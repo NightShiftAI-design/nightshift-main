@@ -1,70 +1,85 @@
 import { supabase } from "./supabase-client.js";
 
 // ------------------ AUTH CHECK ------------------
-function requireAuth() {
-  const session = localStorage.getItem("ns-session");
-  if (!session) {
+if (!localStorage.getItem("ns-session")) {
     window.location.href = "/dashboard/login.html";
-  }
 }
-requireAuth();
 
 // ------------------ LOGOUT ------------------
-document.getElementById("logout-btn").addEventListener("click", () => {
-  localStorage.removeItem("ns-session");
-  window.location.href = "/dashboard/login.html";
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("ns-session");
+    window.location.href = "/dashboard/login.html";
 });
 
-// ------------------ LOAD DATA ------------------
-async function loadDashboard() {
+// ------------------ LOAD CALL SUMMARIES ------------------
+async function loadCalls() {
+    const container = document.getElementById("callSummaries");
 
-  // ---- CALL SUMMARY VIEW ----
-  const { data: calls, error: callError } = await supabase
-    .from("daily_calls_view")
-    .select("*")
-    .order("date", { ascending: false })
-    .limit(7);
+    const { data, error } = await supabase
+        .from("call_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-  if (callError) {
-    document.getElementById("call-summary").innerHTML =
-      "Error loading call summary.";
-    console.error(callError);
-  } else {
-    document.getElementById("call-summary").innerHTML =
-      calls.length > 0
-        ? calls
-            .map(c => `<p><strong>${c.date}</strong>: ${c.total_calls} calls</p>`)
-            .join("")
-        : "No data available.";
-  }
+    if (error) {
+        console.error(error);
+        container.innerHTML = "<p>Error loading call summaries.</p>";
+        return;
+    }
 
-  // ---- RESERVATIONS TABLE ----
-  const { data: reservations, error: resError } = await supabase
-    .from("reservations")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10);
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p>No call logs available.</p>";
+        return;
+    }
 
-  if (resError) {
-    document.getElementById("reservations-list").innerHTML =
-      "Error loading reservations.";
-    console.error(resError);
-  } else {
-    document.getElementById("reservations-list").innerHTML =
-      reservations.length > 0
-        ? reservations
-            .map(
-              r => `
-          <div class="reservation-card">
-            <strong>${r.guest_name}</strong><br>
-            ${r.room_type} — ${r.arrival_date}<br>
-            Total: $${r.total_due}
-          </div>
+    container.innerHTML = data
+        .map(
+            c => `
+            <div class="dash-item">
+                <strong>${c.caller_number}</strong><br>
+                ${c.summary || "No summary"}<br>
+                <small>${new Date(c.created_at).toLocaleString()}</small>
+            </div>
         `
-            )
-            .join("")
-        : "No reservations yet.";
-  }
+        )
+        .join("");
 }
 
-loadDashboard();
+// ------------------ LOAD RESERVATIONS ------------------
+async function loadReservations() {
+    const container = document.getElementById("reservations");
+
+    const { data, error } = await supabase
+        .from("reservations")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+    if (error) {
+        console.error(error);
+        container.innerHTML = "<p>Error loading reservations.</p>";
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p>No reservations yet.</p>";
+        return;
+    }
+
+    container.innerHTML = data
+        .map(
+            r => `
+            <div class="dash-item">
+                <strong>${r.guest_name}</strong><br>
+                Room: ${r.room_type}<br>
+                Dates: ${r.arrival_date} → ${r.departure_date}<br>
+                <small>${new Date(r.created_at).toLocaleString()}</small>
+            </div>
+        `
+        )
+        .join("");
+}
+
+// ------------------ RUN EVERYTHING ------------------
+loadCalls();
+loadReservations();
