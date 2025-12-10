@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NightShift Dashboard</title>
 
-    <!-- Correct path to dashboard CSS -->
+    <!-- DASHBOARD STYLES -->
     <link rel="stylesheet" href="../assets/style.css">
 </head>
 
 <body>
+
+    <!-- HEADER -->
     <header class="dash-header">
         <h1>NightShift Dashboard</h1>
         <button id="logoutBtn" class="logout-btn">Logout</button>
     </header>
 
+    <!-- MAIN CONTENT -->
     <main class="dash-container">
 
-        <!-- Call Summaries -->
+        <!-- CALL SUMMARIES SECTION -->
         <section class="dash-section">
             <h2>Latest Call Summaries</h2>
             <div id="callSummaries" class="dash-list">
@@ -25,9 +28,9 @@
             </div>
         </section>
 
-        <!-- Reservations -->
+        <!-- RESERVATIONS SECTION -->
         <section class="dash-section">
-            <h2>Latest Reservations</h2>
+            <h2>Recent Reservations</h2>
             <div id="reservationsList" class="dash-list">
                 <p class="loading">Loading reservations...</p>
             </div>
@@ -35,9 +38,88 @@
 
     </main>
 
-    <!-- Correct script imports (module required) -->
-    <script type="module" src="./supabase-client.js"></script>
-    <script type="module" src="./dashboard.js"></script>
+    <!-- SUPABASE + LOGIC -->
+    <script type="module">
+        import { supabase } from "./supabase-client.js";
+
+        /* -----------------------------
+                AUTH CHECK
+        ------------------------------ */
+        function getCookie(name) {
+            return document.cookie
+                .split("; ")
+                .find(c => c.startsWith(name + "="));
+        }
+
+        if (!getCookie("ns-auth")) {
+            window.location.href = "/dashboard/login.html";
+        }
+
+        /* -----------------------------
+                LOAD DASHBOARD DATA
+        ------------------------------ */
+        async function loadDashboard() {
+            // Load call summaries
+            const { data: calls, error: callErr } = await supabase
+                .from("public_daily_calls_view")
+                .select("*")
+                .order("date", { ascending: false })
+                .limit(7);
+
+            if (callErr) {
+                document.getElementById("callSummaries").innerHTML =
+                    "<p class='error'>Error loading call summaries.</p>";
+                console.error(callErr);
+            } else {
+                document.getElementById("callSummaries").innerHTML =
+                    calls?.length
+                        ? calls.map(c => `
+                            <div class="dash-card">
+                                <strong>${c.date}</strong><br>
+                                ${c.total_calls} calls
+                            </div>
+                        `).join("")
+                        : "<p>No call data available.</p>";
+            }
+
+            // Load reservations
+            const { data: reservations, error: resErr } = await supabase
+                .from("public_reservations")
+                .select("*")
+                .order("created_at", { ascending: false })
+                .limit(10);
+
+            if (resErr) {
+                document.getElementById("reservationsList").innerHTML =
+                    "<p class='error'>Error loading reservations.</p>";
+                console.error(resErr);
+            } else {
+                document.getElementById("reservationsList").innerHTML =
+                    reservations?.length
+                        ? reservations
+                            .map(r => `
+                                <div class="reservation-card">
+                                    <strong>${r.guest_name}</strong><br>
+                                    ${r.room_type} — ${r.arrival_date}<br>
+                                    Total: $${r.total_due}
+                                </div>
+                            `).join("")
+                        : "<p>No reservations found.</p>";
+            }
+        }
+
+        /* -----------------------------
+                LOGOUT BUTTON
+        ------------------------------ */
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            document.cookie =
+                "ns-auth=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
+            window.location.href = "/dashboard/login.html";
+        });
+
+        // Load data on page open
+        loadDashboard();
+    </script>
 
 </body>
 </html>
