@@ -1,25 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NightShift Login</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NightShift Login</title>
+
+    <link rel="stylesheet" href="../assets/style.css">
+
+    <style>
+        /* Minimal login-specific styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #0e0e11;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .login-box {
+            width: 350px;
+            padding: 30px;
+            border-radius: 10px;
+            background: #1a1a1d;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 6px;
+            background: #5b5bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .error {
+            margin-top: 10px;
+            color: #ff4d4d;
+            text-align: center;
+        }
+        .success {
+            margin-top: 10px;
+            color: #4dff88;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="login-container">
-    <h1>NightShift Dashboard Login</h1>
 
-    <p class="subtext">Enter your owner access key to continue.</p>
+    <div class="login-box">
+        <h2>NightShift Dashboard Login</h2>
 
-    <input id="access-key" type="password" placeholder="Access Key" />
+        <input type="email" id="emailInput" placeholder="Email" />
+        <input type="password" id="passwordInput" placeholder="Password" />
 
-    <button id="login-btn">Login</button>
+        <button id="loginBtn">Login</button>
 
-    <p id="login-error" class="error"></p>
-  </div>
+        <p id="message"></p>
+    </div>
 
-  <script type="module" src="login.js"></script>
+    <!-- Import Supabase -->
+    <script type="module">
+        import { supabase } from "./supabase-client.js";
+
+        const emailInput = document.getElementById("emailInput");
+        const passwordInput = document.getElementById("passwordInput");
+        const loginBtn = document.getElementById("loginBtn");
+        const messageBox = document.getElementById("message");
+
+        loginBtn.addEventListener("click", async () => {
+            messageBox.textContent = "";
+            messageBox.className = "";
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                messageBox.textContent = "Please enter both fields.";
+                messageBox.className = "error";
+                return;
+            }
+
+            messageBox.textContent = "Logging in...";
+            messageBox.className = "success";
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                messageBox.textContent = error.message;
+                messageBox.className = "error";
+                return;
+            }
+
+            // Successful login → redirect
+            window.location.href = "./index.html";
+        });
+
+        // If already logged in, redirect automatically
+        supabase.auth.getSession().then(({ data }) => {
+            if (data?.session) {
+                window.location.href = "./index.html";
+            }
+        });
+    </script>
+
 </body>
-</html>
