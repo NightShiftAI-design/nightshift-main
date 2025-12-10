@@ -1,125 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NightShift Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | NightShift Dashboard</title>
 
-    <link rel="stylesheet" href="../assets/style.css">
-
-    <style>
-        /* Minimal login-specific styling */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #0e0e11;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-        .login-box {
-            width: 350px;
-            padding: 30px;
-            border-radius: 10px;
-            background: #1a1a1d;
-            box-shadow: 0 0 20px rgba(0,0,0,0.4);
-        }
-        h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 6px;
-            border: none;
-            outline: none;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 6px;
-            background: #5b5bff;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .error {
-            margin-top: 10px;
-            color: #ff4d4d;
-            text-align: center;
-        }
-        .success {
-            margin-top: 10px;
-            color: #4dff88;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/style.css" />
 </head>
 
 <body>
 
-    <div class="login-box">
-        <h2>NightShift Dashboard Login</h2>
+    <div class="login-container">
+        <h1>NightShift Dashboard</h1>
+        <p class="login-subtitle">Secure Login</p>
 
-        <input type="email" id="emailInput" placeholder="Email" />
-        <input type="password" id="passwordInput" placeholder="Password" />
+        <form id="loginForm" class="login-form">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="you@example.com" required />
 
-        <button id="loginBtn">Login</button>
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••" required />
 
-        <p id="message"></p>
-    </div>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
 
-    <!-- Import Supabase -->
-    <script type="module">
-        import { supabase } from "./supabase-client.js";
+        <p id="loginMessage" class="login-message"></p>
+    </div>
 
-        const emailInput = document.getElementById("emailInput");
-        const passwordInput = document.getElementById("passwordInput");
-        const loginBtn = document.getElementById("loginBtn");
-        const messageBox = document.getElementById("message");
+    <!-- Correct absolute module imports -->
+    <script type="module">
+        import { supabase } from "/dashboard/supabase-client.js";
+        import "/dashboard/login.js";
 
-        loginBtn.addEventListener("click", async () => {
-            messageBox.textContent = "";
-            messageBox.className = "";
+        const form = document.getElementById("loginForm");
+        const msg = document.getElementById("loginMessage");
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-            if (!email || !password) {
-                messageBox.textContent = "Please enter both fields.";
-                messageBox.className = "error";
-                return;
-            }
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
 
-            messageBox.textContent = "Logging in...";
-            messageBox.className = "success";
+            msg.textContent = "Logging in...";
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
 
-            if (error) {
-                messageBox.textContent = error.message;
-                messageBox.className = "error";
-                return;
-            }
+            if (error) {
+                msg.textContent = "Invalid login. Try again.";
+                msg.style.color = "red";
+                return;
+            }
 
-            // Successful login → redirect
-            window.location.href = "./index.html";
-        });
+            // Set login cookie (simple dashboard access token)
+            document.cookie = "ns-auth=true; path=/; max-age=86400;";
 
-        // If already logged in, redirect automatically
-        supabase.auth.getSession().then(({ data }) => {
-            if (data?.session) {
-                window.location.href = "./index.html";
-            }
-        });
-    </script>
+            msg.textContent = "Login successful. Redirecting...";
+            msg.style.color = "green";
+
+            setTimeout(() => {
+                window.location.href = "/dashboard/index.html";
+            }, 700);
+        });
+    </script>
 
 </body>
+</html>
