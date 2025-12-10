@@ -27,10 +27,9 @@
         <p id="loginMessage" class="login-message"></p>
     </div>
 
-    <!-- Correct absolute module imports -->
+    <!-- ONLY Supabase client — remove login.js -->
     <script type="module">
         import { supabase } from "/dashboard/supabase-client.js";
-        import "/dashboard/login.js";
 
         const form = document.getElementById("loginForm");
         const msg = document.getElementById("loginMessage");
@@ -54,8 +53,8 @@
                 return;
             }
 
-            // Set login cookie (simple dashboard access token)
-            document.cookie = "ns-auth=true; path=/; max-age=86400;";
+            // Save session flag
+            localStorage.setItem("ns-session", "active");
 
             msg.textContent = "Login successful. Redirecting...";
             msg.style.color = "green";
