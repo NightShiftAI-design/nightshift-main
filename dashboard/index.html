@@ -1,35 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NightShift Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NightShift Dashboard</title>
+
+    <!-- Correct path to dashboard CSS -->
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 
 <body>
-  <header>
-    <h1>NightShift Dashboard</h1>
-    <button id="logout-btn">Logout</button>
-  </header>
+    <header class="dash-header">
+        <h1>NightShift Dashboard</h1>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+    </header>
 
-  <main>
-    <section class="card">
-      <h2>Last 7 Days – Call Summary</h2>
-      <div id="call-summary">Loading...</div>
-    </section>
+    <main class="dash-container">
 
-    <section class="card">
-      <h2>Latest Reservations</h2>
-      <div id="reservations-list">Loading...</div>
-    </section>
-  </main>
+        <!-- Call Summaries -->
+        <section class="dash-section">
+            <h2>Latest Call Summaries</h2>
+            <div id="callSummaries" class="dash-list">
+                <p class="loading">Loading call summaries...</p>
+            </div>
+        </section>
 
-  <!-- Load Supabase Client FIRST -->
-  <script type="module" src="supabase-client.js"></script>
+        <!-- Reservations -->
+        <section class="dash-section">
+            <h2>Latest Reservations</h2>
+            <div id="reservationsList" class="dash-list">
+                <p class="loading">Loading reservations...</p>
+            </div>
+        </section>
 
-  <!-- Then load dashboard logic -->
-  <script type="module" src="dashboard.js"></script>
+    </main>
+
+    <!-- Correct script imports (module required) -->
+    <script type="module" src="./supabase-client.js"></script>
+    <script type="module" src="./dashboard.js"></script>
 
 </body>
 </html>
