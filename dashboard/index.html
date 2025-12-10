@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NightShift Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
+<body>
+  <header>
+    <h1>NightShift Dashboard</h1>
+    <button id="logout-btn">Logout</button>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Last 7 Days – Call Summary</h2>
+      <div id="call-summary">Loading...</div>
+    </section>
+
+    <section class="card">
+      <h2>Latest Reservations</h2>
+      <div id="reservations-list">Loading...</div>
+    </section>
+  </main>
+
+  <!-- Load Supabase Client FIRST -->
+  <script type="module" src="supabase-client.js"></script>
+
+  <!-- Then load dashboard logic -->
+  <script type="module" src="dashboard.js"></script>
+
+</body>
+</html>
