@@ -1,14 +1,13 @@
 {
   "version": 2,
-  "public": true,
+  "public": "public",
   "builds": [
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "assets/*", "use": "@vercel/static" },
-    { "src": "dashboard/*", "use": "@vercel/static" }
+    { "src": "public/**/*", "use": "@vercel/static" },
+    { "src": "*.html", "use": "@vercel/static" }
   ],
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/assets/(.*)", "destination": "/assets/$1" },
-    { "source": "/dashboard/(.*)", "destination": "/dashboard/$1" }
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+    { "src": "/dashboard/(.*)", "dest": "/public/dashboard/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
