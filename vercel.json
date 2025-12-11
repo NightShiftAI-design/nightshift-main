@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "public": true,
+  "builds": [
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "assets/*", "use": "@vercel/static" },
+    { "src": "dashboard/*", "use": "@vercel/static" }
+  ],
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/dashboard/(.*)", "destination": "/dashboard/$1" }
+  ]
+}
