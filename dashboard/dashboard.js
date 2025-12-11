@@ -1,85 +1,76 @@
+// ------------------ IMPORT SUPABASE ------------------
 import { supabase } from "./supabase-client.js";
 
 // ------------------ AUTH CHECK ------------------
-if (!localStorage.getItem("ns-session")) {
+function requireAuth() {
+  if (!document.cookie.includes("ns-auth=")) {
     window.location.href = "/dashboard/login.html";
+  }
 }
+requireAuth();
 
-// ------------------ LOGOUT ------------------
+// ------------------ LOGOUT BUTTON ------------------
 document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("ns-session");
-    window.location.href = "/dashboard/login.html";
+  document.cookie = "ns-auth=; Max-Age=0; path=/;";
+  window.location.href = "/dashboard/login.html";
 });
 
-// ------------------ LOAD CALL SUMMARIES ------------------
-async function loadCalls() {
-    const container = document.getElementById("callSummaries");
+// ------------------ LOAD DASHBOARD DATA ------------------
+async function loadDashboard() {
+  // ------------------ CALL SUMMARY ------------------
+  const { data: callData, error: callErr } = await supabase
+    .from("daily_calls_view")
+    .select("*")
+    .order("date", { ascending: false })
+    .limit(7);
 
-    const { data, error } = await supabase
-        .from("call_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(10);
+  const callBox = document.getElementById("call-summary");
 
-    if (error) {
-        console.error(error);
-        container.innerHTML = "<p>Error loading call summaries.</p>";
-        return;
-    }
+  if (callErr) {
+    callBox.innerHTML = "Error loading call summaries.";
+    console.error(callErr);
+  } else if (!callData || callData.length === 0) {
+    callBox.innerHTML = "No call data yet.";
+  } else {
+    callBox.innerHTML = callData
+      .map(
+        (c) => `
+        <div class="dash-item">
+          <strong>${c.date}</strong> — ${c.total_calls} calls
+        </div>
+      `
+      )
+      .join("");
+  }
 
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p>No call logs available.</p>";
-        return;
-    }
+  // ------------------ RESERVATIONS ------------------
+  const { data: reservations, error: resErr } = await supabase
+    .from("reservations")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(10);
 
-    container.innerHTML = data
-        .map(
-            c => `
-            <div class="dash-item">
-                <strong>${c.caller_number}</strong><br>
-                ${c.summary || "No summary"}<br>
-                <small>${new Date(c.created_at).toLocaleString()}</small>
-            </div>
-        `
-        )
-        .join("");
+  const resBox = document.getElementById("reservations-list");
+
+  if (resErr) {
+    resBox.innerHTML = "Error loading reservations.";
+    console.error(resErr);
+  } else if (!reservations || reservations.length === 0) {
+    resBox.innerHTML = "No reservations yet.";
+  } else {
+    resBox.innerHTML = reservations
+      .map(
+        (r) => `
+        <div class="reservation-card">
+          <strong>${r.guest_name}</strong><br>
+          Room: ${r.room_type}<br>
+          Arrival: ${r.arrival_date}<br>
+          Total: $${r.total_due}
+        </div>
+      `
+      )
+      .join("");
+  }
 }
 
-// ------------------ LOAD RESERVATIONS ------------------
-async function loadReservations() {
-    const container = document.getElementById("reservations");
-
-    const { data, error } = await supabase
-        .from("reservations")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-    if (error) {
-        console.error(error);
-        container.innerHTML = "<p>Error loading reservations.</p>";
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p>No reservations yet.</p>";
-        return;
-    }
-
-    container.innerHTML = data
-        .map(
-            r => `
-            <div class="dash-item">
-                <strong>${r.guest_name}</strong><br>
-                Room: ${r.room_type}<br>
-                Dates: ${r.arrival_date} → ${r.departure_date}<br>
-                <small>${new Date(r.created_at).toLocaleString()}</small>
-            </div>
-        `
-        )
-        .join("");
-}
-
-// ------------------ RUN EVERYTHING ------------------
-loadCalls();
-loadReservations();
+loadDashboard();
