@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | NightShift Dashboard</title>
 
-    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="/assets/style.css" />
 </head>
+
 <body>
 
     <div class="login-container">
@@ -15,10 +16,10 @@
 
         <form id="loginForm" class="login-form">
             <label>Email</label>
-            <input type="email" id="email" placeholder="you@example.com" required>
+            <input type="email" id="email" placeholder="you@example.com" required />
 
             <label>Password</label>
-            <input type="password" id="password" placeholder="••••••••" required>
+            <input type="password" id="password" placeholder="••••••••" required />
 
             <button type="submit" class="login-btn">Login</button>
         </form>
@@ -26,9 +27,9 @@
         <p id="loginMessage" class="login-message"></p>
     </div>
 
-    <!-- CORRECT MODULE IMPORTS -->
+    <!-- MODULE SCRIPTS ONLY -->
     <script type="module">
-        import { supabase } from "./supabase-client.js";
+        import { supabase } from "/dashboard/supabase-client.js";
 
         const form = document.getElementById("loginForm");
         const msg = document.getElementById("loginMessage");
@@ -36,7 +37,7 @@
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            msg.textContent = "Checking credentials...";
+            msg.textContent = "Logging in…";
 
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
@@ -47,15 +48,15 @@
             });
 
             if (error) {
-                msg.textContent = "Invalid email or password.";
+                msg.textContent = "Invalid login — try again.";
                 msg.style.color = "red";
                 return;
             }
 
-            // Create login cookie
-            document.cookie = "ns-auth=true; path=/; max-age=86400;";
+            // Create simple login cookie
+            document.cookie = "ns-auth=true; path=/; max-age=86400";
 
-            msg.textContent = "Login successful!";
+            msg.textContent = "Login successful — redirecting…";
             msg.style.color = "green";
 
             setTimeout(() => {
@@ -63,5 +64,6 @@
             }, 600);
         });
     </script>
+
 </body>
 </html>
