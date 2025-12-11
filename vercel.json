@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "static": {
-    "public": "public"
-  }
+  "routes": [
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
 }
