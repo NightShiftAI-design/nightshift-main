@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NightShift Dashboard</title>
 
-    <link rel="stylesheet" href="/assets/style.css" />
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
-
 <body>
+
     <header class="dash-header">
         <h1>NightShift Dashboard</h1>
         <button id="logoutBtn" class="logout-btn">Logout</button>
@@ -16,16 +16,18 @@
 
     <main class="dash-container">
 
+        <!-- Call Summaries -->
         <section class="dash-section">
             <h2>Latest Call Summaries</h2>
-            <div id="call-summary" class="dash-list">
+            <div id="callSummaries">
                 <p class="loading">Loading call summaries...</p>
             </div>
         </section>
 
+        <!-- Reservations -->
         <section class="dash-section">
             <h2>Latest Reservations</h2>
-            <div id="reservations-list" class="dash-list">
+            <div id="reservationsList">
                 <p class="loading">Loading reservations...</p>
             </div>
         </section>
@@ -36,14 +38,14 @@
         import { supabase } from "./supabase-client.js";
         import "./dashboard.js";
 
-        // Check login cookie
+        // AUTH GUARD
         if (!document.cookie.includes("ns-auth=")) {
             window.location.href = "/dashboard/login.html";
         }
 
-        // Handle logout
+        // LOGOUT
         document.getElementById("logoutBtn").addEventListener("click", () => {
-            document.cookie = "ns-auth=; Max-Age=0; path=/;";
+            document.cookie = "ns-auth=; path=/; max-age=0;";
             window.location.href = "/dashboard/login.html";
         });
     </script>
