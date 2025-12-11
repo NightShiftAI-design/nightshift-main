@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NightShift Dashboard</title>
 
-    <!-- Correct CSS path -->
     <link rel="stylesheet" href="/assets/style.css" />
 </head>
 
@@ -17,35 +16,32 @@
 
     <main class="dash-container">
 
-        <!-- Call Summaries -->
         <section class="dash-section">
             <h2>Latest Call Summaries</h2>
-            <div id="callSummaries" class="dash-list">
+            <div id="call-summary" class="dash-list">
                 <p class="loading">Loading call summaries...</p>
             </div>
         </section>
 
-        <!-- Reservations -->
         <section class="dash-section">
             <h2>Latest Reservations</h2>
-            <div id="reservationsList" class="dash-list">
+            <div id="reservations-list" class="dash-list">
                 <p class="loading">Loading reservations...</p>
             </div>
         </section>
 
     </main>
 
-    <!-- Absolute module imports fix ALL errors -->
     <script type="module">
-        import { supabase } from "/dashboard/supabase-client.js";
-        import "/dashboard/dashboard.js";
+        import { supabase } from "./supabase-client.js";
+        import "./dashboard.js";
 
-        // Simple auth protection
+        // Check login cookie
         if (!document.cookie.includes("ns-auth=")) {
             window.location.href = "/dashboard/login.html";
         }
 
-        // Logout
+        // Handle logout
         document.getElementById("logoutBtn").addEventListener("click", () => {
             document.cookie = "ns-auth=; Max-Age=0; path=/;";
             window.location.href = "/dashboard/login.html";
