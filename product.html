@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product | NightShift Hotels</title>
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body>
+  <div class="main-wrapper">
+    <!-- NAV (same) -->
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="/index.html" class="nav-left">
+          <div class="nav-logo-circle">NS</div>
+          <div class="nav-brand-text">
+            <span>NightShift</span>
+            <span>AI Night Front Desk</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="/product.html" class="active">Product</a>
+          <a href="/who-we-serve.html">Who We Serve</a>
+          <a href="/packages.html">Packages</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html" class="nav-cta">
+            <span class="icon">●</span>
+            <span>Talk to Sales</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="page-container">
+      <section class="section">
+        <div class="section-header">
+          <div class="eyebrow">The product</div>
+          <h1 class="section-title">One AI agent that behaves like a trained night auditor</h1>
+          <p class="section-subtitle">
+            NightShift answers calls, books rooms, screens trouble, and documents everything
+            cleanly for your morning team – on autopilot.
+          </p>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95rem;margin-bottom:0.3rem;">What NightShift actually does</h3>
+            <ul class="bullet-list">
+              <li>Answers every call in ~3 seconds with a calm, human voice.</li>
+              <li>Understands your room types, rates, taxes, pet fees, and smoking rules.</li>
+              <li>Books rooms and confirms the total due at check-in.</li>
+              <li>Sends call summaries, bookings and tags to your email and dashboard.</li>
+              <li>Politely handles “problem callers” so your staff doesn’t have to.</li>
+            </ul>
+
+            <p style="font-size:0.85rem;color:#9ca3af;margin-top:0.7rem;">
+              You still control availability and can make final decisions, but NightShift
+              takes care of 80–90% of the repetitive work that burns your staff out.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <h3>What your team receives</h3>
+            <ul class="bullet-list">
+              <li>Clean SMS + email with each booking or important call.</li>
+              <li>Dashboard view of daily calls, reasons, and outcomes.</li>
+              <li>Flags for emergencies, complaints, or VIP situations.</li>
+              <li>Filters for “spam / nonsense” vs “real guests”.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div class="eyebrow">Compliance & guardrails</div>
+          <h2 class="section-title">Designed around hospitality reality – not just AI hype</h2>
+          <p class="section-subtitle">
+            NightShift is engineered with stricter rules than most humans use at the desk:
+            PCI, ADA, and brand-safe behavior by default.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>PCI-friendly by design</h3>
+            <p>
+              NightShift never takes card numbers over the phone. It only explains
+              how payment works and sends guests to safe channels or in-person payment.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🐾</div>
+            <h3>ADA service animal logic</h3>
+            <p>
+              Correctly separates pets from service animals, asks the allowed questions,
+              and avoids illegal documentation requests.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🚫</div>
+            <h3>Brand-safe responses</h3>
+            <p>
+              No arguing, no sarcasm, no “creative” answers. Calm, consistent, and
+              respectful – as if the owner was listening to every call.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="feature-card">
+          <h2 class="section-title" style="margin-bottom:0.3rem;">
+            Want this running on your property before your next weekend rush?
+          </h2>
+          <p class="section-subtitle" style="max-width:none;">
+            Implementation is measured in days, not months. We’ll tune the script to your
+            property, connect your phone, and start collecting real call data.
+          </p>
+
+          <div class="hero-cta-row" style="margin-top:1rem;">
+            <a href="/contact.html" class="btn-primary">
+              <span>Schedule onboarding</span>
+              <span class="icon">→</span>
+            </a>
+            <a href="/packages.html" class="btn-secondary">
+              View Core &amp; Pro details
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> NightShift Hotels.</div>
+        <div class="footer-links">
+          <a href="/packages.html">Packages</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/contact.html">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
