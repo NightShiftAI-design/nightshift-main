@@ -3,83 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact – NightShift AI</title>
-  <link rel="stylesheet" href="/assets/site.css?v=21" />
+  <title>Contact – NightShift Hotels</title>
+  <link rel="stylesheet" href="/assets/site.css?v=10" />
 </head>
+
 <body>
-<div class="main-wrapper">
-  <header class="site-nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-left">
-        <div class="nav-logo-circle">NS</div>
-        <div class="nav-brand-text">
-          <span>NightShift</span>
-          <span>AI Night Front Desk</span>
+  <div class="main-wrapper">
+
+    <!-- NAVBAR -->
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="/" class="nav-left">
+          <div class="nav-logo-circle">NS</div>
+          <div class="nav-brand-text">
+            <span>NightShift</span>
+            <span>AI Night Front Desk</span>
+          </div>
+        </a>
+
+        <div class="nav-links">
+          <a href="/product.html">Product</a>
+          <a href="/who-we-serve.html">Who We Serve</a>
+          <a href="/packages.html">Packages</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html" class="nav-cta">Talk to Sales</a>
         </div>
-      </a>
-      <nav class="nav-links">
-        <a href="product.html">Product</a>
-        <a href="who-we-serve.html">Who we serve</a>
-        <a href="packages.html">Packages</a>
-        <a href="about.html">About</a>
-        <a href="contact.html">Contact</a>
-        <a href="contact.html" class="nav-cta">Book a 15-min demo</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="section">
-  <div class="section-header">
-    <h1 class="section-title">Contact NightShift</h1>
-    <p class="section-subtitle">
-      Reach out any time — our team responds within a few hours.
-    </p>
-  </div>
-
-  <div class="contact-container">
-    <div class="contact-item">
-      <h3>Email</h3>
-      <p>contact@nightshifthotels.com</p>
-      <p>support@nightshifthotels.com</p>
-      <p>info@nightshifthotels.com</p>
-      <p>founder@nightshifthotels.com</p>
-    </div>
-
-    <div class="contact-item">
-      <h3>Phone</h3>
-      <p>(423) 771-5523</p>
-      <p>Mon–Sun • 24/7 availability</p>
-    </div>
-
-    <div class="contact-item">
-      <h3>Business Hours</h3>
-      <p>We operate on rolling schedules.</p>
-      <p>You will always receive a reply the same day.</p>
-    </div>
-
-    <div class="contact-item">
-      <h3>Demo Requests</h3>
-      <p>Email: demos@nightshifthotels.com</p>
-      <p>We’ll schedule a 15-minute walkthrough.</p>
-    </div>
-  </div>
-</main>
-
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div>© <span id="year"></span> NightShift Hotels. All rights reserved.</div>
-      <div class="footer-links">
-        <a href="packages.html">Packages</a>
-        <a href="who-we-serve.html">Who we serve</a>
-        <a href="about.html">About</a>
-        <a href="faq.html">FAQ</a>
-        <a href="contact.html">Contact</a>
       </div>
-    </div>
-  </footer>
-</div>
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+    </nav>
+
+    <!-- CONTACT SECTION -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Contact NightShift</h2>
+        <p class="section-subtitle">
+          Reach out anytime. We respond within a few hours.
+        </p>
+      </div>
+
+      <!-- GRID WRAPPER -->
+      <div class="contact-grid">
+
+        <!-- LEFT = FORM -->
+        <div class="contact-card">
+          <h3>Send us a message</h3>
+          <form class="contact-form">
+            <label>Name</label>
+            <input type="text" placeholder="Your name" required />
+
+            <label>Email</label>
+            <input type="email" placeholder="you@example.com" required />
+
+            <label>Message</label>
+            <textarea placeholder="How can we help?" rows="5" required></textarea>
+
+            <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">
+              Submit
+            </button>
+          </form>
+        </div>
+
+        <!-- RIGHT = INFO -->
+        <div class="contact-card">
+          <h3>Contact Information</h3>
+
+          <p><strong>Email:</strong></p>
+          <ul>
+            <li>contact@nightshifthotels.com</li>
+            <li>info@nightshifthotels.com</li>
+            <li>support@nightshifthotels.com</li>
+            <li>founder@nightshifthotels.com</li>
+          </ul>
+
+          <p style="margin-top:15px;"><strong>Hours:</strong><br>
+            Monday–Sunday, 9am–9pm EST
+          </p>
+
+          <p style="margin-top:15px;"><strong>Response Time:</strong><br>
+            Under 4 hours
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> NightShift Hotels. All rights reserved.</div>
+
+        <div class="footer-links">
+          <a href="/packages.html">Packages</a>
+          <a href="/who-we-serve.html">Who We Serve</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/contact.html">Contact</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
