@@ -1,6 +1,6 @@
 /* =========================================
-   NightShift AI — Production SaaS UI
-   Stable, Confident, Non-Doc Design
+   NightShift AI — Production SaaS Styles
+   Authoritative, Dark, Non-Document UI
 ========================================= */
 
 /* =========================
@@ -24,7 +24,7 @@ body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: #050816;
   color: #f8fafc;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -48,7 +48,7 @@ a {
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 120px 24px 80px;
+  padding: 110px 24px 90px;
 }
 
 /* =========================
@@ -58,7 +58,7 @@ a {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(5, 8, 22, 0.92);
+  background: rgba(5, 8, 22, 0.94);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(99, 102, 241, 0.35);
 }
@@ -87,8 +87,9 @@ a {
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  color: #fff;
-  box-shadow: 0 0 32px rgba(99, 102, 241, 0.65);
+  font-size: 18px;
+  color: #ffffff;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.65);
 }
 
 .nav-brand-text span:first-child {
@@ -113,24 +114,24 @@ a {
 }
 
 .nav-links a:hover {
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99, 102, 241, 0.18);
 }
 
 .nav-cta {
   background: linear-gradient(135deg, #6366f1, #22c1c3);
-  color: #fff;
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 14px 42px rgba(99, 102, 241, 0.6);
+  box-shadow: 0 14px 40px rgba(99, 102, 241, 0.55);
 }
 
 /* =========================
-   HERO (COLOR DOMINANT)
+   HERO
 ========================= */
 .hero {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.25fr 1fr;
   gap: 48px;
-  padding: 88px 64px;
+  padding: 90px 64px;
   border-radius: 32px;
   background: linear-gradient(
     135deg,
@@ -143,8 +144,8 @@ a {
 
 .hero-left-eyebrow {
   display: inline-flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
   padding: 6px 14px;
   background: rgba(255, 255, 255, 0.22);
   border-radius: 999px;
@@ -160,14 +161,14 @@ a {
 }
 
 .hero-title {
-  font-size: 3.2rem;
+  font-size: 3.1rem;
   font-weight: 900;
   line-height: 1.05;
   margin: 22px 0;
 }
 
 .hero-title .highlight {
-  background: #fff;
+  background: #ffffff;
   color: #020617;
   padding: 0 10px;
   border-radius: 10px;
@@ -187,7 +188,7 @@ a {
 
 .btn-primary {
   background: #020617;
-  color: #fff;
+  color: #ffffff;
   padding: 14px 28px;
   border-radius: 999px;
   font-weight: 800;
@@ -228,7 +229,7 @@ a {
 
 .section--tint {
   background: #020617;
-  padding: 88px 64px;
+  padding: 90px 64px;
   border-radius: 32px;
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
 }
