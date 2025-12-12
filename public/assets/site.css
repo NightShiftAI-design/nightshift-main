@@ -768,31 +768,57 @@ form button {
     align-items: flex-start;
   }
 /* ================================
-   CONTACT PAGE – MATCH PACKAGES
+   CONTACT PAGE – PROFESSIONAL TIGHT LAYOUT
 ================================ */
-.contact-container {
-  max-width: 700px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  max-width: 900px;       /* keeps it from being too wide */
+  margin: 0 auto;         /* center the grid */
 }
 
-.contact-item {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+.contact-card {
+  background: #fff;
   padding: 22px 26px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
 }
 
-.contact-item h3 {
-  margin-bottom: 8px;
+.contact-card h3 {
+  margin-bottom: 12px;
   font-size: 20px;
+  font-weight: 700;
 }
 
-.contact-item p {
+.contact-form label {
+  display: block;
+  margin-top: 12px;
   margin-bottom: 4px;
-  color: #444;
-  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+.contact-card ul {
+  padding-left: 18px;
+  margin-top: 6px;
+}
+
+.contact-card ul li {
+  margin-bottom: 6px;
+  font-size: 15px;
 }
