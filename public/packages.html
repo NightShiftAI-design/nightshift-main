@@ -1,1 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Packages & Pricing – NightShift AI</title>
+  <link rel="stylesheet" href="/assets/site.css?v=21" />
+</head>
+<body>
+<div class="main-wrapper">
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-left">
+        <div class="nav-logo-circle">NS</div>
+        <div class="nav-brand-text">
+          <span>NightShift</span>
+          <span>AI Night Front Desk</span>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="product.html">Product</a>
+        <a href="who-we-serve.html">Who we serve</a>
+        <a href="packages.html">Packages</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="contact.html" class="nav-cta">Book a 15-min demo</a>
+      </nav>
+    </div>
+  </header>
 
+  <main class="page-container">
+    <section class="section">
+      <div class="section-header">
+        <div class="eyebrow">Packages</div>
+        <h1 class="section-title">Pick the coverage that matches your nights.</h1>
+        <p class="section-subtitle">
+          Most owners start with Core for one property, then upgrade to Pro as they see
+          NightShift paying for itself in extra bookings and fewer night-shift headaches.
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="price-card" id="core">
+          <div class="price-label">Most popular</div>
+          <div class="price-name">Core</div>
+          <div class="price-amount">$5,999 <span>one-time • financing options</span></div>
+          <p class="price-copy">
+            Designed for 25–90 room independents who want reliable night coverage without hiring a full team.
+          </p>
+          <ul class="price-list">
+            <li>NightShift answers calls in ~3 seconds with your hotel name</li>
+            <li>Books rooms (including cash) within your policies</li>
+            <li>Handles FAQs: rates, directions, parking, pets, breakfast, Wi-Fi</li>
+            <li>Politely filters obvious nonsense / unsafe calls</li>
+            <li>Email + SMS summary after every call to owner / GM</li>
+          </ul>
+          <a href="contact.html" class="price-cta">Start with Core</a>
+        </div>
+
+        <div class="price-card price-card--outline" id="pro">
+          <div class="price-label">Growing properties</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">$9,999 <span>per property, volume pricing available</span></div>
+          <p class="price-copy">
+            For busier hotels and small groups that want deeper automation and reporting – still focused on nights and low-volume hours.
+          </p>
+          <ul class="price-list">
+            <li>Everything in Core</li>
+            <li>Advanced reporting & dashboards across properties</li>
+            <li>Flexible routing rules by hour, caller type, or property</li>
+            <li>Priority onboarding with hands-on configuration</li>
+            <li>Dedicated channel for support & tweaks</li>
+          </ul>
+          <a href="contact.html" class="price-cta">Talk about Pro</a>
+        </div>
+
+        <div class="price-card price-card--outline" id="elite">
+          <div class="price-label">Coming soon</div>
+          <div class="price-name">Elite</div>
+          <div class="price-amount">TBD <span>portfolio & group coverage</span></div>
+          <p class="price-copy">
+            Hybrid AI + human night desk coverage for owners with multiple brands,
+            states, or call routing requirements.
+          </p>
+          <ul class="price-list">
+            <li>Multi-property call routing and load-balancing</li>
+            <li>Custom integrations with PMS and analytics</li>
+            <li>Dedicated success manager & on-call escalation</li>
+            <li>Early access to experimental NightShift features</li>
+          </ul>
+          <a href="contact.html" class="price-cta">Join Elite waitlist</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="feature-card">
+        <h3>Not sure which package fits?</h3>
+        <p style="font-size:13px;color:#cbd5f5;">
+          On a quick call we’ll look at your current call volume, night coverage,
+          and staffing setup. Many owners start with Core at one property, then move
+          to Pro or multi-property coverage after a month of results.
+        </p>
+        <div class="hero-cta-row" style="margin-top:8px;">
+          <a href="contact.html" class="btn-primary">
+            <span>Ask for a package recommendation</span>
+            <span class="icon">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>© <span id="year"></span> NightShift Hotels. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="packages.html">Packages</a>
+        <a href="who-we-serve.html">Who we serve</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
