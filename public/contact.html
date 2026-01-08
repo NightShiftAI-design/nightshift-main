@@ -4,9 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact – NightShift AI</title>
+
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
 
-  <!-- Contact page-only styling (so you don’t have to touch site.css) -->
+  <!-- Contact page-only styling -->
   <style>
     .contact-wrap{
       display:grid;
@@ -68,7 +75,7 @@
       padding: 12px 12px;
       outline: none;
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
 
     .field textarea{ resize: vertical; min-height: 120px; }
@@ -131,7 +138,6 @@
       box-shadow: 0 0 20px rgba(34,197,94,.65);
     }
 
-    /* Honeypot (spam trap) - hidden from humans */
     .hp-field{
       position:absolute !important;
       left:-9999px !important;
@@ -182,55 +188,52 @@
         <div class="contact-wrap">
 
           <!-- FORM CARD -->
-          <section class="ns-card" aria-label="Request a quote form">
+          <section class="ns-card">
             <h3>Request a Quote</h3>
             <p class="muted" style="margin:0;">
               No spam. We’ll only use this info to respond and price your setup.
             </p>
 
-            <!-- We submit via JS to Formspree, then redirect to /thanks.html -->
             <form id="quoteForm" novalidate>
 
-              <!-- Honeypot field (bots fill it; humans never see it) -->
-              <div class="hp-field" aria-hidden="true">
-                <label for="company">Company</label>
-                <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+              <!-- Honeypot -->
+              <div class="hp-field">
+                <input name="company" type="text" autocomplete="off" />
               </div>
 
-              <!-- Formspree helpers -->
               <input type="hidden" name="_subject" value="NightShift AI — New Quote Request" />
               <input type="hidden" name="_replyto" value="" />
 
               <div class="form-grid">
 
                 <div class="field">
-                  <label for="name">Name</label>
-                  <input id="name" name="name" type="text" placeholder="Your full name" required />
+                  <label>Name</label>
+                  <input id="name" name="name" required />
                 </div>
 
                 <div class="field">
-                  <label for="email">Email</label>
-                  <input id="email" name="email" type="email" placeholder="you@example.com" required />
+                  <label>Email</label>
+                  <input id="email" name="email" type="email" required />
                 </div>
 
                 <div class="field">
-                  <label for="phone">Phone</label>
-                  <input id="phone" name="phone" type="tel" placeholder="(###) ###-####" />
+                  <label>Phone</label>
+                  <input name="phone" />
                 </div>
 
                 <div class="field">
-                  <label for="hotel">Hotel / Business</label>
-                  <input id="hotel" name="hotel" type="text" placeholder="Property or company name" required />
+                  <label>Hotel / Business</label>
+                  <input id="hotel" name="hotel" required />
                 </div>
 
                 <div class="field">
-                  <label for="rooms">Rooms</label>
-                  <input id="rooms" name="rooms" type="text" placeholder="e.g., 45" />
+                  <label>Rooms</label>
+                  <input name="rooms" />
                 </div>
 
                 <div class="field">
-                  <label for="brand">Brand</label>
-                  <select id="brand" name="brand">
+                  <label>Brand</label>
+                  <select name="brand">
                     <option value="">Independent / Not sure</option>
                     <option>Best Western</option>
                     <option>Choice Hotels</option>
@@ -243,13 +246,8 @@
                 </div>
 
                 <div class="field full">
-                  <label for="message">What do you need NightShift to handle?</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    placeholder="Example: after-hours calls, booking requests, weekly rates, multilingual calls, franchise compliance, escalation rules…"
-                    required
-                  ></textarea>
+                  <label>What do you need NightShift to handle?</label>
+                  <textarea id="message" name="message" required></textarea>
                 </div>
 
               </div>
@@ -260,16 +258,14 @@
                 <span class="tiny">Typical setup: under 10 minutes.</span>
               </div>
 
-              <div id="status" class="status" role="status" aria-live="polite"></div>
+              <div id="status" class="status"></div>
             </form>
           </section>
 
           <!-- INFO CARD -->
-          <aside class="ns-card" aria-label="Contact information">
+          <aside class="ns-card">
             <h3>Direct Contact</h3>
-            <p class="muted" style="margin:0;">
-              Prefer email or phone? Reach us anytime:
-            </p>
+            <p class="muted">Prefer email or phone? Reach us anytime:</p>
 
             <ul class="info-list">
               <li><strong>Support:</strong> support@nightshifthotels.com</li>
@@ -282,7 +278,7 @@
             <div class="hero-card" style="margin-top:18px;">
               <div class="eyebrow">What we’ll ask</div>
               <p class="section-subtitle" style="margin-top:10px;">
-                Room count, brand, call volume, pet/ADA policy rules, rate quoting needs, and who to escalate to.
+                Room count, brand, call volume, pet/ADA policies, rate quoting, and escalation contacts.
               </p>
             </div>
           </aside>
@@ -292,7 +288,6 @@
 
     </main>
 
-    <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-inner">
         <div>© 2026 NightShift AI</div>
@@ -321,67 +316,35 @@
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
 
-        // Bot trap
         const hp = form.querySelector('input[name="company"]');
-        if (hp && hp.value && hp.value.trim().length > 0) {
-          // silently succeed (don’t tip off bots)
+        if (hp && hp.value) {
           window.location.href = "/thanks.html";
           return;
         }
 
-        // Required fields
-        const requiredIds = ["name", "email", "hotel", "message"];
-        for (const id of requiredIds) {
-          const el = document.getElementById(id);
-          if (!el || !String(el.value || "").trim()) {
-            el && el.focus();
-            setStatus("Please fill out the required fields.", "err");
-            return;
-          }
-        }
-
         btn.disabled = true;
-        btn.style.opacity = "0.85";
-        setStatus("Sending…", "");
+        setStatus("Sending…");
 
         try {
           const fd = new FormData(form);
-
-          // Set reply-to dynamically (so your email client can hit Reply)
-          const emailVal = (document.getElementById("email")?.value || "").trim();
-          if (emailVal) fd.set("_replyto", emailVal);
-
-          const data = Object.fromEntries(fd.entries());
+          fd.set("_replyto", document.getElementById("email").value);
 
           const res = await fetch(endpoint, {
             method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
+            headers: { "Accept": "application/json" },
+            body: fd
           });
-
-          const json = await res.json().catch(() => ({}));
 
           if (res.ok) {
             setStatus("Sent. Redirecting…", "ok");
-            setTimeout(() => {
-              window.location.href = "/thanks.html";
-            }, 350);
-            return;
+            setTimeout(() => window.location.href = "/thanks.html", 400);
+          } else {
+            setStatus("Something went wrong. Please try again or call us.", "err");
           }
-
-          const msg =
-            (json && (json.error || json.message)) ||
-            "Something went wrong. Please try again or call us.";
-          setStatus(msg, "err");
-
-        } catch (err) {
+        } catch {
           setStatus("Network error. Please try again or call us.", "err");
         } finally {
           btn.disabled = false;
-          btn.style.opacity = "1";
         }
       });
     })();
