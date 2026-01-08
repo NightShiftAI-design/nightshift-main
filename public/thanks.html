@@ -4,19 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Thank You – NightShift AI</title>
+
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
 
-  <!-- Page-only styling to match the new Contact page -->
   <style>
-    .ns-card{
-      background: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
-      border-radius: 24px;
-      padding: 34px 28px;
-      box-shadow: 0 40px 110px rgba(0,0,0,.75);
-      border: 1px solid rgba(99,102,241,.25);
+    /* Page-only styling (keeps site.css untouched) */
+    .thanks-wrap{
+      max-width: 760px;
+      margin: 0 auto;
       text-align: center;
     }
-
+    .thanks-card{
+      margin-top: 18px;
+      background: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 40px 110px rgba(0,0,0,.75);
+      border: 1px solid rgba(99,102,241,.25);
+    }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -30,31 +41,33 @@
       font-size: 12px;
       letter-spacing: .08em;
       text-transform: uppercase;
-      margin-bottom: 14px;
     }
     .pill .dot{
       width: 8px; height: 8px; border-radius: 999px;
       background: #22c55e;
       box-shadow: 0 0 20px rgba(34,197,94,.65);
     }
-
-    .muted{
-      color: rgba(234,240,255,.75);
-      font-size: 14px;
-      line-height: 1.55;
-      max-width: 640px;
-      margin: 12px auto 0;
-    }
-
     .mini{
-      color: rgba(234,240,255,.7);
-      font-size: 12px;
       margin-top: 14px;
+      font-size: 13px;
+      color: rgba(234,240,255,.75);
+      line-height: 1.6;
     }
-
-    .center-wrap{
-      max-width: 860px;
-      margin: 0 auto;
+    .two-actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .list{
+      text-align:left;
+      max-width: 520px;
+      margin: 14px auto 0;
+      padding-left: 18px;
+      color: rgba(234,240,255,.78);
+      line-height: 1.75;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -72,37 +85,52 @@
             <span>AI Night Front Desk</span>
           </div>
         </a>
+
+        <div class="nav-links">
+          <a href="/product.html">Product</a>
+          <a href="/who-we-serve.html">Who We Serve</a>
+          <a href="/packages.html">Packages</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html" class="nav-cta">Get a Quote</a>
+        </div>
       </div>
     </nav>
 
-    <!-- THANK YOU CONTENT -->
+    <!-- CONTENT -->
     <main class="page-container">
-      <section class="section center-wrap">
+      <section class="section">
+        <div class="thanks-wrap">
 
-        <div class="ns-card">
-          <span class="pill"><span class="dot"></span> Request received</span>
+          <span class="pill"><span class="dot"></span> REQUEST RECEIVED</span>
 
-          <h1 class="section-title" style="margin-top:6px;">Thanks — We’ve Got Your Request ✅</h1>
+          <h1 class="section-title" style="margin-top:14px;">Thanks — We’ve Got Your Request ✅</h1>
 
-          <p class="muted">
-            A NightShift specialist will review your details and reach out shortly — often within minutes
-            during business hours.
+          <p class="section-subtitle" style="max-width:680px; margin: 10px auto 0;">
+            A NightShift specialist will review your details and reach out shortly.
+            If it’s urgent, call us and we’ll help immediately.
           </p>
 
-          <p class="muted">
-            If this is urgent, call us now and we’ll help immediately.
-          </p>
+          <div class="thanks-card">
+            <div class="eyebrow">What happens next</div>
+            <ul class="list">
+              <li>We confirm your room count, brand, and call coverage needs.</li>
+              <li>We recommend the right package (Core / Pro / Elite).</li>
+              <li>We send a tailored quote + quick install steps.</li>
+            </ul>
 
-          <div class="hero-cta-row" style="justify-content:center; margin-top:28px;">
-            <a href="tel:4237715523" class="btn-primary">📞 Call Now</a>
-            <a href="/index.html" class="btn-secondary">Back to Home</a>
+            <div class="two-actions">
+              <a href="tel:4237715523" class="btn-primary">📞 Call Now</a>
+              <a href="/product.html" class="btn-secondary">Explore Product →</a>
+              <a href="/index.html" class="btn-secondary">Back to Home</a>
+            </div>
+
+            <div class="mini">
+              Typical setup is under 10 minutes once details are confirmed.
+            </div>
           </div>
 
-          <div class="mini">
-            Tip: Add <strong>info@nightshifthotels.com</strong> to your contacts so our reply doesn’t land in spam.
-          </div>
         </div>
-
       </section>
     </main>
 
