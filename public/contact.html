@@ -8,195 +8,148 @@
 </head>
 
 <body>
-  <div class="main-wrapper">
+<div class="main-wrapper">
 
-    <!-- NAVBAR -->
-    <nav class="site-nav">
-      <div class="nav-inner">
-        <a href="/index.html" class="nav-left" aria-label="NightShift AI Home">
-          <div class="nav-logo-circle">NS</div>
-          <div class="nav-brand-text">
-            <span>NightShift</span>
-            <span>AI Night Front Desk</span>
-          </div>
-        </a>
-
-        <div class="nav-links">
-          <a href="/product.html">Product</a>
-          <a href="/who-we-serve.html">Who We Serve</a>
-          <a href="/packages.html">Packages</a>
-          <a href="/faq.html">FAQ</a>
-          <a href="/about.html">About</a>
-          <a href="/contact.html" class="nav-cta">Get a Quote</a>
+  <!-- NAVBAR -->
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-left">
+        <div class="nav-logo-circle">NS</div>
+        <div class="nav-brand-text">
+          <span>NightShift</span>
+          <span>AI Night Front Desk</span>
         </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="/product.html">Product</a>
+        <a href="/who-we-serve.html">Who We Serve</a>
+        <a href="/packages.html">Packages</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html" class="nav-cta">Get a Quote</a>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <!-- PAGE CONTENT -->
-    <main class="page-container">
+  <!-- PAGE CONTENT -->
+  <main class="page-container">
 
-      <!-- HEADER -->
-      <section class="section">
+    <!-- HEADER -->
+    <section class="section">
+      <div class="section-header">
         <div class="eyebrow">Get a Quote</div>
-        <h1 class="section-title">Tell us about your property</h1>
-        <p class="section-subtitle">
-          Answer a few quick questions and we’ll respond with the best package recommendation and a tailored quote.
-          Most replies come back fast.
+        <h1 class="section-title">Let’s Talk About Your Property</h1>
+        <p class="section-subtitle" style="max-width:620px;">
+          Tell us a bit about your hotel or business and we’ll recommend the right NightShift setup
+          for your call volume, brand requirements, and automation needs.
         </p>
-
-        <div class="hero-cta-row" style="margin-top:18px;">
-          <a href="tel:4237715523" class="btn-primary">📞 Call Now</a>
-          <a href="mailto:info@nightshifthotels.com?subject=NightShift%20AI%20Quote%20Request" class="btn-secondary">
-            Email Us →
-          </a>
-        </div>
-      </section>
-
-      <!-- FORM + INFO -->
-      <section class="section">
-        <div class="feature-grid">
-
-          <!-- FORM CARD -->
-          <div class="feature-card">
-            <div class="eyebrow">Quote request</div>
-            <h2 class="section-title" style="margin-top:8px;">Request a quote</h2>
-            <p class="section-subtitle" style="margin-top:10px;">
-              (This form is currently display-only unless you connect a form endpoint.)
-            </p>
-
-            <form style="margin-top:16px; display:grid; gap:12px;">
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Full Name</div>
-                <input type="text" name="name" placeholder="Your name"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);" />
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Email</div>
-                <input type="email" name="email" placeholder="you@example.com"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);" />
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Phone (optional)</div>
-                <input type="tel" name="phone" placeholder="(###) ###-####"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);" />
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Property / Business Name</div>
-                <input type="text" name="property" placeholder="Hotel / Motel / Firm name"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);" />
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Type</div>
-                <select name="type"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);">
-                  <option>Independent hotel / motel</option>
-                  <option>Franchise hotel</option>
-                  <option>Ownership group / multiple properties</option>
-                  <option>Law firm</option>
-                  <option>Other</option>
-                </select>
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Room Count (approx.)</div>
-                <input type="text" name="rooms" placeholder="e.g., 45"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);" />
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">Estimated Calls After Hours</div>
-                <select name="calls"
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);">
-                  <option>0–5 per night</option>
-                  <option>5–15 per night</option>
-                  <option>15–30 per night</option>
-                  <option>30+ per night</option>
-                  <option>Not sure</option>
-                </select>
-              </label>
-
-              <label>
-                <div style="font-weight:700; margin-bottom:6px;">What do you want NightShift to do?</div>
-                <textarea name="message" rows="5" placeholder="Bookings, FAQs, policies, escalations, multi-language, etc."
-                  style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(2,6,23,.65); color:var(--text);"></textarea>
-              </label>
-
-              <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
-                Get a Quote Now
-              </button>
-
-              <p style="margin:0; font-size:12px; color:rgba(234,240,255,.65);">
-                Prefer email? Send details to <strong>info@nightshifthotels.com</strong>.
-              </p>
-            </form>
-          </div>
-
-          <!-- INFO CARD -->
-          <div class="feature-card">
-            <div class="eyebrow">Contact</div>
-            <h2 class="section-title" style="margin-top:8px;">Reach us anytime</h2>
-            <p class="section-subtitle" style="margin-top:10px;">
-              Fastest options are call or email. If you’re an active client, mention “urgent” for priority routing.
-            </p>
-
-            <div style="margin-top:16px; display:grid; gap:10px; color:rgba(234,240,255,.78);">
-              <div><strong>Support:</strong> support@nightshifthotels.com</div>
-              <div><strong>General:</strong> info@nightshifthotels.com</div>
-              <div><strong>Founder:</strong> founder@nightshifthotels.com</div>
-              <div><strong>Phone:</strong> <a href="tel:4237715523" style="text-decoration:underline;">(423) 771-5523</a></div>
-              <div><strong>Hours:</strong> 24/7</div>
-            </div>
-
-            <div style="margin-top:18px;">
-              <div class="hero-card">
-                <div class="eyebrow">What happens next</div>
-                <h3 style="margin:8px 0 10px;">Quick setup call</h3>
-                <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78);">
-                  <li>We confirm your property details</li>
-                  <li>We recommend Core / Pro / Elite</li>
-                  <li>We share a quote + timeline</li>
-                  <li>Most installs go live fast</li>
-                </ul>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      <!-- CTA -->
-      <section class="section">
-        <div class="eyebrow">Prefer to talk live?</div>
-        <h2 class="section-title">We can walk you through it in minutes</h2>
-        <p class="section-subtitle">
-          Installation, routing, policies, pricing — we’ll handle it.
-        </p>
-
-        <div class="hero-cta-row" style="margin-top:18px;">
-          <a href="tel:4237715523" class="btn-primary">📞 Call Us Now</a>
-          <a href="/packages.html" class="btn-secondary">View Packages →</a>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="site-footer">
-      <div class="footer-inner">
-        <div>© 2026 NightShift AI</div>
-        <div class="footer-links">
-          <a href="/privacy.html">Privacy Policy</a>
-          <a href="/terms.html">Terms</a>
-          <a href="/contact.html">Contact</a>
-        </div>
       </div>
-    </footer>
+    </section>
 
-  </div>
+    <!-- CONTACT GRID -->
+    <section class="section">
+      <div class="contact-grid">
+
+        <!-- FORM CARD -->
+        <div class="contact-card">
+          <h3>Request a Quote</h3>
+
+          <form
+            class="contact-form"
+            action="https://formspree.io/f/mbdlneev"
+            method="POST"
+          >
+
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" placeholder="Your full name" required />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" required />
+
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="(###) ###-####" />
+
+            <label for="hotel">Hotel / Business Name</label>
+            <input id="hotel" name="hotel" type="text" placeholder="Property or firm name" required />
+
+            <label for="rooms">Approx. Number of Rooms (if hotel)</label>
+            <input id="rooms" name="rooms" type="text" placeholder="e.g., 45" />
+
+            <label for="message">Tell us about your needs</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              placeholder="Call volume, brand, overnight coverage, booking needs, etc..."
+              required
+            ></textarea>
+
+            <!-- Redirect after submit -->
+            <input
+              type="hidden"
+              name="_redirect"
+              value="https://nightshifthotels.com/thanks.html"
+            />
+
+            <button type="submit" class="btn-primary">Get My Quote</button>
+          </form>
+        </div>
+
+        <!-- INFO CARD -->
+        <div class="contact-card">
+          <h3>Contact Information</h3>
+
+          <p style="font-size:14px;color:#cbd5f5;line-height:1.5;">
+            You can also reach the NightShift team directly.
+            All inboxes are monitored continuously.
+          </p>
+
+          <ul style="font-size:14px; line-height:1.8; padding-left:16px;">
+            <li><strong>Support:</strong> support@nightshifthotels.com</li>
+            <li><strong>Sales:</strong> info@nightshifthotels.com</li>
+            <li><strong>Founder:</strong> founder@nightshifthotels.com</li>
+            <li><strong>Phone:</strong> (423) 771-5523</li>
+            <li><strong>Hours:</strong> 24/7 Support Available</li>
+          </ul>
+
+          <p style="margin-top:14px;font-size:14px;color:#cbd5f5;">
+            Active properties receive priority routing for urgent issues and escalation support.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Prefer to Talk Live?</h2>
+        <p class="section-subtitle">
+          Our team can walk you through setup, pricing, and demos in real time.
+        </p>
+      </div>
+
+      <div class="hero-cta-row">
+        <a href="tel:4237715523" class="btn-primary">📞 Call Now</a>
+        <a href="/product.html" class="btn-secondary">Explore Product →</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>© 2026 NightShift AI</div>
+      <div class="footer-links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
 </body>
 </html>
