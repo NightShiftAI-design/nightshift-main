@@ -295,6 +295,48 @@ button, input, textarea { font: inherit; }
 }
 
 /* -------------------------
+   TRUST STRIP + BADGES
+------------------------- */
+.trust-strip{
+  display:flex;
+  flex-wrap: wrap;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(46,107,255,.20);
+  color: rgba(234,240,255,.86);
+  font-size: 12px;
+  font-weight: 750;
+  text-align:center;
+}
+
+.trust-strip .sep{ opacity:.35; }
+
+.badge-row{
+  margin-top: 14px;
+  display:flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.badge-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(234,240,255,.90);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* -------------------------
    SECTION HEADERS
 ------------------------- */
 .eyebrow{
@@ -345,6 +387,14 @@ button, input, textarea { font: inherit; }
 .price-card:hover,
 .testimonial-card:hover{
   border-color: rgba(46,107,255,.22);
+}
+
+/* Notice variant (Not a Call Center block) */
+.feature-card.notice{
+  border-color: rgba(46,107,255,.22);
+  background:
+    radial-gradient(600px 240px at 10% 0%, rgba(46,107,255,.12), transparent 55%),
+    linear-gradient(180deg, rgba(11,16,38,.85), rgba(2,6,23,.92));
 }
 
 /* PRICING */
@@ -414,4 +464,12 @@ button, input, textarea { font: inherit; }
   .hero-subtitle{
     font-size: 16px;
   }
+
+  .trust-strip{
+    border-radius: 18px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .trust-strip .sep{ display:none; }
 }
