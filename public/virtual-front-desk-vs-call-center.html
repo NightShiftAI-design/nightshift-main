@@ -14,6 +14,93 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
+
+  <!-- Page-only styles (keeps site.css unchanged) -->
+  <style>
+    .compare{
+      margin-top: 26px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(46,107,255,.20);
+      background: rgba(2,6,23,.55);
+      box-shadow: 0 30px 90px rgba(0,0,0,.55);
+    }
+    .compare-row{
+      display:grid;
+      grid-template-columns: 1.05fr 1fr 1fr;
+    }
+    .compare-head{
+      background: linear-gradient(135deg, rgba(124,58,237,.28), rgba(46,107,255,.18));
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .cell{
+      padding: 16px 18px;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .cell:last-child{ border-right: 0; }
+
+    .label{
+      font-weight: 900;
+      letter-spacing: .01em;
+    }
+    .muted{
+      color: rgba(234,240,255,.74);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 850;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(234,240,255,.92);
+      margin-bottom: 8px;
+    }
+    .tag.good{
+      background: rgba(34,197,94,.10);
+      border-color: rgba(34,197,94,.22);
+      color: rgba(214,255,230,.95);
+    }
+    .tag.warn{
+      background: rgba(251,191,36,.10);
+      border-color: rgba(251,191,36,.22);
+      color: rgba(255,243,205,.95);
+    }
+
+    .compare-body .compare-row{
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .compare-body .compare-row:last-child{
+      border-bottom: 0;
+    }
+
+    .cta-card{
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      border: 1px solid rgba(124,58,237,.22);
+      background:
+        radial-gradient(800px 260px at 20% 0%, rgba(124,58,237,.18), transparent 60%),
+        linear-gradient(180deg, rgba(11,16,38,.88), rgba(2,6,23,.94));
+      box-shadow: 0 20px 70px rgba(0,0,0,.45);
+      text-align:center;
+    }
+
+    @media (max-width: 980px){
+      .compare-row{ grid-template-columns: 1fr; }
+      .compare-head{ display:none; }
+      .cell{
+        border-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+      }
+      .cell:last-child{ border-bottom: 0; }
+    }
+  </style>
 </head>
 
 <body>
@@ -44,16 +131,15 @@
     <!-- HERO -->
     <header class="page-container" style="padding-bottom:60px;">
       <section class="section">
-
         <div class="hero-left-eyebrow">
-          NOT A CALL CENTER • HOTEL OPERATIONS
+          <span class="dot"></span> NOT A CALL CENTER • HOTEL OPERATIONS
         </div>
 
         <h1 class="section-title" style="font-size:var(--h1); margin-top:16px;">
           Hotel Call Center vs Virtual Front Desk
         </h1>
 
-        <p class="section-subtitle" style="max-width:720px; margin-top:10px;">
+        <p class="section-subtitle" style="max-width:760px; margin-top:10px;">
           Many hotel brands route calls to centralized reservation centers. These systems are optimized for booking volume —
           not guest service, safety, or property-specific operations.
           <br><br>
@@ -64,74 +150,127 @@
           <a href="/contact.html" class="btn-primary">Request Demo</a>
           <a href="/contact.html" class="btn-secondary">Request Portfolio Demo →</a>
         </div>
-
       </section>
     </header>
 
-    <!-- COMPARISON TABLE -->
+    <!-- CONTENT -->
     <main class="page-container" style="padding-top:0;">
 
+      <!-- COMPARISON -->
       <section class="section">
-
         <h2 class="section-title">What’s Really Answering Your Guests’ Calls?</h2>
-        <p class="section-subtitle">
+        <p class="section-subtitle" style="max-width:860px;">
           Not all after-hours call handling is the same. Here’s the operational difference.
         </p>
 
-        <div class="feature-grid" style="margin-top:40px;">
-
-          <!-- HEADER ROW -->
-          <div class="feature-card center" style="background:transparent; box-shadow:none; border:none;"></div>
-          <div class="feature-card center">
-            <strong>Typical Call Center</strong>
-          </div>
-          <div class="feature-card center">
-            <strong>NightShift AI Virtual Front Desk</strong>
+        <div class="compare">
+          <div class="compare-row compare-head">
+            <div class="cell"><div class="label">Category</div></div>
+            <div class="cell"><div class="label">Typical Call Center</div></div>
+            <div class="cell"><div class="label">NightShift AI Virtual Front Desk</div></div>
           </div>
 
-          <!-- ROWS -->
-          <div class="feature-card"><strong>Answers as hotel staff</strong></div>
-          <div class="feature-card">⚠️ Generic agents or scripts</div>
-          <div class="feature-card">✅ Brand-aligned voice & behavior</div>
+          <div class="compare-body">
 
-          <div class="feature-card"><strong>Property-specific answers</strong></div>
-          <div class="feature-card">❌ No local knowledge</div>
-          <div class="feature-card">✅ Trained on your hotel’s policies</div>
+            <div class="compare-row">
+              <div class="cell">
+                <div class="label">Answers as hotel staff</div>
+                <div class="muted">How it presents on the phone</div>
+              </div>
+              <div class="cell">
+                <span class="tag warn">Generic</span>
+                <div class="muted">Reservation agents or scripts not aligned to property operations.</div>
+              </div>
+              <div class="cell">
+                <span class="tag good">Brand-aligned</span>
+                <div class="muted">Hospitality-trained voice and behavior, configured to your property.</div>
+              </div>
+            </div>
 
-          <div class="feature-card"><strong>ADA-safe service animal handling</strong></div>
-          <div class="feature-card">❌ Inconsistent / risky</div>
-          <div class="feature-card">✅ ADA-compliant workflows</div>
+            <div class="compare-row">
+              <div class="cell">
+                <div class="label">Property-specific answers</div>
+                <div class="muted">Policies, fees, amenities, rules</div>
+              </div>
+              <div class="cell">
+                <span class="tag warn">Limited</span>
+                <div class="muted">Often lacks local context and policy exceptions.</div>
+              </div>
+              <div class="cell">
+                <span class="tag good">Trained on your rules</span>
+                <div class="muted">Configured to your policies, workflows, and escalation contacts.</div>
+              </div>
+            </div>
 
-          <div class="feature-card"><strong>Emergency recognition & escalation</strong></div>
-          <div class="feature-card">❌ Redirects guest to hotel</div>
-          <div class="feature-card">✅ Immediate escalation to staff</div>
+            <div class="compare-row">
+              <div class="cell">
+                <div class="label">ADA-safe service animal handling</div>
+                <div class="muted">Compliance-sensitive conversations</div>
+              </div>
+              <div class="cell">
+                <span class="tag warn">Risky</span>
+                <div class="muted">Inconsistent phrasing can create avoidable exposure or guest conflict.</div>
+              </div>
+              <div class="cell">
+                <span class="tag good">ADA-aware flows</span>
+                <div class="muted">Built to follow ADA-aligned service animal questioning patterns.</div>
+              </div>
+            </div>
 
-          <div class="feature-card"><strong>Late check-in handling</strong></div>
-          <div class="feature-card">❌ Tells guest to call property</div>
-          <div class="feature-card">✅ Follows your arrival procedures</div>
+            <div class="compare-row">
+              <div class="cell">
+                <div class="label">Emergency recognition & escalation</div>
+                <div class="muted">Safety routing when it matters</div>
+              </div>
+              <div class="cell">
+                <span class="tag warn">Redirects</span>
+                <div class="muted">May tell guests to call the property again or leave a message.</div>
+              </div>
+              <div class="cell">
+                <span class="tag good">Immediate escalation</span>
+                <div class="muted">Routes urgent issues to staff based on rules you set.</div>
+              </div>
+            </div>
 
-          <div class="feature-card"><strong>Local recommendations</strong></div>
-          <div class="feature-card">❌ Scripted or unavailable</div>
-          <div class="feature-card">✅ Property-approved answers</div>
+            <div class="compare-row">
+              <div class="cell">
+                <div class="label">Late check-in handling</div>
+                <div class="muted">Arrival procedures and instructions</div>
+              </div>
+              <div class="cell">
+                <span class="tag warn">Often deflects</span>
+                <div class="muted">Frequently pushes the guest back to the hotel phone.</div>
+              </div>
+              <div class="cell">
+                <span class="tag good">Workflow-driven</span>
+                <div class="muted">Follows your late-arrival process and provides clear next steps.</div>
+              </div>
+            </div>
 
-          <div class="feature-card"><strong>Replaces night desk calls</strong></div>
-          <div class="feature-card">❌ No</div>
-          <div class="feature-card">✅ Yes</div>
+            <div class="compare-row">
+              <div class="cell">
+                <div class="label">Control over guest experience</div>
+                <div class="muted">Tone, policy language, escalation rules</div>
+              </div>
+              <div class="cell">
+                <span class="tag warn">Corporate scripts</span>
+                <div class="muted">Limited customization at the property level.</div>
+              </div>
+              <div class="cell">
+                <span class="tag good">You decide</span>
+                <div class="muted">Your rules drive the experience, including what escalates and when.</div>
+              </div>
+            </div>
 
-          <div class="feature-card"><strong>Control over guest experience</strong></div>
-          <div class="feature-card">❌ Corporate scripts</div>
-          <div class="feature-card">✅ You decide</div>
-
+          </div>
         </div>
-
       </section>
 
       <!-- COMPLIANCE / LIABILITY -->
       <section class="section">
-
         <h2 class="section-title">Designed to Protect You — Not Just Answer Phones</h2>
-        <p class="section-subtitle">
-          NightShift AI follows structured, ADA-aware call flows, logs interactions, and routes sensitive situations to human staff.
+        <p class="section-subtitle" style="max-width:860px;">
+          NightShift follows structured, ADA-aware call flows, logs interactions, and routes sensitive situations to human staff.
         </p>
 
         <div class="feature-grid" style="margin-top:28px;">
@@ -140,15 +279,13 @@
           <div class="feature-card">✔ Eliminates inconsistent guest info</div>
           <div class="feature-card">✔ Protects brand reputation & reviews</div>
         </div>
-
       </section>
 
       <!-- OBJECTION HANDLING -->
       <section class="section">
-
         <h2 class="section-title">“Our Brand Already Answers Our Calls.”</h2>
-        <p class="section-subtitle">
-          Most corporate call centers handle reservations only.
+        <p class="section-subtitle" style="max-width:860px;">
+          Most corporate call centers handle reservations only — but real hotel calls are operational.
         </p>
 
         <div class="feature-grid" style="margin-top:28px;">
@@ -158,18 +295,16 @@
           <div class="feature-card">Maintenance or safety issues</div>
         </div>
 
-        <p class="section-subtitle" style="margin-top:18px;">
-          That’s why hotels still staff night desks — and why NightShift AI replaces operational calls, not just booking agents.
+        <p class="section-subtitle" style="margin-top:18px; max-width:860px;">
+          That’s why hotels still staff night desks — and why NightShift replaces operational calls, not just booking agents.
         </p>
-
       </section>
 
       <!-- PORTFOLIO CTA -->
       <section class="section">
-
-        <div class="feature-card notice center">
+        <div class="cta-card">
           <h2 class="section-title" style="margin-bottom:10px;">Managing Multiple Hotels?</h2>
-          <p class="section-subtitle" style="margin:0 auto 18px;">
+          <p class="section-subtitle" style="margin:0 auto 18px; max-width:860px;">
             NightShift AI standardizes overnight call handling across your properties while preserving each hotel’s workflows.
           </p>
 
@@ -178,7 +313,6 @@
             <a href="/contact.html" class="btn-secondary">Talk to Sales →</a>
           </div>
         </div>
-
       </section>
 
     </main>
