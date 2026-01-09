@@ -147,6 +147,50 @@
       opacity:0 !important;
       pointer-events:none !important;
     }
+
+    .badge-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(234,240,255,.88);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .02em;
+      pointer-events:none;
+    }
+
+    .switch-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .switch-btn{
+      appearance:none;
+      border: 1px solid rgba(99,102,241,.25);
+      background: rgba(2,6,23,.65);
+      color: rgba(234,240,255,.88);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 900;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .switch-btn:hover{ transform: translateY(-1px); }
+    .switch-btn.active{
+      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28));
+      border-color: rgba(46,107,255,.30);
+    }
   </style>
 </head>
 
@@ -178,21 +222,39 @@
     <main class="page-container">
 
       <section class="section">
-        <span class="pill"><span class="dot"></span> 24/7 RESPONSE • FAST SETUP</span>
+        <span class="pill"><span class="dot"></span> VIRTUAL FRONT DESK • NOT A CALL CENTER</span>
         <h1 class="section-title" style="margin-top:14px;">Get a Quote</h1>
-        <p class="section-subtitle" style="max-width:720px;">
-          Tell us your room count, brand (if any), and call volume. We’ll recommend the right setup
-          and follow up quickly.
+        <p class="section-subtitle" style="max-width:860px;">
+          NightShift AI is a virtual front desk trained on your property’s rules — built for after-hours guest operations,
+          not generic reservation scripts. Share a few details and we’ll recommend the right setup quickly.
         </p>
+
+        <div class="badge-row">
+          <span class="badge">✅ Property-specific answers</span>
+          <span class="badge">✅ ADA-aware workflows</span>
+          <span class="badge">✅ Emergency escalation</span>
+          <span class="badge">✅ Privacy-first setup</span>
+        </div>
+
+        <div class="hero-cta-row" style="margin-top:16px;">
+          <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">Call Center vs Virtual Front Desk →</a>
+          <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
+        </div>
 
         <div class="contact-wrap">
 
           <!-- FORM CARD -->
           <section class="ns-card">
-            <h3>Request a Quote</h3>
+            <h3 id="formTitle">Request a Quote</h3>
             <p class="muted" style="margin:0;">
-              No spam. We’ll only use this info to respond and price your setup.
+              We’ll only use this info to respond and tailor your configuration (policies, escalation, and call handling).
             </p>
+
+            <!-- Quote vs Portfolio toggle (same form backend) -->
+            <div class="switch-row" aria-label="Request type" style="margin-top:14px;">
+              <button type="button" class="switch-btn active" id="btnQuote">Single Property Quote</button>
+              <button type="button" class="switch-btn" id="btnPortfolio">Portfolio Demo</button>
+            </div>
 
             <form id="quoteForm" novalidate>
 
@@ -203,6 +265,7 @@
 
               <input type="hidden" name="_subject" value="NightShift AI — New Quote Request" />
               <input type="hidden" name="_replyto" value="" />
+              <input type="hidden" name="request_type" id="request_type" value="Single Property Quote" />
 
               <div class="form-grid">
 
@@ -218,17 +281,45 @@
 
                 <div class="field">
                   <label>Phone</label>
-                  <input name="phone" />
+                  <input name="phone" placeholder="Optional" />
                 </div>
 
                 <div class="field">
-                  <label>Hotel / Business</label>
+                  <label>Hotel / Group Name</label>
                   <input id="hotel" name="hotel" required />
                 </div>
 
                 <div class="field">
-                  <label>Rooms</label>
-                  <input name="rooms" />
+                  <label>Property Type</label>
+                  <select name="property_type" required>
+                    <option value="">Select one</option>
+                    <option>Independent hotel / motel</option>
+                    <option>Franchise hotel</option>
+                    <option>Ownership group / management company</option>
+                    <option>Extended stay</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Rooms (per property)</label>
+                  <input name="rooms" placeholder="e.g., 62" />
+                </div>
+
+                <div class="field">
+                  <label># of Properties (if portfolio)</label>
+                  <input name="property_count" id="property_count" placeholder="e.g., 5" />
+                </div>
+
+                <div class="field">
+                  <label>Call Volume (estimate)</label>
+                  <select name="call_volume">
+                    <option value="">Not sure</option>
+                    <option>0–10 calls/night</option>
+                    <option>10–25 calls/night</option>
+                    <option>25–50 calls/night</option>
+                    <option>50+ calls/night</option>
+                  </select>
                 </div>
 
                 <div class="field">
@@ -245,9 +336,27 @@
                   </select>
                 </div>
 
+                <div class="field">
+                  <label>Current After-Hours Setup</label>
+                  <select name="current_setup">
+                    <option value="">Select one</option>
+                    <option>On-site night desk</option>
+                    <option>Calls forward to mobile / on-call staff</option>
+                    <option>Answering service / call center</option>
+                    <option>Voicemail / missed calls</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
                 <div class="field full">
-                  <label>What do you need NightShift to handle?</label>
-                  <textarea id="message" name="message" required></textarea>
+                  <label>What do you want NightShift to handle?</label>
+                  <textarea id="message" name="message" required
+                    placeholder="Examples: late check-ins, rate quotes (nightly/weekly), deposits, pet & service animal handling, lockouts, noise complaints, directions/policies, escalation contacts…"></textarea>
+                </div>
+
+                <div class="field full">
+                  <label>Escalation Contacts (optional)</label>
+                  <textarea name="escalation" placeholder="Who should urgent calls route to? (GM / front desk / on-call maintenance)"></textarea>
                 </div>
 
               </div>
@@ -255,7 +364,7 @@
               <div class="actions">
                 <button id="submitBtn" type="submit" class="btn-primary">Send Request</button>
                 <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
-                <span class="tiny">Typical setup: under 10 minutes.</span>
+                <span class="tiny">Typical install: under 10 minutes • Portfolio onboarding available</span>
               </div>
 
               <div id="status" class="status"></div>
@@ -268,8 +377,8 @@
             <p class="muted">Prefer email or phone? Reach us anytime:</p>
 
             <ul class="info-list">
-              <li><strong>Support:</strong> support@nightshifthotels.com</li>
               <li><strong>Sales:</strong> info@nightshifthotels.com</li>
+              <li><strong>Support:</strong> support@nightshifthotels.com</li>
               <li><strong>Founder:</strong> founder@nightshifthotels.com</li>
               <li><strong>Phone:</strong> (423) 771-5523</li>
               <li><strong>Hours:</strong> 24/7</li>
@@ -278,8 +387,22 @@
             <div class="hero-card" style="margin-top:18px;">
               <div class="eyebrow">What we’ll ask</div>
               <p class="section-subtitle" style="margin-top:10px;">
-                Room count, brand, call volume, pet/ADA policies, rate quoting, and escalation contacts.
+                Room count, call volume, brand requirements (if any), rate quoting rules, pets/service animal handling,
+                late check-in procedure, and escalation contacts.
               </p>
+            </div>
+
+            <div class="hero-card" style="margin-top:14px;">
+              <div class="eyebrow">Best for</div>
+              <p class="section-subtitle" style="margin-top:10px;">
+                Hotels that want to replace overnight call handling with a property-trained virtual front desk —
+                while keeping staff in control for sensitive situations.
+              </p>
+            </div>
+
+            <div class="hero-cta-row" style="margin-top:14px;">
+              <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">See Comparison →</a>
+              <a href="/packages.html" class="btn-secondary">See Packages →</a>
             </div>
           </aside>
 
@@ -308,10 +431,37 @@
       const statusEl = document.getElementById("status");
       const btn = document.getElementById("submitBtn");
 
+      const btnQuote = document.getElementById("btnQuote");
+      const btnPortfolio = document.getElementById("btnPortfolio");
+      const requestType = document.getElementById("request_type");
+      const formTitle = document.getElementById("formTitle");
+      const propertyCount = document.getElementById("property_count");
+
       function setStatus(msg, type) {
         statusEl.textContent = msg;
         statusEl.className = "status show " + (type || "");
       }
+
+      function setMode(mode){
+        if(mode === "portfolio"){
+          btnPortfolio.classList.add("active");
+          btnQuote.classList.remove("active");
+          requestType.value = "Portfolio Demo";
+          formTitle.textContent = "Request a Portfolio Demo";
+          propertyCount.placeholder = "Required for portfolios (e.g., 8)";
+          propertyCount.setAttribute("required", "required");
+        } else {
+          btnQuote.classList.add("active");
+          btnPortfolio.classList.remove("active");
+          requestType.value = "Single Property Quote";
+          formTitle.textContent = "Request a Quote";
+          propertyCount.placeholder = "Optional (e.g., 5)";
+          propertyCount.removeAttribute("required");
+        }
+      }
+
+      btnQuote.addEventListener("click", () => setMode("quote"));
+      btnPortfolio.addEventListener("click", () => setMode("portfolio"));
 
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -337,7 +487,7 @@
 
           if (res.ok) {
             setStatus("Sent. Redirecting…", "ok");
-            setTimeout(() => window.location.href = "/thanks.html", 400);
+            setTimeout(() => window.location.href = "/thanks.html", 450);
           } else {
             setStatus("Something went wrong. Please try again or call us.", "err");
           }
