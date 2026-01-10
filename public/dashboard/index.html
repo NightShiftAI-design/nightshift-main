@@ -56,18 +56,17 @@
       color: var(--text);
     }
 
-    /* Login overlay (keep dashboard visible behind it) */
+    /* Login overlay */
     .overlay{
       position: fixed; inset: 0;
       display: none;
       align-items: center; justify-content: center;
       padding: 22px;
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.55);
       backdrop-filter: blur(10px);
       z-index: 999;
     }
-    [data-theme="light"] .overlay{ background: rgba(10,15,25,0.20); }
-
+    [data-theme="light"] .overlay{ background: rgba(10,15,25,0.22); }
     .loginCard{
       width: min(520px, 100%);
       border-radius: 22px;
@@ -102,10 +101,8 @@
       background: rgba(10,15,25,0.03);
     }
     .field input:focus{ box-shadow: var(--ring); }
-
     .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .spacer{ flex:1; }
-
     .btn{
       border: 1px solid var(--border);
       background: var(--panel);
@@ -115,6 +112,7 @@
       cursor:pointer;
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
       font-size: 13px;
+      user-select:none;
     }
     .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
     .btn:focus{ outline:none; box-shadow: var(--ring); }
@@ -122,24 +120,29 @@
       background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
       border-color: rgba(110,168,255,0.45);
     }
-
     .error{ margin-top: 10px; color: #ffb4b4; font-size: 12px; display:none; }
     [data-theme="light"] .error{ color: #b00020; }
 
-    /* /* Layout */
-    .wrap{ display:grid; grid-template-columns: 270px 1fr; min-height:100vh; }
-
+    /* Layout */
+    .wrap{ display:grid; grid-template-columns: 300px 1fr; min-height:100vh; gap: 0; }
     .sidebar{
       position:sticky; top:0; height:100vh;
-      padding:18px; border-right: 1px solid var(--border);
+      padding:18px;
+      border-right: 1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       backdrop-filter: blur(10px);
+      overflow:auto;
     }
+    .main{ padding: 18px 18px 28px; min-width: 0; } /* min-width:0 prevents grid overflow */
 
+    /* Brand */
     .brand{
       display:flex; align-items:center; gap:10px;
-      padding:12px; border: 1px solid var(--border);
-      border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow);
+      padding:12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
     .brand .dot{
       width:12px; height:12px; border-radius:50%;
@@ -149,6 +152,7 @@
     .brand h1{ font-size: 14px; margin:0; }
     .brand p{ margin:0; font-size: 12px; color: var(--muted); }
 
+    /* Sidebar stack */
     .nav{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
     .pill{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -162,7 +166,7 @@
     }
 
     .side-footer{
-      position:absolute; left:18px; right:18px; bottom:18px;
+      margin-top: 12px;
       display:flex; flex-direction:column; gap:10px;
     }
     .hint{
@@ -172,7 +176,25 @@
     }
     .minirow{ display:flex; gap:10px; flex-wrap:wrap; }
 
-    .main{ padding: 18px 18px 28px; }
+    /* Cards */
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-width: 0;
+    }
+    .card .head{
+      padding: 14px 14px 10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card .head h3{ margin:0; font-size: 14px; }
+    .card .head span{ font-size: 12px; color: var(--muted); }
+    .card .body{ padding: 14px; }
+
+    /* Main topbar */
     .topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom: 14px; }
     .title h2{ margin:0; font-size: 20px; }
     .title p{ margin:6px 0 0; font-size: 13px; color: var(--muted); }
@@ -191,108 +213,75 @@
       outline:none; min-width: 140px;
     }
 
-    .grid{ display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 14px; }
-    @media (max-width: 1100px){
-      .wrap{ grid-template-columns: 1fr; }
-      .sidebar{ position:relative; height:auto; }
-      .side-footer{ position:relative; left:auto; right:auto; bottom:auto; }
-      .grid{ grid-template-columns: 1fr; }
-    }
+    /* ✅ Main content is now single column (no competing right column) */
+    .mainGrid{ display:flex; flex-direction:column; gap: 14px; }
 
-    .card{
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card .head{
-      padding: 14px 14px 10px;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .card .head h3{ margin:0; font-size: 14px; }
-    .card .head span{ font-size: 12px; color: var(--muted); }
-    .card .body{ padding: 14px; }
-
-    .kpis{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    @media (max-width: 900px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
+    /* KPIs */
+    .kpis{ display:grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
     .kpi{
       border-radius: var(--radius2);
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.04);
       padding: 12px;
       min-height: 92px;
+      min-width: 0;
     }
     .kpi .name{ font-size: 12px; color: var(--muted); margin:0 0 8px; }
     .kpi .value{ font-size: 20px; margin:0 0 6px; }
     .kpi .sub{ font-size: 12px; color: var(--muted); margin:0; }
 
-    /* ---------- TABLE: no page-level horizontal scrolling ---------- */
+    /* ✅ Responsive KPI behavior */
+    @media (max-width: 1200px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px){ .kpis{ grid-template-columns: 1fr; } }
+
+    /* Activity table wrapper */
     .tablewrap{
-      overflow: hidden;                 /* prevents page-level left/right scroll */
+      overflow-x: auto;
       border-radius: var(--radius2);
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.02);
     }
 
-    .tablewrap table{
-      width: 100%;
+    /* ✅ Make table fit without forced horizontal scrolling */
+    table{
+      width:100%;
       border-collapse: collapse;
-      table-layout: fixed;              /* key: keep within container */
+      min-width: 0; /* critical */
+      table-layout: fixed; /* critical: prevents super-wide columns */
     }
-
-    .tablewrap th,
-    .tablewrap td{
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    /* Column sizing (fixed layout) */
-    .tablewrap th:nth-child(1), .tablewrap td:nth-child(1){ width: 150px; } /* Time */
-    .tablewrap th:nth-child(2), .tablewrap td:nth-child(2){ width: 90px; }  /* Type */
-    .tablewrap th:nth-child(3), .tablewrap td:nth-child(3){ width: 180px; } /* Guest/Caller */
-    .tablewrap th:nth-child(4), .tablewrap td:nth-child(4){ width: 120px; } /* Arrival */
-    .tablewrap th:nth-child(5), .tablewrap td:nth-child(5){ width: 70px; }  /* Nights */
-    .tablewrap th:nth-child(6), .tablewrap td:nth-child(6){ width: 110px; } /* Total */
-    .tablewrap th:nth-child(7), .tablewrap td:nth-child(7){ width: 110px; } /* Sentiment */
-    /* Summary fills remaining space */
-
     thead th{
       text-align:left; font-size: 12px; color: var(--muted); font-weight: 600;
       padding: 12px; border-bottom: 1px solid var(--border);
       background: rgba(255,255,255,0.02);
       position: sticky; top: 0; z-index: 2;
       backdrop-filter: blur(10px);
+      white-space: nowrap;
     }
     tbody td{
       padding: 12px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       font-size: 13px;
       vertical-align: top;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     tbody tr:hover td{ background: rgba(110,168,255,0.07); }
 
-    /* Clamp long summary */
+    /* ✅ Allow summary to wrap / clamp instead of forcing width */
+    td.col-summary{
+      white-space: normal;
+    }
     .summaryClamp{
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       line-height: 1.35;
+      max-height: calc(1.35em * 2);
     }
 
-    /* On smaller screens, allow horizontal scroll inside the table card only */
-    @media (max-width: 1100px){
-      .tablewrap{
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .tablewrap table{
-        min-width: 900px;               /* only inside the wrapper */
-      }
-    }
-
+    /* State + Toast */
     .state{
       padding: 14px;
       border-radius: var(--radius2);
@@ -300,11 +289,8 @@
       color: var(--muted);
       font-size: 13px;
       background: rgba(255,255,255,0.02);
-      white-space: pre-line;
+      white-space: pre-wrap;
     }
-
-    .stack{ display:flex; flex-direction:column; gap:14px; }
-
     .toast{
       position: fixed; right: 16px; bottom: 16px; max-width: 360px;
       padding: 12px 14px; border-radius: 14px;
@@ -320,6 +306,13 @@
     }
     [data-theme="light"] .toast{ background: rgba(255,255,255,0.78); }
     .toast.show{ opacity:1; transform: translateY(0); }
+
+    /* ✅ Mobile layout: sidebar becomes top */
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns: 1fr; }
+      .sidebar{ position:relative; height:auto; }
+      .main{ padding-top: 0; }
+    }
   </style>
 </head>
 
@@ -355,6 +348,7 @@
   </div>
 
   <div class="wrap">
+    <!-- LEFT COLUMN -->
     <aside class="sidebar">
       <div class="brand">
         <div class="dot"></div>
@@ -368,6 +362,18 @@
         <div class="pill"><b>Overview</b><span class="badge" id="badgeWindow">—</span></div>
         <div class="pill"><b>Activity</b><span class="badge" id="badgeCount">—</span></div>
         <div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
+
+        <!-- ✅ MOVED: Ops Signals now in left column (full width) -->
+        <section class="card" style="margin-top:10px;">
+          <div class="head">
+            <h3>Ops Signals</h3>
+            <span>fast triage</span>
+          </div>
+          <div class="body">
+            <!-- keep same ID so app.js can fill it -->
+            <div id="opsInsights" class="state">—</div>
+          </div>
+        </section>
       </div>
 
       <div class="side-footer">
@@ -381,6 +387,7 @@
       </div>
     </aside>
 
+    <!-- MAIN AREA -->
     <main class="main">
       <div class="topbar">
         <div class="title">
@@ -415,13 +422,16 @@
         </div>
       </div>
 
-      <div class="grid">
+      <div class="mainGrid">
+        <!-- KPIs + Feed in same big card -->
         <section class="card">
           <div class="head">
             <h3>Performance KPIs</h3>
             <span id="lastUpdated">—</span>
           </div>
+
           <div class="body">
+            <!-- ✅ KPIs now get full width -->
             <div class="kpis" id="kpiGrid"></div>
 
             <div style="height:14px"></div>
@@ -438,13 +448,13 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Time</th>
-                    <th>Type</th>
-                    <th>Guest / Caller</th>
-                    <th>Arrival</th>
-                    <th>Nights</th>
-                    <th>Total Due</th>
-                    <th>Sentiment</th>
+                    <th style="width:140px;">Time</th>
+                    <th style="width:88px;">Type</th>
+                    <th style="width:170px;">Guest/Caller</th>
+                    <th style="width:110px;">Arrival</th>
+                    <th style="width:64px;">N</th>
+                    <th style="width:110px;">Total</th>
+                    <th style="width:110px;">Sentiment</th>
                     <th>Summary</th>
                   </tr>
                 </thead>
@@ -453,18 +463,6 @@
             </div>
           </div>
         </section>
-
-        <aside class="stack">
-          <section class="card">
-            <div class="head">
-              <h3>Ops Signals</h3>
-              <span>fast triage</span>
-            </div>
-            <div class="body">
-              <div id="opsInsights" class="state">—</div>
-            </div>
-          </section>
-        </aside>
       </div>
     </main>
   </div>
