@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NightShift AI Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 24px; background:#0b1220; color:#e5e7eb; }
+    input, button { padding: 10px; border-radius: 8px; border: none; }
+    input { width: 280px; }
+    button { background:#2563eb; color:white; cursor:pointer; }
+    button:hover { opacity:.9; }
+    table { border-collapse: collapse; width: 100%; margin-top: 14px; background:#020617; border-radius:12px; overflow:hidden; }
+    th, td { padding: 12px; border-bottom:1px solid #1e293b; text-align:left; }
+    th { color:#94a3b8; font-weight:600; }
+    .muted { color:#94a3b8; }
+    .hidden { display:none; }
+    .card { background:#020617; border-radius:16px; padding:16px; margin: 14px 0; }
+  </style>
+</head>
+<body>
+
+<h1>🌙 NightShift AI — Dashboard</h1>
+
+<div id="auth" class="card">
+  <h3>Login</h3>
+  <p class="muted">Enter your email to receive a magic link.</p>
+  <input id="email" type="email" placeholder="you@hotel.com" />
+  <button id="sendLink">Send Magic Link</button>
+  <p id="authMsg" class="muted"></p>
+</div>
+
+<div id="app" class="card hidden">
+  <div class="muted">Signed in as</div>
+  <div id="who"></div>
+  <button id="logout">Log out</button>
+
+  <h3 style="margin-top:18px;">Latest Reservations</h3>
+  <div class="muted" id="count"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Created</th>
+        <th>Guest</th>
+        <th>Arrival</th>
+        <th>Nights</th>
+        <th>Room</th>
+        <th>Total</th>
+        <th>Pets</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<!-- Supabase library -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<!-- Your config + app code -->
+<script src="/dashboard/config.js"></script>
+<script src="/dashboard/app.js"></script>
+
+</body>
+</html>
