@@ -1,4 +1,5 @@
-// public/dashboard/app.js — v8 (KPIs + Ops + Charts)
+// public/dashboard/app.js  — v9 (analytics + ops + charts wired)
+
 (() => {
   // ============================================================
   // Settings
@@ -14,7 +15,6 @@
 
   const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
   const DEDUPE_DUPLICATE_BOOKINGS = true;
-  const ENABLE_RANGE_FILTER = true;
 
   // ============================================================
   // Helpers
@@ -49,260 +49,474 @@
   };
 
   const toYMD = (d) => {
-    if (!(d instanceof Date) || isNaN(d.getTime())) return "";
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   };
 
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0);
-  const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999);
+  const endOfDay   = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(),23,59,59,999);
 
-  const toast = (msg) => {
-    const el = $("toast");
-    if (!el) return;
-    el.textContent = msg;
+  function escHtml(str) {
+    return safeStr(str)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function safeJsonParse(v){
+    if(!v) return null;
+    if(typeof v === "object") return v;
+    try{ return JSON.parse(v); }catch{ return null; }
+  }
+
+  function toNum(v){
+    if(v===null||v===undefined) return NaN;
+    if(typeof v==="number") return v;
+    const s=String(v).replace(/[^0-9.\-]/g,"");
+    const n=Number(s);
+    return Number.isFinite(n)?n:NaN;
+  }
+
+  function toast(msg){
+    const el=$("toast"); if(!el) return;
+    el.textContent=msg;
     el.classList.add("show");
     clearTimeout(toast._t);
-    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
-  };
+    toast._t=setTimeout(()=>el.classList.remove("show"),2200);
+  }
 
   // ============================================================
   // Canonical URL
   // ============================================================
-  function enforceCanonicalUrl() {
-    try {
-      if (location.origin !== CANONICAL_ORIGIN) {
-        location.replace(CANONICAL_ORIGIN + location.pathname + location.search + location.hash);
+  function enforceCanonicalUrl(){
+    try{
+      if(location.origin!==CANONICAL_ORIGIN){
+        location.replace(CANONICAL_ORIGIN+location.pathname+location.search+location.hash);
         return true;
       }
-      if (location.pathname === "/dashboard" || location.pathname === "/dashboard/index.html") {
+      if(location.pathname==="/dashboard"||location.pathname==="/dashboard/index.html"){
         location.replace(CANONICAL_URL);
         return true;
       }
-      return false;
-    } catch { return false; }
+    }catch{}
+    return false;
   }
 
   // ============================================================
   // Supabase
   // ============================================================
-  function getSupabaseClient() {
-    const cfg = window.NSA_CONFIG || {};
-    if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || !window.supabase)
-      throw new Error("Supabase config missing");
+  let supabaseClient=null;
 
-    return window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
-      auth: { persistSession: PERSIST_SESSION, autoRefreshToken: true, detectSessionInUrl: true }
+  function clearSupabaseAuthStorage(){
+    try{
+      for(const k of Object.keys(localStorage)){
+        if(k.startsWith("sb-")&&k.endsWith("-auth-token")) localStorage.removeItem(k);
+      }
+    }catch{}
+  }
+
+  function getSupabaseClient(){
+    const cfg=window.NSA_CONFIG||{};
+    if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY||!window.supabase){
+      throw new Error("Missing Supabase config.");
+    }
+    return window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{
+      auth:{persistSession:PERSIST_SESSION,autoRefreshToken:true,detectSessionInUrl:true}
     });
+  }
+
+  // ============================================================
+  // Auth UI
+  // ============================================================
+  function showOverlay(show){
+    const o=$("authOverlay"); if(!o) return;
+    o.style.display=show?"flex":"none";
+  }
+
+  function setSessionUI(session){
+    const email=session?.user?.email||"";
+    $("authBadge").textContent=email?"Unlocked":"Locked";
+    $("btnAuth").textContent=email?"Account":"Login";
+    $("btnLogout").style.display=email?"inline-flex":"none";
+    $("authStatus").textContent=email?`Signed in as ${email}`:"Not signed in";
+  }
+
+  async function hardSignOut(){
+    try{ await supabaseClient.auth.signOut(); }catch{}
+    clearSupabaseAuthStorage();
+  }
+
+  async function ensureAuthGate(){
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    setSessionUI(session);
+
+    if(!session){
+      showOverlay(true);
+      clearDataUI("Please sign in to load dashboard data.");
+      return false;
+    }
+
+    if(session.user.email!==FOUNDER_EMAIL){
+      showOverlay(true);
+      clearDataUI("Unauthorized email.");
+      await hardSignOut();
+      return false;
+    }
+
+    showOverlay(false);
+    return true;
+  }
+
+  function initAuthHandlers(){
+    $("btnAuth").onclick=()=>showOverlay(true);
+    $("btnCloseAuth").onclick=()=>showOverlay(false);
+    $("btnSendLink").onclick=sendMagicLink;
+    $("btnResendLink").onclick=sendMagicLink;
+
+    $("btnLogout").onclick=async()=>{
+      toast("Signing out…");
+      await hardSignOut();
+      location.reload();
+    };
+
+    supabaseClient.auth.onAuthStateChange(async(_,session)=>{
+      setSessionUI(session);
+      if(session) loadAndRender();
+    });
+  }
+
+  async function sendMagicLink(){
+    const email=$("authEmail").value.trim();
+    if(!email.includes("@")) return;
+
+    const {error}=await supabaseClient.auth.signInWithOtp({
+      email, options:{emailRedirectTo:CANONICAL_URL}
+    });
+
+    if(error){ alert(error.message); return; }
+    toast("Magic link sent.");
+  }
+
+  // ============================================================
+  // Controls
+  // ============================================================
+  function initControls(){
+    $("rangeSelect").onchange=()=>loadAndRender();
+    $("startDate").onchange=()=>loadAndRender();
+    $("endDate").onchange=()=>loadAndRender();
+    $("btnRefresh").onclick=()=>loadAndRender();
+    $("btnExport").onclick=()=>exportCSV(filteredRows);
+
+    $("searchInput").oninput=()=>{ applyFilters(); renderAll(); };
+  }
+
+  function getSelectedRange(){
+    const mode=$("rangeSelect").value;
+    const now=new Date();
+
+    if(mode==="today") return {label:"Today",start:startOfDay(now),end:endOfDay(now)};
+    if(mode==="7"||mode==="30"){
+      const days=Number(mode);
+      const s=new Date(now); s.setDate(now.getDate()-(days-1));
+      return {label:`Last ${days} days`,start:startOfDay(s),end:endOfDay(now)};
+    }
+
+    const sVal=$("startDate").value;
+    const eVal=$("endDate").value;
+    if(sVal&&eVal){
+      return {
+        label:`${sVal} → ${eVal}`,
+        start:startOfDay(new Date(sVal)),
+        end:endOfDay(new Date(eVal))
+      };
+    }
+
+    const s=new Date(now); s.setDate(now.getDate()-6);
+    return {label:"Last 7 days",start:startOfDay(s),end:endOfDay(now)};
+  }
+
+  // ============================================================
+  // Fetch + Normalize
+  // ============================================================
+  async function fetchTable(table){
+    const {data,error}=await supabaseClient.from(table).select("*").order("created_at",{ascending:false}).limit(3000);
+    if(error) throw error;
+    return data||[];
+  }
+
+  function normalizeReservation(r){
+    return {
+      kind:"booking",
+      when:parseISOish(r.created_at),
+      guest:safeStr(r.guest_name),
+      arrival:safeStr(r.arrival_date),
+      nights:toNum(r.nights),
+      totalDue:toNum(r.total_due),
+      sentiment:"",
+      summary:`Reservation for ${r.guest_name} • Arrive ${r.arrival_date}`,
+      raw:r
+    };
+  }
+
+  function normalizeCall(r){
+    const booking=safeJsonParse(r.booking);
+    return {
+      kind:"call",
+      when:parseISOish(r.created_at),
+      guest:booking?.guest_name||"",
+      arrival:booking?.arrival_date||"",
+      nights:null,
+      totalDue:null,
+      sentiment:safeStr(r.sentiment),
+      duration:toNum(r.duration_seconds),
+      summary:safeStr(r.summary),
+      raw:r
+    };
   }
 
   // ============================================================
   // State
   // ============================================================
-  let supabaseClient = null;
-  let allRows = [];
-  let filteredRows = [];
-  let lastRange = null;
-  let chartCalls = null;
-  let chartBookings = null;
-
-  // ============================================================
-  // Date Range
-  // ============================================================
-  function getSelectedRange() {
-    const mode = $("rangeSelect")?.value || "7";
-    const now = new Date();
-
-    if (mode === "today") return { label:"Today", start:startOfDay(now), end:endOfDay(now) };
-
-    if (mode === "7" || mode === "30") {
-      const days = Number(mode);
-      const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days-1)));
-      return { label:`Last ${days} days`, start:s, end:endOfDay(now) };
-    }
-
-    const sVal = $("startDate")?.value;
-    const eVal = $("endDate")?.value;
-    if (!sVal || !eVal) return getSelectedRange();
-
-    return {
-      label: `${sVal} → ${eVal}`,
-      start: startOfDay(new Date(`${sVal}T00:00:00`)),
-      end: endOfDay(new Date(`${eVal}T00:00:00`))
-    };
-  }
+  let allRows=[];
+  let filteredRows=[];
+  let lastRange=null;
 
   // ============================================================
   // Filters
   // ============================================================
-  function applyFilters() {
-    const range = lastRange;
-    const q = safeStr($("searchInput")?.value).toLowerCase();
+  function applyFilters(){
+    const range=lastRange;
+    const q=$("searchInput").value.toLowerCase().trim();
 
-    filteredRows = allRows.filter(r => {
-      if (r.when) {
-        if (r.when < range.start || r.when > range.end) return false;
+    filteredRows=allRows.filter(r=>{
+      if(r.when){
+        if(r.when<range.start||r.when>range.end) return false;
       }
-      if (!q) return true;
-
-      const hay = JSON.stringify(r).toLowerCase();
+      if(!q) return true;
+      const hay=JSON.stringify(r).toLowerCase();
       return hay.includes(q);
     });
   }
 
   // ============================================================
-  // KPIs
+  // KPIs + Ops
   // ============================================================
-  function computeKPIs(rows) {
-    const calls = rows.filter(r => r.kind === "call");
-    const bookings = rows.filter(r => r.kind === "booking");
+  function computeKPIs(rows){
+    const calls=rows.filter(r=>r.kind==="call");
+    const bookings=rows.filter(r=>r.kind==="booking");
 
-    const revenue = bookings.reduce((s,b)=>s+(Number(b.totalDue)||0),0);
+    const totalCalls=calls.length;
+    const totalBookings=bookings.length;
+    const conv=totalCalls?totalBookings/totalCalls:NaN;
 
-    return {
-      totalCalls: calls.length,
-      totalBookings: bookings.length,
-      conv: calls.length ? bookings.length / calls.length : NaN,
-      revenue
-    };
+    const durations=calls.map(c=>c.duration).filter(Number.isFinite);
+    const avgDur=durations.length?durations.reduce((a,b)=>a+b,0)/durations.length:NaN;
+
+    const revenue=bookings.map(b=>b.totalDue).filter(Number.isFinite).reduce((a,b)=>a+b,0);
+
+    const negative=calls.filter(c=>c.sentiment.toLowerCase().includes("neg")).length;
+    const longCalls=calls.filter(c=>c.duration>=240).length;
+
+    return {totalCalls,totalBookings,conv,avgDur,revenue,negative,longCalls};
   }
 
-  function renderKPIs(k) {
-    const el = $("kpiGrid");
-    el.innerHTML = "";
-
-    const tiles = [
-      { n:"Calls", v:fmtInt(k.totalCalls) },
-      { n:"Bookings", v:fmtInt(k.totalBookings) },
-      { n:"Conversion", v:fmtPct(k.conv) },
-      { n:"Revenue", v:fmtMoney(k.revenue) },
+  function renderKPIs(k){
+    const el=$("kpiGrid"); el.innerHTML="";
+    const tiles=[
+      ["Total calls",fmtInt(k.totalCalls)],
+      ["Bookings",fmtInt(k.totalBookings)],
+      ["Conversion",fmtPct(k.conv)],
+      ["Revenue",fmtMoney(k.revenue)],
+      ["Avg call",Number.isFinite(k.avgDur)?`${Math.round(k.avgDur)}s`:"—"]
     ];
-
-    for (const t of tiles) {
-      const d = document.createElement("div");
-      d.className = "kpi";
-      d.innerHTML = `<p class="name">${t.n}</p><p class="value">${t.v}</p>`;
+    for(const[t,v]of tiles){
+      const d=document.createElement("div");
+      d.className="kpi";
+      d.innerHTML=`<p class="name">${t}</p><p class="value">${v}</p>`;
       el.appendChild(d);
     }
+  }
+
+  function renderOps(k){
+    $("opsInsights").innerHTML=`
+      Neg sentiment: ${fmtInt(k.negative)}<br>
+      Long calls (4m+): ${fmtInt(k.longCalls)}<br>
+      Conversion: ${fmtPct(k.conv)}<br>
+      Revenue: ${fmtMoney(k.revenue)}
+    `;
   }
 
   // ============================================================
   // Charts
   // ============================================================
-  function buildDailySeries(rows, kind) {
-    const map = {};
-    for (const r of rows) {
-      if (r.kind !== kind || !r.when) continue;
-      const k = toYMD(r.when);
-      map[k] = (map[k] || 0) + 1;
+  function groupByDay(rows,kind){
+    const map={};
+    for(const r of rows){
+      if(r.kind!==kind||!r.when) continue;
+      const d=toYMD(r.when);
+      map[d]=(map[d]||0)+1;
     }
-
-    const labels = Object.keys(map).sort();
-    return {
-      labels,
-      values: labels.map(l => map[l])
-    };
+    return map;
   }
 
-  function renderCharts() {
-    if (!window.Chart) return;
+  function renderChart(canvasId,data){
+    const c=$(canvasId); if(!c) return;
+    const ctx=c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
 
-    const calls = buildDailySeries(filteredRows, "call");
-    const bookings = buildDailySeries(filteredRows, "booking");
+    const keys=Object.keys(data).sort();
+    if(!keys.length) return;
 
-    const ctx1 = $("chartCalls");
-    const ctx2 = $("chartBookings");
+    const vals=keys.map(k=>data[k]);
+    const max=Math.max(...vals);
 
-    if (chartCalls) chartCalls.destroy();
-    if (chartBookings) chartBookings.destroy();
+    const w=c.width,h=c.height;
+    const pad=20;
+    const step=(w-pad*2)/(keys.length-1||1);
 
-    chartCalls = new Chart(ctx1, {
-      type: "line",
-      data: { labels: calls.labels, datasets:[{ label:"Calls", data:calls.values, tension:.3 }] },
-      options:{ responsive:true, plugins:{ legend:{display:false} } }
+    ctx.strokeStyle="#6ea8ff";
+    ctx.beginPath();
+
+    keys.forEach((k,i)=>{
+      const x=pad+i*step;
+      const y=h-pad-(vals[i]/max)*(h-pad*2);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
     });
 
-    chartBookings = new Chart(ctx2, {
-      type: "bar",
-      data: { labels: bookings.labels, datasets:[{ label:"Bookings", data:bookings.values }] },
-      options:{ responsive:true, plugins:{ legend:{display:false} } }
-    });
+    ctx.stroke();
   }
 
   // ============================================================
-  // Feed
+  // Feed + Export
   // ============================================================
-  function renderFeed(rows) {
-    const tb = $("feedTbody");
-    tb.innerHTML = "";
+  function renderFeed(rows){
+    $("badgeCount").textContent=fmtInt(rows.length);
+    $("feedMeta").textContent=`${rows.length} items`;
 
-    for (const r of rows.slice(0,500)) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r.when ? r.when.toLocaleString() : "—"}</td>
+    const tbody=$("feedTbody");
+    tbody.innerHTML="";
+
+    for(const r of rows.slice(0,500)){
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${r.when?r.when.toLocaleString():"—"}</td>
         <td>${r.kind}</td>
-        <td>${safeStr(r.guest)}</td>
-        <td>${safeStr(r.arrival)}</td>
-        <td>${r.nights ?? "—"}</td>
-        <td>${r.totalDue ? fmtMoney(r.totalDue) : "—"}</td>
-        <td>${safeStr(r.sentiment)}</td>
-        <td>${safeStr(r.summary)}</td>
+        <td>${escHtml(r.guest||"—")}</td>
+        <td>${escHtml(r.arrival||"—")}</td>
+        <td>${Number.isFinite(r.nights)?r.nights:"—"}</td>
+        <td>${Number.isFinite(r.totalDue)?fmtMoney(r.totalDue):"—"}</td>
+        <td>${escHtml(r.sentiment||"—")}</td>
+        <td>${escHtml(r.summary||"—")}</td>
       `;
-      tb.appendChild(tr);
+      tbody.appendChild(tr);
+    }
+  }
+
+  function exportCSV(rows){
+    if(!rows.length){ toast("Nothing to export."); return; }
+
+    const cols=["kind","time","guest","arrival","nights","total","sentiment","summary"];
+    const lines=[cols.join(",")];
+
+    for(const r of rows){
+      const vals=[
+        r.kind,
+        r.when?r.when.toISOString():"",
+        r.guest,r.arrival,
+        r.nights,r.totalDue,
+        r.sentiment,r.summary
+      ].map(v=>`"${String(v??"").replace(/"/g,'""')}"`);
+      lines.push(vals.join(","));
     }
 
-    $("feedMeta").textContent = `${rows.length} items`;
-    $("badgeCount").textContent = rows.length;
+    const blob=new Blob([lines.join("\n")],{type:"text/csv"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=`nightshift_${Date.now()}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    toast("CSV exported.");
   }
 
   // ============================================================
-  // Render
+  // Render All
   // ============================================================
-  function renderAll() {
+  function renderAll(){
     applyFilters();
-    renderKPIs(computeKPIs(filteredRows));
-    renderCharts();
+    const k=computeKPIs(filteredRows);
+    renderKPIs(k);
+    renderOps(k);
+
+    renderChart("chartCalls",groupByDay(filteredRows,"call"));
+    renderChart("chartBookings",groupByDay(filteredRows,"booking"));
+
     renderFeed(filteredRows);
+    $("lastUpdated").textContent=`Updated ${new Date().toLocaleString()}`;
+  }
+
+  function clearDataUI(msg){
+    $("stateBox").textContent=msg||"—";
   }
 
   // ============================================================
   // Load
   // ============================================================
-  async function loadAndRender() {
-    lastRange = getSelectedRange();
+  async function loadAndRender(){
+    if(!(await ensureAuthGate())) return;
 
-    const [r1, r2] = await Promise.all([
-      supabaseClient.from("reservations").select("*").limit(3000),
-      supabaseClient.from("call_logs").select("*").limit(3000),
-    ]);
+    try{
+      lastRange=getSelectedRange();
+      $("badgeWindow").textContent=lastRange.label;
 
-    const rows = [];
+      const [resv,calls]=await Promise.all([
+        fetchTable("reservations"),
+        fetchTable("call_logs")
+      ]);
 
-    for (const r of r1.data || []) {
-      rows.push({ kind:"booking", when:parseISOish(r.created_at), ...r });
+      allRows=[
+        ...resv.map(normalizeReservation),
+        ...calls.map(normalizeCall)
+      ];
+
+      renderAll();
+      toast("Dashboard refreshed.");
+    }catch(e){
+      console.error(e);
+      clearDataUI("Load error.");
     }
-    for (const c of r2.data || []) {
-      rows.push({ kind:"call", when:parseISOish(c.created_at), ...c });
-    }
-
-    allRows = rows;
-    renderAll();
   }
 
   // ============================================================
   // Init
   // ============================================================
-  async function init() {
-    if (enforceCanonicalUrl()) return;
+  async function init(){
+    if(enforceCanonicalUrl()) return;
 
-    try { supabaseClient = getSupabaseClient(); }
-    catch(e){ alert(e.message); return; }
+    try{ supabaseClient=getSupabaseClient(); }
+    catch(e){ clearDataUI(e.message); return; }
 
-    $("rangeSelect")?.addEventListener("change", loadAndRender);
-    $("btnRefresh")?.addEventListener("click", loadAndRender);
-    $("searchInput")?.addEventListener("input", renderAll);
+    initAuthHandlers();
+    initControls();
 
-    await loadAndRender();
+    if(ALWAYS_REQUIRE_LOGIN){
+      clearSupabaseAuthStorage();
+      showOverlay(true);
+      return;
+    }
+
+    if(await ensureAuthGate()) loadAndRender();
+
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible") loadAndRender();
+    });
+
+    window.addEventListener("pageshow",(e)=>{
+      if(e.persisted) loadAndRender();
+    });
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded",init);
 })();
