@@ -171,6 +171,18 @@ button, input, textarea { font: inherit; }
   border-color: rgba(46,107,255,.18);
 }
 
+/* ✅ Public Dashboard link styling (admin-ish, but not a primary CTA) */
+.nav-links a.nav-dashboard{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(234,240,255,.92);
+}
+
+.nav-links a.nav-dashboard:hover{
+  background: rgba(46,107,255,.14);
+  border-color: rgba(46,107,255,.28);
+}
+
 .nav-cta,
 .btn-primary{
   background: linear-gradient(135deg, var(--accent2), var(--accent));
