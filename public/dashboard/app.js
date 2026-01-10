@@ -5,11 +5,10 @@
   // ============================================================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
 
-  // If true: ALWAYS show login overlay on page load (even if a session exists).
-  // This prevents “type /dashboard and see data” on a shared computer.
+  // Always show login overlay on load (prevents "URL bypass" on shared computers)
   const ALWAYS_REQUIRE_LOGIN = true;
 
-  // Never persist sessions (prevents silent auto-login after refresh)
+  // Do not persist sessions (prevents silent auto-login after refresh)
   const PERSIST_SESSION = false;
 
   // ============================================================
@@ -66,12 +65,21 @@
   }
 
   function clearSupabaseAuthStorage() {
-    // Supabase stores tokens in localStorage keys like: sb-<projectref>-auth-token
     try {
       for (const k of Object.keys(localStorage)) {
         if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
       }
     } catch {}
+  }
+
+  // Escape HTML so we never inject raw user content into innerHTML
+  function escHtml(str) {
+    return safeStr(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   // ============================================================
@@ -115,14 +123,13 @@
   }
 
   // ============================================================
-  // Tables (based on YOUR schema list)
+  // Tables
   // ============================================================
   const TABLES = {
     reservations: "reservations",
     callLogs: "call_logs",
   };
 
-  // Try these as timestamp columns in order
   const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts", "time", "createdAt"];
 
   // ============================================================
@@ -156,9 +163,8 @@
   }
 
   async function hardSignOut() {
-    // We want logout to ALWAYS work, even if there are stale tokens.
     try {
-      await supabaseClient.auth.signOut(); // v2 doesn't need scope to clear in-memory
+      await supabaseClient.auth.signOut();
     } catch (e) {
       console.warn("signOut threw:", e);
     }
@@ -166,8 +172,6 @@
   }
 
   async function enforceFounderIfSet(session) {
-    // Optional: if you want only founder to see anything.
-    // If you later add hotel_users mapping, replace this with your RBAC checks.
     if (!session?.user?.email) return { ok: false, reason: "No email on session." };
     if (session.user.email !== FOUNDER_EMAIL) {
       return { ok: false, reason: `Access denied for ${session.user.email}.` };
@@ -175,8 +179,7 @@
     return { ok: true };
   }
 
-  async function ensureAuthGate({ allowAutoFromUrl } = { allowAutoFromUrl: true }) {
-    // detectSessionInUrl will create a session after magic link click automatically.
+  async function ensureAuthGate() {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     if (error) console.warn("getSession error:", error);
 
@@ -188,20 +191,11 @@
       return { ok: false, session: null };
     }
 
-    // If you only want founder access, enforce it here
     const founderCheck = await enforceFounderIfSet(session);
     if (!founderCheck.ok) {
       showOverlay(true);
       clearDataUI(founderCheck.reason + " Please use an authorized email.");
       await hardSignOut();
-      return { ok: false, session: null };
-    }
-
-    // If ALWAYS_REQUIRE_LOGIN, we still keep overlay up until user explicitly signs in.
-    // BUT: we allow auto sign-in from magic link (URL token) so it can close.
-    if (ALWAYS_REQUIRE_LOGIN && !allowAutoFromUrl) {
-      showOverlay(true);
-      $("stateBox").textContent = "Please sign in to load dashboard data.";
       return { ok: false, session: null };
     }
 
@@ -225,8 +219,7 @@
       setTimeout(() => window.location.reload(), 250);
     });
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      // event examples: "SIGNED_IN", "SIGNED_OUT", "TOKEN_REFRESHED"
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       setSessionUI(session);
 
       if (!session) {
@@ -235,7 +228,6 @@
         return;
       }
 
-      // Enforce founder-only for now
       const founderCheck = await enforceFounderIfSet(session);
       if (!founderCheck.ok) {
         showOverlay(true);
@@ -254,7 +246,7 @@
     const email = safeStr($("authEmail")?.value).trim();
     if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
 
-    // MUST be in Supabase Auth -> Redirect URLs
+    // MUST be allowed in Supabase Auth -> Redirect URLs
     const redirectTo = `${window.location.origin}/dashboard/`;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
@@ -348,7 +340,6 @@
     const startISO = range.start.toISOString();
     const endISO = range.end.toISOString();
 
-    // Attempt range filter using different timestamp columns
     for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
@@ -361,7 +352,6 @@
       if (!error) return { data: data || [], tsField, mode: `range:${tsField}` };
     }
 
-    // Fallback: order by timestamp column without range filter
     for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
@@ -372,7 +362,6 @@
       if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
     }
 
-    // Final fallback: raw limit
     const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
     if (error) throw error;
     return { data: data || [], tsField: "", mode: "raw" };
@@ -458,7 +447,7 @@
   }
 
   // ============================================================
-  // Filtering / KPIs / UI
+  // Filtering / KPIs / Ops Signals / Feed
   // ============================================================
   function applyFilters() {
     const range = lastRange || getSelectedRange();
@@ -494,7 +483,10 @@
 
     const revenue = bookings.map(b => b.totalDue).filter(n => Number.isFinite(n)).reduce((a,b)=>a+b,0);
 
-    return { totalCalls, totalBookings, conv, avgDur, revenue };
+    const negativeCount = rows.filter(r => safeStr(r.sentiment).toLowerCase().includes("neg")).length;
+    const longCalls = calls.filter(c => Number.isFinite(c.durationSeconds) && c.durationSeconds >= 240).length;
+
+    return { totalCalls, totalBookings, conv, avgDur, revenue, negativeCount, longCalls };
   }
 
   function renderKPIs(k) {
@@ -513,9 +505,37 @@
     for (const t of tiles) {
       const div = document.createElement("div");
       div.className = "kpi";
-      div.innerHTML = `<p class="name">${t.name}</p><p class="value">${t.value}</p><p class="sub">${t.sub}</p>`;
+      div.innerHTML = `
+        <p class="name">${escHtml(t.name)}</p>
+        <p class="value">${escHtml(t.value)}</p>
+        <p class="sub">${escHtml(t.sub)}</p>
+      `;
       el.appendChild(div);
     }
+  }
+
+  function renderOpsSignals(k) {
+    const box = $("opsInsights");
+    if (!box) return;
+
+    box.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <b>Watchlist</b><br/>
+          <span style="color: var(--muted); font-size: 13px;">
+            Negative sentiment: <b>${fmtInt(k.negativeCount)}</b><br/>
+            Long calls (4m+): <b>${fmtInt(k.longCalls)}</b>
+          </span>
+        </div>
+        <div>
+          <b>Snapshot</b><br/>
+          <span style="color: var(--muted); font-size: 13px;">
+            Calls: <b>${fmtInt(k.totalCalls)}</b> • Bookings: <b>${fmtInt(k.totalBookings)}</b><br/>
+            Conversion: <b>${fmtPct(k.conv)}</b> • Revenue: <b>${fmtMoney(k.revenue)}</b>
+          </span>
+        </div>
+      </div>
+    `;
   }
 
   function renderFeed(rows) {
@@ -545,22 +565,25 @@
 
     for (const r of sorted.slice(0, 500)) {
       const tr = document.createElement("tr");
+
       const whenTxt = r.when ? r.when.toLocaleString() : safeStr(r.whenRaw) || "—";
       const arrivalTxt = r.arrival ? safeStr(r.arrival) : "—";
       const nightsTxt = Number.isFinite(r.nights) ? String(r.nights) : "—";
       const totalTxt = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
       const typeTxt = r.kind === "booking" ? "booking" : "call";
       const sentimentTxt = safeStr(r.sentiment) || "—";
+      const guestTxt = safeStr(r.guest) || "—";
+      const summaryTxt = safeStr(r.summary) || "—";
 
       tr.innerHTML = `
-        <td><span class="muted">${whenTxt}</span></td>
-        <td>${typeTxt}</td>
-        <td>${safeStr(r.guest) || "<span class='muted'>—</span>"}</td>
-        <td>${arrivalTxt}</td>
-        <td>${nightsTxt}</td>
-        <td>${totalTxt}</td>
-        <td>${sentimentTxt}</td>
-        <td><div class="summaryClamp">${safeStr(r.summary) || "<span class='muted'>—</span>"}</div></td>
+        <td><span class="muted">${escHtml(whenTxt)}</span></td>
+        <td>${escHtml(typeTxt)}</td>
+        <td title="${escHtml(guestTxt)}">${escHtml(guestTxt)}</td>
+        <td title="${escHtml(arrivalTxt)}">${escHtml(arrivalTxt)}</td>
+        <td>${escHtml(nightsTxt)}</td>
+        <td>${escHtml(totalTxt)}</td>
+        <td title="${escHtml(sentimentTxt)}">${escHtml(sentimentTxt)}</td>
+        <td class="col-summary"><div class="summaryClamp" title="${escHtml(summaryTxt)}">${escHtml(summaryTxt)}</div></td>
       `;
       tbody.appendChild(tr);
     }
@@ -569,6 +592,7 @@
   function exportCSV(rows) {
     const cols = ["kind","time","event","guest_or_caller","arrival_date","nights","total_due","sentiment","summary"];
     const lines = [cols.join(",")];
+
     for (const r of rows) {
       const time = r.when ? r.when.toISOString() : safeStr(r.whenRaw);
       const vals = [
@@ -579,6 +603,7 @@
       ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
       lines.push(vals.join(","));
     }
+
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -594,28 +619,44 @@
   function renderAll() {
     applyFilters();
     $("badgeWindow").textContent = lastRange?.label || "—";
+
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
+    renderOpsSignals(k);
     renderFeed(filteredRows);
-    $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
+
+    const lu = $("lastUpdated");
+    if (lu) lu.textContent = `Updated ${new Date().toLocaleString()}`;
   }
 
   function clearDataUI(msg) {
     allRows = [];
     filteredRows = [];
-    $("badgeCount").textContent = "—";
-    $("kpiGrid").innerHTML = "";
-    $("tableWrap").style.display = "none";
-    $("stateBox").style.display = "block";
-    $("stateBox").textContent = msg || "—";
+
+    const bc = $("badgeCount");
+    if (bc) bc.textContent = "—";
+
+    const kpi = $("kpiGrid");
+    if (kpi) kpi.innerHTML = "";
+
+    const ops = $("opsInsights");
+    if (ops) ops.innerHTML = "—";
+
+    const tw = $("tableWrap");
+    if (tw) tw.style.display = "none";
+
+    const sb = $("stateBox");
+    if (sb) {
+      sb.style.display = "block";
+      sb.textContent = msg || "—";
+    }
   }
 
   // ============================================================
   // Load
   // ============================================================
   async function loadAndRender() {
-    // Enforce auth gate (but allow magic-link URL sign-in)
-    const gate = await ensureAuthGate({ allowAutoFromUrl: true });
+    const gate = await ensureAuthGate();
     if (!gate.ok) return;
 
     const state = $("stateBox");
@@ -680,24 +721,19 @@
 
     initAuthHandlers();
 
-    // ALWAYS_REQUIRE_LOGIN behavior:
-    // - Always show overlay on load
-    // - BUT we still allow magic-link tokens in the URL to create a session,
-    //   then onAuthStateChange fires and loadAndRender() runs.
     if (ALWAYS_REQUIRE_LOGIN) {
-      // Clear any old tokens so refresh doesn't auto-open data on shared machines
+      // Clear tokens so a refresh on shared machines doesn't silently keep session
       clearSupabaseAuthStorage();
       showOverlay(true);
       clearDataUI("Please sign in to load dashboard data.");
 
-      // If the user arrived from a magic link, Supabase will detect it and set session.
-      // We call getSession so UI updates ASAP.
-      await ensureAuthGate({ allowAutoFromUrl: true });
+      // If user arrived from magic link, Supabase will detect URL token and SIGNED_IN will fire.
+      // We still call getSession once so UI can update quickly if already authenticated.
+      await supabaseClient.auth.getSession();
       return;
     }
 
-    // Normal mode: if already signed in, load data
-    const gate = await ensureAuthGate({ allowAutoFromUrl: true });
+    const gate = await ensureAuthGate();
     if (gate.ok) await loadAndRender();
   }
 
