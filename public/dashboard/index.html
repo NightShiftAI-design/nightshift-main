@@ -33,7 +33,13 @@
       --ring: 0 0 0 3px rgba(110,168,255,0.20);
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
-    [data-theme="light"]{
+
+    /* ============================================================
+       THEME BRIDGE (v9.2 uses html.dark class)
+       - Default visuals remain DARK (as before)
+       - When html does NOT have .dark => LIGHT vars apply
+       ============================================================ */
+    html:not(.dark){
       --bg: #f6f7fb;
       --panel: rgba(10,15,25,0.04);
       --panel2: rgba(10,15,25,0.06);
@@ -66,7 +72,8 @@
       backdrop-filter: blur(10px);
       z-index: 999;
     }
-    [data-theme="light"] .overlay{ background: rgba(10,15,25,0.22); }
+    html:not(.dark) .overlay{ background: rgba(10,15,25,0.22); }
+
     .loginCard{
       width: min(520px, 100%);
       border-radius: 22px;
@@ -96,7 +103,7 @@
       outline:none;
       font-size: 14px;
     }
-    [data-theme="light"] .field input{
+    html:not(.dark) .field input{
       border-color: rgba(10,15,25,0.12);
       background: rgba(10,15,25,0.03);
     }
@@ -121,7 +128,7 @@
       border-color: rgba(110,168,255,0.45);
     }
     .error{ margin-top: 10px; color: #ffb4b4; font-size: 12px; display:none; }
-    [data-theme="light"] .error{ color: #b00020; }
+    html:not(.dark) .error{ color: #b00020; }
 
     /* Layout */
     .wrap{ display:grid; grid-template-columns: 300px 1fr; min-height:100vh; gap: 0; }
@@ -279,7 +286,7 @@
       max-height: calc(1.35em * 2);
     }
 
-    /* ✅ Ops Signals (neat + tiny colored dots) */
+    /* ✅ Ops Signals (kept as-is, no traffic-light logic added) */
     .opsBox{ display:flex; flex-direction:column; gap:12px; }
     .opsSection{
       border: 1px solid rgba(255,255,255,0.08);
@@ -337,6 +344,9 @@
       background: rgba(255,255,255,0.02);
       white-space: pre-wrap;
     }
+    /* ✅ Hide stateBox when empty (so it doesn't permanently show a placeholder) */
+    #stateBox:empty{ display:none; }
+
     .toast{
       position: fixed; right: 16px; bottom: 16px; max-width: 360px;
       padding: 12px 14px; border-radius: 14px;
@@ -350,7 +360,7 @@
       transition: opacity .18s ease, transform .18s ease;
       z-index: 99;
     }
-    [data-theme="light"] .toast{ background: rgba(255,255,255,0.78); }
+    html:not(.dark) .toast{ background: rgba(255,255,255,0.78); }
     .toast.show{ opacity:1; transform: translateY(0); }
 
     /* ✅ Mobile layout: sidebar becomes top */
@@ -409,7 +419,7 @@
         <div class="pill"><b>Activity</b><span class="badge" id="badgeCount">—</span></div>
         <div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
 
-        <!-- ✅ MOVED: Ops Signals now in left column (full width) -->
+        <!-- ✅ Ops Signals now in left column (full width) -->
         <section class="card" style="margin-top:10px;">
           <div class="head">
             <h3>Ops Signals</h3>
@@ -425,6 +435,7 @@
       <div class="side-footer">
         <div class="hint">Tip: Search guest, phone, event, room type, “booking”, call_id.</div>
         <div class="minirow">
+          <!-- ✅ v9.2 binds to this ID -->
           <button class="btn" id="btnTheme" type="button">Toggle theme</button>
           <button class="btn" id="btnAuth" type="button">Login</button>
           <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
@@ -477,35 +488,36 @@
           </div>
 
           <div class="body">
+            <!-- KPI TILES -->
+            <div class="kpis" id="kpiGrid"></div>
 
-  <!-- KPI TILES -->
-  <div class="kpis" id="kpiGrid"></div>
+            <div style="height:16px"></div>
 
-  <div style="height:16px"></div>
+            <!-- CHARTS -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+              <div class="card" style="padding:12px;">
+                <b style="font-size:13px;">Calls per Day</b>
+                <canvas id="chartCalls" height="140"></canvas>
+              </div>
 
-  <!-- CHARTS -->
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
-    <div class="card" style="padding:12px;">
-      <b style="font-size:13px;">Calls per Day</b>
-      <canvas id="chartCalls" height="140"></canvas>
-    </div>
+              <div class="card" style="padding:12px;">
+                <b style="font-size:13px;">Bookings per Day</b>
+                <canvas id="chartBookings" height="140"></canvas>
+              </div>
+            </div>
 
-    <div class="card" style="padding:12px;">
-      <b style="font-size:13px;">Bookings per Day</b>
-      <canvas id="chartBookings" height="140"></canvas>
-    </div>
-  </div>
+            <!-- FEED HEADER -->
+            <div class="row" style="margin-bottom:10px;">
+              <b style="font-size:13px;">Activity Feed</b>
+              <span class="spacer"></span>
+              <span class="small" id="feedMeta">—</span>
+            </div>
 
-  <!-- FEED HEADER -->
-  <div class="row" style="margin-bottom:10px;">
-    <b style="font-size:13px;">Activity Feed</b>
-    <span class="spacer"></span>
-    <span class="small" id="feedMeta">—</span>
-  </div>
+            <!-- ✅ IMPORTANT: leave empty by default so it hides; app.js will fill it on errors/auth -->
+            <div id="stateBox" class="state"></div>
 
-            <div id="stateBox" class="state">Loading…</div>
-
-            <div class="tablewrap" id="tableWrap" style="display:none;">
+            <!-- ✅ IMPORTANT: tableWrap must NOT be display:none or the feed will never appear -->
+            <div class="tablewrap" id="tableWrap">
               <table>
                 <thead>
                   <tr>
