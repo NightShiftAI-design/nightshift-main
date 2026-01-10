@@ -1,4 +1,4 @@
-// public/dashboard/app.js  — v4 FULL REPLACEMENT
+// public/dashboard/app.js — v5 HARD AUTH RESET BUILD
 (() => {
   // ============================================================
   // Settings
@@ -9,12 +9,10 @@
   const CANONICAL_PATH = "/dashboard/";
   const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
 
-  const ALWAYS_REQUIRE_LOGIN = false;
   const PERSIST_SESSION = true;
 
   const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
   const DEDUPE_DUPLICATE_BOOKINGS = true;
-  const ENABLE_RANGE_FILTER = true;
 
   // ============================================================
   // Helpers
@@ -28,45 +26,6 @@
     : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
 
-  // Treat YYYY-MM-DD as local date (prevents -1 day shift)
-  const parseISOish = (v) => {
-    if (!v) return null;
-    const s = String(v).trim();
-
-    const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (ddmmyyyy) {
-      const [, dd, mm, yyyy] = ddmmyyyy;
-      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (ymd) {
-      const [, yyyy, mm, dd] = ymd;
-      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d;
-  };
-
-  const toYMD = (d) => {
-    if (!(d instanceof Date) || isNaN(d.getTime())) return "";
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
-
-  const canonicalYMDFromAnyDateStr = (s) => {
-    const d = parseISOish(s);
-    return d ? toYMD(d) : "";
-  };
-
-  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-  const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
-
   const toast = (msg) => {
     const el = $("toast");
     if (!el) return;
@@ -76,44 +35,15 @@
     toast._t = setTimeout(() => el.classList.remove("show"), 2200);
   };
 
-  function setAuthError(msg) {
-    const el = $("authError");
-    if (!el) return;
-    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
-    el.style.display = "block";
-    el.textContent = msg;
-  }
-
   function clearSupabaseAuthStorage() {
     try {
       for (const k of Object.keys(localStorage)) {
-        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
+        if (k.startsWith("sb-")) localStorage.removeItem(k);
+      }
+      for (const k of Object.keys(sessionStorage)) {
+        if (k.startsWith("sb-")) sessionStorage.removeItem(k);
       }
     } catch {}
-  }
-
-  function escHtml(str) {
-    return safeStr(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function safeJsonParse(v) {
-    if (!v) return null;
-    if (typeof v === "object") return v;
-    try { return JSON.parse(String(v)); } catch { return null; }
-  }
-
-  function toNum(v) {
-    if (v === null || v === undefined) return NaN;
-    if (typeof v === "number") return v;
-    const s = String(v).replace(/[^0-9.\-]/g, "").trim();
-    if (!s) return NaN;
-    const n = Number(s);
-    return Number.isFinite(n) ? n : NaN;
   }
 
   // ============================================================
@@ -140,144 +70,9 @@
   }
 
   // ============================================================
-  // Dedupe helpers
-  // ============================================================
-  function normKey(v) {
-    return safeStr(v).trim().toLowerCase();
-  }
-
-  function canonicalGuestName(v) {
-    let s = safeStr(v).trim();
-    if (s.includes(":")) s = s.split(":")[0].trim();
-    s = s.replace(/\s*[-•|]\s*(king|queen|double|single|suite|non[-\s]?smoking|smoking|room|reservation|booking).*/i, "").trim();
-    s = s.replace(/\s+/g, " ");
-    return s;
-  }
-
-  function extractISODateFromText(text) {
-    const s = safeStr(text);
-    const iso = s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
-    if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
-
-    const m = s.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2}),\s+(20\d{2})\b/i);
-    if (m) {
-      const monthMap = {
-        jan: "01", january: "01", feb: "02", february: "02",
-        mar: "03", march: "03", apr: "04", april: "04",
-        may: "05", jun: "06", june: "06", jul: "07", july: "07",
-        aug: "08", august: "08", sep: "09", sept: "09", september: "09",
-        oct: "10", october: "10", nov: "11", november: "11", dec: "12", december: "12",
-      };
-      const mon = monthMap[m[1].toLowerCase()] || "";
-      const day = String(Number(m[2])).padStart(2, "0");
-      const year = m[3];
-      if (mon) return `${year}-${mon}-${day}`;
-    }
-    return "";
-  }
-
-  function extractNameFromSummary(summary) {
-    const s = safeStr(summary).trim();
-    if (!s) return "";
-    const m = s.match(/\bfor\s+([^,•.\n]{2,80})/i);
-    if (!m) return "";
-    const raw = safeStr(m[1]).trim();
-    const nameOnly = raw.split(":")[0].trim();
-    if (nameOnly.length < 2 || /^\d+$/.test(nameOnly)) return "";
-    return nameOnly;
-  }
-
-  function isBookingLikeCall(summary) {
-    const s = safeStr(summary).toLowerCase();
-    return (
-      s.includes("reservation confirmed") ||
-      s.includes("confirmed reservation") ||
-      s.includes("reservation for") ||
-      s.includes("booking confirmed") ||
-      s.includes("reservation_confirmed")
-    );
-  }
-
-  function dedupeBookingLikeCalls(rows) {
-    const bookingKeySet = new Set();
-    for (const r of rows) {
-      if (r.kind !== "booking") continue;
-      const g = normKey(canonicalGuestName(r.guest));
-      const a = normKey(canonicalYMDFromAnyDateStr(r.arrival));
-      if (g && a) bookingKeySet.add(`${g}__${a}`);
-    }
-
-    return rows.filter(r => {
-      if (r.kind !== "call") return true;
-      if (!isBookingLikeCall(r.summary)) return true;
-
-      const callBooking = (r.booking && typeof r.booking === "object") ? r.booking : null;
-
-      const guestFromCall = normKey(canonicalGuestName(
-        callBooking?.guest_name || r.guest || extractNameFromSummary(r.summary)
-      ));
-
-      const arrivalFromCall = normKey(canonicalYMDFromAnyDateStr(
-        callBooking?.arrival_date || r.arrival || extractISODateFromText(r.summary)
-      ));
-
-      if (!guestFromCall || !arrivalFromCall) return true;
-      return !bookingKeySet.has(`${guestFromCall}__${arrivalFromCall}`);
-    });
-  }
-
-  function dedupeDuplicateBookings(rows) {
-    const seen = new Set();
-    const out = [];
-
-    const sorted = [...rows].sort((a, b) => {
-      const ta = a.when ? a.when.getTime() : -Infinity;
-      const tb = b.when ? b.when.getTime() : -Infinity;
-      return tb - ta;
-    });
-
-    for (const r of sorted) {
-      if (r.kind !== "booking") {
-        out.push(r);
-        continue;
-      }
-
-      const g = normKey(canonicalGuestName(r.guest));
-      const a = normKey(canonicalYMDFromAnyDateStr(r.arrival));
-      const n = Number.isFinite(r.nights) ? String(r.nights) : "";
-      const t = Number.isFinite(r.totalDue) ? String(r.totalDue) : "";
-
-      const key = `${g}__${a}__${n}__${t}`;
-      if (g && a && seen.has(key)) continue;
-
-      if (g && a) seen.add(key);
-      out.push(r);
-    }
-
-    return out;
-  }
-
-  // ============================================================
-  // Theme
-  // ============================================================
-  function initTheme() {
-    const saved = localStorage.getItem("ns_theme");
-    if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
-
-    $("btnTheme")?.addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = (cur === "dark") ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("ns_theme", next);
-      toast(`Theme: ${next}`);
-      renderAll();
-    });
-  }
-
-  // ============================================================
   // Supabase
   // ============================================================
-  function getSupabaseClient() {
+  function createFreshClient() {
     const cfg = window.NSA_CONFIG || {};
     const url = cfg.SUPABASE_URL;
     const key = cfg.SUPABASE_ANON_KEY;
@@ -296,22 +91,10 @@
   }
 
   // ============================================================
-  // Tables
-  // ============================================================
-  const TABLES = {
-    reservations: "reservations",
-    callLogs: "call_logs",
-  };
-
-  const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts", "time", "createdAt"];
-
-  // ============================================================
   // State
   // ============================================================
   let supabaseClient = null;
-  let allRows = [];
-  let filteredRows = [];
-  let lastRange = null;
+  let authListenerUnsub = null;
 
   // ============================================================
   // Auth UI
@@ -320,378 +103,178 @@
     const o = $("authOverlay");
     if (!o) return;
     o.style.display = show ? "flex" : "none";
-    o.setAttribute("aria-hidden", show ? "false" : "true");
   }
 
   function setSessionUI(session) {
     const email = session?.user?.email || "";
     $("authBadge").textContent = email ? "Unlocked" : "Locked";
     $("btnAuth").textContent = email ? "Account" : "Login";
-    const logoutBtn = $("btnLogout");
-    if (logoutBtn) logoutBtn.style.display = email ? "inline-flex" : "none";
-    const authStatus = $("authStatus");
-    if (authStatus) authStatus.textContent = email ? `Signed in as ${email}` : "Not signed in";
+    $("btnLogout").style.display = email ? "inline-flex" : "none";
+    $("authStatus").textContent = email ? `Signed in as ${email}` : "Not signed in";
   }
 
-  async function hardSignOut() {
-    try { await supabaseClient.auth.signOut(); } catch {}
+  async function HARD_LOGOUT_AND_RESET() {
+    try { await supabaseClient?.auth?.signOut(); } catch {}
+    try { authListenerUnsub?.(); } catch {}
+
     clearSupabaseAuthStorage();
+
+    toast("Signed out.");
+    setTimeout(() => window.location.replace(CANONICAL_URL), 150);
   }
 
-  async function enforceFounderIfSet(session) {
-    if (!session?.user?.email) return { ok: false, reason: "No email on session." };
-    if (session.user.email !== FOUNDER_EMAIL) {
-      return { ok: false, reason: `Access denied for ${session.user.email}.` };
-    }
-    return { ok: true };
+  async function enforceFounder(session) {
+    if (!session?.user?.email) return false;
+    return session.user.email === FOUNDER_EMAIL;
   }
 
-  async function ensureAuthGate() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    setSessionUI(session);
+  // ============================================================
+  // Auth Flow
+  // ============================================================
+  async function attachAuthListener() {
+    if (authListenerUnsub) authListenerUnsub();
 
-    if (!session) {
-      showOverlay(true);
-      $("stateBox").textContent = "Please sign in to load dashboard data.";
-      return { ok: false, session: null };
-    }
-
-    const founderCheck = await enforceFounderIfSet(session);
-    if (!founderCheck.ok) {
-      showOverlay(true);
-      clearDataUI(founderCheck.reason + " Please use an authorized email.");
-      await hardSignOut();
-      return { ok: false, session: null };
-    }
-
-    showOverlay(false);
-    return { ok: true, session };
-  }
-
-  function initAuthHandlers() {
-    $("btnAuth")?.addEventListener("click", () => showOverlay(true));
-    $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
-    $("btnSendLink")?.addEventListener("click", sendMagicLink);
-    $("btnResendLink")?.addEventListener("click", sendMagicLink);
-
-    $("btnLogout")?.addEventListener("click", async () => {
-      toast("Signing out…");
-      await hardSignOut();
-      setSessionUI(null);
-      showOverlay(true);
-      clearDataUI("Signed out. Please sign in to view dashboard data.");
-      setTimeout(() => window.location.reload(), 200);
-    });
-
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    const { data } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
       setSessionUI(session);
 
-      if (!session) {
+      if (event === "SIGNED_OUT" || !session) {
         showOverlay(true);
         clearDataUI("Please sign in to load dashboard data.");
         return;
       }
 
-      const founderCheck = await enforceFounderIfSet(session);
-      if (!founderCheck.ok) {
-        showOverlay(true);
-        clearDataUI(founderCheck.reason + " Please use an authorized email.");
-        await hardSignOut();
+      if (!(await enforceFounder(session))) {
+        clearDataUI("Unauthorized account.");
+        await HARD_LOGOUT_AND_RESET();
         return;
       }
 
       showOverlay(false);
       await loadAndRender();
     });
+
+    authListenerUnsub = data?.subscription?.unsubscribe;
+  }
+
+  async function ensureSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    setSessionUI(session);
+
+    if (!session) {
+      showOverlay(true);
+      clearDataUI("Please sign in to load dashboard data.");
+      return false;
+    }
+
+    if (!(await enforceFounder(session))) {
+      clearDataUI("Unauthorized account.");
+      await HARD_LOGOUT_AND_RESET();
+      return false;
+    }
+
+    showOverlay(false);
+    return true;
   }
 
   async function sendMagicLink() {
-    setAuthError("");
     const email = safeStr($("authEmail")?.value).trim();
-    if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
+    if (!email || !email.includes("@")) return;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: CANONICAL_URL }
     });
 
-    if (error) return setAuthError(error.message || "Failed to send magic link.");
-    toast("Magic link sent. Check your email.");
+    if (error) {
+      toast(error.message || "Magic link failed.");
+      return;
+    }
+
+    toast("Magic link sent.");
   }
 
   // ============================================================
-  // Controls
+  // Data
   // ============================================================
-  function initControls() {
-    const rangeSelect = $("rangeSelect");
-    const customRange = $("customRange");
-    const startDate = $("startDate");
-    const endDate = $("endDate");
-    const searchInput = $("searchInput");
+  const TABLES = { reservations: "reservations", callLogs: "call_logs" };
+  const TS = ["created_at", "inserted_at", "timestamp", "time"];
 
-    function syncCustomVisibility() {
-      if (!customRange || !rangeSelect) return;
-      customRange.style.display = (rangeSelect.value === "custom") ? "flex" : "none";
-    }
+  let allRows = [];
+  let filteredRows = [];
+  let lastRange = null;
 
-    rangeSelect?.addEventListener("change", async () => {
-      syncCustomVisibility();
-      await loadAndRender();
-    });
-
-    startDate?.addEventListener("change", loadAndRender);
-    endDate?.addEventListener("change", loadAndRender);
-
-    searchInput?.addEventListener("input", () => {
-      applyFilters();
-      renderAll();
-    });
-
-    $("btnRefresh")?.addEventListener("click", loadAndRender);
-    $("btnExport")?.addEventListener("click", () => {
-      if (!filteredRows.length) return toast("Nothing to export.");
-      exportCSV(filteredRows);
-    });
-
-    syncCustomVisibility();
-
-    if (startDate && endDate) {
-      const today = new Date();
-      const start = new Date(today);
-      start.setDate(start.getDate() - 6);
-      startDate.value = toYMD(start);
-      endDate.value = toYMD(today);
-    }
+  function parseDate(v) {
+    const d = new Date(v);
+    return isNaN(d) ? null : d;
   }
 
-  function getSelectedRange() {
-    const mode = $("rangeSelect")?.value || "7";
-    const now = new Date();
-
-    if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
-
-    if (mode === "7" || mode === "30") {
-      const days = Number(mode);
-      const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
-      return { label: `Last ${days} days`, start: s, end: endOfDay(now) };
-    }
-
-    const sVal = $("startDate")?.value;
-    const eVal = $("endDate")?.value;
-    const s = sVal ? startOfDay(new Date(`${sVal}T00:00:00`)) : null;
-    const e = eVal ? endOfDay(new Date(`${eVal}T00:00:00`)) : null;
-
-    if (!s || !e || isNaN(s.getTime()) || isNaN(e.getTime())) {
-      const s2 = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
-      return { label: "Last 7 days", start: s2, end: endOfDay(now) };
-    }
-
-    return { label: `${sVal} → ${eVal}`, start: s, end: e };
-  }
-
-  // ============================================================
-  // Fetch
-  // ============================================================
-  async function fetchTableInRange(tableName, range, limit) {
-    if (ENABLE_RANGE_FILTER) {
-      const startISO = range.start.toISOString();
-      const endISO = range.end.toISOString();
-
-      for (const tsField of TS_CANDIDATES) {
-        const { data, error } = await supabaseClient
-          .from(tableName)
-          .select("*")
-          .gte(tsField, startISO)
-          .lte(tsField, endISO)
-          .order(tsField, { ascending: false })
-          .limit(limit);
-
-        if (!error && Array.isArray(data) && data.length > 0) {
-          return { data: data || [], tsField, mode: `range:${tsField}` };
-        }
-      }
-    }
-
-    for (const tsField of TS_CANDIDATES) {
+  async function fetchLatest(table) {
+    for (const f of TS) {
       const { data, error } = await supabaseClient
-        .from(tableName)
+        .from(table)
         .select("*")
-        .order(tsField, { ascending: false })
-        .limit(Math.min(limit, 3000));
-
-      if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
+        .order(f, { ascending: false })
+        .limit(2000);
+      if (!error) return { data, f };
     }
-
-    const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
-    if (error) throw error;
-    return { data: data || [], tsField: "", mode: "raw" };
+    return { data: [] };
   }
 
-  // ============================================================
-  // Normalize
-  // ============================================================
-  function normalizeReservationRow(r, tsField) {
-    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || null;
-    const bookingObj = (r?.booking && typeof r.booking === "object") ? r.booking : null;
-
-    const event = safeStr(r?.event || bookingObj?.event || "booking");
-    const guest = safeStr(r?.guest_name || bookingObj?.guest_name || "");
-    const arrivalRaw = safeStr(r?.arrival_date || bookingObj?.arrival_date || "");
-    const arrival = canonicalYMDFromAnyDateStr(arrivalRaw) || arrivalRaw;
-
-    const nights = toNum(r?.nights ?? bookingObj?.nights);
-    const totalDue = toNum(r?.total_due ?? bookingObj?.total_due);
-    const sentiment = safeStr(r?.sentiment || "");
-
-    const summary =
-      safeStr(r?.summary) ||
-      `Reservation${guest ? ` for ${guest}` : ""}${arrival ? ` • Arrive ${arrival}` : ""}`;
-
+  function normalizeReservation(r, f) {
     return {
       kind: "booking",
-      when,
-      whenRaw: r?.[tsField] || r?.created_at || "",
-      event,
-      guest,
-      arrival,
-      nights: Number.isFinite(nights) ? nights : null,
-      totalDue: Number.isFinite(totalDue) ? totalDue : null,
-      sentiment,
-      summary,
-      raw: r,
+      when: parseDate(r[f] || r.created_at),
+      guest: safeStr(r.guest_name),
+      arrival: safeStr(r.arrival_date),
+      nights: r.nights,
+      totalDue: Number(r.total_due),
+      sentiment: "",
+      summary: r.summary || `Reservation for ${r.guest_name}`,
+      raw: r
     };
   }
 
-  function normalizeCallLogRow(r, tsField) {
-    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || null;
-
-    const event = safeStr(r?.event || "call");
-    const callId = safeStr(r?.call_id || r?.id || "");
-
-    const rawPhone =
-      r?.from ??
-      r?.caller_number ??
-      "";
-
-    const duration = toNum(r?.duration_seconds ?? NaN);
-    const sentiment = safeStr(r?.sentiment || "");
-
-    const summary =
-      safeStr(r?.summary) ||
-      `${event}${callId ? ` • ${callId}` : ""}${rawPhone ? ` • ${safeStr(rawPhone)}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
-
-    const bookingObj = safeJsonParse(r?.booking);
-
-    const guestDisplay =
-      safeStr(bookingObj?.guest_name) ||
-      extractNameFromSummary(summary) ||
-      safeStr(rawPhone) ||
-      callId;
-
-    const arrivalDisplay =
-      safeStr(bookingObj?.arrival_date) ||
-      extractISODateFromText(summary) ||
-      "";
-
-    const arrivalCanonical = canonicalYMDFromAnyDateStr(arrivalDisplay) || arrivalDisplay;
-
+  function normalizeCall(r, f) {
+    const booking = (() => { try { return JSON.parse(r.booking); } catch { return null; } })();
     return {
       kind: "call",
-      when,
-      whenRaw: r?.[tsField] || r?.created_at || "",
-      event,
-      guest: guestDisplay,
-      arrival: arrivalCanonical,
+      when: parseDate(r[f] || r.created_at),
+      guest: booking?.guest_name || r.caller_number || "",
+      arrival: booking?.arrival_date || "",
       nights: null,
       totalDue: null,
-      sentiment,
-      summary,
-      durationSeconds: Number.isFinite(duration) ? duration : null,
-      booking: bookingObj,
-      raw: r,
+      sentiment: r.sentiment || "",
+      summary: r.summary || "",
+      booking,
+      raw: r
     };
   }
 
-  // ============================================================
-  // Filtering / KPIs / Feed
-  // ============================================================
-  function applyFilters() {
-    const range = lastRange || getSelectedRange();
-    const q = (safeStr($("searchInput")?.value)).toLowerCase().trim();
-
-    filteredRows = allRows.filter(row => {
-      const t = row.when instanceof Date && !isNaN(row.when.getTime()) ? row.when.getTime() : null;
-      if (t !== null) {
-        if (t < range.start.getTime() || t > range.end.getTime()) return false;
-      }
-      if (!q) return true;
-
-      const hay = [
-        row.kind, row.event, row.guest, row.arrival, row.sentiment, row.summary, safeStr(row.whenRaw),
-      ].join(" ").toLowerCase();
-
-      let rawStr = "";
-      try { rawStr = JSON.stringify(row.raw).toLowerCase(); } catch {}
-      return hay.includes(q) || rawStr.includes(q);
+  function dedupe(rows) {
+    const seen = new Set();
+    return rows.filter(r => {
+      const k = `${r.kind}|${r.guest}|${r.arrival}|${r.totalDue || ""}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
     });
   }
 
-  function computeKPIs(rows) {
-    const calls = rows.filter(r => r.kind === "call");
-    const bookings = rows.filter(r => r.kind === "booking");
-
-    const totalCalls = calls.length;
-    const totalBookings = bookings.length;
-    const conv = totalCalls > 0 ? (totalBookings / totalCalls) : NaN;
-
-    const durations = calls.map(c => c.durationSeconds).filter(n => Number.isFinite(n));
-    const avgDur = durations.length ? (durations.reduce((a,b)=>a+b,0) / durations.length) : NaN;
-
-    const revenue = bookings.map(b => b.totalDue).filter(n => Number.isFinite(n)).reduce((a,b)=>a+b,0);
-
-    const negativeCount = rows.filter(r => safeStr(r.sentiment).toLowerCase().includes("neg")).length;
-    const longCalls = calls.filter(c => Number.isFinite(c.durationSeconds) && c.durationSeconds >= 240).length;
-
-    return { totalCalls, totalBookings, conv, avgDur, revenue, negativeCount, longCalls };
-  }
-
-  function renderKPIs(k) {
-    const el = $("kpiGrid");
-    if (!el) return;
-    el.innerHTML = "";
-
-    const tiles = [
-      { name: "Total calls", value: fmtInt(k.totalCalls), sub: "call logs in range" },
-      { name: "Bookings", value: fmtInt(k.totalBookings), sub: "reservations in range" },
-      { name: "Conversion", value: fmtPct(k.conv), sub: "bookings ÷ calls" },
-      { name: "Booking revenue", value: fmtMoney(k.revenue), sub: "sum total_due" },
-      { name: "Avg call duration", value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", sub: "duration_seconds" },
-    ];
-
-    for (const t of tiles) {
-      const div = document.createElement("div");
-      div.className = "kpi";
-      div.innerHTML = `
-        <p class="name">${escHtml(t.name)}</p>
-        <p class="value">${escHtml(t.value)}</p>
-        <p class="sub">${escHtml(t.sub)}</p>
-      `;
-      el.appendChild(div);
-    }
-  }
-
+  // ============================================================
+  // Render (minimal for debug stability)
+  // ============================================================
   function renderFeed(rows) {
-    const state = $("stateBox");
-    const wrap = $("tableWrap");
     const tbody = $("feedTbody");
+    const wrap = $("tableWrap");
+    const state = $("stateBox");
 
-    $("badgeCount").textContent = fmtInt(rows.length);
-    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
+    $("badgeCount").textContent = rows.length;
 
     if (!rows.length) {
       wrap.style.display = "none";
       state.style.display = "block";
-      state.textContent = "No data returned.";
+      state.textContent = "No data.";
       return;
     }
 
@@ -699,131 +282,57 @@
     wrap.style.display = "block";
     tbody.innerHTML = "";
 
-    const sorted = [...rows].sort((a,b) => {
-      const ta = a.when ? a.when.getTime() : -Infinity;
-      const tb = b.when ? b.when.getTime() : -Infinity;
-      return tb - ta;
-    });
-
-    for (const r of sorted.slice(0, 500)) {
+    for (const r of rows.slice(0, 300)) {
       const tr = document.createElement("tr");
-
-      const whenTxt = r.when ? r.when.toLocaleString() : safeStr(r.whenRaw) || "—";
-      const arrivalTxt = r.arrival ? safeStr(r.arrival) : "—";
-      const nightsTxt = Number.isFinite(r.nights) ? String(r.nights) : "—";
-      const totalTxt = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
-      const typeTxt = r.kind === "booking" ? "booking" : "call";
-      const sentimentTxt = safeStr(r.sentiment) || "—";
-      const guestTxt = safeStr(r.guest) || "—";
-      const summaryTxt = safeStr(r.summary) || "—";
-
       tr.innerHTML = `
-        <td>${escHtml(whenTxt)}</td>
-        <td>${escHtml(typeTxt)}</td>
-        <td title="${escHtml(guestTxt)}">${escHtml(guestTxt)}</td>
-        <td title="${escHtml(arrivalTxt)}">${escHtml(arrivalTxt)}</td>
-        <td>${escHtml(nightsTxt)}</td>
-        <td>${escHtml(totalTxt)}</td>
-        <td title="${escHtml(sentimentTxt)}">${escHtml(sentimentTxt)}</td>
-        <td class="col-summary"><div class="summaryClamp" title="${escHtml(summaryTxt)}">${escHtml(summaryTxt)}</div></td>
+        <td>${r.when ? r.when.toLocaleString() : "—"}</td>
+        <td>${r.kind}</td>
+        <td>${r.guest || "—"}</td>
+        <td>${r.arrival || "—"}</td>
+        <td>${r.nights ?? "—"}</td>
+        <td>${r.totalDue ? "$" + r.totalDue : "—"}</td>
+        <td>${r.sentiment || "—"}</td>
+        <td>${r.summary || "—"}</td>
       `;
       tbody.appendChild(tr);
     }
   }
 
-  function exportCSV(rows) {
-    const cols = ["kind","time","event","guest_or_caller","arrival_date","nights","total_due","sentiment","summary"];
-    const lines = [cols.join(",")];
-
-    for (const r of rows) {
-      const time = r.when ? r.when.toISOString() : safeStr(r.whenRaw);
-      const vals = [
-        r.kind, time, safeStr(r.event), safeStr(r.guest), safeStr(r.arrival),
-        Number.isFinite(r.nights) ? r.nights : "",
-        Number.isFinite(r.totalDue) ? r.totalDue : "",
-        safeStr(r.sentiment), safeStr(r.summary),
-      ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
-      lines.push(vals.join(","));
-    }
-
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nightshift_dashboard_${Date.now()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    toast("CSV exported.");
-  }
-
-  function renderAll() {
-    applyFilters();
-    $("badgeWindow").textContent = lastRange?.label || "—";
-
-    const k = computeKPIs(filteredRows);
-    renderKPIs(k);
-    renderFeed(filteredRows);
-
-    const lu = $("lastUpdated");
-    if (lu) lu.textContent = `Updated ${new Date().toLocaleString()}`;
-  }
-
   function clearDataUI(msg) {
     allRows = [];
     filteredRows = [];
-
     $("badgeCount").textContent = "—";
-    $("kpiGrid").innerHTML = "";
     $("tableWrap").style.display = "none";
-
-    const sb = $("stateBox");
-    sb.style.display = "block";
-    sb.textContent = msg || "—";
+    $("stateBox").style.display = "block";
+    $("stateBox").textContent = msg || "—";
   }
 
   // ============================================================
   // Load
   // ============================================================
   async function loadAndRender() {
-    const gate = await ensureAuthGate();
-    if (!gate.ok) return;
+    if (!(await ensureSession())) return;
 
-    const state = $("stateBox");
-    const wrap = $("tableWrap");
-    wrap.style.display = "none";
-    state.style.display = "block";
-    state.textContent = "Loading…";
+    $("stateBox").textContent = "Loading…";
 
     try {
-      lastRange = getSelectedRange();
-      $("badgeWindow").textContent = lastRange.label;
-
       const [resv, calls] = await Promise.all([
-        fetchTableInRange(TABLES.reservations, lastRange, 3000),
-        fetchTableInRange(TABLES.callLogs, lastRange, 3000),
+        fetchLatest(TABLES.reservations),
+        fetchLatest(TABLES.callLogs),
       ]);
 
-      const normalized = [];
-      for (const r of (resv.data || [])) normalized.push(normalizeReservationRow(r, resv.tsField));
-      for (const c of (calls.data || [])) normalized.push(normalizeCallLogRow(c, calls.tsField));
+      const rows = [];
+      resv.data.forEach(r => rows.push(normalizeReservation(r, resv.f)));
+      calls.data.forEach(r => rows.push(normalizeCall(r, calls.f)));
 
-      let merged = normalized.map(r => {
-        if (!r.when) r.when = parseISOish(r.whenRaw);
-        return r;
-      });
+      allRows = dedupe(rows);
+      filteredRows = allRows;
 
-      if (HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS) merged = dedupeBookingLikeCalls(merged);
-      if (DEDUPE_DUPLICATE_BOOKINGS) merged = dedupeDuplicateBookings(merged);
-
-      allRows = merged;
-      renderAll();
-      toast("Dashboard refreshed.");
-    } catch (err) {
-      console.error(err);
-      state.textContent = `Error: ${err?.message || err}`;
-      toast("Load failed.");
+      renderFeed(filteredRows);
+      toast("Loaded.");
+    } catch (e) {
+      console.error(e);
+      clearDataUI("Load failed.");
     }
   }
 
@@ -833,29 +342,25 @@
   async function init() {
     if (enforceCanonicalUrl()) return;
 
-    initTheme();
-    initControls();
+    clearSupabaseAuthStorage(); // 🔥 ensures stale sessions cannot survive
 
     try {
-      supabaseClient = getSupabaseClient();
+      supabaseClient = createFreshClient();
     } catch (e) {
-      clearDataUI(`Config error: ${e.message}`);
+      clearDataUI("Config error.");
       showOverlay(true);
       return;
     }
 
-    initAuthHandlers();
+    await attachAuthListener();
 
-    if (ALWAYS_REQUIRE_LOGIN) {
-      clearSupabaseAuthStorage();
-      showOverlay(true);
-      clearDataUI("Please sign in to load dashboard data.");
-      await supabaseClient.auth.getSession();
-      return;
-    }
+    $("btnAuth").onclick = () => showOverlay(true);
+    $("btnCloseAuth").onclick = () => showOverlay(false);
+    $("btnSendLink").onclick = sendMagicLink;
+    $("btnResendLink").onclick = sendMagicLink;
+    $("btnLogout").onclick = HARD_LOGOUT_AND_RESET;
 
-    const gate = await ensureAuthGate();
-    if (gate.ok) await loadAndRender();
+    await ensureSession();
   }
 
   document.addEventListener("DOMContentLoaded", init);
