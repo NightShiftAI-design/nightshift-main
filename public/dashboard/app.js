@@ -1,11 +1,8 @@
-// public/dashboard/app.js  — v9 (analytics + ops + charts wired)
+// public/dashboard/app.js — v10 (feed fixed, ops colors, charts render)
 
 (() => {
-  // ============================================================
-  // Settings
-  // ============================================================
+  // ===================== SETTINGS =====================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
-
   const CANONICAL_ORIGIN = "https://www.nightshifthotels.com";
   const CANONICAL_PATH = "/dashboard/";
   const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
@@ -13,12 +10,7 @@
   const ALWAYS_REQUIRE_LOGIN = false;
   const PERSIST_SESSION = true;
 
-  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
-  const DEDUPE_DUPLICATE_BOOKINGS = true;
-
-  // ============================================================
-  // Helpers
-  // ============================================================
+  // ===================== HELPERS =====================
   const $ = (id) => document.getElementById(id);
   const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
 
@@ -31,19 +23,6 @@
   const parseISOish = (v) => {
     if (!v) return null;
     const s = String(v).trim();
-
-    const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (ddmmyyyy) {
-      const [, dd, mm, yyyy] = ddmmyyyy;
-      return new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
-    }
-
-    const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (ymd) {
-      const [, yyyy, mm, dd] = ymd;
-      return new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
-    }
-
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   };
@@ -89,9 +68,7 @@
     toast._t=setTimeout(()=>el.classList.remove("show"),2200);
   }
 
-  // ============================================================
-  // Canonical URL
-  // ============================================================
+  // ===================== CANONICAL =====================
   function enforceCanonicalUrl(){
     try{
       if(location.origin!==CANONICAL_ORIGIN){
@@ -106,9 +83,7 @@
     return false;
   }
 
-  // ============================================================
-  // Supabase
-  // ============================================================
+  // ===================== SUPABASE =====================
   let supabaseClient=null;
 
   function clearSupabaseAuthStorage(){
@@ -129,9 +104,7 @@
     });
   }
 
-  // ============================================================
-  // Auth UI
-  // ============================================================
+  // ===================== AUTH UI =====================
   function showOverlay(show){
     const o=$("authOverlay"); if(!o) return;
     o.style.display=show?"flex":"none";
@@ -157,7 +130,7 @@
     if(!session){
       showOverlay(true);
       clearDataUI("Please sign in to load dashboard data.");
-      return false;
+      returns false;
     }
 
     if(session.user.email!==FOUNDER_EMAIL){
@@ -201,16 +174,13 @@
     toast("Magic link sent.");
   }
 
-  // ============================================================
-  // Controls
-  // ============================================================
+  // ===================== CONTROLS =====================
   function initControls(){
     $("rangeSelect").onchange=()=>loadAndRender();
     $("startDate").onchange=()=>loadAndRender();
     $("endDate").onchange=()=>loadAndRender();
     $("btnRefresh").onclick=()=>loadAndRender();
     $("btnExport").onclick=()=>exportCSV(filteredRows);
-
     $("searchInput").oninput=()=>{ applyFilters(); renderAll(); };
   }
 
@@ -239,9 +209,7 @@
     return {label:"Last 7 days",start:startOfDay(s),end:endOfDay(now)};
   }
 
-  // ============================================================
-  // Fetch + Normalize
-  // ============================================================
+  // ===================== FETCH =====================
   async function fetchTable(table){
     const {data,error}=await supabaseClient.from(table).select("*").order("created_at",{ascending:false}).limit(3000);
     if(error) throw error;
@@ -278,16 +246,12 @@
     };
   }
 
-  // ============================================================
-  // State
-  // ============================================================
+  // ===================== STATE =====================
   let allRows=[];
   let filteredRows=[];
   let lastRange=null;
 
-  // ============================================================
-  // Filters
-  // ============================================================
+  // ===================== FILTERS =====================
   function applyFilters(){
     const range=lastRange;
     const q=$("searchInput").value.toLowerCase().trim();
@@ -297,14 +261,11 @@
         if(r.when<range.start||r.when>range.end) return false;
       }
       if(!q) return true;
-      const hay=JSON.stringify(r).toLowerCase();
-      return hay.includes(q);
+      return JSON.stringify(r).toLowerCase().includes(q);
     });
   }
 
-  // ============================================================
-  // KPIs + Ops
-  // ============================================================
+  // ===================== KPIs + OPS =====================
   function computeKPIs(rows){
     const calls=rows.filter(r=>r.kind==="call");
     const bookings=rows.filter(r=>r.kind==="booking");
@@ -341,18 +302,23 @@
     }
   }
 
+  function dot(color){
+    return `<span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:${color};margin-right:8px;"></span>`;
+  }
+
   function renderOps(k){
+    const negColor=k.negative>0?"#ff6b6b":"#42d392";
+    const longColor=k.longCalls>0?"#ffcc66":"#42d392";
+
     $("opsInsights").innerHTML=`
-      Neg sentiment: ${fmtInt(k.negative)}<br>
-      Long calls (4m+): ${fmtInt(k.longCalls)}<br>
-      Conversion: ${fmtPct(k.conv)}<br>
-      Revenue: ${fmtMoney(k.revenue)}
+      <div>${dot(negColor)} Negative sentiment: <b>${fmtInt(k.negative)}</b></div>
+      <div>${dot(longColor)} Long calls (4m+): <b>${fmtInt(k.longCalls)}</b></div>
+      <div>${dot("#6ea8ff")} Conversion: <b>${fmtPct(k.conv)}</b></div>
+      <div>${dot("#6ea8ff")} Revenue: <b>${fmtMoney(k.revenue)}</b></div>
     `;
   }
 
-  // ============================================================
-  // Charts
-  // ============================================================
+  // ===================== CHARTS =====================
   function groupByDay(rows,kind){
     const map={};
     for(const r of rows){
@@ -365,6 +331,10 @@
 
   function renderChart(canvasId,data){
     const c=$(canvasId); if(!c) return;
+
+    c.width=c.parentElement.clientWidth-20;
+    c.height=140;
+
     const ctx=c.getContext("2d");
     ctx.clearRect(0,0,c.width,c.height);
 
@@ -390,14 +360,18 @@
     ctx.stroke();
   }
 
-  // ============================================================
-  // Feed + Export
-  // ============================================================
+  // ===================== FEED + EXPORT =====================
   function renderFeed(rows){
     $("badgeCount").textContent=fmtInt(rows.length);
     $("feedMeta").textContent=`${rows.length} items`;
 
+    const state=$("stateBox");
+    const wrap=$("tableWrap");
     const tbody=$("feedTbody");
+
+    state.style.display="none";
+    wrap.style.display="block";
+
     tbody.innerHTML="";
 
     for(const r of rows.slice(0,500)){
@@ -441,18 +415,14 @@
     toast("CSV exported.");
   }
 
-  // ============================================================
-  // Render All
-  // ============================================================
+  // ===================== RENDER ALL =====================
   function renderAll(){
     applyFilters();
     const k=computeKPIs(filteredRows);
     renderKPIs(k);
     renderOps(k);
-
     renderChart("chartCalls",groupByDay(filteredRows,"call"));
     renderChart("chartBookings",groupByDay(filteredRows,"booking"));
-
     renderFeed(filteredRows);
     $("lastUpdated").textContent=`Updated ${new Date().toLocaleString()}`;
   }
@@ -461,9 +431,7 @@
     $("stateBox").textContent=msg||"—";
   }
 
-  // ============================================================
-  // Load
-  // ============================================================
+  // ===================== LOAD =====================
   async function loadAndRender(){
     if(!(await ensureAuthGate())) return;
 
@@ -489,9 +457,7 @@
     }
   }
 
-  // ============================================================
-  // Init
-  // ============================================================
+  // ===================== INIT =====================
   async function init(){
     if(enforceCanonicalUrl()) return;
 
