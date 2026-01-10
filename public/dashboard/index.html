@@ -120,6 +120,10 @@
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
       font-size: 13px;
       user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
     }
     .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
     .btn:focus{ outline:none; box-shadow: var(--ring); }
@@ -140,7 +144,7 @@
       backdrop-filter: blur(10px);
       overflow:auto;
     }
-    .main{ padding: 18px 18px 28px; min-width: 0; } /* min-width:0 prevents grid overflow */
+    .main{ padding: 18px 18px 28px; min-width: 0; }
 
     /* Brand */
     .brand{
@@ -150,11 +154,20 @@
       border-radius: var(--radius);
       background: var(--panel);
       box-shadow: var(--shadow);
+      text-decoration:none;
+      color: inherit;
     }
+    .brand:hover{
+      background: var(--panel2);
+      border-color: rgba(110,168,255,0.35);
+      transform: translateY(-1px);
+    }
+    .brand:focus{ outline:none; box-shadow: var(--ring); }
     .brand .dot{
       width:12px; height:12px; border-radius:50%;
       background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
       box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
+      flex: 0 0 auto;
     }
     .brand h1{ font-size: 14px; margin:0; }
     .brand p{ margin:0; font-size: 12px; color: var(--muted); }
@@ -220,7 +233,6 @@
       outline:none; min-width: 140px;
     }
 
-    /* ✅ Main content is now single column (no competing right column) */
     .mainGrid{ display:flex; flex-direction:column; gap: 14px; }
 
     /* KPIs */
@@ -237,7 +249,6 @@
     .kpi .value{ font-size: 20px; margin:0 0 6px; }
     .kpi .sub{ font-size: 12px; color: var(--muted); margin:0; }
 
-    /* ✅ Responsive KPI behavior */
     @media (max-width: 1200px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px){ .kpis{ grid-template-columns: 1fr; } }
 
@@ -249,12 +260,11 @@
       background: rgba(255,255,255,0.02);
     }
 
-    /* ✅ Make table fit without forced horizontal scrolling */
     table{
       width:100%;
       border-collapse: collapse;
-      min-width: 0; /* critical */
-      table-layout: fixed; /* critical: prevents super-wide columns */
+      min-width: 0;
+      table-layout: fixed;
     }
     thead th{
       text-align:left; font-size: 12px; color: var(--muted); font-weight: 600;
@@ -275,7 +285,6 @@
     }
     tbody tr:hover td{ background: rgba(110,168,255,0.07); }
 
-    /* ✅ Allow summary to wrap / clamp instead of forcing width */
     td.col-summary{ white-space: normal; }
     .summaryClamp{
       display: -webkit-box;
@@ -286,7 +295,7 @@
       max-height: calc(1.35em * 2);
     }
 
-    /* ✅ Ops Signals (kept as-is, no traffic-light logic added) */
+    /* Ops Signals (kept as-is) */
     .opsBox{ display:flex; flex-direction:column; gap:12px; }
     .opsSection{
       border: 1px solid rgba(255,255,255,0.08);
@@ -316,23 +325,6 @@
     .opsLabel{ color: var(--text); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
     .opsRight{ display:flex; align-items:center; gap:10px; }
     .opsValue{ font-weight: 700; color: var(--text); white-space: nowrap; }
-    .dotMini{
-      width:8px; height:8px; border-radius: 999px;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
-      flex: 0 0 auto;
-    }
-    .dotMini.good{ background: var(--good); box-shadow: 0 0 0 3px rgba(66,211,146,0.15); }
-    .dotMini.warn{ background: var(--warn); box-shadow: 0 0 0 3px rgba(255,204,102,0.14); }
-    .dotMini.bad{ background: var(--bad); box-shadow: 0 0 0 3px rgba(255,107,107,0.14); }
-    .pillMini{
-      font-size: 12px;
-      padding: 5px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-      white-space: nowrap;
-    }
 
     /* State + Toast */
     .state{
@@ -344,7 +336,6 @@
       background: rgba(255,255,255,0.02);
       white-space: pre-wrap;
     }
-    /* ✅ Hide stateBox when empty (so it doesn't permanently show a placeholder) */
     #stateBox:empty{ display:none; }
 
     .toast{
@@ -363,7 +354,28 @@
     html:not(.dark) .toast{ background: rgba(255,255,255,0.78); }
     .toast.show{ opacity:1; transform: translateY(0); }
 
-    /* ✅ Mobile layout: sidebar becomes top */
+    /* ✅ Overlay "Back to site" link styling (low risk) */
+    .overlayBackRow{
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:10px;
+    }
+    .overlayBackRow a{
+      color: var(--muted);
+      font-size: 12px;
+      text-decoration:none;
+      border-bottom: 1px dashed transparent;
+    }
+    .overlayBackRow a:hover{
+      color: var(--text);
+      border-bottom-color: rgba(110,168,255,0.45);
+    }
+
+    /* Mobile layout */
     @media (max-width: 1100px){
       .wrap{ grid-template-columns: 1fr; }
       .sidebar{ position:relative; height:auto; }
@@ -399,6 +411,11 @@
         </div>
 
         <div class="error" id="authError"></div>
+
+        <!-- ✅ NEW: obvious escape hatch when not logged in -->
+        <div class="overlayBackRow">
+          <a href="/" aria-label="Back to NightShift AI homepage">← Back to NightShiftAI.com</a>
+        </div>
       </div>
     </div>
   </div>
@@ -406,27 +423,26 @@
   <div class="wrap">
     <!-- LEFT COLUMN -->
     <aside class="sidebar">
-      <div class="brand">
+      <!-- ✅ NEW: clickable brand to main site -->
+      <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
         <div class="dot"></div>
         <div>
           <h1>NightShift AI</h1>
           <p>Owner Dashboard</p>
         </div>
-      </div>
+      </a>
 
       <div class="nav">
         <div class="pill"><b>Overview</b><span class="badge" id="badgeWindow">—</span></div>
         <div class="pill"><b>Activity</b><span class="badge" id="badgeCount">—</span></div>
         <div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
 
-        <!-- ✅ Ops Signals now in left column (full width) -->
         <section class="card" style="margin-top:10px;">
           <div class="head">
             <h3>Ops Signals</h3>
             <span>fast triage</span>
           </div>
           <div class="body">
-            <!-- keep same ID so app.js can fill it -->
             <div id="opsInsights" class="state">—</div>
           </div>
         </section>
@@ -435,7 +451,6 @@
       <div class="side-footer">
         <div class="hint">Tip: Search guest, phone, event, room type, “booking”, call_id.</div>
         <div class="minirow">
-          <!-- ✅ v9.2 binds to this ID -->
           <button class="btn" id="btnTheme" type="button">Toggle theme</button>
           <button class="btn" id="btnAuth" type="button">Login</button>
           <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
@@ -480,7 +495,6 @@
       </div>
 
       <div class="mainGrid">
-        <!-- KPIs + Feed in same big card -->
         <section class="card">
           <div class="head">
             <h3>Performance KPIs</h3>
@@ -488,12 +502,10 @@
           </div>
 
           <div class="body">
-            <!-- KPI TILES -->
             <div class="kpis" id="kpiGrid"></div>
 
             <div style="height:16px"></div>
 
-            <!-- CHARTS -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
               <div class="card" style="padding:12px;">
                 <b style="font-size:13px;">Calls per Day</b>
@@ -506,17 +518,14 @@
               </div>
             </div>
 
-            <!-- FEED HEADER -->
             <div class="row" style="margin-bottom:10px;">
               <b style="font-size:13px;">Activity Feed</b>
               <span class="spacer"></span>
               <span class="small" id="feedMeta">—</span>
             </div>
 
-            <!-- ✅ IMPORTANT: leave empty by default so it hides; app.js will fill it on errors/auth -->
             <div id="stateBox" class="state"></div>
 
-            <!-- ✅ IMPORTANT: tableWrap must NOT be display:none or the feed will never appear -->
             <div class="tablewrap" id="tableWrap">
               <table>
                 <thead>
