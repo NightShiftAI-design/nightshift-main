@@ -1,4 +1,4 @@
-// public/dashboard/app.js — v5 HARD AUTH RESET BUILD
+// public/dashboard/app.js — v6 (Auth stable + Working Date Filters)
 (() => {
   // ============================================================
   // Settings
@@ -11,20 +11,11 @@
 
   const PERSIST_SESSION = true;
 
-  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
-  const DEDUPE_DUPLICATE_BOOKINGS = true;
-
   // ============================================================
   // Helpers
   // ============================================================
   const $ = (id) => document.getElementById(id);
   const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
-
-  const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
-  const fmtMoney = (n) => Number.isFinite(n)
-    ? n.toLocaleString(undefined, { style: "currency", currency: "USD" })
-    : "—";
-  const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
 
   const toast = (msg) => {
     const el = $("toast");
@@ -35,14 +26,13 @@
     toast._t = setTimeout(() => el.classList.remove("show"), 2200);
   };
 
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0);
+  const endOfDay   = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999);
+
   function clearSupabaseAuthStorage() {
     try {
-      for (const k of Object.keys(localStorage)) {
-        if (k.startsWith("sb-")) localStorage.removeItem(k);
-      }
-      for (const k of Object.keys(sessionStorage)) {
-        if (k.startsWith("sb-")) sessionStorage.removeItem(k);
-      }
+      for (const k of Object.keys(localStorage)) if (k.startsWith("sb-")) localStorage.removeItem(k);
+      for (const k of Object.keys(sessionStorage)) if (k.startsWith("sb-")) sessionStorage.removeItem(k);
     } catch {}
   }
 
@@ -64,24 +54,19 @@
       }
 
       return false;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
   // ============================================================
   // Supabase
   // ============================================================
-  function createFreshClient() {
+  function createClient() {
     const cfg = window.NSA_CONFIG || {};
-    const url = cfg.SUPABASE_URL;
-    const key = cfg.SUPABASE_ANON_KEY;
-
-    if (!url || !key || !window.supabase) {
-      throw new Error("Missing Supabase config or SDK.");
+    if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || !window.supabase) {
+      throw new Error("Missing Supabase config or SDK");
     }
 
-    return window.supabase.createClient(url, key, {
+    return window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
       auth: {
         persistSession: PERSIST_SESSION,
         autoRefreshToken: true,
@@ -94,15 +79,16 @@
   // State
   // ============================================================
   let supabaseClient = null;
-  let authListenerUnsub = null;
+  let authUnsub = null;
+
+  let allRows = [];
+  let filteredRows = [];
 
   // ============================================================
   // Auth UI
   // ============================================================
   function showOverlay(show) {
-    const o = $("authOverlay");
-    if (!o) return;
-    o.style.display = show ? "flex" : "none";
+    $("authOverlay").style.display = show ? "flex" : "none";
   }
 
   function setSessionUI(session) {
@@ -113,31 +99,25 @@
     $("authStatus").textContent = email ? `Signed in as ${email}` : "Not signed in";
   }
 
-  async function HARD_LOGOUT_AND_RESET() {
-    try { await supabaseClient?.auth?.signOut(); } catch {}
-    try { authListenerUnsub?.(); } catch {}
-
+  async function HARD_LOGOUT() {
+    try { await supabaseClient.auth.signOut(); } catch {}
+    try { authUnsub?.(); } catch {}
     clearSupabaseAuthStorage();
-
-    toast("Signed out.");
+    toast("Signed out");
     setTimeout(() => window.location.replace(CANONICAL_URL), 150);
   }
 
   async function enforceFounder(session) {
-    if (!session?.user?.email) return false;
-    return session.user.email === FOUNDER_EMAIL;
+    return session?.user?.email === FOUNDER_EMAIL;
   }
 
-  // ============================================================
-  // Auth Flow
-  // ============================================================
   async function attachAuthListener() {
-    if (authListenerUnsub) authListenerUnsub();
+    if (authUnsub) authUnsub();
 
-    const { data } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    const { data } = supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       setSessionUI(session);
 
-      if (event === "SIGNED_OUT" || !session) {
+      if (!session) {
         showOverlay(true);
         clearDataUI("Please sign in to load dashboard data.");
         return;
@@ -145,7 +125,7 @@
 
       if (!(await enforceFounder(session))) {
         clearDataUI("Unauthorized account.");
-        await HARD_LOGOUT_AND_RESET();
+        await HARD_LOGOUT();
         return;
       }
 
@@ -153,12 +133,11 @@
       await loadAndRender();
     });
 
-    authListenerUnsub = data?.subscription?.unsubscribe;
+    authUnsub = data?.subscription?.unsubscribe;
   }
 
   async function ensureSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
-
     setSessionUI(session);
 
     if (!session) {
@@ -169,7 +148,7 @@
 
     if (!(await enforceFounder(session))) {
       clearDataUI("Unauthorized account.");
-      await HARD_LOGOUT_AND_RESET();
+      await HARD_LOGOUT();
       return false;
     }
 
@@ -178,7 +157,7 @@
   }
 
   async function sendMagicLink() {
-    const email = safeStr($("authEmail")?.value).trim();
+    const email = safeStr($("authEmail").value).trim();
     if (!email || !email.includes("@")) return;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
@@ -186,12 +165,48 @@
       options: { emailRedirectTo: CANONICAL_URL }
     });
 
-    if (error) {
-      toast(error.message || "Magic link failed.");
+    if (error) return toast(error.message || "Magic link failed");
+    toast("Magic link sent");
+  }
+
+  // ============================================================
+  // Date Range
+  // ============================================================
+  function getSelectedRange() {
+    const mode = $("rangeSelect").value;
+    const now = new Date();
+
+    if (mode === "today") return { start: startOfDay(now), end: endOfDay(now) };
+
+    if (mode === "7" || mode === "30") {
+      const days = Number(mode);
+      const s = new Date(now);
+      s.setDate(s.getDate() - (days - 1));
+      return { start: startOfDay(s), end: endOfDay(now) };
+    }
+
+    const sVal = $("startDate").value;
+    const eVal = $("endDate").value;
+    if (!sVal || !eVal) return null;
+
+    return {
+      start: startOfDay(new Date(`${sVal}T00:00:00`)),
+      end: endOfDay(new Date(`${eVal}T00:00:00`)),
+    };
+  }
+
+  function applyDateFilter() {
+    const range = getSelectedRange();
+    if (!range) {
+      filteredRows = allRows;
       return;
     }
 
-    toast("Magic link sent.");
+    filteredRows = allRows.filter(r => {
+      if (!r.when) return false;
+      const t = r.when.getTime();
+      return t >= range.start.getTime() && t <= range.end.getTime();
+    });
   }
 
   // ============================================================
@@ -199,10 +214,6 @@
   // ============================================================
   const TABLES = { reservations: "reservations", callLogs: "call_logs" };
   const TS = ["created_at", "inserted_at", "timestamp", "time"];
-
-  let allRows = [];
-  let filteredRows = [];
-  let lastRange = null;
 
   function parseDate(v) {
     const d = new Date(v);
@@ -215,7 +226,7 @@
         .from(table)
         .select("*")
         .order(f, { ascending: false })
-        .limit(2000);
+        .limit(3000);
       if (!error) return { data, f };
     }
     return { data: [] };
@@ -236,7 +247,9 @@
   }
 
   function normalizeCall(r, f) {
-    const booking = (() => { try { return JSON.parse(r.booking); } catch { return null; } })();
+    let booking = null;
+    try { booking = JSON.parse(r.booking); } catch {}
+
     return {
       kind: "call",
       when: parseDate(r[f] || r.created_at),
@@ -246,7 +259,6 @@
       totalDue: null,
       sentiment: r.sentiment || "",
       summary: r.summary || "",
-      booking,
       raw: r
     };
   }
@@ -262,7 +274,7 @@
   }
 
   // ============================================================
-  // Render (minimal for debug stability)
+  // Render
   // ============================================================
   function renderFeed(rows) {
     const tbody = $("feedTbody");
@@ -274,7 +286,7 @@
     if (!rows.length) {
       wrap.style.display = "none";
       state.style.display = "block";
-      state.textContent = "No data.";
+      state.textContent = "No data in selected range.";
       return;
     }
 
@@ -282,7 +294,7 @@
     wrap.style.display = "block";
     tbody.innerHTML = "";
 
-    for (const r of rows.slice(0, 300)) {
+    for (const r of rows.slice(0, 500)) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${r.when ? r.when.toLocaleString() : "—"}</td>
@@ -299,8 +311,6 @@
   }
 
   function clearDataUI(msg) {
-    allRows = [];
-    filteredRows = [];
     $("badgeCount").textContent = "—";
     $("tableWrap").style.display = "none";
     $("stateBox").style.display = "block";
@@ -326,10 +336,11 @@
       calls.data.forEach(r => rows.push(normalizeCall(r, calls.f)));
 
       allRows = dedupe(rows);
-      filteredRows = allRows;
 
+      applyDateFilter();
       renderFeed(filteredRows);
-      toast("Loaded.");
+
+      toast("Updated");
     } catch (e) {
       console.error(e);
       clearDataUI("Load failed.");
@@ -342,11 +353,11 @@
   async function init() {
     if (enforceCanonicalUrl()) return;
 
-    clearSupabaseAuthStorage(); // 🔥 ensures stale sessions cannot survive
+    clearSupabaseAuthStorage();
 
     try {
-      supabaseClient = createFreshClient();
-    } catch (e) {
+      supabaseClient = createClient();
+    } catch {
       clearDataUI("Config error.");
       showOverlay(true);
       return;
@@ -358,7 +369,12 @@
     $("btnCloseAuth").onclick = () => showOverlay(false);
     $("btnSendLink").onclick = sendMagicLink;
     $("btnResendLink").onclick = sendMagicLink;
-    $("btnLogout").onclick = HARD_LOGOUT_AND_RESET;
+    $("btnLogout").onclick = HARD_LOGOUT;
+
+    $("rangeSelect").onchange = loadAndRender;
+    $("startDate").onchange = loadAndRender;
+    $("endDate").onchange = loadAndRender;
+    $("btnRefresh").onclick = loadAndRender;
 
     await ensureSession();
   }
