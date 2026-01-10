@@ -1,26 +1,22 @@
-// public/dashboard/app.js — v10 (rebased on working v9)
-// Fixes: Activity Feed stuck "Loading…", Ops dots, chart rendering guards + resize safety
+// public/dashboard/app.js
 (() => {
   // ============================================================
   // Settings
   // ============================================================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
 
-  // Canonical dashboard URL (fixes /dashboard vs /dashboard/ vs index.html + www)
-  const CANONICAL_ORIGIN = "https://www.nightshifthotels.com";
-  const CANONICAL_PATH = "/dashboard/";
-  const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
-
-  // Persist sessions so refresh works
-  const ALWAYS_REQUIRE_LOGIN = false;
+  // Keep you signed in (so refresh + switching tabs doesn't break auth)
   const PERSIST_SESSION = true;
 
-  // Dedupe
-  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
-  const DEDUPE_DUPLICATE_BOOKINGS = true;
+  // If true, forces login overlay on every load (shared-computer mode).
+  // Keep FALSE for normal founder usage.
+  const ALWAYS_REQUIRE_LOGIN = false;
 
-  // Fetch behavior
-  const ENABLE_RANGE_FILTER = true;
+  // Dedupe: hide booking-like CALL entries if a matching BOOKING exists
+  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
+
+  // Dedupe: hide duplicate BOOKINGS that are clearly repeats
+  const DEDUPE_DUPLICATE_BOOKINGS = true;
 
   // ============================================================
   // Helpers
@@ -34,8 +30,25 @@
     : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
 
-  // Treat YYYY-MM-DD as local date (prevents -1 day issues)
-  const parseISOish = (v) => {
+  const toast = (msg) => {
+    const el = $("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+  };
+
+  function setAuthError(msg) {
+    const el = $("authError");
+    if (!el) return;
+    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
+    el.style.display = "block";
+    el.textContent = msg;
+  }
+
+  // Treat YYYY-MM-DD as LOCAL midnight (prevents “-1 day” issues in EST)
+  function parseISOish(v) {
     if (!v) return null;
     const s = String(v).trim();
 
@@ -57,48 +70,23 @@
 
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
-  };
+  }
 
-  const toYMD = (d) => {
+  function toYMD(d) {
     if (!(d instanceof Date) || isNaN(d.getTime())) return "";
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
-  };
+  }
 
-  const canonicalYMDFromAnyDateStr = (s) => {
+  function canonicalYMDFromAnyDateStr(s) {
     const d = parseISOish(s);
     return d ? toYMD(d) : "";
-  };
+  }
 
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
   const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
-
-  const toast = (msg) => {
-    const el = $("toast");
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
-  };
-
-  function setAuthError(msg) {
-    const el = $("authError");
-    if (!el) return;
-    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
-    el.style.display = "block";
-    el.textContent = msg;
-  }
-
-  function clearSupabaseAuthStorage() {
-    try {
-      for (const k of Object.keys(localStorage)) {
-        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
-      }
-    } catch {}
-  }
 
   function escHtml(str) {
     return safeStr(str)
@@ -124,41 +112,338 @@
     return Number.isFinite(n) ? n : NaN;
   }
 
-  // ============================================================
-  // Canonical URL enforcement
-  // ============================================================
-  function enforceCanonicalUrl() {
+  function clearSupabaseAuthStorage() {
     try {
-      if (window.location.origin !== CANONICAL_ORIGIN) {
-        window.location.replace(`${CANONICAL_ORIGIN}${window.location.pathname}${window.location.search}${window.location.hash}`);
-        return true;
+      for (const k of Object.keys(localStorage)) {
+        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
       }
-      const p = window.location.pathname;
-      if (p === "/dashboard" || p === "/dashboard/index.html") {
-        window.location.replace(CANONICAL_URL);
-        return true;
+    } catch {}
+  }
+
+  // ============================================================
+  // Supabase
+  // ============================================================
+  function getSupabaseClient() {
+    const cfg = window.NSA_CONFIG || {};
+    const url = cfg.SUPABASE_URL;
+    const key = cfg.SUPABASE_ANON_KEY;
+
+    if (!url || !key || !window.supabase) {
+      throw new Error("Missing Supabase config or supabase-js not loaded.");
+    }
+
+    return window.supabase.createClient(url, key, {
+      auth: {
+        persistSession: PERSIST_SESSION,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
       }
-      return false;
+    });
+  }
+
+  // ============================================================
+  // Tables + timestamp candidates
+  // ============================================================
+  const TABLES = {
+    reservations: "reservations",
+    callLogs: "call_logs",
+  };
+
+  // Your rows show created_at exists on both
+  const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts", "time", "createdAt"];
+
+  // ============================================================
+  // State
+  // ============================================================
+  let supabaseClient = null;
+  let allRows = [];
+  let filteredRows = [];
+  let lastRange = null;
+
+  // ============================================================
+  // Auth UI
+  // ============================================================
+  function showOverlay(show) {
+    const o = $("authOverlay");
+    if (!o) return;
+    o.style.display = show ? "flex" : "none";
+    o.setAttribute("aria-hidden", show ? "false" : "true");
+  }
+
+  function setSessionUI(session) {
+    const email = session?.user?.email || "";
+    const authBadge = $("authBadge");
+    const btnAuth = $("btnAuth");
+    const btnLogout = $("btnLogout");
+    const authStatus = $("authStatus");
+
+    if (authBadge) authBadge.textContent = email ? "Unlocked" : "Locked";
+    if (btnAuth) btnAuth.textContent = email ? "Account" : "Login";
+    if (btnLogout) btnLogout.style.display = email ? "inline-flex" : "none";
+    if (authStatus) authStatus.textContent = email ? `Signed in as ${email}` : "Not signed in";
+  }
+
+  async function hardSignOut() {
+    try {
+      // v2 supports scope; if it throws, ignore
+      await supabaseClient.auth.signOut({ scope: "local" });
     } catch {
-      return false;
+      try { await supabaseClient.auth.signOut(); } catch {}
+    }
+    clearSupabaseAuthStorage();
+  }
+
+  async function enforceFounder(session) {
+    const email = session?.user?.email || "";
+    if (!email) return { ok: false, reason: "No email on session." };
+    if (email !== FOUNDER_EMAIL) return { ok: false, reason: `Access denied for ${email}.` };
+    return { ok: true };
+  }
+
+  async function ensureAuthGate() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    setSessionUI(session);
+
+    if (!session) {
+      showOverlay(true);
+      clearDataUI("Please sign in to load dashboard data.");
+      return { ok: false, session: null };
+    }
+
+    const ok = await enforceFounder(session);
+    if (!ok.ok) {
+      showOverlay(true);
+      clearDataUI(ok.reason);
+      await hardSignOut();
+      return { ok: false, session: null };
+    }
+
+    showOverlay(false);
+    return { ok: true, session };
+  }
+
+  async function sendMagicLink() {
+    setAuthError("");
+    const email = safeStr($("authEmail")?.value).trim();
+    if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
+
+    // Redirect back to the exact page you’re on (prevents / vs /index.html issues)
+    // Ensure it’s the folder root with trailing slash.
+    const origin = window.location.origin;
+    const redirectTo = `${origin}/dashboard/`;
+
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+
+    if (error) {
+      console.error("Magic link error:", error);
+      return setAuthError(error.message || "Failed to send magic link.");
+    }
+
+    toast("Magic link sent. Check your email.");
+    setAuthError("");
+  }
+
+  function initAuthHandlers() {
+    $("btnAuth")?.addEventListener("click", () => showOverlay(true));
+    $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
+    $("btnSendLink")?.addEventListener("click", sendMagicLink);
+    $("btnResendLink")?.addEventListener("click", sendMagicLink);
+
+    $("btnLogout")?.addEventListener("click", async () => {
+      toast("Signing out…");
+      await hardSignOut();
+      setSessionUI(null);
+      showOverlay(true);
+      clearDataUI("Signed out. Please sign in to view dashboard data.");
+      // Hard reload to reset everything cleanly
+      setTimeout(() => window.location.reload(), 200);
+    });
+
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      setSessionUI(session);
+
+      if (!session) {
+        showOverlay(true);
+        clearDataUI("Please sign in to load dashboard data.");
+        return;
+      }
+
+      const ok = await enforceFounder(session);
+      if (!ok.ok) {
+        showOverlay(true);
+        clearDataUI(ok.reason);
+        await hardSignOut();
+        return;
+      }
+
+      showOverlay(false);
+      await loadAndRender();
+    });
+  }
+
+  // ============================================================
+  // Controls
+  // ============================================================
+  function getSelectedRange() {
+    const mode = $("rangeSelect")?.value || "7";
+    const now = new Date();
+
+    if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
+
+    if (mode === "7" || mode === "30") {
+      const days = Number(mode);
+      const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
+      return { label: `Last ${days} days`, start: s, end: endOfDay(now) };
+    }
+
+    // Custom
+    const sVal = $("startDate")?.value;
+    const eVal = $("endDate")?.value;
+    const s = sVal ? startOfDay(new Date(`${sVal}T00:00:00`)) : null;
+    const e = eVal ? endOfDay(new Date(`${eVal}T00:00:00`)) : null;
+
+    if (!s || !e || isNaN(s.getTime()) || isNaN(e.getTime())) {
+      const s2 = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
+      return { label: "Last 7 days", start: s2, end: endOfDay(now) };
+    }
+
+    return { label: `${sVal} → ${eVal}`, start: s, end: e };
+  }
+
+  function initControls() {
+    const rangeSelect = $("rangeSelect");
+    const customRange = $("customRange");
+    const startDate = $("startDate");
+    const endDate = $("endDate");
+    const searchInput = $("searchInput");
+
+    function syncCustomVisibility() {
+      if (!customRange || !rangeSelect) return;
+      customRange.style.display = (rangeSelect.value === "custom") ? "flex" : "none";
+    }
+
+    rangeSelect?.addEventListener("change", async () => {
+      syncCustomVisibility();
+      await loadAndRender();
+    });
+
+    startDate?.addEventListener("change", loadAndRender);
+    endDate?.addEventListener("change", loadAndRender);
+
+    searchInput?.addEventListener("input", () => {
+      applyFilters();
+      renderAll();
+    });
+
+    $("btnRefresh")?.addEventListener("click", loadAndRender);
+
+    $("btnExport")?.addEventListener("click", () => {
+      if (!filteredRows.length) return toast("Nothing to export.");
+      exportCSV(filteredRows);
+    });
+
+    syncCustomVisibility();
+
+    if (startDate && endDate) {
+      const today = new Date();
+      const start = new Date(today);
+      start.setDate(start.getDate() - 6);
+      startDate.value = toYMD(start);
+      endDate.value = toYMD(today);
     }
   }
 
   // ============================================================
-  // Dedupe helpers
+  // Fetch
   // ============================================================
-  function normKey(v) { return safeStr(v).trim().toLowerCase(); }
+  async function fetchTable(tableName, range, limit) {
+    // Use order() only (range filters often fail due to timestamp types/tz)
+    for (const tsField of TS_CANDIDATES) {
+      const { data, error } = await supabaseClient
+        .from(tableName)
+        .select("*")
+        .order(tsField, { ascending: false })
+        .limit(limit);
 
-  function canonicalGuestName(v) {
-    let s = safeStr(v).trim();
-    if (s.includes(":")) s = s.split(":")[0].trim();
-    s = s.replace(/\s*[-•|]\s*(king|queen|double|single|suite|non[-\s]?smoking|smoking|room|reservation|booking).*/i, "").trim();
-    s = s.replace(/\s+/g, " ");
-    return s;
+      if (!error) return { data: data || [], tsField };
+    }
+
+    const { data, error } = await supabaseClient.from(tableName).select("*").limit(Math.min(limit, 200));
+    if (error) throw error;
+    return { data: data || [], tsField: "" };
+  }
+
+  // ============================================================
+  // Normalize rows
+  // ============================================================
+  function normalizeReservationRow(r, tsField) {
+    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || null;
+    const guest = safeStr(r?.guest_name || r?.name || "");
+    const arrivalRaw = safeStr(r?.arrival_date || "");
+    const arrival = canonicalYMDFromAnyDateStr(arrivalRaw) || arrivalRaw;
+
+    const nights = toNum(r?.nights);
+    const totalDue = toNum(r?.total_due);
+    const summary =
+      safeStr(r?.summary) ||
+      `Reservation${guest ? ` for ${guest}` : ""}${arrival ? ` • Arrive ${arrival}` : ""}`;
+
+    return {
+      kind: "booking",
+      when,
+      whenRaw: r?.[tsField] || r?.created_at || "",
+      event: safeStr(r?.event || "booking"),
+      guest,
+      arrival,
+      nights: Number.isFinite(nights) ? nights : null,
+      totalDue: Number.isFinite(totalDue) ? totalDue : null,
+      sentiment: "",
+      summary,
+      raw: r,
+    };
+  }
+
+  function normalizeCallLogRow(r, tsField) {
+    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || null;
+    const bookingObj = safeJsonParse(r?.booking);
+
+    const guest =
+      safeStr(bookingObj?.guest_name).trim() ||
+      safeStr(r?.guest_name || "").trim() ||
+      safeStr(extractNameFromSummary(r?.summary)).trim() ||
+      "—";
+
+    const arrival =
+      canonicalYMDFromAnyDateStr(bookingObj?.arrival_date) ||
+      canonicalYMDFromAnyDateStr(extractISODateFromText(r?.summary)) ||
+      "";
+
+    const sentiment = safeStr(r?.sentiment || "");
+    const summary = safeStr(r?.summary || r?.notes || "");
+
+    return {
+      kind: "call",
+      when,
+      whenRaw: r?.[tsField] || r?.created_at || "",
+      event: safeStr(r?.event || r?.type || "call"),
+      guest,
+      arrival,
+      nights: null,
+      totalDue: null,
+      sentiment,
+      summary,
+      durationSeconds: toNum(r?.duration_seconds),
+      booking: bookingObj,
+      raw: r,
+    };
   }
 
   function extractISODateFromText(text) {
     const s = safeStr(text);
+
     const iso = s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
     if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
 
@@ -176,6 +461,7 @@
       const year = m[3];
       if (mon) return `${year}-${mon}-${day}`;
     }
+
     return "";
   }
 
@@ -188,6 +474,20 @@
     const nameOnly = raw.split(":")[0].trim();
     if (nameOnly.length < 2 || /^\d+$/.test(nameOnly)) return "";
     return nameOnly;
+  }
+
+  // ============================================================
+  // Dedupe
+  // ============================================================
+  function normKey(v) {
+    return safeStr(v).trim().toLowerCase();
+  }
+
+  function canonicalGuestName(v) {
+    let s = safeStr(v).trim();
+    if (s.includes(":")) s = s.split(":")[0].trim();
+    s = s.replace(/\s+/g, " ");
+    return s;
   }
 
   function isBookingLikeCall(summary) {
@@ -233,6 +533,7 @@
     const seen = new Set();
     const out = [];
 
+    // keep newest first
     const sorted = [...rows].sort((a, b) => {
       const ta = a.when ? a.when.getTime() : -Infinity;
       const tb = b.when ? b.when.getTime() : -Infinity;
@@ -249,399 +550,11 @@
 
       const key = `${g}__${a}__${n}__${t}`;
       if (g && a && seen.has(key)) continue;
-
       if (g && a) seen.add(key);
       out.push(r);
     }
+
     return out;
-  }
-
-  // ============================================================
-  // Theme
-  // ============================================================
-  function initTheme() {
-    const saved = localStorage.getItem("ns_theme");
-    if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
-
-    $("btnTheme")?.addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme") || "dark";
-      const next = (cur === "dark") ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("ns_theme", next);
-      toast(`Theme: ${next}`);
-      renderAll();
-    });
-  }
-
-  // ============================================================
-  // Supabase
-  // ============================================================
-  function getSupabaseClient() {
-    const cfg = window.NSA_CONFIG || {};
-    const url = cfg.SUPABASE_URL;
-    const key = cfg.SUPABASE_ANON_KEY;
-
-    if (!url || !key || !window.supabase) {
-      throw new Error("Missing Supabase config (config.js) or supabase-js not loaded.");
-    }
-
-    return window.supabase.createClient(url, key, {
-      auth: {
-        persistSession: PERSIST_SESSION,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      }
-    });
-  }
-
-  // ============================================================
-  // Tables
-  // ============================================================
-  const TABLES = { reservations: "reservations", callLogs: "call_logs" };
-  const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts", "time", "createdAt"];
-
-  // ============================================================
-  // State
-  // ============================================================
-  let supabaseClient = null;
-  let allRows = [];
-  let filteredRows = [];
-  let lastRange = null;
-
-  // ============================================================
-  // Auth UI
-  // ============================================================
-  function showOverlay(show) {
-    const o = $("authOverlay");
-    if (!o) return;
-    o.style.display = show ? "flex" : "none";
-    o.setAttribute("aria-hidden", show ? "false" : "true");
-  }
-
-  function setSessionUI(session) {
-    const email = session?.user?.email || "";
-    const authBadge = $("authBadge");
-    if (authBadge) authBadge.textContent = email ? "Unlocked" : "Locked";
-
-    const btnAuth = $("btnAuth");
-    if (btnAuth) btnAuth.textContent = email ? "Account" : "Login";
-
-    const logoutBtn = $("btnLogout");
-    if (logoutBtn) logoutBtn.style.display = email ? "inline-flex" : "none";
-
-    const authStatus = $("authStatus");
-    if (authStatus) authStatus.textContent = email ? `Signed in as ${email}` : "Not signed in";
-  }
-
-  async function hardSignOut() {
-    try { await supabaseClient.auth.signOut(); } catch {}
-    clearSupabaseAuthStorage();
-  }
-
-  async function enforceFounderIfSet(session) {
-    if (!session?.user?.email) return { ok: false, reason: "No email on session." };
-    if (session.user.email !== FOUNDER_EMAIL) {
-      return { ok: false, reason: `Access denied for ${session.user.email}.` };
-    }
-    return { ok: true };
-  }
-
-  async function ensureAuthGate() {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    if (error) console.warn("getSession error:", error);
-
-    setSessionUI(session);
-
-    if (!session) {
-      showOverlay(true);
-      clearDataUI("Please sign in to load dashboard data.");
-      return { ok: false, session: null };
-    }
-
-    const founderCheck = await enforceFounderIfSet(session);
-    if (!founderCheck.ok) {
-      showOverlay(true);
-      clearDataUI(founderCheck.reason + " Please use an authorized email.");
-      await hardSignOut();
-      return { ok: false, session: null };
-    }
-
-    showOverlay(false);
-    return { ok: true, session };
-  }
-
-  function initAuthHandlers() {
-    $("btnAuth")?.addEventListener("click", () => showOverlay(true));
-    $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
-
-    $("btnSendLink")?.addEventListener("click", sendMagicLink);
-    $("btnResendLink")?.addEventListener("click", sendMagicLink);
-
-    $("btnLogout")?.addEventListener("click", async () => {
-      toast("Signing out…");
-      await hardSignOut();
-      setSessionUI(null);
-      showOverlay(true);
-      clearDataUI("Signed out. Please sign in to view dashboard data.");
-      setTimeout(() => window.location.reload(), 250);
-    });
-
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-      setSessionUI(session);
-
-      if (!session) {
-        showOverlay(true);
-        clearDataUI("Please sign in to load dashboard data.");
-        return;
-      }
-
-      const founderCheck = await enforceFounderIfSet(session);
-      if (!founderCheck.ok) {
-        showOverlay(true);
-        clearDataUI(founderCheck.reason + " Please use an authorized email.");
-        await hardSignOut();
-        return;
-      }
-
-      showOverlay(false);
-      await loadAndRender();
-    });
-  }
-
-  async function sendMagicLink() {
-    setAuthError("");
-    const email = safeStr($("authEmail")?.value).trim();
-    if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
-
-    const redirectTo = CANONICAL_URL;
-
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo }
-    });
-
-    if (error) {
-      console.error("Magic link error:", error);
-      return setAuthError(error.message || "Failed to send magic link.");
-    }
-
-    toast("Magic link sent. Check your email.");
-    setAuthError("");
-  }
-
-  // ============================================================
-  // Controls
-  // ============================================================
-  function initControls() {
-    const rangeSelect = $("rangeSelect");
-    const customRange = $("customRange");
-    const startDate = $("startDate");
-    const endDate = $("endDate");
-    const searchInput = $("searchInput");
-
-    function syncCustomVisibility() {
-      if (!customRange || !rangeSelect) return;
-      customRange.style.display = (rangeSelect.value === "custom") ? "flex" : "none";
-    }
-
-    rangeSelect?.addEventListener("change", async () => {
-      syncCustomVisibility();
-      await loadAndRender();
-    });
-
-    startDate?.addEventListener("change", loadAndRender);
-    endDate?.addEventListener("change", loadAndRender);
-
-    searchInput?.addEventListener("input", () => {
-      applyFilters();
-      renderAll();
-    });
-
-    $("btnRefresh")?.addEventListener("click", loadAndRender);
-    $("btnExport")?.addEventListener("click", () => {
-      if (!filteredRows.length) return toast("Nothing to export.");
-      exportCSV(filteredRows);
-    });
-
-    syncCustomVisibility();
-
-    if (startDate && endDate) {
-      const today = new Date();
-      const start = new Date(today);
-      start.setDate(start.getDate() - 6);
-      startDate.value = toYMD(start);
-      endDate.value = toYMD(today);
-    }
-  }
-
-  function getSelectedRange() {
-    const mode = $("rangeSelect")?.value || "7";
-    const now = new Date();
-
-    if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
-
-    if (mode === "7" || mode === "30") {
-      const days = Number(mode);
-      const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
-      return { label: `Last ${days} days`, start: s, end: endOfDay(now) };
-    }
-
-    const sVal = $("startDate")?.value;
-    const eVal = $("endDate")?.value;
-    const s = sVal ? startOfDay(new Date(`${sVal}T00:00:00`)) : null;
-    const e = eVal ? endOfDay(new Date(`${eVal}T00:00:00`)) : null;
-
-    if (!s || !e || isNaN(s.getTime()) || isNaN(e.getTime())) {
-      const s2 = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
-      return { label: "Last 7 days", start: s2, end: endOfDay(now) };
-    }
-
-    return { label: `${sVal} → ${eVal}`, start: s, end: e };
-  }
-
-  // ============================================================
-  // Fetch
-  // ============================================================
-  async function fetchTableInRange(tableName, range, limit) {
-    if (ENABLE_RANGE_FILTER) {
-      const startISO = range.start.toISOString();
-      const endISO = range.end.toISOString();
-
-      for (const tsField of TS_CANDIDATES) {
-        const { data, error } = await supabaseClient
-          .from(tableName)
-          .select("*")
-          .gte(tsField, startISO)
-          .lte(tsField, endISO)
-          .order(tsField, { ascending: false })
-          .limit(limit);
-
-        if (!error && Array.isArray(data) && data.length > 0) {
-          return { data: data || [], tsField, mode: `range:${tsField}` };
-        }
-        if (error) continue;
-      }
-    }
-
-    for (const tsField of TS_CANDIDATES) {
-      const { data, error } = await supabaseClient
-        .from(tableName)
-        .select("*")
-        .order(tsField, { ascending: false })
-        .limit(Math.min(limit, 3000));
-
-      if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
-    }
-
-    const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
-    if (error) throw error;
-    return { data: data || [], tsField: "", mode: "raw" };
-  }
-
-  async function probeAccess() {
-    const res = [];
-    for (const t of [TABLES.reservations, TABLES.callLogs]) {
-      const { data, error } = await supabaseClient.from(t).select("*").limit(1);
-      res.push({ table: t, ok: !error, rows: (data || []).length, error: error?.message || "" });
-    }
-    return res;
-  }
-
-  // ============================================================
-  // Normalize
-  // ============================================================
-  function normalizeReservationRow(r, tsField) {
-    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
-    const bookingObj = (r?.booking && typeof r.booking === "object") ? r.booking : null;
-
-    const event = safeStr(r?.event || bookingObj?.event || "booking");
-    const guest = safeStr(r?.guest_name || bookingObj?.guest_name || r?.name || r?.caller_name || "");
-
-    const arrivalRaw = safeStr(r?.arrival_date || bookingObj?.arrival_date || "");
-    const arrival = canonicalYMDFromAnyDateStr(arrivalRaw) || arrivalRaw;
-
-    const nights = toNum(r?.nights ?? bookingObj?.nights);
-    const totalDue = toNum(r?.total_due ?? bookingObj?.total_due);
-    const sentiment = safeStr(r?.sentiment || bookingObj?.sentiment || r?.call_sentiment || "");
-
-    const summary =
-      safeStr(r?.summary) ||
-      safeStr(bookingObj?.summary) ||
-      `Reservation${guest ? ` for ${guest}` : ""}${arrival ? ` • Arrive ${arrival}` : ""}`;
-
-    return {
-      kind: "booking",
-      when,
-      whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
-      event,
-      guest,
-      arrival,
-      nights: Number.isFinite(nights) ? nights : null,
-      totalDue: Number.isFinite(totalDue) ? totalDue : null,
-      sentiment,
-      summary,
-      raw: r,
-    };
-  }
-
-  function normalizeCallLogRow(r, tsField) {
-    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
-
-    const event = safeStr(r?.event || r?.type || "call");
-    const callId = safeStr(r?.call_id || r?.call_sid || r?.sid || r?.id || "");
-
-    const rawPhone =
-      r?.from ??
-      r?.caller ??
-      r?.phone ??
-      r?.caller_phone ??
-      r?.from_number ??
-      r?.caller_number ??
-      "";
-
-    const duration = toNum(r?.duration_seconds ?? r?.duration ?? NaN);
-    const sentiment = safeStr(r?.sentiment || r?.call_sentiment || "");
-
-    const summary =
-      safeStr(r?.summary) ||
-      safeStr(r?.notes) ||
-      safeStr(r?.transcript_summary) ||
-      `${event}${callId ? ` • ${callId}` : ""}${rawPhone ? ` • ${safeStr(rawPhone)}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
-
-    const bookingObj = safeJsonParse(r?.booking);
-
-    const guestFromBooking = safeStr(bookingObj?.guest_name).trim();
-    const arrivalFromBooking = safeStr(bookingObj?.arrival_date).trim();
-
-    const explicitName = safeStr(r?.guest_name || r?.caller_name || r?.name || "").trim();
-    const extractedName = extractNameFromSummary(summary);
-
-    const guestDisplay =
-      guestFromBooking ||
-      explicitName ||
-      extractedName ||
-      safeStr(rawPhone).trim() ||
-      callId;
-
-    const arrivalFromText = extractISODateFromText(summary);
-    const arrivalDisplay = arrivalFromBooking || arrivalFromText || "";
-    const arrivalCanonical = canonicalYMDFromAnyDateStr(arrivalDisplay) || arrivalDisplay;
-
-    return {
-      kind: "call",
-      when,
-      whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
-      event,
-      guest: guestDisplay,
-      arrival: arrivalCanonical,
-      nights: null,
-      totalDue: null,
-      sentiment,
-      summary,
-      durationSeconds: Number.isFinite(duration) ? duration : null,
-      booking: bookingObj,
-      raw: r,
-    };
   }
 
   // ============================================================
@@ -656,6 +569,7 @@
       if (t !== null) {
         if (t < range.start.getTime() || t > range.end.getTime()) return false;
       }
+
       if (!q) return true;
 
       const hay = [
@@ -690,8 +604,8 @@
   function renderKPIs(k) {
     const el = $("kpiGrid");
     if (!el) return;
-    el.innerHTML = "";
 
+    el.innerHTML = "";
     const tiles = [
       { name: "Total calls", value: fmtInt(k.totalCalls), sub: "call logs in range" },
       { name: "Bookings", value: fmtInt(k.totalBookings), sub: "reservations in range" },
@@ -712,166 +626,84 @@
     }
   }
 
-  // Traffic-light dot using CSS vars already in your index.html
-  function dotCssVar(varName) {
-    return `<span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(${varName});margin-right:8px;transform:translateY(-1px);"></span>`;
+  function dot(colorVar) {
+    // uses your existing CSS vars: --good / --warn / --bad / --accent
+    return `<span style="display:inline-block;width:9px;height:9px;border-radius:999px;background:var(${colorVar});box-shadow:0 0 0 3px rgba(255,255,255,0.06);margin-right:10px;transform:translateY(1px);"></span>`;
   }
 
   function renderOpsSignals(k) {
     const box = $("opsInsights");
     if (!box) return;
 
-    const negVar = (k.negativeCount > 0) ? "--bad" : "--good";
-    const longVar = (k.longCalls > 0) ? "--warn" : "--good";
+    const negColor = (k.negativeCount > 0) ? "--bad" : "--good";
+    const longColor = (k.longCalls > 0) ? "--warn" : "--good";
 
     box.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <div style="font-weight:700; font-size:13px;">Watchlist</div>
+        <div style="font-weight:800; font-size:13px;">Watchlist</div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
           <div style="display:flex; align-items:center; min-width:0;">
-            ${dotCssVar(negVar)}
-            <span style="color:var(--muted); font-size:13px; white-space:nowrap;">Negative sentiment</span>
+            ${dot(negColor)}
+            <span style="color:var(--muted); font-size:13px;">Negative sentiment</span>
           </div>
-          <div style="font-weight:700; font-size:13px;">${fmtInt(k.negativeCount)}</div>
+          <div style="font-weight:800; font-size:13px;">${fmtInt(k.negativeCount)}</div>
         </div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
           <div style="display:flex; align-items:center; min-width:0;">
-            ${dotCssVar(longVar)}
-            <span style="color:var(--muted); font-size:13px; white-space:nowrap;">Long calls (4m+)</span>
+            ${dot(longColor)}
+            <span style="color:var(--muted); font-size:13px;">Long calls (4m+)</span>
           </div>
-          <div style="font-weight:700; font-size:13px;">${fmtInt(k.longCalls)}</div>
+          <div style="font-weight:800; font-size:13px;">${fmtInt(k.longCalls)}</div>
         </div>
 
-        <div style="height:1px; background: rgba(255,255,255,0.08);"></div>
+        <div style="height:1px; background: rgba(255,255,255,0.08); margin:6px 0;"></div>
 
-        <div style="font-weight:700; font-size:13px;">Snapshot</div>
-
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <div style="display:flex; align-items:center;">${dotCssVar("--accent")}<span style="color:var(--muted); font-size:13px;">Calls</span></div>
-          <div style="font-weight:700; font-size:13px;">${fmtInt(k.totalCalls)}</div>
-        </div>
+        <div style="font-weight:800; font-size:13px;">Snapshot</div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <div style="display:flex; align-items:center;">${dotCssVar("--accent")}<span style="color:var(--muted); font-size:13px;">Bookings</span></div>
-          <div style="font-weight:700; font-size:13px;">${fmtInt(k.totalBookings)}</div>
+          <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Calls</span></div>
+          <div style="font-weight:800; font-size:13px;">${fmtInt(k.totalCalls)}</div>
         </div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <div style="display:flex; align-items:center;">${dotCssVar("--accent")}<span style="color:var(--muted); font-size:13px;">Conversion</span></div>
-          <div style="font-weight:700; font-size:13px;">${fmtPct(k.conv)}</div>
+          <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Bookings</span></div>
+          <div style="font-weight:800; font-size:13px;">${fmtInt(k.totalBookings)}</div>
         </div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <div style="display:flex; align-items:center;">${dotCssVar("--accent")}<span style="color:var(--muted); font-size:13px;">Revenue</span></div>
-          <div style="font-weight:700; font-size:13px;">${fmtMoney(k.revenue)}</div>
+          <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Conversion</span></div>
+          <div style="font-weight:800; font-size:13px;">${fmtPct(k.conv)}</div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Revenue</span></div>
+          <div style="font-weight:800; font-size:13px;">${fmtMoney(k.revenue)}</div>
         </div>
       </div>
     `;
   }
 
-  // ---------------- Charts (guarded: will NOT break app if missing in HTML)
-  function groupCountsByDay(rows, kind) {
-    const map = new Map();
-    for (const r of rows) {
-      if (r.kind !== kind) continue;
-      const d = r.when instanceof Date && !isNaN(r.when.getTime()) ? toYMD(r.when) : "";
-      if (!d) continue;
-      map.set(d, (map.get(d) || 0) + 1);
-    }
-    // return sorted arrays
-    const keys = Array.from(map.keys()).sort();
-    return { labels: keys, values: keys.map(k => map.get(k) || 0) };
-  }
-
-  function renderLineChart(canvasId, labels, values) {
-    const c = $(canvasId);
-    if (!c || !c.getContext) return; // no canvas in HTML -> skip
-
-    // ensure visible sizing
-    const parent = c.parentElement;
-    const w = Math.max(260, (parent?.clientWidth || 0) - 8);
-    const h = Math.max(140, c.height || 140);
-
-    // only resize when needed (prevents blur)
-    if (c.width !== w) c.width = w;
-    if (c.height !== h) c.height = h;
-
-    const ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
-
-    if (!labels.length) {
-      // draw a subtle empty state line
-      ctx.globalAlpha = 0.55;
-      ctx.strokeStyle = "rgba(255,255,255,0.25)";
-      ctx.beginPath();
-      ctx.moveTo(12, h / 2);
-      ctx.lineTo(w - 12, h / 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-      return;
-    }
-
-    const maxV = Math.max(1, ...values);
-    const pad = 18;
-    const usableW = w - pad * 2;
-    const usableH = h - pad * 2;
-    const step = labels.length > 1 ? usableW / (labels.length - 1) : usableW;
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(110,168,255,0.95)"; // accent-ish
-    ctx.beginPath();
-
-    labels.forEach((_, i) => {
-      const x = pad + i * step;
-      const y = pad + (usableH - (values[i] / maxV) * usableH);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-
-    ctx.stroke();
-
-    // points
-    ctx.fillStyle = "rgba(110,168,255,0.95)";
-    labels.forEach((_, i) => {
-      const x = pad + i * step;
-      const y = pad + (usableH - (values[i] / maxV) * usableH);
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    });
-  }
-
-  function renderCharts(rows) {
-    // only compute if you added canvases in HTML
-    const calls = groupCountsByDay(rows, "call");
-    const bookings = groupCountsByDay(rows, "booking");
-
-    renderLineChart("chartCalls", calls.labels, calls.values);
-    renderLineChart("chartBookings", bookings.labels, bookings.values);
-  }
-
-  // ---------------- Feed (v10 fix: never leave stateBox stuck)
   function renderFeed(rows) {
     const state = $("stateBox");
     const wrap = $("tableWrap");
     const tbody = $("feedTbody");
+    const badgeCount = $("badgeCount");
+    const feedMeta = $("feedMeta");
 
-    // Guard if HTML changed
-    if (!state || !wrap || !tbody) return;
+    if (badgeCount) badgeCount.textContent = fmtInt(rows.length);
+    if (feedMeta) feedMeta.textContent = `${fmtInt(rows.length)} items`;
 
-    $("badgeCount").textContent = fmtInt(rows.length);
-    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
+    if (!wrap || !tbody || !state) return;
 
     if (!rows.length) {
       wrap.style.display = "none";
       state.style.display = "block";
-      state.textContent = "No activity in this date range.";
+      state.textContent = "No data in this range.";
       return;
     }
 
-    // ✅ v10: ALWAYS hide loading and show table when we have rows
     state.style.display = "none";
     wrap.style.display = "block";
     tbody.innerHTML = "";
@@ -937,12 +769,13 @@
 
   function renderAll() {
     applyFilters();
-    $("badgeWindow").textContent = lastRange?.label || "—";
+
+    const badgeWindow = $("badgeWindow");
+    if (badgeWindow) badgeWindow.textContent = lastRange?.label || "—";
 
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
     renderOpsSignals(k);
-    renderCharts(filteredRows);
     renderFeed(filteredRows);
 
     const lu = $("lastUpdated");
@@ -953,11 +786,17 @@
     allRows = [];
     filteredRows = [];
 
-    if ($("badgeCount")) $("badgeCount").textContent = "—";
-    if ($("kpiGrid")) $("kpiGrid").innerHTML = "";
-    if ($("opsInsights")) $("opsInsights").innerHTML = "—";
+    const bc = $("badgeCount");
+    if (bc) bc.textContent = "—";
 
-    if ($("tableWrap")) $("tableWrap").style.display = "none";
+    const kpi = $("kpiGrid");
+    if (kpi) kpi.innerHTML = "";
+
+    const ops = $("opsInsights");
+    if (ops) ops.innerHTML = escHtml(msg || "—");
+
+    const tw = $("tableWrap");
+    if (tw) tw.style.display = "none";
 
     const sb = $("stateBox");
     if (sb) {
@@ -980,17 +819,20 @@
 
     try {
       lastRange = getSelectedRange();
-      if ($("badgeWindow")) $("badgeWindow").textContent = lastRange.label;
+      const badgeWindow = $("badgeWindow");
+      if (badgeWindow) badgeWindow.textContent = lastRange.label;
 
+      // Pull a healthy amount, then filter locally by date range
       const [resv, calls] = await Promise.all([
-        fetchTableInRange(TABLES.reservations, lastRange, 3000),
-        fetchTableInRange(TABLES.callLogs, lastRange, 3000),
+        fetchTable(TABLES.reservations, lastRange, 4000),
+        fetchTable(TABLES.callLogs, lastRange, 5000),
       ]);
 
       const normalized = [];
       for (const r of (resv.data || [])) normalized.push(normalizeReservationRow(r, resv.tsField));
       for (const c of (calls.data || [])) normalized.push(normalizeCallLogRow(c, calls.tsField));
 
+      // Ensure when exists for filtering
       let merged = normalized.map(r => {
         if (!r.when) r.when = parseISOish(r.whenRaw);
         return r;
@@ -1001,34 +843,55 @@
 
       allRows = merged;
 
-      if (!allRows.length && state) {
-        const probes = await probeAccess();
-        const probeText = probes.map(p =>
-          `• ${p.table}: ${p.ok ? `OK (rows visible: ${p.rows})` : `BLOCKED — ${p.error || "RLS"}`}`
-        ).join("\n");
-
-        state.textContent =
-          "Signed in, but no rows returned.\n\n" +
-          "Probe:\n" + probeText + "\n";
-      }
-
+      // Now local date-range filtering actually matters
       renderAll();
       toast("Dashboard refreshed.");
     } catch (err) {
       console.error(err);
       if (state) state.textContent = `Error: ${err?.message || err}`;
-      toast("Load failed. Check console + Supabase settings.");
+      toast("Load failed. Check console + Supabase.");
     }
+  }
+
+  // ============================================================
+  // Theme
+  // ============================================================
+  function initTheme() {
+    const saved = localStorage.getItem("ns_theme");
+    if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+
+    $("btnTheme")?.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = (cur === "dark") ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("ns_theme", next);
+      toast(`Theme: ${next}`);
+      renderAll();
+    });
+  }
+
+  // ============================================================
+  // Tab visibility resilience (so leaving tab doesn't “kill” your UI)
+  // ============================================================
+  function initVisibilityResilience() {
+    document.addEventListener("visibilitychange", () => {
+      // When you come back to the tab, re-check session + refresh data once.
+      if (!document.hidden) {
+        // Avoid hammering: small delay so browser fully resumes
+        setTimeout(() => {
+          loadAndRender().catch(() => {});
+        }, 250);
+      }
+    });
   }
 
   // ============================================================
   // Init
   // ============================================================
   async function init() {
-    if (enforceCanonicalUrl()) return;
-
     initTheme();
     initControls();
+    initVisibilityResilience();
 
     try {
       supabaseClient = getSupabaseClient();
@@ -1050,14 +913,6 @@
 
     const gate = await ensureAuthGate();
     if (gate.ok) await loadAndRender();
-
-    // Helps when tab is backgrounded then focused again
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") loadAndRender();
-    });
-    window.addEventListener("pageshow", (e) => {
-      if (e.persisted) loadAndRender();
-    });
   }
 
   document.addEventListener("DOMContentLoaded", init);
