@@ -1,14 +1,15 @@
 // public/dashboard/app.js
 (() => {
   // ============================================================
-  // Settings
+  // Settings (edit these if you want)
   // ============================================================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
 
-  // Always show login overlay until user signs in (prevents "URL bypass")
+  // If true: ALWAYS show login overlay on page load (even if a session exists).
+  // This prevents “type /dashboard and see data” on a shared computer.
   const ALWAYS_REQUIRE_LOGIN = true;
 
-  // Never persist sessions (prevents silent auto-login across refresh)
+  // Never persist sessions (prevents silent auto-login after refresh)
   const PERSIST_SESSION = false;
 
   // ============================================================
@@ -64,11 +65,10 @@
     el.textContent = msg;
   }
 
-  // Hard clear any Supabase auth tokens that might be stuck in localStorage
   function clearSupabaseAuthStorage() {
+    // Supabase stores tokens in localStorage keys like: sb-<projectref>-auth-token
     try {
-      const keys = Object.keys(localStorage);
-      for (const k of keys) {
+      for (const k of Object.keys(localStorage)) {
         if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
       }
     } catch {}
@@ -100,7 +100,9 @@
     const key = cfg.SUPABASE_ANON_KEY;
 
     if (!url || !key || !window.supabase) {
-      throw new Error("Missing Supabase config. Ensure dashboard/config.js sets window.NSA_CONFIG.SUPABASE_URL and SUPABASE_ANON_KEY, and supabase-js is loaded.");
+      throw new Error(
+        "Missing Supabase config. Ensure dashboard/config.js sets window.NSA_CONFIG.SUPABASE_URL and SUPABASE_ANON_KEY, and supabase-js is loaded."
+      );
     }
 
     return window.supabase.createClient(url, key, {
@@ -113,11 +115,11 @@
   }
 
   // ============================================================
-  // Tables
+  // Tables (based on YOUR schema list)
   // ============================================================
   const TABLES = {
     reservations: "reservations",
-    callLogs: "call_logs",   // ✅ your real table with 30 rows
+    callLogs: "call_logs",
   };
 
   // Try these as timestamp columns in order
@@ -154,21 +156,50 @@
   }
 
   async function hardSignOut() {
+    // We want logout to ALWAYS work, even if there are stale tokens.
     try {
-      await supabaseClient.auth.signOut({ scope: "local" });
+      await supabaseClient.auth.signOut(); // v2 doesn't need scope to clear in-memory
     } catch (e) {
       console.warn("signOut threw:", e);
     }
     clearSupabaseAuthStorage();
   }
 
-  async function ensureAuthGate() {
+  async function enforceFounderIfSet(session) {
+    // Optional: if you want only founder to see anything.
+    // If you later add hotel_users mapping, replace this with your RBAC checks.
+    if (!session?.user?.email) return { ok: false, reason: "No email on session." };
+    if (session.user.email !== FOUNDER_EMAIL) {
+      return { ok: false, reason: `Access denied for ${session.user.email}.` };
+    }
+    return { ok: true };
+  }
+
+  async function ensureAuthGate({ allowAutoFromUrl } = { allowAutoFromUrl: true }) {
+    // detectSessionInUrl will create a session after magic link click automatically.
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     if (error) console.warn("getSession error:", error);
 
     setSessionUI(session);
 
     if (!session) {
+      showOverlay(true);
+      $("stateBox").textContent = "Please sign in to load dashboard data.";
+      return { ok: false, session: null };
+    }
+
+    // If you only want founder access, enforce it here
+    const founderCheck = await enforceFounderIfSet(session);
+    if (!founderCheck.ok) {
+      showOverlay(true);
+      clearDataUI(founderCheck.reason + " Please use an authorized email.");
+      await hardSignOut();
+      return { ok: false, session: null };
+    }
+
+    // If ALWAYS_REQUIRE_LOGIN, we still keep overlay up until user explicitly signs in.
+    // BUT: we allow auto sign-in from magic link (URL token) so it can close.
+    if (ALWAYS_REQUIRE_LOGIN && !allowAutoFromUrl) {
       showOverlay(true);
       $("stateBox").textContent = "Please sign in to load dashboard data.";
       return { ok: false, session: null };
@@ -191,33 +222,30 @@
       setSessionUI(null);
       showOverlay(true);
       clearDataUI("Signed out. Please sign in to view dashboard data.");
-      // reload to fully reset in-memory state
       setTimeout(() => window.location.reload(), 250);
     });
 
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      // event examples: "SIGNED_IN", "SIGNED_OUT", "TOKEN_REFRESHED"
       setSessionUI(session);
 
-      if (ALWAYS_REQUIRE_LOGIN) {
-        // Always require explicit login each visit; once logged in, we load.
-        if (session) {
-          showOverlay(false);
-          await loadAndRender();
-        } else {
-          showOverlay(true);
-          clearDataUI("Please sign in to load dashboard data.");
-        }
+      if (!session) {
+        showOverlay(true);
+        clearDataUI("Please sign in to load dashboard data.");
         return;
       }
 
-      // Default behavior
-      if (session) {
-        showOverlay(false);
-        await loadAndRender();
-      } else {
+      // Enforce founder-only for now
+      const founderCheck = await enforceFounderIfSet(session);
+      if (!founderCheck.ok) {
         showOverlay(true);
-        clearDataUI("Please sign in to load dashboard data.");
+        clearDataUI(founderCheck.reason + " Please use an authorized email.");
+        await hardSignOut();
+        return;
       }
+
+      showOverlay(false);
+      await loadAndRender();
     });
   }
 
@@ -226,7 +254,7 @@
     const email = safeStr($("authEmail")?.value).trim();
     if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
 
-    // ✅ must be allowed in Supabase Auth redirect URLs
+    // MUST be in Supabase Auth -> Redirect URLs
     const redirectTo = `${window.location.origin}/dashboard/`;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
@@ -262,6 +290,7 @@
       syncCustomVisibility();
       await loadAndRender();
     });
+
     startDate?.addEventListener("change", loadAndRender);
     endDate?.addEventListener("change", loadAndRender);
 
@@ -386,10 +415,13 @@
       kind: "booking",
       when,
       whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
-      event, guest, arrival,
+      event,
+      guest,
+      arrival,
       nights: Number.isFinite(nights) ? nights : null,
       totalDue: Number.isFinite(totalDue) ? totalDue : null,
-      sentiment, summary,
+      sentiment,
+      summary,
       raw: r,
     };
   }
@@ -518,6 +550,7 @@
       const nightsTxt = Number.isFinite(r.nights) ? String(r.nights) : "—";
       const totalTxt = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
       const typeTxt = r.kind === "booking" ? "booking" : "call";
+      const sentimentTxt = safeStr(r.sentiment) || "—";
 
       tr.innerHTML = `
         <td><span class="muted">${whenTxt}</span></td>
@@ -526,8 +559,8 @@
         <td>${arrivalTxt}</td>
         <td>${nightsTxt}</td>
         <td>${totalTxt}</td>
-        <td>${safeStr(r.sentiment) || "—"}</td>
-        <td>${safeStr(r.summary) || "<span class='muted'>—</span>"}</td>
+        <td>${sentimentTxt}</td>
+        <td><div class="summaryClamp">${safeStr(r.summary) || "<span class='muted'>—</span>"}</div></td>
       `;
       tbody.appendChild(tr);
     }
@@ -581,13 +614,9 @@
   // Load
   // ============================================================
   async function loadAndRender() {
-    const gate = await ensureAuthGate();
+    // Enforce auth gate (but allow magic-link URL sign-in)
+    const gate = await ensureAuthGate({ allowAutoFromUrl: true });
     if (!gate.ok) return;
-
-    const email = gate.session?.user?.email || "";
-    if (email && email !== FOUNDER_EMAIL) {
-      toast("Signed in. Access depends on Supabase RLS.");
-    }
 
     const state = $("stateBox");
     const wrap = $("tableWrap");
@@ -621,9 +650,8 @@
 
         state.textContent =
           "Signed in, but no rows returned.\n\n" +
-          "If you can see rows in Supabase Table Editor but dashboard shows none, RLS is blocking SELECT.\n\n" +
-          "Probe:\n" + probeText + "\n\n" +
-          "Fix by adding SELECT policies for founder email (already provided).";
+          "If you see rows in Supabase Table Editor but the dashboard shows none, RLS is blocking SELECT.\n\n" +
+          "Probe:\n" + probeText + "\n";
       }
 
       renderAll();
@@ -652,19 +680,24 @@
 
     initAuthHandlers();
 
-    // Always prompt login first (prevents "URL bypass" view)
+    // ALWAYS_REQUIRE_LOGIN behavior:
+    // - Always show overlay on load
+    // - BUT we still allow magic-link tokens in the URL to create a session,
+    //   then onAuthStateChange fires and loadAndRender() runs.
     if (ALWAYS_REQUIRE_LOGIN) {
+      // Clear any old tokens so refresh doesn't auto-open data on shared machines
+      clearSupabaseAuthStorage();
       showOverlay(true);
       clearDataUI("Please sign in to load dashboard data.");
 
-      // If Supabase detects a magic-link token in URL, it will create a session
-      // and onAuthStateChange will fire, then loadAndRender() runs.
-      await ensureAuthGate();
+      // If the user arrived from a magic link, Supabase will detect it and set session.
+      // We call getSession so UI updates ASAP.
+      await ensureAuthGate({ allowAutoFromUrl: true });
       return;
     }
 
-    // Normal mode
-    const gate = await ensureAuthGate();
+    // Normal mode: if already signed in, load data
+    const gate = await ensureAuthGate({ allowAutoFromUrl: true });
     if (gate.ok) await loadAndRender();
   }
 
