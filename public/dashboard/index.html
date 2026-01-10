@@ -269,9 +269,7 @@
     tbody tr:hover td{ background: rgba(110,168,255,0.07); }
 
     /* ✅ Allow summary to wrap / clamp instead of forcing width */
-    td.col-summary{
-      white-space: normal;
-    }
+    td.col-summary{ white-space: normal; }
     .summaryClamp{
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -279,6 +277,54 @@
       overflow: hidden;
       line-height: 1.35;
       max-height: calc(1.35em * 2);
+    }
+
+    /* ✅ Ops Signals (neat + tiny colored dots) */
+    .opsBox{ display:flex; flex-direction:column; gap:12px; }
+    .opsSection{
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .opsTitle{
+      display:flex; align-items:center; justify-content:space-between;
+      margin:0 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .2px;
+      text-transform: uppercase;
+    }
+    .opsList{ display:flex; flex-direction:column; gap:8px; }
+    .opsItem{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      min-width: 0;
+    }
+    .opsLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .opsLabel{ color: var(--text); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+    .opsRight{ display:flex; align-items:center; gap:10px; }
+    .opsValue{ font-weight: 700; color: var(--text); white-space: nowrap; }
+    .dotMini{
+      width:8px; height:8px; border-radius: 999px;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+      flex: 0 0 auto;
+    }
+    .dotMini.good{ background: var(--good); box-shadow: 0 0 0 3px rgba(66,211,146,0.15); }
+    .dotMini.warn{ background: var(--warn); box-shadow: 0 0 0 3px rgba(255,204,102,0.14); }
+    .dotMini.bad{ background: var(--bad); box-shadow: 0 0 0 3px rgba(255,107,107,0.14); }
+    .pillMini{
+      font-size: 12px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      white-space: nowrap;
     }
 
     /* State + Toast */
