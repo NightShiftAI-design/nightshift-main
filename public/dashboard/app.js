@@ -1,28 +1,19 @@
-// public/dashboard/app.js
+// public/dashboard/app.js  — v4 FULL REPLACEMENT
 (() => {
   // ============================================================
-  // Settings (edit these if you want)
+  // Settings
   // ============================================================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
 
-  // ✅ Canonical dashboard URL (fixes /dashboard vs /dashboard/ vs index.html + www vs non-www)
   const CANONICAL_ORIGIN = "https://www.nightshifthotels.com";
   const CANONICAL_PATH = "/dashboard/";
   const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
 
-  // ✅ Persist sessions so refresh works (no more magic link every time)
-  // If you ever want "shared computer lock mode", flip ALWAYS_REQUIRE_LOGIN back to true.
   const ALWAYS_REQUIRE_LOGIN = false;
   const PERSIST_SESSION = true;
 
-  // Hide booking-like CALL rows when a BOOKING exists for same guest+arrival
   const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
-
-  // ✅ Also hide duplicate BOOKING rows that are clearly repeats
   const DEDUPE_DUPLICATE_BOOKINGS = true;
-
-  // ✅ If range filtering by timestamp column causes empty results (common with timestamp w/o tz),
-  // fall back to "order only" mode automatically.
   const ENABLE_RANGE_FILTER = true;
 
   // ============================================================
@@ -37,28 +28,25 @@
     : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
 
-  // ✅ IMPORTANT: treat YYYY-MM-DD as *local* date, not UTC (prevents -1 day in EST)
+  // Treat YYYY-MM-DD as local date (prevents -1 day shift)
   const parseISOish = (v) => {
     if (!v) return null;
     const s = String(v).trim();
 
-    // DD-MM-YYYY (your reservations format)
     const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
     if (ddmmyyyy) {
       const [, dd, mm, yyyy] = ddmmyyyy;
-      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`); // local midnight
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
       return isNaN(d.getTime()) ? null : d;
     }
 
-    // YYYY-MM-DD (treat as local date, not UTC)
     const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (ymd) {
       const [, yyyy, mm, dd] = ymd;
-      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`); // local midnight
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
       return isNaN(d.getTime()) ? null : d;
     }
 
-    // Fallback: timestamps / month names
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   };
@@ -104,7 +92,6 @@
     } catch {}
   }
 
-  // Escape HTML so we never inject raw user content into innerHTML
   function escHtml(str) {
     return safeStr(str)
       .replace(/&/g, "&amp;")
@@ -130,27 +117,22 @@
   }
 
   // ============================================================
-  // Canonical URL enforcement (fixes /dashboard vs /dashboard/ + www)
+  // Canonical URL
   // ============================================================
   function enforceCanonicalUrl() {
     try {
-      const h = window.location.hostname;
       const p = window.location.pathname;
 
-      // Force www + https origin
       if (window.location.origin !== CANONICAL_ORIGIN) {
         window.location.replace(`${CANONICAL_ORIGIN}${window.location.pathname}${window.location.search}${window.location.hash}`);
         return true;
       }
 
-      // Force /dashboard/ path (not /dashboard, not /dashboard/index.html)
       if (p === "/dashboard" || p === "/dashboard/index.html") {
         window.location.replace(CANONICAL_URL);
         return true;
       }
 
-      // If someone hits /dashboard/anything-else, don't hijack.
-      // If they are in /dashboard/ already, good.
       return false;
     } catch {
       return false;
@@ -166,26 +148,17 @@
 
   function canonicalGuestName(v) {
     let s = safeStr(v).trim();
-
-    // Strip anything after ":" (e.g., "Lil Baby: King non-smoking")
     if (s.includes(":")) s = s.split(":")[0].trim();
-
-    // Strip common trailing descriptors
     s = s.replace(/\s*[-•|]\s*(king|queen|double|single|suite|non[-\s]?smoking|smoking|room|reservation|booking).*/i, "").trim();
-
-    // Collapse whitespace
     s = s.replace(/\s+/g, " ");
     return s;
   }
 
   function extractISODateFromText(text) {
     const s = safeStr(text);
-
-    // ISO date: 2026-01-15
     const iso = s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
     if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
 
-    // Month name: Jan 15, 2026
     const m = s.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2}),\s+(20\d{2})\b/i);
     if (m) {
       const monthMap = {
@@ -200,7 +173,6 @@
       const year = m[3];
       if (mon) return `${year}-${mon}-${day}`;
     }
-
     return "";
   }
 
@@ -311,9 +283,7 @@
     const key = cfg.SUPABASE_ANON_KEY;
 
     if (!url || !key || !window.supabase) {
-      throw new Error(
-        "Missing Supabase config. Ensure dashboard/config.js sets window.NSA_CONFIG.SUPABASE_URL and SUPABASE_ANON_KEY, and supabase-js is loaded."
-      );
+      throw new Error("Missing Supabase config or SDK.");
     }
 
     return window.supabase.createClient(url, key, {
@@ -357,20 +327,14 @@
     const email = session?.user?.email || "";
     $("authBadge").textContent = email ? "Unlocked" : "Locked";
     $("btnAuth").textContent = email ? "Account" : "Login";
-
     const logoutBtn = $("btnLogout");
     if (logoutBtn) logoutBtn.style.display = email ? "inline-flex" : "none";
-
     const authStatus = $("authStatus");
     if (authStatus) authStatus.textContent = email ? `Signed in as ${email}` : "Not signed in";
   }
 
   async function hardSignOut() {
-    try {
-      await supabaseClient.auth.signOut();
-    } catch (e) {
-      console.warn("signOut threw:", e);
-    }
+    try { await supabaseClient.auth.signOut(); } catch {}
     clearSupabaseAuthStorage();
   }
 
@@ -383,9 +347,7 @@
   }
 
   async function ensureAuthGate() {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    if (error) console.warn("getSession error:", error);
-
+    const { data: { session } } = await supabaseClient.auth.getSession();
     setSessionUI(session);
 
     if (!session) {
@@ -409,7 +371,6 @@
   function initAuthHandlers() {
     $("btnAuth")?.addEventListener("click", () => showOverlay(true));
     $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
-
     $("btnSendLink")?.addEventListener("click", sendMagicLink);
     $("btnResendLink")?.addEventListener("click", sendMagicLink);
 
@@ -419,15 +380,11 @@
       setSessionUI(null);
       showOverlay(true);
       clearDataUI("Signed out. Please sign in to view dashboard data.");
-      setTimeout(() => window.location.reload(), 250);
+      setTimeout(() => window.location.reload(), 200);
     });
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       setSessionUI(session);
-
-      // Helpful toast for debugging auth flows
-      if (event === "SIGNED_IN") toast("Signed in.");
-      if (event === "SIGNED_OUT") toast("Signed out.");
 
       if (!session) {
         showOverlay(true);
@@ -453,21 +410,13 @@
     const email = safeStr($("authEmail")?.value).trim();
     if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
 
-    // ✅ Hardcode to canonical URL (prevents 301/redirect mismatch breaking OTP)
-    const redirectTo = CANONICAL_URL;
-
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: redirectTo }
+      options: { emailRedirectTo: CANONICAL_URL }
     });
 
-    if (error) {
-      console.error("Magic link error:", error);
-      return setAuthError(error.message || "Failed to send magic link.");
-    }
-
+    if (error) return setAuthError(error.message || "Failed to send magic link.");
     toast("Magic link sent. Check your email.");
-    setAuthError("");
   }
 
   // ============================================================
@@ -544,7 +493,6 @@
   // Fetch
   // ============================================================
   async function fetchTableInRange(tableName, range, limit) {
-    // Primary attempt: range filter by timestamp (if enabled)
     if (ENABLE_RANGE_FILTER) {
       const startISO = range.start.toISOString();
       const endISO = range.end.toISOString();
@@ -558,19 +506,12 @@
           .order(tsField, { ascending: false })
           .limit(limit);
 
-        // If query works AND returns rows, great.
-        // If query works but returns zero rows, it might be because of timestamp format mismatch.
-        // We'll fall back to order-only mode below.
         if (!error && Array.isArray(data) && data.length > 0) {
           return { data: data || [], tsField, mode: `range:${tsField}` };
         }
-
-        // If error: try next field
-        if (error) continue;
       }
     }
 
-    // Fallback: order-only mode (most robust)
     for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
@@ -581,51 +522,35 @@
       if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
     }
 
-    // Last resort
     const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
     if (error) throw error;
     return { data: data || [], tsField: "", mode: "raw" };
   }
 
-  async function probeAccess() {
-    const res = [];
-    for (const t of [TABLES.reservations, TABLES.callLogs]) {
-      const { data, error } = await supabaseClient.from(t).select("*").limit(1);
-      res.push({
-        table: t,
-        ok: !error,
-        rows: (data || []).length,
-        error: error?.message || ""
-      });
-    }
-    return res;
-  }
-
   // ============================================================
-  // Normalize to unified feed rows
+  // Normalize
   // ============================================================
   function normalizeReservationRow(r, tsField) {
-    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
+    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || null;
     const bookingObj = (r?.booking && typeof r.booking === "object") ? r.booking : null;
 
     const event = safeStr(r?.event || bookingObj?.event || "booking");
-    const guest = safeStr(r?.guest_name || bookingObj?.guest_name || r?.name || r?.caller_name || "");
+    const guest = safeStr(r?.guest_name || bookingObj?.guest_name || "");
     const arrivalRaw = safeStr(r?.arrival_date || bookingObj?.arrival_date || "");
     const arrival = canonicalYMDFromAnyDateStr(arrivalRaw) || arrivalRaw;
 
     const nights = toNum(r?.nights ?? bookingObj?.nights);
     const totalDue = toNum(r?.total_due ?? bookingObj?.total_due);
-    const sentiment = safeStr(r?.sentiment || bookingObj?.sentiment || r?.call_sentiment || "");
+    const sentiment = safeStr(r?.sentiment || "");
 
     const summary =
       safeStr(r?.summary) ||
-      safeStr(bookingObj?.summary) ||
       `Reservation${guest ? ` for ${guest}` : ""}${arrival ? ` • Arrive ${arrival}` : ""}`;
 
     return {
       kind: "booking",
       when,
-      whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
+      whenRaw: r?.[tsField] || r?.created_at || "",
       event,
       guest,
       arrival,
@@ -638,50 +563,34 @@
   }
 
   function normalizeCallLogRow(r, tsField) {
-    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
+    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || null;
 
-    const event = safeStr(r?.event || r?.type || "call");
-    const callId = safeStr(r?.call_id || r?.call_sid || r?.sid || r?.id || "");
+    const event = safeStr(r?.event || "call");
+    const callId = safeStr(r?.call_id || r?.id || "");
 
     const rawPhone =
       r?.from ??
-      r?.caller ??
-      r?.phone ??
-      r?.caller_phone ??
-      r?.from_number ??
       r?.caller_number ??
       "";
 
-    const duration = toNum(r?.duration_seconds ?? r?.duration ?? NaN);
-    const sentiment = safeStr(r?.sentiment || r?.call_sentiment || "");
+    const duration = toNum(r?.duration_seconds ?? NaN);
+    const sentiment = safeStr(r?.sentiment || "");
 
     const summary =
       safeStr(r?.summary) ||
-      safeStr(r?.notes) ||
-      safeStr(r?.transcript_summary) ||
       `${event}${callId ? ` • ${callId}` : ""}${rawPhone ? ` • ${safeStr(rawPhone)}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
 
-    // Parse structured booking JSON string (if present)
     const bookingObj = safeJsonParse(r?.booking);
 
-    const guestFromBooking = safeStr(bookingObj?.guest_name).trim();
-    const arrivalFromBooking = safeStr(bookingObj?.arrival_date).trim();
-
-    const explicitName = safeStr(r?.guest_name || r?.caller_name || r?.name || "").trim();
-    const extractedName = extractNameFromSummary(summary);
-
     const guestDisplay =
-      guestFromBooking ||
-      explicitName ||
-      extractedName ||
-      safeStr(rawPhone).trim() ||
+      safeStr(bookingObj?.guest_name) ||
+      extractNameFromSummary(summary) ||
+      safeStr(rawPhone) ||
       callId;
 
-    const arrivalFromText = extractISODateFromText(summary);
-
     const arrivalDisplay =
-      arrivalFromBooking ||
-      arrivalFromText ||
+      safeStr(bookingObj?.arrival_date) ||
+      extractISODateFromText(summary) ||
       "";
 
     const arrivalCanonical = canonicalYMDFromAnyDateStr(arrivalDisplay) || arrivalDisplay;
@@ -689,7 +598,7 @@
     return {
       kind: "call",
       when,
-      whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
+      whenRaw: r?.[tsField] || r?.created_at || "",
       event,
       guest: guestDisplay,
       arrival: arrivalCanonical,
@@ -698,13 +607,13 @@
       sentiment,
       summary,
       durationSeconds: Number.isFinite(duration) ? duration : null,
-      booking: bookingObj, // used for dedupe
+      booking: bookingObj,
       raw: r,
     };
   }
 
   // ============================================================
-  // Filtering / KPIs / Ops Signals / Feed
+  // Filtering / KPIs / Feed
   // ============================================================
   function applyFilters() {
     const range = lastRange || getSelectedRange();
@@ -771,70 +680,6 @@
     }
   }
 
-  function dot(colorVar) {
-    return `<span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(${colorVar});margin-right:8px;transform:translateY(-1px);"></span>`;
-  }
-
-  function renderOpsSignals(k) {
-    const box = $("opsInsights");
-    if (!box) return;
-
-    const negColor = (k.negativeCount > 0) ? "--bad" : "--good";
-    const longColor = (k.longCalls > 0) ? "--warn" : "--good";
-
-    box.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:12px;">
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div style="font-weight:700; font-size:13px;">Watchlist</div>
-
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="display:flex; align-items:center; gap:0; min-width:0;">
-              ${dot(negColor)}
-              <span style="color:var(--muted); font-size:13px; white-space:nowrap;">Negative sentiment</span>
-            </div>
-            <div style="font-weight:700; font-size:13px;">${fmtInt(k.negativeCount)}</div>
-          </div>
-
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="display:flex; align-items:center; gap:0; min-width:0;">
-              ${dot(longColor)}
-              <span style="color:var(--muted); font-size:13px; white-space:nowrap;">Long calls (4m+)</span>
-            </div>
-            <div style="font-weight:700; font-size:13px;">${fmtInt(k.longCalls)}</div>
-          </div>
-        </div>
-
-        <div style="height:1px; background: rgba(255,255,255,0.08);"></div>
-
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div style="font-weight:700; font-size:13px;">Snapshot</div>
-
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Calls</span></div>
-              <div style="font-weight:700; font-size:13px;">${fmtInt(k.totalCalls)}</div>
-            </div>
-
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Bookings</span></div>
-              <div style="font-weight:700; font-size:13px;">${fmtInt(k.totalBookings)}</div>
-            </div>
-
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Conversion</span></div>
-              <div style="font-weight:700; font-size:13px;">${fmtPct(k.conv)}</div>
-            </div>
-
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Revenue</span></div>
-              <div style="font-weight:700; font-size:13px;">${fmtMoney(k.revenue)}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
   function renderFeed(rows) {
     const state = $("stateBox");
     const wrap = $("tableWrap");
@@ -846,7 +691,7 @@
     if (!rows.length) {
       wrap.style.display = "none";
       state.style.display = "block";
-      state.textContent = "No data returned (empty tables OR RLS blocked).";
+      state.textContent = "No data returned.";
       return;
     }
 
@@ -873,7 +718,7 @@
       const summaryTxt = safeStr(r.summary) || "—";
 
       tr.innerHTML = `
-        <td><span class="muted">${escHtml(whenTxt)}</span></td>
+        <td>${escHtml(whenTxt)}</td>
         <td>${escHtml(typeTxt)}</td>
         <td title="${escHtml(guestTxt)}">${escHtml(guestTxt)}</td>
         <td title="${escHtml(arrivalTxt)}">${escHtml(arrivalTxt)}</td>
@@ -919,7 +764,6 @@
 
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
-    renderOpsSignals(k);
     renderFeed(filteredRows);
 
     const lu = $("lastUpdated");
@@ -930,23 +774,13 @@
     allRows = [];
     filteredRows = [];
 
-    const bc = $("badgeCount");
-    if (bc) bc.textContent = "—";
-
-    const kpi = $("kpiGrid");
-    if (kpi) kpi.innerHTML = "";
-
-    const ops = $("opsInsights");
-    if (ops) ops.innerHTML = "—";
-
-    const tw = $("tableWrap");
-    if (tw) tw.style.display = "none";
+    $("badgeCount").textContent = "—";
+    $("kpiGrid").innerHTML = "";
+    $("tableWrap").style.display = "none";
 
     const sb = $("stateBox");
-    if (sb) {
-      sb.style.display = "block";
-      sb.textContent = msg || "—";
-    }
+    sb.style.display = "block";
+    sb.textContent = msg || "—";
   }
 
   // ============================================================
@@ -980,36 +814,16 @@
         return r;
       });
 
-      if (HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS) {
-        merged = dedupeBookingLikeCalls(merged);
-      }
-
-      if (DEDUPE_DUPLICATE_BOOKINGS) {
-        merged = dedupeDuplicateBookings(merged);
-      }
+      if (HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS) merged = dedupeBookingLikeCalls(merged);
+      if (DEDUPE_DUPLICATE_BOOKINGS) merged = dedupeDuplicateBookings(merged);
 
       allRows = merged;
-
-      if (!allRows.length) {
-        const probes = await probeAccess();
-        const probeText = probes.map(p =>
-          `• ${p.table}: ${p.ok ? `OK (rows visible: ${p.rows})` : `BLOCKED — ${p.error || "RLS"}`}`
-        ).join("\n");
-
-        state.textContent =
-          "Signed in, but no rows returned.\n\n" +
-          "Likely causes:\n" +
-          "• RLS is blocking SELECT (most common)\n" +
-          "• Timestamp range filter mismatch (we auto-fallback to order-only)\n\n" +
-          "Probe:\n" + probeText + "\n";
-      }
-
       renderAll();
       toast("Dashboard refreshed.");
     } catch (err) {
       console.error(err);
       state.textContent = `Error: ${err?.message || err}`;
-      toast("Load failed. Check console + Supabase settings.");
+      toast("Load failed.");
     }
   }
 
@@ -1017,7 +831,6 @@
   // Init
   // ============================================================
   async function init() {
-    // ✅ Force canonical URL first
     if (enforceCanonicalUrl()) return;
 
     initTheme();
