@@ -4,7 +4,9 @@
   const $ = (id) => document.getElementById(id);
 
   const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
-  const fmtMoney = (n) => Number.isFinite(n) ? n.toLocaleString(undefined, { style: "currency", currency: "USD" }) : "—";
+  const fmtMoney = (n) => Number.isFinite(n)
+    ? n.toLocaleString(undefined, { style: "currency", currency: "USD" })
+    : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
   const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
 
@@ -49,17 +51,28 @@
     el.textContent = msg;
   }
 
+  function clearSupabaseAuthStorage() {
+    // Supabase v2 stores auth tokens in localStorage keys like: sb-<projectref>-auth-token
+    try {
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
+      }
+    } catch {}
+  }
+
   // ---------- Theme ----------
   function initTheme() {
     const saved = localStorage.getItem("ns_theme");
     if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+
     $("btnTheme")?.addEventListener("click", () => {
       const cur = document.documentElement.getAttribute("data-theme") || "dark";
       const next = (cur === "dark") ? "light" : "dark";
       document.documentElement.setAttribute("data-theme", next);
       localStorage.setItem("ns_theme", next);
       toast(`Theme: ${next}`);
-      renderAll(); // redraw charts for contrast
+      renderAll();
     });
   }
 
@@ -100,6 +113,9 @@
     callEvents: "call_events",
   };
 
+  // Timestamp candidates we will try (because schemas differ)
+  const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts"];
+
   // ---------- State ----------
   let supabaseClient = null;
   let allRows = [];
@@ -116,8 +132,6 @@
 
   function setSessionUI(session) {
     const email = session?.user?.email || "";
-    const userEmailEl = $("userEmail");
-    if (userEmailEl) userEmailEl.textContent = email || "—";
 
     $("authBadge").textContent = email ? "Unlocked" : "Locked";
     $("btnAuth").textContent = email ? "Account" : "Login";
@@ -148,16 +162,27 @@
   function initAuthHandlers() {
     $("btnAuth")?.addEventListener("click", () => showOverlay(true));
     $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
-
     $("btnSendLink")?.addEventListener("click", sendMagicLink);
     $("btnResendLink")?.addEventListener("click", sendMagicLink);
 
     $("btnLogout")?.addEventListener("click", async () => {
-      await supabaseClient.auth.signOut();
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) console.warn("signOut error:", error);
+      } catch (e) {
+        console.warn("signOut threw:", e);
+      }
+
+      // Hard clear in case token is stuck
+      clearSupabaseAuthStorage();
+
       toast("Signed out.");
       setSessionUI(null);
       showOverlay(true);
       clearDataUI("Signed out. Please login to view data.");
+
+      // Force a clean state
+      setTimeout(() => window.location.reload(), 300);
     });
 
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
@@ -233,7 +258,6 @@
 
     syncCustomVisibility();
 
-    // Default dates for custom mode
     if (startDate && endDate) {
       const today = new Date();
       const start = new Date(today);
@@ -247,32 +271,27 @@
     const mode = $("rangeSelect")?.value || "7";
     const now = new Date();
 
-    if (mode === "today") {
-      return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
-    }
-
+    if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
     if (mode === "7" || mode === "30") {
       const days = Number(mode);
       const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
       return { label: `Last ${days} days`, start: s, end: endOfDay(now) };
     }
 
-    // custom
     const sVal = $("startDate")?.value;
     const eVal = $("endDate")?.value;
     const s = sVal ? startOfDay(new Date(`${sVal}T00:00:00`)) : null;
     const e = eVal ? endOfDay(new Date(`${eVal}T00:00:00`)) : null;
 
     if (!s || !e || isNaN(s.getTime()) || isNaN(e.getTime())) {
-      return getSelectedRangeFallback();
+      const fallback = (() => {
+        const now2 = new Date();
+        const s2 = startOfDay(new Date(now2.getFullYear(), now2.getMonth(), now2.getDate() - 6));
+        return { label: "Last 7 days", start: s2, end: endOfDay(now2) };
+      })();
+      return fallback;
     }
     return { label: `${sVal} → ${eVal}`, start: s, end: e };
-  }
-
-  function getSelectedRangeFallback() {
-    const now = new Date();
-    const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
-    return { label: "Last 7 days", start: s, end: endOfDay(now) };
   }
 
   // ---------- Fetch ----------
@@ -280,6 +299,7 @@
     const startISO = range.start.toISOString();
     const endISO = range.end.toISOString();
 
+    // Try filtering by various timestamp fields
     for (const tsField of tsCandidates) {
       const { data, error } = await supabaseClient
         .from(tableName)
@@ -289,26 +309,53 @@
         .order(tsField, { ascending: false })
         .limit(limit);
 
-      if (!error) return { data: data || [], tsField };
+      if (!error) return { data: data || [], tsField, mode: `range:${tsField}` };
     }
 
-    // Fallback: grab recent rows
+    // Fallback: try ordering by candidates (no filtering)
+    for (const tsField of tsCandidates) {
+      const { data, error } = await supabaseClient
+        .from(tableName)
+        .select("*")
+        .order(tsField, { ascending: false })
+        .limit(Math.min(limit, 500));
+
+      if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
+    }
+
+    // Final fallback: just limit(200) raw
     const { data, error } = await supabaseClient
       .from(tableName)
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(Math.min(limit, 800));
+      .limit(200);
 
-    if (error) return { data: [], tsField: "created_at", error };
-    return { data: data || [], tsField: "created_at" };
+    if (error) return { data: [], tsField: "", mode: "raw", error };
+    return { data: data || [], tsField: "", mode: "raw" };
   }
 
   async function fetchReservations(range) {
-    return fetchTableInRange(TABLES.reservations, range, 2000, ["created_at", "inserted_at", "timestamp", "ts"]);
+    return fetchTableInRange(TABLES.reservations, range, 2000, TS_CANDIDATES);
   }
 
   async function fetchCallEvents(range) {
-    return fetchTableInRange(TABLES.callEvents, range, 3000, ["created_at", "inserted_at", "timestamp", "ts"]);
+    return fetchTableInRange(TABLES.callEvents, range, 3000, TS_CANDIDATES);
+  }
+
+  async function probeWhyEmpty() {
+    // Small probes that help us distinguish: (1) RLS vs (2) wrong table/columns
+    const probes = [];
+
+    for (const t of [TABLES.reservations, TABLES.callEvents]) {
+      const { data, error } = await supabaseClient.from(t).select("*").limit(1);
+      probes.push({
+        table: t,
+        ok: !error,
+        rowReturned: !!(data && data.length),
+        error: error?.message || ""
+      });
+    }
+
+    return probes;
   }
 
   // ---------- Normalize ----------
@@ -374,7 +421,7 @@
     };
   }
 
-  // ---------- Filtering ----------
+  // ---------- Filtering / KPIs / Feed ----------
   function applyFilters() {
     const range = lastRange || getSelectedRange();
     const q = (safeStr($("searchInput")?.value)).toLowerCase().trim();
@@ -398,7 +445,6 @@
     });
   }
 
-  // ---------- KPIs / Insights ----------
   function computeKPIs(rows) {
     const calls = rows.filter(r => r.kind === "call");
     const bookings = rows.filter(r => r.kind === "booking");
@@ -419,15 +465,7 @@
       return acc;
     }, {});
 
-    const today = startOfDay(new Date()).getTime();
-    const nextArrivals = bookings
-      .map(b => ({ b, d: parseISOish(b.arrival) }))
-      .filter(x => x.d && !isNaN(x.d.getTime()))
-      .filter(x => x.d.getTime() >= today)
-      .sort((a,b)=>a.d-b.d)
-      .slice(0, 5);
-
-    return { totalCalls, totalBookings, conv, avgDur, revenue, sentimentCounts, nextArrivals };
+    return { totalCalls, totalBookings, conv, avgDur, revenue, sentimentCounts };
   }
 
   function renderKPIs(k) {
@@ -454,50 +492,25 @@
     }
   }
 
-  function renderOpsInsights(k, rows) {
+  function renderOpsInsights(_k, _rows) {
     const box = $("opsInsights");
     if (!box) return;
-
-    const calls = rows.filter(r => r.kind === "call");
-    const negative = rows.filter(r => safeStr(r.sentiment).toLowerCase() === "negative");
-    const longCalls = calls.filter(c => Number.isFinite(c.durationSeconds) && c.durationSeconds >= 240).slice(0, 6);
-    const noSummary = rows.filter(r => !safeStr(r.summary).trim()).length;
-
-    const nextArrivalsText = k.nextArrivals.length
-      ? k.nextArrivals.map(x => {
-          const g = x.b.guest || "Guest";
-          const a = x.b.arrival || toYMD(x.d);
-          const n = Number.isFinite(x.b.nights) ? `${x.b.nights} night(s)` : "";
-          return `• ${g} — ${a} ${n ? `(${n})` : ""}`;
-        }).join("<br/>")
-      : `No upcoming arrival dates detected in this range.`;
-
-    box.innerHTML = `
-      <div style="line-height:1.6">
-        <b>Watchlist</b><br/>
-        Negative sentiment: <b>${fmtInt(negative.length)}</b><br/>
-        Long calls (4m+): <b>${fmtInt(longCalls.length)}</b><br/>
-        Missing summaries: <b>${fmtInt(noSummary)}</b><br/><br/>
-        <b>Next arrivals</b><br/>
-        ${nextArrivalsText}
-      </div>
-    `;
+    box.innerHTML = `<div class="state">Signals will populate when data loads.</div>`;
   }
 
-  // ---------- Feed ----------
   function renderFeed(rows) {
     const state = $("stateBox");
     const wrap = $("tableWrap");
     const tbody = $("feedTbody");
 
-    if ($("badgeCount")) $("badgeCount").textContent = fmtInt(rows.length);
-    if ($("feedMeta")) $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
+    $("badgeCount").textContent = fmtInt(rows.length);
+    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
 
     if (!rows.length) {
       if (wrap) wrap.style.display = "none";
       if (state) {
         state.style.display = "block";
-        state.textContent = "No data found for this date range / search (or RLS blocked).";
+        state.textContent = "No data returned for this range (or access blocked).";
       }
       return;
     }
@@ -536,7 +549,6 @@
     }
   }
 
-  // ---------- CSV ----------
   function exportCSV(rows) {
     const cols = ["kind","time","event","guest_or_caller","arrival_date","nights","total_due","sentiment","summary"];
     const lines = [cols.join(",")];
@@ -569,30 +581,27 @@
     toast("CSV exported.");
   }
 
-  // ---------- Render ----------
   function renderAll() {
     applyFilters();
-    if ($("badgeWindow")) $("badgeWindow").textContent = lastRange?.label || "—";
+    $("badgeWindow").textContent = lastRange?.label || "—";
 
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
     renderOpsInsights(k, filteredRows);
     renderFeed(filteredRows);
 
-    if ($("lastUpdated")) $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
+    $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
   }
 
   function clearDataUI(msg) {
     allRows = [];
     filteredRows = [];
-    if ($("badgeCount")) $("badgeCount").textContent = "—";
-    if ($("kpiGrid")) $("kpiGrid").innerHTML = "";
-    if ($("opsInsights")) $("opsInsights").innerHTML = "";
-    if ($("tableWrap")) $("tableWrap").style.display = "none";
-    if ($("stateBox")) {
-      $("stateBox").style.display = "block";
-      $("stateBox").textContent = msg || "—";
-    }
+    $("badgeCount").textContent = "—";
+    $("kpiGrid").innerHTML = "";
+    $("opsInsights").innerHTML = "";
+    $("tableWrap").style.display = "none";
+    $("stateBox").style.display = "block";
+    $("stateBox").textContent = msg || "—";
   }
 
   // ---------- Load ----------
@@ -611,7 +620,7 @@
 
     try {
       lastRange = getSelectedRange();
-      if ($("badgeWindow")) $("badgeWindow").textContent = lastRange.label;
+      $("badgeWindow").textContent = lastRange.label;
 
       const [resv, calls] = await Promise.all([
         fetchReservations(lastRange),
@@ -627,9 +636,20 @@
         return r;
       });
 
-      if (!allRows.length && state) {
-        state.textContent =
-          "Signed in, but no rows returned. Usually RLS blocking access, or table names/timestamp fields don’t match.";
+      if (!allRows.length) {
+        const probes = await probeWhyEmpty();
+        const probeText = probes.map(p =>
+          `• ${p.table}: ${p.ok ? "OK" : "ERROR"} ${p.rowReturned ? "(row exists)" : "(no row returned)"}${p.error ? ` — ${p.error}` : ""}`
+        ).join("\n");
+
+        if (state) {
+          state.textContent =
+            "Signed in, but no rows were returned.\n\n" +
+            "This is almost always RLS blocking SELECT, or the table is empty.\n\n" +
+            "Probe:\n" + probeText + "\n\n" +
+            "If probe shows OK but no rows: table is empty.\n" +
+            "If probe shows ERROR or OK/no rows while you KNOW there is data: RLS is blocking reads.";
+        }
       }
 
       renderAll();
