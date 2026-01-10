@@ -56,17 +56,18 @@
       color: var(--text);
     }
 
-    /* Login overlay */
+    /* Login overlay (keep dashboard visible behind it) */
     .overlay{
       position: fixed; inset: 0;
       display: none;
       align-items: center; justify-content: center;
       padding: 22px;
-      background: rgba(0,0,0,0.55);
+      background: rgba(0,0,0,0.35);
       backdrop-filter: blur(10px);
       z-index: 999;
     }
-    [data-theme="light"] .overlay{ background: rgba(10,15,25,0.22); }
+    [data-theme="light"] .overlay{ background: rgba(10,15,25,0.20); }
+
     .loginCard{
       width: min(520px, 100%);
       border-radius: 22px;
@@ -101,8 +102,10 @@
       background: rgba(10,15,25,0.03);
     }
     .field input:focus{ box-shadow: var(--ring); }
+
     .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .spacer{ flex:1; }
+
     .btn{
       border: 1px solid var(--border);
       background: var(--panel);
@@ -119,17 +122,20 @@
       background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
       border-color: rgba(110,168,255,0.45);
     }
+
     .error{ margin-top: 10px; color: #ffb4b4; font-size: 12px; display:none; }
     [data-theme="light"] .error{ color: #b00020; }
 
-    /* Layout */
+    /* /* Layout */
     .wrap{ display:grid; grid-template-columns: 270px 1fr; min-height:100vh; }
+
     .sidebar{
       position:sticky; top:0; height:100vh;
       padding:18px; border-right: 1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       backdrop-filter: blur(10px);
     }
+
     .brand{
       display:flex; align-items:center; gap:10px;
       padding:12px; border: 1px solid var(--border);
@@ -222,13 +228,36 @@
     .kpi .value{ font-size: 20px; margin:0 0 6px; }
     .kpi .sub{ font-size: 12px; color: var(--muted); margin:0; }
 
+    /* ---------- TABLE: no page-level horizontal scrolling ---------- */
     .tablewrap{
-      overflow:auto;
+      overflow: hidden;                 /* prevents page-level left/right scroll */
       border-radius: var(--radius2);
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.02);
     }
-    table{ width:100%; border-collapse: collapse; min-width: 980px; }
+
+    .tablewrap table{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;              /* key: keep within container */
+    }
+
+    .tablewrap th,
+    .tablewrap td{
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* Column sizing (fixed layout) */
+    .tablewrap th:nth-child(1), .tablewrap td:nth-child(1){ width: 150px; } /* Time */
+    .tablewrap th:nth-child(2), .tablewrap td:nth-child(2){ width: 90px; }  /* Type */
+    .tablewrap th:nth-child(3), .tablewrap td:nth-child(3){ width: 180px; } /* Guest/Caller */
+    .tablewrap th:nth-child(4), .tablewrap td:nth-child(4){ width: 120px; } /* Arrival */
+    .tablewrap th:nth-child(5), .tablewrap td:nth-child(5){ width: 70px; }  /* Nights */
+    .tablewrap th:nth-child(6), .tablewrap td:nth-child(6){ width: 110px; } /* Total */
+    .tablewrap th:nth-child(7), .tablewrap td:nth-child(7){ width: 110px; } /* Sentiment */
+    /* Summary fills remaining space */
+
     thead th{
       text-align:left; font-size: 12px; color: var(--muted); font-weight: 600;
       padding: 12px; border-bottom: 1px solid var(--border);
@@ -244,6 +273,26 @@
     }
     tbody tr:hover td{ background: rgba(110,168,255,0.07); }
 
+    /* Clamp long summary */
+    .summaryClamp{
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.35;
+    }
+
+    /* On smaller screens, allow horizontal scroll inside the table card only */
+    @media (max-width: 1100px){
+      .tablewrap{
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tablewrap table{
+        min-width: 900px;               /* only inside the wrapper */
+      }
+    }
+
     .state{
       padding: 14px;
       border-radius: var(--radius2);
@@ -251,8 +300,11 @@
       color: var(--muted);
       font-size: 13px;
       background: rgba(255,255,255,0.02);
+      white-space: pre-line;
     }
+
     .stack{ display:flex; flex-direction:column; gap:14px; }
+
     .toast{
       position: fixed; right: 16px; bottom: 16px; max-width: 360px;
       padding: 12px 14px; border-radius: 14px;
@@ -386,13 +438,13 @@
               <table>
                 <thead>
                   <tr>
-                    <th style="width:160px;">Time</th>
-                    <th style="width:140px;">Type</th>
-                    <th style="width:220px;">Guest / Caller</th>
-                    <th style="width:160px;">Arrival</th>
-                    <th style="width:90px;">Nights</th>
-                    <th style="width:140px;">Total Due</th>
-                    <th style="width:140px;">Sentiment</th>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Guest / Caller</th>
+                    <th>Arrival</th>
+                    <th>Nights</th>
+                    <th>Total Due</th>
+                    <th>Sentiment</th>
                     <th>Summary</th>
                   </tr>
                 </thead>
