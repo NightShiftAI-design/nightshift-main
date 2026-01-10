@@ -122,7 +122,7 @@
     authMsg.textContent = "Sending magic link...";
 
     // IMPORTANT: ensure Supabase Auth URL Configuration includes this redirect URL
-    const redirectTo = window.location.origin + "/dashboard/";
+    const redirectTo = "https://nightshifthotels.com/dashboard/";
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
