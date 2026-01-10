@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Check your email • NightShift AI</title>
+
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- Optional: if you want theme toggle to still apply here, this reads localStorage and sets html.dark -->
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem("nsa_theme") || "system";
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var resolved = (t === "dark") ? "dark" : (t === "light") ? "light" : (prefersDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }catch(e){}
+    })();
+  </script>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.62);
+      --accent: #6ea8ff;
+      --shadow: 0 12px 40px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --ring: 0 0 0 3px rgba(110,168,255,0.20);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    html:not(.dark){
+      --bg: #f6f7fb;
+      --panel: rgba(10,15,25,0.04);
+      --panel2: rgba(10,15,25,0.06);
+      --border: rgba(10,15,25,0.10);
+      --text: rgba(10,15,25,0.92);
+      --muted: rgba(10,15,25,0.62);
+      --shadow: 0 12px 30px rgba(10,15,25,0.10);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+    }
+
+    .card{
+      width: min(640px, 100%);
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .head{
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color: inherit;
+    }
+    .dot{
+      width:12px; height:12px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
+      box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
+      flex: 0 0 auto;
+    }
+    .brand b{ font-size: 14px; }
+    .brand span{ display:block; font-size: 12px; color: var(--muted); margin-top:2px; }
+
+    .body{ padding: 18px; }
+
+    h1{
+      font-size: 18px;
+      margin: 0 0 8px;
+      letter-spacing: -0.01em;
+    }
+    p{
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .emailPill{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      font-size: 13px;
+      margin: 8px 0 14px;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+    .btn{
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: 11px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      font-size: 13px;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
+    .btn:focus{ outline:none; box-shadow: var(--ring); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
+      border-color: rgba(110,168,255,0.45);
+    }
+
+    .tips{
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .tips ul{
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" role="main" aria-label="Check your email">
+    <div class="head">
+      <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
+        <span class="dot"></span>
+        <div>
+          <b>NightShift AI</b>
+          <span>Secure sign-in</span>
+        </div>
+      </a>
+      <div class="small" id="ts">—</div>
+    </div>
+
+    <div class="body">
+      <h1>Check your inbox for your secure sign-in link</h1>
+      <p>
+        We’ve sent a magic link to your email. Click the link to finish signing in to the dashboard.
+      </p>
+
+      <div class="emailPill" id="emailPill" style="display:none;"></div>
+
+      <div class="row">
+        <a class="btn primary" href="/dashboard/">Back to Dashboard</a>
+        <a class="btn" href="/" rel="nofollow">Back to NightShiftAI.com</a>
+      </div>
+
+      <div class="tips">
+        <p class="small" style="margin:0;">
+          If you don’t see it within 1–2 minutes:
+        </p>
+        <ul>
+          <li>Check spam/promotions folders</li>
+          <li>Search for “NightShift AI”</li>
+          <li>Try Resend from the dashboard login</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      try{
+        document.getElementById("ts").textContent = "Sent " + new Date().toLocaleString();
+        var params = new URLSearchParams(location.search);
+        var email = params.get("email");
+        if (email){
+          var pill = document.getElementById("emailPill");
+          pill.style.display = "inline-flex";
+          pill.textContent = "Sent to: " + email;
+        }
+      }catch(e){}
+    })();
+  </script>
+</body>
+</html>
