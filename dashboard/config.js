@@ -1,0 +1,4 @@
+window.NSA_CONFIG = {
+  SUPABASE_URL: "https://sbzdnzouoyxmawuhdvdi.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiemRuem91b3l4bWF3dWhkdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY3ODgsImV4cCI6MjA4MDc4Mjc4OH0.SV4XppZoez27_g69NsjZNeJ989bhrEAAvR_XoD5w2Ho"
+};
