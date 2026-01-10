@@ -1,65 +1,662 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NightShift AI Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NightShift AI • Dashboard</title>
+
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- Supabase JS (required) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Your config + app logic -->
+  <script defer src="./config.js"></script>
+  <script defer src="./app.js"></script>
+
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 24px; background:#0b1220; color:#e5e7eb; }
-    input, button { padding: 10px; border-radius: 8px; border: none; }
-    input { width: 280px; }
-    button { background:#2563eb; color:white; cursor:pointer; }
-    button:hover { opacity:.9; }
-    table { border-collapse: collapse; width: 100%; margin-top: 14px; background:#020617; border-radius:12px; overflow:hidden; }
-    th, td { padding: 12px; border-bottom:1px solid #1e293b; text-align:left; }
-    th { color:#94a3b8; font-weight:600; }
-    .muted { color:#94a3b8; }
-    .hidden { display:none; }
-    .card { background:#020617; border-radius:16px; padding:16px; margin: 14px 0; }
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.62);
+      --muted2: rgba(255,255,255,0.45);
+      --accent: #6ea8ff;
+      --good: #42d392;
+      --warn: #ffcc66;
+      --bad: #ff6b6b;
+      --shadow: 0 12px 40px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --radius2: 14px;
+      --ring: 0 0 0 3px rgba(110,168,255,0.20);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    [data-theme="light"]{
+      --bg: #f6f7fb;
+      --panel: rgba(10,15,25,0.04);
+      --panel2: rgba(10,15,25,0.06);
+      --border: rgba(10,15,25,0.10);
+      --text: rgba(10,15,25,0.92);
+      --muted: rgba(10,15,25,0.62);
+      --muted2: rgba(10,15,25,0.45);
+      --shadow: 0 12px 30px rgba(10,15,25,0.10);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    button, input, select { font-family: inherit; }
+
+    .wrap{
+      display:grid;
+      grid-template-columns: 270px 1fr;
+      min-height:100vh;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position:sticky;
+      top:0;
+      height:100vh;
+      padding:18px;
+      border-right: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .brand .dot{
+      width:12px; height:12px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
+      box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
+      flex:0 0 auto;
+    }
+    .brand h1{
+      font-size: 14px;
+      letter-spacing: 0.2px;
+      margin:0;
+      line-height:1.2;
+    }
+    .brand p{
+      margin:0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .nav{
+      margin-top:16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .nav .pill{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .nav .pill:hover{
+      transform: translateY(-1px);
+      background: var(--panel2);
+      border-color: rgba(110,168,255,0.35);
+    }
+    .pill .label{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .pill .label b{ font-size: 13px; }
+    .pill .label span{ font-size: 12px; color: var(--muted); }
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(110,168,255,0.14);
+      color: var(--text);
+      white-space:nowrap;
+    }
+
+    .side-footer{
+      position:absolute;
+      left:18px; right:18px; bottom:18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .hint{
+      font-size:12px;
+      color: var(--muted);
+      padding:10px 12px;
+      border-radius: 14px;
+      border: 1px dashed var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .minirow{
+      display:flex;
+      gap:10px;
+    }
+    .btn{
+      appearance:none;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
+    .btn:focus{ outline:none; box-shadow: var(--ring); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
+      border-color: rgba(110,168,255,0.45);
+    }
+
+    /* Main */
+    .main{
+      padding: 18px 18px 28px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 14px;
+    }
+    .title h2{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    .title p{
+      margin:6px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:10px;
+      align-items:center;
+    }
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .chip label{
+      font-size:12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .chip select, .chip input{
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding:8px 10px;
+      border-radius: 12px;
+      outline:none;
+      min-width: 140px;
+    }
+    [data-theme="light"] .chip select,
+    [data-theme="light"] .chip input{
+      border-color: rgba(10,15,25,0.12);
+      background: rgba(10,15,25,0.03);
+    }
+    .chip input::placeholder{ color: var(--muted2); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+    }
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns: 1fr; }
+      .sidebar{ position:relative; height:auto; }
+      .side-footer{ position:relative; left:auto; right:auto; bottom:auto; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .head{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card .head h3{
+      margin:0;
+      font-size: 14px;
+      letter-spacing: 0.15px;
+    }
+    .card .head span{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .card .body{ padding: 14px; }
+
+    /* KPI tiles */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 900px){
+      .kpis{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi{
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 12px;
+      min-height: 92px;
+    }
+    .kpi .name{
+      font-size: 12px;
+      color: var(--muted);
+      margin:0 0 8px;
+    }
+    .kpi .value{
+      font-size: 20px;
+      margin:0 0 6px;
+      letter-spacing: 0.2px;
+    }
+    .kpi .sub{
+      font-size: 12px;
+      color: var(--muted);
+      margin:0;
+    }
+
+    /* Charts */
+    .charts{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 900px){
+      .charts{ grid-template-columns: 1fr; }
+    }
+    .chartbox{
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 12px;
+    }
+    canvas{
+      width:100%;
+      height:180px;
+      display:block;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    [data-theme="light"] canvas{
+      background: rgba(10,15,25,0.03);
+      border-color: rgba(10,15,25,0.10);
+    }
+    .legend{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .legend .dot{
+      width:10px; height:10px; border-radius: 50%;
+      display:inline-block; margin-right:6px;
+      background: currentColor;
+      opacity: 0.9;
+      transform: translateY(1px);
+    }
+
+    /* Table */
+    .tablewrap{
+      overflow:auto;
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    thead th{
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      backdrop-filter: blur(10px);
+    }
+    tbody td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: top;
+      cursor: default;
+    }
+    tbody tr:hover td{
+      background: rgba(110,168,255,0.07);
+    }
+    .muted{ color: var(--muted); }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      white-space:nowrap;
+    }
+    .tag.good{ border-color: rgba(66,211,146,0.35); background: rgba(66,211,146,0.12); }
+    .tag.warn{ border-color: rgba(255,204,102,0.35); background: rgba(255,204,102,0.12); }
+    .tag.bad{ border-color: rgba(255,107,107,0.35); background: rgba(255,107,107,0.12); }
+
+    /* Right column */
+    .stack{ display:flex; flex-direction:column; gap:14px; }
+
+    .insights{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .insight{
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 12px;
+    }
+    .insight b{ display:block; font-size:13px; margin-bottom:6px; }
+    .insight span{ color: var(--muted); font-size:12px; }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      max-width: 360px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(10,15,25,0.72);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      font-size: 13px;
+      opacity:0;
+      transform: translateY(10px);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 99;
+    }
+    [data-theme="light"] .toast{
+      background: rgba(255,255,255,0.78);
+    }
+    .toast.show{ opacity:1; transform: translateY(0); }
+
+    /* Loading / empty */
+    .state{
+      padding: 14px;
+      border-radius: var(--radius2);
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      background: rgba(255,255,255,0.02);
+    }
+    .row{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .spacer{ flex:1; }
+    .small{ font-size:12px; color: var(--muted); }
   </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand" role="banner">
+        <div class="dot" aria-hidden="true"></div>
+        <div>
+          <h1>NightShift AI</h1>
+          <p>Owner Dashboard</p>
+        </div>
+      </div>
 
-<h1>🌙 NightShift AI — Dashboard</h1>
+      <div class="nav" aria-label="Dashboard navigation">
+        <div class="pill" title="Live KPIs and trends">
+          <div class="label">
+            <b>Overview</b>
+            <span>KPIs • trends • alerts</span>
+          </div>
+          <span class="badge" id="badgeWindow">Last 7 days</span>
+        </div>
 
-<div id="auth" class="card">
-  <h3>Login</h3>
-  <p class="muted">Enter your email to receive a magic link.</p>
-  <input id="email" type="email" placeholder="you@hotel.com" />
-  <button id="sendLink">Send Magic Link</button>
-  <p id="authMsg" class="muted"></p>
-</div>
+        <div class="pill" title="Call and booking feed">
+          <div class="label">
+            <b>Activity Feed</b>
+            <span>Calls • bookings • notes</span>
+          </div>
+          <span class="badge" id="badgeCount">—</span>
+        </div>
 
-<div id="app" class="card hidden">
-  <div class="muted">Signed in as</div>
-  <div id="who"></div>
-  <button id="logout">Log out</button>
+        <div class="pill" title="Portfolio summary (multi-property ready)">
+          <div class="label">
+            <b>Portfolio</b>
+            <span>Multi-property view</span>
+          </div>
+          <span class="badge" id="badgePortfolio">Ready</span>
+        </div>
+      </div>
 
-  <h3 style="margin-top:18px;">Latest Reservations</h3>
-  <div class="muted" id="count"></div>
+      <div class="side-footer">
+        <div class="hint">
+          Tip: Use search to find a guest, phone, room type, or “booking”.
+          Export CSV for owners anytime.
+        </div>
+        <div class="minirow">
+          <button class="btn" id="btnTheme" type="button">Toggle theme</button>
+          <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
+        </div>
+      </div>
+    </aside>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Created</th>
-        <th>Guest</th>
-        <th>Arrival</th>
-        <th>Nights</th>
-        <th>Room</th>
-        <th>Total</th>
-        <th>Pets</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
-</div>
+    <!-- Main -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">
+          <h2>Executive Overview</h2>
+          <p>
+            Clean portfolio-style dashboard: **KPIs**, **ops signals**, searchable activity feed,
+            date filters, CSV export, and simple charts (no frameworks).
+          </p>
+        </div>
 
-<!-- Supabase library -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+        <div class="controls" aria-label="Dashboard controls">
+          <div class="chip">
+            <label for="rangeSelect">Date</label>
+            <select id="rangeSelect">
+              <option value="today">Today</option>
+              <option value="7" selected>Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
 
-<!-- Your config + app code -->
-<script src="/dashboard/config.js"></script>
-<script src="/dashboard/app.js"></script>
+          <div class="chip" id="customRange" style="display:none;">
+            <label for="startDate">From</label>
+            <input id="startDate" type="date"/>
+            <label for="endDate">To</label>
+            <input id="endDate" type="date"/>
+          </div>
 
+          <div class="chip" style="min-width: 320px;">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
+          </div>
+
+          <button class="btn" id="btnExport" type="button">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- Left column -->
+        <section class="card">
+          <div class="head">
+            <h3>Performance KPIs</h3>
+            <span id="lastUpdated">—</span>
+          </div>
+          <div class="body">
+            <div class="kpis" id="kpiGrid">
+              <!-- filled by JS -->
+            </div>
+
+            <div style="height:12px"></div>
+
+            <div class="charts">
+              <div class="chartbox">
+                <div class="row">
+                  <b style="font-size:13px;">Calls per day</b>
+                  <span class="spacer"></span>
+                  <span class="small" id="callsTrendLabel">—</span>
+                </div>
+                <div style="height:10px"></div>
+                <canvas id="callsChart" width="900" height="260"></canvas>
+                <div class="legend">
+                  <span><i class="dot" style="color: var(--accent)"></i> Calls</span>
+                </div>
+              </div>
+
+              <div class="chartbox">
+                <div class="row">
+                  <b style="font-size:13px;">Bookings per day</b>
+                  <span class="spacer"></span>
+                  <span class="small" id="bookingsTrendLabel">—</span>
+                </div>
+                <div style="height:10px"></div>
+                <canvas id="bookingsChart" width="900" height="260"></canvas>
+                <div class="legend">
+                  <span><i class="dot" style="color: var(--good)"></i> Bookings</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="height:14px"></div>
+
+            <div class="row" style="margin-bottom:10px;">
+              <b style="font-size:13px;">Activity Feed</b>
+              <span class="spacer"></span>
+              <span class="small" id="feedMeta">—</span>
+            </div>
+
+            <div id="stateBox" class="state">Loading…</div>
+
+            <div class="tablewrap" id="tableWrap" style="display:none;">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:160px;">Time</th>
+                    <th style="width:140px;">Type</th>
+                    <th style="width:220px;">Guest / Caller</th>
+                    <th style="width:160px;">Arrival</th>
+                    <th style="width:90px;">Nights</th>
+                    <th style="width:140px;">Total Due</th>
+                    <th style="width:140px;">Sentiment</th>
+                    <th>Summary</th>
+                  </tr>
+                </thead>
+                <tbody id="feedTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right column -->
+        <aside class="stack">
+          <section class="card">
+            <div class="head">
+              <h3>Ops Signals</h3>
+              <span>fast triage</span>
+            </div>
+            <div class="body">
+              <div class="insights" id="opsInsights">
+                <!-- filled by JS -->
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="head">
+              <h3>Portfolio Notes</h3>
+              <span>owner-ready</span>
+            </div>
+            <div class="body">
+              <div class="state" id="portfolioBox">
+                Designed for multi-property: when you add a <span class="muted">property_id / property_name</span> column later,
+                this UI will automatically group and summarize by property.
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
 </body>
 </html>
