@@ -5,11 +5,12 @@
   // ============================================================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
 
-  // Always show login overlay on load (prevents "URL bypass" on shared computers)
-  const ALWAYS_REQUIRE_LOGIN = true;
+  // ✅ Persist sessions so refresh works (no more magic link every time)
+  // NOTE: If you ever want "shared computer lock mode", flip ALWAYS_REQUIRE_LOGIN back to true.
+  const ALWAYS_REQUIRE_LOGIN = false;
 
-  // Do not persist sessions (prevents silent auto-login after refresh)
-  const PERSIST_SESSION = false;
+  // ✅ Persist sessions (required for refresh UX)
+  const PERSIST_SESSION = true;
 
   // If a CALL row clearly represents a confirmed booking AND a matching BOOKING row exists,
   // hide the CALL row to prevent duplicates/confusion.
@@ -46,6 +47,11 @@
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
+  };
+
+  const canonicalYMDFromAnyDateStr = (s) => {
+    const d = parseISOish(s);
+    return d ? toYMD(d) : "";
   };
 
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -86,11 +92,40 @@
       .replace(/'/g, "&#039;");
   }
 
+  function safeJsonParse(v) {
+    if (!v) return null;
+    if (typeof v === "object") return v;
+    try { return JSON.parse(String(v)); } catch { return null; }
+  }
+
+  function toNum(v) {
+    if (v === null || v === undefined) return NaN;
+    if (typeof v === "number") return v;
+    const s = String(v).replace(/[^0-9.\-]/g, "").trim();
+    if (!s) return NaN;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  }
+
   // ============================================================
   // Dedupe helpers (remove booking-like CALL rows when BOOKING exists)
   // ============================================================
   function normKey(v) {
     return safeStr(v).trim().toLowerCase();
+  }
+
+  function canonicalGuestName(v) {
+    let s = safeStr(v).trim();
+
+    // Strip anything after ":" (e.g., "Lil Baby: King non-smoking")
+    if (s.includes(":")) s = s.split(":")[0].trim();
+
+    // Strip some common trailing descriptors
+    s = s.replace(/\s*[-•|]\s*(king|queen|double|single|suite|non[-\s]?smoking|smoking|room|reservation|booking).*/i, "").trim();
+
+    // Collapse whitespace
+    s = s.replace(/\s+/g, " ");
+    return s;
   }
 
   function extractISODateFromText(text) {
@@ -125,27 +160,30 @@
     // "Reservation confirmed for Key Glock, ..."
     const m = s.match(/\bfor\s+([^,•.\n]{2,80})/i);
     if (!m) return "";
-    const name = safeStr(m[1]).trim();
-    if (name.length < 2 || /^\d+$/.test(name)) return "";
-    return name;
+    const raw = safeStr(m[1]).trim();
+    const nameOnly = raw.split(":")[0].trim();
+    if (nameOnly.length < 2 || /^\d+$/.test(nameOnly)) return "";
+    return nameOnly;
   }
 
   function isBookingLikeCall(summary) {
     const s = safeStr(summary).toLowerCase();
     return (
       s.includes("reservation confirmed") ||
+      s.includes("confirmed reservation") ||
       s.includes("reservation for") ||
-      s.includes("booking confirmed")
+      s.includes("booking confirmed") ||
+      s.includes("reservation_confirmed")
     );
   }
 
   function dedupeBookingLikeCalls(rows) {
-    // Build set of known booking keys (guest + arrival)
+    // Build set of known booking keys (guest + arrival) using canonical formats
     const bookingKeySet = new Set();
     for (const r of rows) {
       if (r.kind !== "booking") continue;
-      const g = normKey(r.guest);
-      const a = normKey(r.arrival);
+      const g = normKey(canonicalGuestName(r.guest));
+      const a = normKey(canonicalYMDFromAnyDateStr(r.arrival));
       if (g && a) bookingKeySet.add(`${g}__${a}`);
     }
 
@@ -153,8 +191,16 @@
       if (r.kind !== "call") return true;
       if (!isBookingLikeCall(r.summary)) return true;
 
-      const guestFromCall = normKey(r.guest) || normKey(extractNameFromSummary(r.summary));
-      const arrivalFromCall = normKey(r.arrival) || normKey(extractISODateFromText(r.summary));
+      // Prefer structured booking payload from call logs (if present)
+      const callBooking = (r.booking && typeof r.booking === "object") ? r.booking : null;
+
+      const guestFromCall = normKey(canonicalGuestName(
+        callBooking?.guest_name || r.guest || extractNameFromSummary(r.summary)
+      ));
+
+      const arrivalFromCall = normKey(canonicalYMDFromAnyDateStr(
+        callBooking?.arrival_date || r.arrival || extractISODateFromText(r.summary)
+      ));
 
       // If we can't parse both, keep the call (better to show than hide incorrectly)
       if (!guestFromCall || !arrivalFromCall) return true;
@@ -198,7 +244,7 @@
     return window.supabase.createClient(url, key, {
       auth: {
         persistSession: PERSIST_SESSION,
-        autoRefreshToken: false,
+        autoRefreshToken: true,
         detectSessionInUrl: true,
       }
     });
@@ -468,13 +514,15 @@
   // ============================================================
   function normalizeReservationRow(r, tsField) {
     const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
-    const bookingObj = r?.booking && typeof r.booking === "object" ? r.booking : null;
+    const bookingObj = (r?.booking && typeof r.booking === "object") ? r.booking : null;
 
     const event = safeStr(r?.event || bookingObj?.event || "booking");
     const guest = safeStr(r?.guest_name || bookingObj?.guest_name || r?.name || r?.caller_name || "");
-    const arrival = safeStr(r?.arrival_date || bookingObj?.arrival_date || "");
-    const nights = Number(r?.nights ?? bookingObj?.nights);
-    const totalDue = Number(r?.total_due ?? bookingObj?.total_due);
+    const arrivalRaw = safeStr(r?.arrival_date || bookingObj?.arrival_date || "");
+    const arrival = canonicalYMDFromAnyDateStr(arrivalRaw) || arrivalRaw;
+
+    const nights = toNum(r?.nights ?? bookingObj?.nights);
+    const totalDue = toNum(r?.total_due ?? bookingObj?.total_due);
     const sentiment = safeStr(r?.sentiment || bookingObj?.sentiment || r?.call_sentiment || "");
 
     const summary =
@@ -512,7 +560,7 @@
       r?.caller_number ??
       "";
 
-    const duration = Number(r?.duration_seconds ?? r?.duration ?? NaN);
+    const duration = toNum(r?.duration_seconds ?? r?.duration ?? NaN);
     const sentiment = safeStr(r?.sentiment || r?.call_sentiment || "");
 
     const summary =
@@ -521,11 +569,30 @@
       safeStr(r?.transcript_summary) ||
       `${event}${callId ? ` • ${callId}` : ""}${rawPhone ? ` • ${safeStr(rawPhone)}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
 
+    // ✅ Parse structured booking JSON string (if present)
+    const bookingObj = safeJsonParse(r?.booking);
+
+    const guestFromBooking = safeStr(bookingObj?.guest_name).trim();
+    const arrivalFromBooking = safeStr(bookingObj?.arrival_date).trim();
+
     const explicitName = safeStr(r?.guest_name || r?.caller_name || r?.name || "").trim();
     const extractedName = extractNameFromSummary(summary);
-    const guestDisplay = explicitName || extractedName || safeStr(rawPhone).trim() || callId;
+
+    const guestDisplay =
+      guestFromBooking ||
+      explicitName ||
+      extractedName ||
+      safeStr(rawPhone).trim() ||
+      callId;
 
     const arrivalFromText = extractISODateFromText(summary);
+
+    const arrivalDisplay =
+      arrivalFromBooking ||
+      arrivalFromText ||
+      "";
+
+    const arrivalCanonical = canonicalYMDFromAnyDateStr(arrivalDisplay) || arrivalDisplay;
 
     return {
       kind: "call",
@@ -533,12 +600,13 @@
       whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
       event,
       guest: guestDisplay,
-      arrival: arrivalFromText || "",
+      arrival: arrivalCanonical,
       nights: null,
       totalDue: null,
       sentiment,
       summary,
       durationSeconds: Number.isFinite(duration) ? duration : null,
+      booking: bookingObj, // <— used for dedupe
       raw: r,
     };
   }
@@ -869,13 +937,10 @@
     initAuthHandlers();
 
     if (ALWAYS_REQUIRE_LOGIN) {
-      // Clear tokens so a refresh on shared machines doesn't silently keep session
+      // Optional "shared computer lock mode"
       clearSupabaseAuthStorage();
       showOverlay(true);
       clearDataUI("Please sign in to load dashboard data.");
-
-      // If user arrived from magic link, Supabase will detect URL token and SIGNED_IN will fire.
-      // We still call getSession once so UI can update quickly if already authenticated.
       await supabaseClient.auth.getSession();
       return;
     }
