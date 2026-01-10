@@ -1,662 +1,785 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NightShift AI • Dashboard</title>
+(() => {
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
 
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="color-scheme" content="dark light" />
+  const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
+  const fmtMoney = (n) => Number.isFinite(n) ? n.toLocaleString(undefined, { style: "currency", currency: "USD" }) : "—";
+  const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
+  const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
 
-  <!-- Supabase JS (required) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  const parseISOish = (v) => {
+    if (!v) return null;
+    const s = String(v).trim();
+    const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (ddmmyyyy) {
+      const [, dd, mm, yyyy] = ddmmyyyy;
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  };
 
-  <!-- Your config + app logic -->
-  <script defer src="./config.js"></script>
-  <script defer src="./app.js"></script>
+  const toYMD = (d) => {
+    if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
 
-  <style>
-    :root{
-      --bg: #0b1020;
-      --panel: rgba(255,255,255,0.06);
-      --panel2: rgba(255,255,255,0.08);
-      --border: rgba(255,255,255,0.10);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.62);
-      --muted2: rgba(255,255,255,0.45);
-      --accent: #6ea8ff;
-      --good: #42d392;
-      --warn: #ffcc66;
-      --bad: #ff6b6b;
-      --shadow: 0 12px 40px rgba(0,0,0,0.45);
-      --radius: 18px;
-      --radius2: 14px;
-      --ring: 0 0 0 3px rgba(110,168,255,0.20);
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    }
-    [data-theme="light"]{
-      --bg: #f6f7fb;
-      --panel: rgba(10,15,25,0.04);
-      --panel2: rgba(10,15,25,0.06);
-      --border: rgba(10,15,25,0.10);
-      --text: rgba(10,15,25,0.92);
-      --muted: rgba(10,15,25,0.62);
-      --muted2: rgba(10,15,25,0.45);
-      --shadow: 0 12px 30px rgba(10,15,25,0.10);
-    }
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: var(--font);
-      background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
-        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
-        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
-        var(--bg);
-      color: var(--text);
-    }
+  const toast = (msg) => {
+    const el = $("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+  };
 
-    a{ color:inherit; text-decoration:none; }
-    button, input, select { font-family: inherit; }
+  function setAuthError(msg) {
+    const el = $("authError");
+    if (!el) return;
+    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
+    el.style.display = "block";
+    el.textContent = msg;
+  }
 
-    .wrap{
-      display:grid;
-      grid-template-columns: 270px 1fr;
-      min-height:100vh;
-    }
+  // ---------- Theme ----------
+  function initTheme() {
+    const saved = localStorage.getItem("ns_theme");
+    if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+    $("btnTheme")?.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = (cur === "dark") ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("ns_theme", next);
+      toast(`Theme: ${next}`);
+      renderAll(); // redraw charts for contrast
+    });
+  }
 
-    /* Sidebar */
-    .sidebar{
-      position:sticky;
-      top:0;
-      height:100vh;
-      padding:18px;
-      border-right: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      backdrop-filter: blur(10px);
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:12px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-    }
-    .brand .dot{
-      width:12px; height:12px; border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
-      box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
-      flex:0 0 auto;
-    }
-    .brand h1{
-      font-size: 14px;
-      letter-spacing: 0.2px;
-      margin:0;
-      line-height:1.2;
-    }
-    .brand p{
-      margin:0;
-      font-size: 12px;
-      color: var(--muted);
+  // ---------- Supabase ----------
+  function getSupabaseClient() {
+    const url = window.SUPABASE_URL || window.supabaseUrl || window.NIGHTSHIFT_SUPABASE_URL;
+    const key = window.SUPABASE_ANON_KEY || window.supabaseAnonKey || window.NIGHTSHIFT_SUPABASE_ANON_KEY;
+
+    if (!url || !key || !window.supabase) {
+      throw new Error("Missing Supabase config. Ensure dashboard/config.js sets SUPABASE_URL and SUPABASE_ANON_KEY.");
     }
 
-    .nav{
-      margin-top:16px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .nav .pill{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:12px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-    .nav .pill:hover{
-      transform: translateY(-1px);
-      background: var(--panel2);
-      border-color: rgba(110,168,255,0.35);
-    }
-    .pill .label{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .pill .label b{ font-size: 13px; }
-    .pill .label span{ font-size: 12px; color: var(--muted); }
-    .badge{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(110,168,255,0.14);
-      color: var(--text);
-      white-space:nowrap;
+    // IMPORTANT: persistSession enabled by default, but we explicitly set it.
+    return window.supabase.createClient(url, key, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      }
+    });
+  }
+
+  // ---------- Tables ----------
+  const TABLES = {
+    reservations: "reservations",
+    callEvents: "call_events",
+  };
+
+  // ---------- State ----------
+  let supabaseClient = null;
+  let allRows = [];
+  let filteredRows = [];
+  let lastRange = null;
+
+  // ---------- Auth UI ----------
+  function showOverlay(show) {
+    const o = $("authOverlay");
+    if (!o) return;
+    o.style.display = show ? "flex" : "none";
+    o.setAttribute("aria-hidden", show ? "false" : "true");
+  }
+
+  function setSessionUI(session) {
+    const email = session?.user?.email || "";
+    $("userEmail").textContent = email || "—";
+    $("authBadge").textContent = email ? "Unlocked" : "Locked";
+    $("btnAuth").textContent = email ? "Account" : "Login";
+    $("btnLogout").style.display = email ? "inline-flex" : "none";
+    $("authStatus").textContent = email ? `Signed in as ${email}` : "Not signed in";
+  }
+
+  async function ensureAuthGate() {
+    // Detect session (including from magic link URL)
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    if (error) console.warn("getSession error:", error);
+
+    setSessionUI(session);
+
+    if (!session) {
+      // block data load until signed in
+      showOverlay(true);
+      $("stateBox").textContent = "Please sign in to load dashboard data.";
+      return false;
     }
 
-    .side-footer{
-      position:absolute;
-      left:18px; right:18px; bottom:18px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .hint{
-      font-size:12px;
-      color: var(--muted);
-      padding:10px 12px;
-      border-radius: 14px;
-      border: 1px dashed var(--border);
-      background: rgba(255,255,255,0.03);
-    }
-    .minirow{
-      display:flex;
-      gap:10px;
-    }
-    .btn{
-      appearance:none;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      color: var(--text);
-      padding:10px 12px;
-      border-radius: 14px;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-    .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
-    .btn:focus{ outline:none; box-shadow: var(--ring); }
-    .btn.primary{
-      background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
-      border-color: rgba(110,168,255,0.45);
+    showOverlay(false);
+    return true;
+  }
+
+  function initAuthHandlers() {
+    $("btnAuth")?.addEventListener("click", () => showOverlay(true));
+    $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
+
+    $("btnSendLink")?.addEventListener("click", sendMagicLink);
+    $("btnResendLink")?.addEventListener("click", sendMagicLink);
+
+    $("btnLogout")?.addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      toast("Signed out.");
+      setSessionUI(null);
+      showOverlay(true);
+      clearDataUI("Signed out. Please login to view data.");
+    });
+
+    // React to auth state changes
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      setSessionUI(session);
+      if (session) {
+        showOverlay(false);
+        await loadAndRender();
+      } else {
+        showOverlay(true);
+        clearDataUI("Please sign in to load dashboard data.");
+      }
+    });
+  }
+
+  async function sendMagicLink() {
+    setAuthError("");
+    const email = safeStr($("authEmail").value).trim();
+
+    if (!email || !email.includes("@")) {
+      return setAuthError("Enter a valid email address.");
     }
 
-    /* Main */
-    .main{
-      padding: 18px 18px 28px;
+    // Must match a redirect URL allowed in Supabase Auth settings
+    const redirectTo = `${window.location.origin}/dashboard/`;
+
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+
+    if (error) {
+      console.error("Magic link error:", error);
+      setAuthError(error.message || "Failed to send magic link.");
+      return;
     }
 
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 14px;
-    }
-    .title h2{
-      margin:0;
-      font-size: 20px;
-      letter-spacing: 0.2px;
-    }
-    .title p{
-      margin:6px 0 0;
-      font-size: 13px;
-      color: var(--muted);
-      max-width: 900px;
+    toast("Magic link sent. Check your email.");
+    setAuthError("");
+  }
+
+  // ---------- Controls ----------
+  function initControls() {
+    const rangeSelect = $("rangeSelect");
+    const customRange = $("customRange");
+    const startDate = $("startDate");
+    const endDate = $("endDate");
+    const searchInput = $("searchInput");
+
+    function syncCustomVisibility() {
+      customRange.style.display = (rangeSelect.value === "custom") ? "flex" : "none";
     }
 
-    .controls{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      gap:10px;
-      align-items:center;
-    }
-    .chip{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-    }
-    .chip label{
-      font-size:12px;
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .chip select, .chip input{
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      padding:8px 10px;
-      border-radius: 12px;
-      outline:none;
-      min-width: 140px;
-    }
-    [data-theme="light"] .chip select,
-    [data-theme="light"] .chip input{
-      border-color: rgba(10,15,25,0.12);
-      background: rgba(10,15,25,0.03);
-    }
-    .chip input::placeholder{ color: var(--muted2); }
+    rangeSelect.addEventListener("change", async () => {
+      syncCustomVisibility();
+      await loadAndRender();
+    });
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 14px;
-    }
-    @media (max-width: 1100px){
-      .wrap{ grid-template-columns: 1fr; }
-      .sidebar{ position:relative; height:auto; }
-      .side-footer{ position:relative; left:auto; right:auto; bottom:auto; }
-      .grid{ grid-template-columns: 1fr; }
+    startDate.addEventListener("change", loadAndRender);
+    endDate.addEventListener("change", loadAndRender);
+
+    searchInput.addEventListener("input", () => {
+      applyFilters();
+      renderAll();
+    });
+
+    $("btnRefresh")?.addEventListener("click", loadAndRender);
+
+    $("btnExport")?.addEventListener("click", () => {
+      if (!filteredRows.length) return toast("Nothing to export.");
+      exportCSV(filteredRows);
+    });
+
+    syncCustomVisibility();
+
+    // Default dates
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6);
+    startDate.value = toYMD(start);
+    endDate.value = toYMD(today);
+  }
+
+  function getSelectedRange() {
+    const mode = $("rangeSelect").value;
+    const now = new Date();
+
+    if (mode === "today") {
+      return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
     }
 
-    .card{
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card .head{
-      padding: 14px 14px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .card .head h3{
-      margin:0;
-      font-size: 14px;
-      letter-spacing: 0.15px;
-    }
-    .card .head span{
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .card .body{ padding: 14px; }
-
-    /* KPI tiles */
-    .kpis{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-    @media (max-width: 900px){
-      .kpis{ grid-template-columns: repeat(2, 1fr); }
-    }
-    .kpi{
-      border-radius: var(--radius2);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      padding: 12px;
-      min-height: 92px;
-    }
-    .kpi .name{
-      font-size: 12px;
-      color: var(--muted);
-      margin:0 0 8px;
-    }
-    .kpi .value{
-      font-size: 20px;
-      margin:0 0 6px;
-      letter-spacing: 0.2px;
-    }
-    .kpi .sub{
-      font-size: 12px;
-      color: var(--muted);
-      margin:0;
+    if (mode === "7" || mode === "30") {
+      const days = Number(mode);
+      const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
+      return { label: `Last ${days} days`, start: s, end: endOfDay(now) };
     }
 
-    /* Charts */
-    .charts{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    // custom
+    const sVal = $("startDate").value;
+    const eVal = $("endDate").value;
+    const s = sVal ? startOfDay(new Date(`${sVal}T00:00:00`)) : null;
+    const e = eVal ? endOfDay(new Date(`${eVal}T00:00:00`)) : null;
+
+    if (!s || !e || isNaN(s.getTime()) || isNaN(e.getTime())) {
+      const fallback = getSelectedRangeFallback();
+      return fallback;
     }
-    @media (max-width: 900px){
-      .charts{ grid-template-columns: 1fr; }
-    }
-    .chartbox{
-      border-radius: var(--radius2);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      padding: 12px;
-    }
-    canvas{
-      width:100%;
-      height:180px;
-      display:block;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.08);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    [data-theme="light"] canvas{
-      background: rgba(10,15,25,0.03);
-      border-color: rgba(10,15,25,0.10);
-    }
-    .legend{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .legend .dot{
-      width:10px; height:10px; border-radius: 50%;
-      display:inline-block; margin-right:6px;
-      background: currentColor;
-      opacity: 0.9;
-      transform: translateY(1px);
+    return { label: `${sVal} → ${eVal}`, start: s, end: e };
+  }
+
+  function getSelectedRangeFallback() {
+    const now = new Date();
+    const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
+    return { label: "Last 7 days", start: s, end: endOfDay(now) };
+  }
+
+  // ---------- Fetch ----------
+  async function fetchTableInRange(tableName, range, limit, tsCandidates) {
+    const startISO = range.start.toISOString();
+    const endISO = range.end.toISOString();
+
+    for (const tsField of tsCandidates) {
+      const { data, error } = await supabaseClient
+        .from(tableName)
+        .select("*")
+        .gte(tsField, startISO)
+        .lte(tsField, endISO)
+        .order(tsField, { ascending: false })
+        .limit(limit);
+
+      if (!error) return { data: data || [], tsField };
     }
 
-    /* Table */
-    .tablewrap{
-      overflow:auto;
-      border-radius: var(--radius2);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.02);
-    }
-    table{
-      width:100%;
-      border-collapse: collapse;
-      min-width: 980px;
-    }
-    thead th{
-      text-align:left;
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 600;
-      padding: 12px 12px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(255,255,255,0.02);
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      backdrop-filter: blur(10px);
-    }
-    tbody td{
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      font-size: 13px;
-      color: var(--text);
-      vertical-align: top;
-      cursor: default;
-    }
-    tbody tr:hover td{
-      background: rgba(110,168,255,0.07);
-    }
-    .muted{ color: var(--muted); }
+    // if we couldn't filter, at least try to get something recent
+    const { data, error } = await supabaseClient
+      .from(tableName)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(Math.min(limit, 800));
 
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      white-space:nowrap;
-    }
-    .tag.good{ border-color: rgba(66,211,146,0.35); background: rgba(66,211,146,0.12); }
-    .tag.warn{ border-color: rgba(255,204,102,0.35); background: rgba(255,204,102,0.12); }
-    .tag.bad{ border-color: rgba(255,107,107,0.35); background: rgba(255,107,107,0.12); }
+    if (error) return { data: [], tsField: "created_at", error };
+    return { data: data || [], tsField: "created_at" };
+  }
 
-    /* Right column */
-    .stack{ display:flex; flex-direction:column; gap:14px; }
+  async function fetchReservations(range) {
+    return fetchTableInRange(TABLES.reservations, range, 2000, ["created_at", "inserted_at", "timestamp", "ts"]);
+  }
 
-    .insights{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .insight{
-      border-radius: var(--radius2);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      padding: 12px;
-    }
-    .insight b{ display:block; font-size:13px; margin-bottom:6px; }
-    .insight span{ color: var(--muted); font-size:12px; }
+  async function fetchCallEvents(range) {
+    return fetchTableInRange(TABLES.callEvents, range, 3000, ["created_at", "inserted_at", "timestamp", "ts"]);
+  }
 
-    /* Toast */
-    .toast{
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      max-width: 360px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(10,15,25,0.72);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      color: var(--text);
-      font-size: 13px;
-      opacity:0;
-      transform: translateY(10px);
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 99;
-    }
-    [data-theme="light"] .toast{
-      background: rgba(255,255,255,0.78);
-    }
-    .toast.show{ opacity:1; transform: translateY(0); }
+  // ---------- Normalize ----------
+  function normalizeReservationRow(r, tsField) {
+    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
 
-    /* Loading / empty */
-    .state{
-      padding: 14px;
-      border-radius: var(--radius2);
-      border: 1px dashed var(--border);
-      color: var(--muted);
-      font-size: 13px;
-      background: rgba(255,255,255,0.02);
-    }
-    .row{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
-    .spacer{ flex:1; }
-    .small{ font-size:12px; color: var(--muted); }
-  </style>
-</head>
+    const bookingObj = r?.booking && typeof r.booking === "object" ? r.booking : null;
 
-<body>
-  <div class="wrap">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand" role="banner">
-        <div class="dot" aria-hidden="true"></div>
-        <div>
-          <h1>NightShift AI</h1>
-          <p>Owner Dashboard</p>
-        </div>
+    const event = safeStr(r?.event || bookingObj?.event || "booking");
+    const guest = safeStr(r?.guest_name || bookingObj?.guest_name || r?.name || r?.caller_name || "");
+    const arrival = safeStr(r?.arrival_date || bookingObj?.arrival_date || "");
+    const nights = Number(r?.nights ?? bookingObj?.nights);
+    const totalDue = Number(r?.total_due ?? bookingObj?.total_due);
+    const roomType = safeStr(r?.room_type || bookingObj?.room_type || "");
+    const sentiment = safeStr(r?.sentiment || bookingObj?.sentiment || r?.call_sentiment || "");
+
+    const summary =
+      safeStr(r?.summary) ||
+      safeStr(bookingObj?.summary) ||
+      `Reservation${guest ? ` for ${guest}` : ""}${arrival ? ` • Arrive ${arrival}` : ""}${roomType ? ` • ${roomType}` : ""}`;
+
+    return {
+      kind: "booking",
+      when,
+      whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
+      event,
+      guest,
+      arrival,
+      nights: Number.isFinite(nights) ? nights : null,
+      totalDue: Number.isFinite(totalDue) ? totalDue : null,
+      sentiment,
+      summary,
+      raw: r,
+    };
+  }
+
+  function normalizeCallEventRow(e, tsField) {
+    const when = parseISOish(e?.[tsField]) || parseISOish(e?.created_at) || parseISOish(e?.inserted_at) || null;
+
+    const event = safeStr(e?.event || e?.type || e?.name || "call_event");
+    const callId = safeStr(e?.call_id || e?.call_sid || e?.id || "");
+    const phone = safeStr(e?.from || e?.caller || e?.phone || e?.caller_phone || "");
+    const sentiment = safeStr(e?.sentiment || e?.call_sentiment || "");
+    const duration = Number(e?.duration_seconds ?? e?.duration ?? NaN);
+
+    const summary =
+      safeStr(e?.summary) ||
+      safeStr(e?.notes) ||
+      safeStr(e?.transcript_summary) ||
+      `${event}${callId ? ` • ${callId}` : ""}${phone ? ` • ${phone}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
+
+    return {
+      kind: "call",
+      when,
+      whenRaw: e?.[tsField] || e?.created_at || e?.inserted_at || "",
+      event,
+      guest: phone || callId,
+      arrival: "",
+      nights: null,
+      totalDue: null,
+      sentiment,
+      summary,
+      durationSeconds: Number.isFinite(duration) ? duration : null,
+      raw: e,
+    };
+  }
+
+  // ---------- Filtering ----------
+  function applyFilters() {
+    const range = lastRange || getSelectedRange();
+    const q = (safeStr($("searchInput")?.value)).toLowerCase().trim();
+
+    filteredRows = allRows.filter(row => {
+      const t = row.when instanceof Date && !isNaN(row.when.getTime()) ? row.when.getTime() : null;
+      if (t !== null) {
+        if (t < range.start.getTime() || t > range.end.getTime()) return false;
+      }
+
+      if (!q) return true;
+
+      const hay = [
+        row.kind, row.event, row.guest, row.arrival, row.sentiment, row.summary, safeStr(row.whenRaw),
+      ].join(" ").toLowerCase();
+
+      let rawStr = "";
+      try { rawStr = JSON.stringify(row.raw).toLowerCase(); } catch {}
+
+      return hay.includes(q) || rawStr.includes(q);
+    });
+  }
+
+  // ---------- KPIs / Insights ----------
+  function computeKPIs(rows) {
+    const calls = rows.filter(r => r.kind === "call");
+    const bookings = rows.filter(r => r.kind === "booking");
+
+    const totalCalls = calls.length;
+    const totalBookings = bookings.length;
+    const conv = totalCalls > 0 ? (totalBookings / totalCalls) : NaN;
+
+    const durations = calls.map(c => c.durationSeconds).filter(n => Number.isFinite(n));
+    const avgDur = durations.length ? (durations.reduce((a,b)=>a+b,0) / durations.length) : NaN;
+
+    const revenue = bookings.map(b => b.totalDue).filter(n => Number.isFinite(n)).reduce((a,b)=>a+b,0);
+
+    const sentimentCounts = rows.reduce((acc, r) => {
+      const s = safeStr(r.sentiment).toLowerCase();
+      if (!s) return acc;
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {});
+
+    const today = startOfDay(new Date()).getTime();
+    const nextArrivals = bookings
+      .map(b => ({ b, d: parseISOish(b.arrival) }))
+      .filter(x => x.d && !isNaN(x.d.getTime()))
+      .filter(x => x.d.getTime() >= today)
+      .sort((a,b)=>a.d-b.d)
+      .slice(0, 5);
+
+    return { totalCalls, totalBookings, conv, avgDur, revenue, sentimentCounts, nextArrivals };
+  }
+
+  function renderKPIs(k) {
+    const el = $("kpiGrid");
+    el.innerHTML = "";
+
+    const tiles = [
+      { name: "Total calls", value: fmtInt(k.totalCalls), sub: "all call events in range" },
+      { name: "Bookings", value: fmtInt(k.totalBookings), sub: "reservations captured" },
+      { name: "Conversion", value: fmtPct(k.conv), sub: "bookings ÷ calls" },
+      { name: "Booking revenue", value: fmtMoney(k.revenue), sub: "sum of total_due (if present)" },
+      { name: "Avg call duration", value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", sub: "based on duration_seconds" },
+      { name: "Positive sentiment", value: fmtInt(k.sentimentCounts["positive"] || 0), sub: "rows tagged positive" },
+      { name: "Neutral sentiment", value: fmtInt(k.sentimentCounts["neutral"] || 0), sub: "rows tagged neutral" },
+      { name: "Negative sentiment", value: fmtInt(k.sentimentCounts["negative"] || 0), sub: "rows tagged negative" },
+    ];
+
+    for (const t of tiles) {
+      const div = document.createElement("div");
+      div.className = "kpi";
+      div.innerHTML = `<p class="name">${t.name}</p><p class="value">${t.value}</p><p class="sub">${t.sub}</p>`;
+      el.appendChild(div);
+    }
+  }
+
+  function renderOpsInsights(k, rows) {
+    const box = $("opsInsights");
+    const calls = rows.filter(r => r.kind === "call");
+    const negative = rows.filter(r => safeStr(r.sentiment).toLowerCase() === "negative");
+    const longCalls = calls.filter(c => Number.isFinite(c.durationSeconds) && c.durationSeconds >= 240).slice(0, 6);
+    const noSummary = rows.filter(r => !safeStr(r.summary).trim()).length;
+
+    const nextArrivalsText = k.nextArrivals.length
+      ? k.nextArrivals.map(x => {
+          const g = x.b.guest || "Guest";
+          const a = x.b.arrival || toYMD(x.d);
+          const n = Number.isFinite(x.b.nights) ? `${x.b.nights} night(s)` : "";
+          return `• ${g} — ${a} ${n ? `(${n})` : ""}`;
+        }).join("<br/>")
+      : `<span class="muted">No upcoming arrival dates detected in this range.</span>`;
+
+    box.innerHTML = `
+      <div class="insight">
+        <b>Watchlist</b>
+        <span>
+          Negative sentiment: <b>${fmtInt(negative.length)}</b><br/>
+          Long calls (4m+): <b>${fmtInt(longCalls.length)}</b><br/>
+          Missing summaries: <b>${fmtInt(noSummary)}</b>
+        </span>
       </div>
 
-      <div class="nav" aria-label="Dashboard navigation">
-        <div class="pill" title="Live KPIs and trends">
-          <div class="label">
-            <b>Overview</b>
-            <span>KPIs • trends • alerts</span>
-          </div>
-          <span class="badge" id="badgeWindow">Last 7 days</span>
-        </div>
-
-        <div class="pill" title="Call and booking feed">
-          <div class="label">
-            <b>Activity Feed</b>
-            <span>Calls • bookings • notes</span>
-          </div>
-          <span class="badge" id="badgeCount">—</span>
-        </div>
-
-        <div class="pill" title="Portfolio summary (multi-property ready)">
-          <div class="label">
-            <b>Portfolio</b>
-            <span>Multi-property view</span>
-          </div>
-          <span class="badge" id="badgePortfolio">Ready</span>
-        </div>
+      <div class="insight">
+        <b>Next arrivals (best-effort)</b>
+        <span>${nextArrivalsText}</span>
       </div>
 
-      <div class="side-footer">
-        <div class="hint">
-          Tip: Use search to find a guest, phone, room type, or “booking”.
-          Export CSV for owners anytime.
-        </div>
-        <div class="minirow">
-          <button class="btn" id="btnTheme" type="button">Toggle theme</button>
-          <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
-        </div>
+      <div class="insight">
+        <b>Operational snapshot</b>
+        <span>
+          Calls: <b>${fmtInt(k.totalCalls)}</b> • Bookings: <b>${fmtInt(k.totalBookings)}</b><br/>
+          Conversion: <b>${fmtPct(k.conv)}</b> • Revenue: <b>${fmtMoney(k.revenue)}</b>
+        </span>
       </div>
-    </aside>
+    `;
+  }
 
-    <!-- Main -->
-    <main class="main">
-      <div class="topbar">
-        <div class="title">
-          <h2>Executive Overview</h2>
-          <p>
-            Clean portfolio-style dashboard: **KPIs**, **ops signals**, searchable activity feed,
-            date filters, CSV export, and simple charts (no frameworks).
-          </p>
-        </div>
+  // ---------- Feed ----------
+  function sentimentTag(sentiment) {
+    const s = safeStr(sentiment).toLowerCase();
+    if (!s) return `<span class="tag">—</span>`;
+    if (s.includes("pos")) return `<span class="tag good">positive</span>`;
+    if (s.includes("neg")) return `<span class="tag bad">negative</span>`;
+    if (s.includes("neu")) return `<span class="tag warn">neutral</span>`;
+    return `<span class="tag">${safeStr(sentiment)}</span>`;
+  }
+  function kindTag(kind) {
+    return kind === "booking" ? `<span class="tag good">booking</span>` : `<span class="tag">call</span>`;
+  }
 
-        <div class="controls" aria-label="Dashboard controls">
-          <div class="chip">
-            <label for="rangeSelect">Date</label>
-            <select id="rangeSelect">
-              <option value="today">Today</option>
-              <option value="7" selected>Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
+  function renderFeed(rows) {
+    const state = $("stateBox");
+    const wrap = $("tableWrap");
+    const tbody = $("feedTbody");
 
-          <div class="chip" id="customRange" style="display:none;">
-            <label for="startDate">From</label>
-            <input id="startDate" type="date"/>
-            <label for="endDate">To</label>
-            <input id="endDate" type="date"/>
-          </div>
+    $("badgeCount").textContent = fmtInt(rows.length);
+    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
 
-          <div class="chip" style="min-width: 320px;">
-            <label for="searchInput">Search</label>
-            <input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
-          </div>
+    if (!rows.length) {
+      wrap.style.display = "none";
+      state.style.display = "block";
+      state.textContent = "No data found for this date range / search (or RLS blocked).";
+      return;
+    }
 
-          <button class="btn" id="btnExport" type="button">Export CSV</button>
-        </div>
-      </div>
+    state.style.display = "none";
+    wrap.style.display = "block";
 
-      <div class="grid">
-        <!-- Left column -->
-        <section class="card">
-          <div class="head">
-            <h3>Performance KPIs</h3>
-            <span id="lastUpdated">—</span>
-          </div>
-          <div class="body">
-            <div class="kpis" id="kpiGrid">
-              <!-- filled by JS -->
-            </div>
+    const sorted = [...rows].sort((a, b) => {
+      const ta = a.when ? a.when.getTime() : -Infinity;
+      const tb = b.when ? b.when.getTime() : -Infinity;
+      return tb - ta;
+    });
 
-            <div style="height:12px"></div>
+    tbody.innerHTML = "";
 
-            <div class="charts">
-              <div class="chartbox">
-                <div class="row">
-                  <b style="font-size:13px;">Calls per day</b>
-                  <span class="spacer"></span>
-                  <span class="small" id="callsTrendLabel">—</span>
-                </div>
-                <div style="height:10px"></div>
-                <canvas id="callsChart" width="900" height="260"></canvas>
-                <div class="legend">
-                  <span><i class="dot" style="color: var(--accent)"></i> Calls</span>
-                </div>
-              </div>
+    for (const r of sorted.slice(0, 500)) {
+      const tr = document.createElement("tr");
+      const whenTxt = r.when ? r.when.toLocaleString() : safeStr(r.whenRaw) || "—";
+      const arrivalTxt = r.arrival ? safeStr(r.arrival) : "—";
+      const nightsTxt = Number.isFinite(r.nights) ? String(r.nights) : "—";
+      const totalTxt = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
 
-              <div class="chartbox">
-                <div class="row">
-                  <b style="font-size:13px;">Bookings per day</b>
-                  <span class="spacer"></span>
-                  <span class="small" id="bookingsTrendLabel">—</span>
-                </div>
-                <div style="height:10px"></div>
-                <canvas id="bookingsChart" width="900" height="260"></canvas>
-                <div class="legend">
-                  <span><i class="dot" style="color: var(--good)"></i> Bookings</span>
-                </div>
-              </div>
-            </div>
+      tr.innerHTML = `
+        <td><span class="muted">${whenTxt}</span></td>
+        <td>${kindTag(r.kind)}</td>
+        <td>${safeStr(r.guest) || "<span class='muted'>—</span>"}</td>
+        <td>${arrivalTxt}</td>
+        <td>${nightsTxt}</td>
+        <td>${totalTxt}</td>
+        <td>${sentimentTag(r.sentiment)}</td>
+        <td>${safeStr(r.summary) || "<span class='muted'>—</span>"}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
 
-            <div style="height:14px"></div>
+  // ---------- Charts ----------
+  function groupByDay(rows, kindFilter) {
+    const map = new Map();
+    for (const r of rows) {
+      if (kindFilter && r.kind !== kindFilter) continue;
+      const d = r.when || parseISOish(r.whenRaw);
+      if (!d || isNaN(d.getTime())) continue;
+      const key = toYMD(d);
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    return map;
+  }
 
-            <div class="row" style="margin-bottom:10px;">
-              <b style="font-size:13px;">Activity Feed</b>
-              <span class="spacer"></span>
-              <span class="small" id="feedMeta">—</span>
-            </div>
+  function buildDayAxis(range) {
+    const days = [];
+    const cur = new Date(range.start);
+    while (cur.getTime() <= range.end.getTime()) {
+      days.push(toYMD(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return days;
+  }
 
-            <div id="stateBox" class="state">Loading…</div>
+  function drawLineChart(canvasId, labels, values, colorVarName) {
+    const canvas = $(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
 
-            <div class="tablewrap" id="tableWrap" style="display:none;">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width:160px;">Time</th>
-                    <th style="width:140px;">Type</th>
-                    <th style="width:220px;">Guest / Caller</th>
-                    <th style="width:160px;">Arrival</th>
-                    <th style="width:90px;">Nights</th>
-                    <th style="width:140px;">Total Due</th>
-                    <th style="width:140px;">Sentiment</th>
-                    <th>Summary</th>
-                  </tr>
-                </thead>
-                <tbody id="feedTbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        <!-- Right column -->
-        <aside class="stack">
-          <section class="card">
-            <div class="head">
-              <h3>Ops Signals</h3>
-              <span>fast triage</span>
-            </div>
-            <div class="body">
-              <div class="insights" id="opsInsights">
-                <!-- filled by JS -->
-              </div>
-            </div>
-          </section>
+    const cs = getComputedStyle(document.documentElement);
+    const stroke = cs.getPropertyValue(colorVarName).trim() || "#6ea8ff";
+    const grid = cs.getPropertyValue("--border").trim() || "rgba(255,255,255,0.12)";
+    const text = cs.getPropertyValue("--muted").trim() || "rgba(255,255,255,0.6)";
 
-          <section class="card">
-            <div class="head">
-              <h3>Portfolio Notes</h3>
-              <span>owner-ready</span>
-            </div>
-            <div class="body">
-              <div class="state" id="portfolioBox">
-                Designed for multi-property: when you add a <span class="muted">property_id / property_name</span> column later,
-                this UI will automatically group and summarize by property.
-              </div>
-            </div>
-          </section>
-        </aside>
-      </div>
-    </main>
-  </div>
+    const W = canvas.width;
+    const H = canvas.height;
+    const pad = 34;
 
-  <div class="toast" id="toast"></div>
-</body>
-</html>
+    const maxVal = Math.max(1, ...values);
+    const minVal = 0;
+
+    ctx.strokeStyle = grid;
+    ctx.lineWidth = 1;
+
+    const gridLines = 4;
+    for (let i = 0; i <= gridLines; i++) {
+      const y = pad + ((H - pad * 2) * i) / gridLines;
+      ctx.beginPath();
+      ctx.moveTo(pad, y);
+      ctx.lineTo(W - pad, y);
+      ctx.stroke();
+
+      const v = Math.round(maxVal - ((maxVal - minVal) * i) / gridLines);
+      ctx.fillStyle = text;
+      ctx.font = "12px system-ui";
+      ctx.fillText(String(v), 8, y + 4);
+    }
+
+    const xStep = (W - pad * 2) / Math.max(1, labels.length - 1);
+    const yScale = (H - pad * 2) / (maxVal - minVal);
+
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    labels.forEach((_, i) => {
+      const x = pad + xStep * i;
+      const y = pad + (maxVal - values[i]) * yScale;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = stroke;
+    labels.forEach((_, i) => {
+      const x = pad + xStep * i;
+      const y = pad + (maxVal - values[i]) * yScale;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.fillStyle = text;
+    ctx.font = "12px system-ui";
+    const step = Math.ceil(labels.length / 6);
+    labels.forEach((lbl, i) => {
+      if (i % step !== 0 && i !== labels.length - 1) return;
+      const x = pad + xStep * i;
+      ctx.fillText(lbl.slice(5), x - 16, H - 10);
+    });
+  }
+
+  function renderCharts(rows) {
+    const range = lastRange || getSelectedRange();
+    const axis = buildDayAxis(range);
+
+    const callsMap = groupByDay(rows, "call");
+    const bookingsMap = groupByDay(rows, "booking");
+
+    const callsSeries = axis.map(d => callsMap.get(d) || 0);
+    const bookingsSeries = axis.map(d => bookingsMap.get(d) || 0);
+
+    $("callsTrendLabel").textContent = `${fmtInt(callsSeries.reduce((a,b)=>a+b,0))} total`;
+    $("bookingsTrendLabel").textContent = `${fmtInt(bookingsSeries.reduce((a,b)=>a+b,0))} total`;
+
+    drawLineChart("callsChart", axis, callsSeries, "--accent");
+
+    const cs = getComputedStyle(document.documentElement);
+    const good = cs.getPropertyValue("--good").trim() || "#42d392";
+    document.documentElement.style.setProperty("--_tmp_booking_color", good);
+    drawLineChart("bookingsChart", axis, bookingsSeries, "--_tmp_booking_color");
+    document.documentElement.style.removeProperty("--_tmp_booking_color");
+  }
+
+  // ---------- CSV ----------
+  function exportCSV(rows) {
+    const cols = ["kind","time","event","guest_or_caller","arrival_date","nights","total_due","sentiment","summary"];
+    const lines = [cols.join(",")];
+
+    for (const r of rows) {
+      const time = r.when ? r.when.toISOString() : safeStr(r.whenRaw);
+      const vals = [
+        r.kind,
+        time,
+        safeStr(r.event),
+        safeStr(r.guest),
+        safeStr(r.arrival),
+        Number.isFinite(r.nights) ? r.nights : "",
+        Number.isFinite(r.totalDue) ? r.totalDue : "",
+        safeStr(r.sentiment),
+        safeStr(r.summary),
+      ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
+      lines.push(vals.join(","));
+    }
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `nightshift_dashboard_${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("CSV exported.");
+  }
+
+  // ---------- Render ----------
+  function renderAll() {
+    applyFilters();
+    $("badgeWindow").textContent = lastRange?.label || "—";
+
+    const k = computeKPIs(filteredRows);
+    renderKPIs(k);
+    renderOpsInsights(k, filteredRows);
+    renderFeed(filteredRows);
+    renderCharts(filteredRows);
+
+    $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
+  }
+
+  function clearDataUI(msg) {
+    allRows = [];
+    filteredRows = [];
+    $("badgeCount").textContent = "—";
+    $("kpiGrid").innerHTML = "";
+    $("opsInsights").innerHTML = "";
+    $("tableWrap").style.display = "none";
+    $("stateBox").style.display = "block";
+    $("stateBox").textContent = msg || "—";
+  }
+
+  // ---------- Load ----------
+  async function loadAndRender() {
+    // Enforce auth gate
+    const ok = await ensureAuthGate();
+    if (!ok) return;
+
+    const state = $("stateBox");
+    const wrap = $("tableWrap");
+
+    wrap.style.display = "none";
+    state.style.display = "block";
+    state.textContent = "Loading…";
+
+    try {
+      lastRange = getSelectedRange();
+      $("badgeWindow").textContent = lastRange.label;
+
+      const [resv, calls] = await Promise.all([
+        fetchReservations(lastRange),
+        fetchCallEvents(lastRange),
+      ]);
+
+      // If RLS blocks, Supabase often returns empty arrays but no error.
+      // We'll still render but show a helpful hint if both empty.
+      const normalized = [];
+      for (const r of (resv.data || [])) normalized.push(normalizeReservationRow(r, resv.tsField));
+      for (const e of (calls.data || [])) normalized.push(normalizeCallEventRow(e, calls.tsField));
+
+      allRows = normalized.map(r => {
+        if (!r.when) r.when = parseISOish(r.whenRaw);
+        return r;
+      });
+
+      if (!allRows.length) {
+        state.textContent =
+          "Signed in, but no rows returned. This is usually RLS (Row Level Security) blocking access, or table names/timestamp fields don’t match.";
+      }
+
+      renderAll();
+      toast("Dashboard refreshed.");
+    } catch (err) {
+      console.error(err);
+      state.textContent = `Error: ${err?.message || err}`;
+      toast("Load failed. Check console + Supabase settings.");
+    }
+  }
+
+  // ---------- Init ----------
+  async function init() {
+    initTheme();
+    initControls();
+
+    try {
+      supabaseClient = getSupabaseClient();
+    } catch (e) {
+      clearDataUI(`Config error: ${e.message}`);
+      showOverlay(true);
+      return;
+    }
+
+    initAuthHandlers();
+
+    // Attempt session detection (including from URL after magic link)
+    await ensureAuthGate();
+
+    // If already signed in, load
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) await loadAndRender();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
