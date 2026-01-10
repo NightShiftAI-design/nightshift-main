@@ -5,19 +5,25 @@
   // ============================================================
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
 
-  // ✅ Persist sessions so refresh works (no more magic link every time)
-  // NOTE: If you ever want "shared computer lock mode", flip ALWAYS_REQUIRE_LOGIN back to true.
-  const ALWAYS_REQUIRE_LOGIN = false;
+  // ✅ Canonical dashboard URL (fixes /dashboard vs /dashboard/ vs index.html + www vs non-www)
+  const CANONICAL_ORIGIN = "https://www.nightshifthotels.com";
+  const CANONICAL_PATH = "/dashboard/";
+  const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
 
-  // ✅ Persist sessions (required for refresh UX)
+  // ✅ Persist sessions so refresh works (no more magic link every time)
+  // If you ever want "shared computer lock mode", flip ALWAYS_REQUIRE_LOGIN back to true.
+  const ALWAYS_REQUIRE_LOGIN = false;
   const PERSIST_SESSION = true;
 
-  // If a CALL row clearly represents a confirmed booking AND a matching BOOKING row exists,
-  // hide the CALL row to prevent duplicates/confusion.
+  // Hide booking-like CALL rows when a BOOKING exists for same guest+arrival
   const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
 
   // ✅ Also hide duplicate BOOKING rows that are clearly repeats
   const DEDUPE_DUPLICATE_BOOKINGS = true;
+
+  // ✅ If range filtering by timestamp column causes empty results (common with timestamp w/o tz),
+  // fall back to "order only" mode automatically.
+  const ENABLE_RANGE_FILTER = true;
 
   // ============================================================
   // Helpers
@@ -124,6 +130,34 @@
   }
 
   // ============================================================
+  // Canonical URL enforcement (fixes /dashboard vs /dashboard/ + www)
+  // ============================================================
+  function enforceCanonicalUrl() {
+    try {
+      const h = window.location.hostname;
+      const p = window.location.pathname;
+
+      // Force www + https origin
+      if (window.location.origin !== CANONICAL_ORIGIN) {
+        window.location.replace(`${CANONICAL_ORIGIN}${window.location.pathname}${window.location.search}${window.location.hash}`);
+        return true;
+      }
+
+      // Force /dashboard/ path (not /dashboard, not /dashboard/index.html)
+      if (p === "/dashboard" || p === "/dashboard/index.html") {
+        window.location.replace(CANONICAL_URL);
+        return true;
+      }
+
+      // If someone hits /dashboard/anything-else, don't hijack.
+      // If they are in /dashboard/ already, good.
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  // ============================================================
   // Dedupe helpers
   // ============================================================
   function normKey(v) {
@@ -136,7 +170,7 @@
     // Strip anything after ":" (e.g., "Lil Baby: King non-smoking")
     if (s.includes(":")) s = s.split(":")[0].trim();
 
-    // Strip some common trailing descriptors
+    // Strip common trailing descriptors
     s = s.replace(/\s*[-•|]\s*(king|queen|double|single|suite|non[-\s]?smoking|smoking|room|reservation|booking).*/i, "").trim();
 
     // Collapse whitespace
@@ -192,7 +226,6 @@
     );
   }
 
-  // Hide booking-like CALL rows when a BOOKING exists for the same guest+arrival
   function dedupeBookingLikeCalls(rows) {
     const bookingKeySet = new Set();
     for (const r of rows) {
@@ -217,13 +250,10 @@
       ));
 
       if (!guestFromCall || !arrivalFromCall) return true;
-
       return !bookingKeySet.has(`${guestFromCall}__${arrivalFromCall}`);
     });
   }
 
-  // Hide duplicate BOOKING rows that appear to be repeated writes
-  // Keeps the newest instance (newest-first)
   function dedupeDuplicateBookings(rows) {
     const seen = new Set();
     const out = [];
@@ -245,8 +275,6 @@
       const n = Number.isFinite(r.nights) ? String(r.nights) : "";
       const t = Number.isFinite(r.totalDue) ? String(r.totalDue) : "";
 
-      // Key: guest + arrival + nights + total_due
-      // (prevents hiding legitimate separate reservations with different totals)
       const key = `${g}__${a}__${n}__${t}`;
       if (g && a && seen.has(key)) continue;
 
@@ -254,7 +282,6 @@
       out.push(r);
     }
 
-    // Return to original (descending time) order in renderFeed anyway
     return out;
   }
 
@@ -395,8 +422,12 @@
       setTimeout(() => window.location.reload(), 250);
     });
 
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
       setSessionUI(session);
+
+      // Helpful toast for debugging auth flows
+      if (event === "SIGNED_IN") toast("Signed in.");
+      if (event === "SIGNED_OUT") toast("Signed out.");
 
       if (!session) {
         showOverlay(true);
@@ -422,8 +453,8 @@
     const email = safeStr($("authEmail")?.value).trim();
     if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
 
-    // MUST be allowed in Supabase Auth -> Redirect URLs
-    const redirectTo = `${window.location.origin}/dashboard/`;
+    // ✅ Hardcode to canonical URL (prevents 301/redirect mismatch breaking OTP)
+    const redirectTo = CANONICAL_URL;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
@@ -513,31 +544,44 @@
   // Fetch
   // ============================================================
   async function fetchTableInRange(tableName, range, limit) {
-    const startISO = range.start.toISOString();
-    const endISO = range.end.toISOString();
+    // Primary attempt: range filter by timestamp (if enabled)
+    if (ENABLE_RANGE_FILTER) {
+      const startISO = range.start.toISOString();
+      const endISO = range.end.toISOString();
 
-    for (const tsField of TS_CANDIDATES) {
-      const { data, error } = await supabaseClient
-        .from(tableName)
-        .select("*")
-        .gte(tsField, startISO)
-        .lte(tsField, endISO)
-        .order(tsField, { ascending: false })
-        .limit(limit);
+      for (const tsField of TS_CANDIDATES) {
+        const { data, error } = await supabaseClient
+          .from(tableName)
+          .select("*")
+          .gte(tsField, startISO)
+          .lte(tsField, endISO)
+          .order(tsField, { ascending: false })
+          .limit(limit);
 
-      if (!error) return { data: data || [], tsField, mode: `range:${tsField}` };
+        // If query works AND returns rows, great.
+        // If query works but returns zero rows, it might be because of timestamp format mismatch.
+        // We'll fall back to order-only mode below.
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return { data: data || [], tsField, mode: `range:${tsField}` };
+        }
+
+        // If error: try next field
+        if (error) continue;
+      }
     }
 
+    // Fallback: order-only mode (most robust)
     for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
         .select("*")
         .order(tsField, { ascending: false })
-        .limit(Math.min(limit, 500));
+        .limit(Math.min(limit, 3000));
 
       if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
     }
 
+    // Last resort
     const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
     if (error) throw error;
     return { data: data || [], tsField: "", mode: "raw" };
@@ -617,7 +661,7 @@
       safeStr(r?.transcript_summary) ||
       `${event}${callId ? ` • ${callId}` : ""}${rawPhone ? ` • ${safeStr(rawPhone)}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
 
-    // ✅ Parse structured booking JSON string (if present)
+    // Parse structured booking JSON string (if present)
     const bookingObj = safeJsonParse(r?.booking);
 
     const guestFromBooking = safeStr(bookingObj?.guest_name).trim();
@@ -654,7 +698,7 @@
       sentiment,
       summary,
       durationSeconds: Number.isFinite(duration) ? duration : null,
-      booking: bookingObj, // <— used for dedupe
+      booking: bookingObj, // used for dedupe
       raw: r,
     };
   }
@@ -727,7 +771,6 @@
     }
   }
 
-  // Tiny colored dot helper (uses existing CSS vars: --good, --warn, --bad, --accent)
   function dot(colorVar) {
     return `<span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(${colorVar});margin-right:8px;transform:translateY(-1px);"></span>`;
   }
@@ -924,7 +967,7 @@
       $("badgeWindow").textContent = lastRange.label;
 
       const [resv, calls] = await Promise.all([
-        fetchTableInRange(TABLES.reservations, lastRange, 2000),
+        fetchTableInRange(TABLES.reservations, lastRange, 3000),
         fetchTableInRange(TABLES.callLogs, lastRange, 3000),
       ]);
 
@@ -955,7 +998,9 @@
 
         state.textContent =
           "Signed in, but no rows returned.\n\n" +
-          "If you see rows in Supabase Table Editor but the dashboard shows none, RLS is blocking SELECT.\n\n" +
+          "Likely causes:\n" +
+          "• RLS is blocking SELECT (most common)\n" +
+          "• Timestamp range filter mismatch (we auto-fallback to order-only)\n\n" +
           "Probe:\n" + probeText + "\n";
       }
 
@@ -972,6 +1017,9 @@
   // Init
   // ============================================================
   async function init() {
+    // ✅ Force canonical URL first
+    if (enforceCanonicalUrl()) return;
+
     initTheme();
     initControls();
 
