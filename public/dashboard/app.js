@@ -1,4 +1,4 @@
-// public/dashboard/app.js — v6 (Auth stable + Working Date Filters)
+// public/dashboard/app.js — v7 (Auth stable + Date filters + Tab resume fix)
 (() => {
   // ============================================================
   // Settings
@@ -80,9 +80,9 @@
   // ============================================================
   let supabaseClient = null;
   let authUnsub = null;
-
   let allRows = [];
   let filteredRows = [];
+  let isLoading = false;
 
   // ============================================================
   // Auth UI
@@ -321,7 +321,13 @@
   // Load
   // ============================================================
   async function loadAndRender() {
-    if (!(await ensureSession())) return;
+    if (isLoading) return;
+    isLoading = true;
+
+    if (!(await ensureSession())) {
+      isLoading = false;
+      return;
+    }
 
     $("stateBox").textContent = "Loading…";
 
@@ -344,6 +350,8 @@
     } catch (e) {
       console.error(e);
       clearDataUI("Load failed.");
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -375,6 +383,16 @@
     $("startDate").onchange = loadAndRender;
     $("endDate").onchange = loadAndRender;
     $("btnRefresh").onclick = loadAndRender;
+
+    // ✅ FIX: resume when tab becomes active
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") loadAndRender();
+    });
+
+    // ✅ FIX: resume when restored from back/forward cache
+    window.addEventListener("pageshow", (e) => {
+      if (e.persisted) loadAndRender();
+    });
 
     await ensureSession();
   }
