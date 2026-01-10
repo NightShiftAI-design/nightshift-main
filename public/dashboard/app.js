@@ -16,6 +16,9 @@
   // hide the CALL row to prevent duplicates/confusion.
   const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
 
+  // ✅ Also hide duplicate BOOKING rows that are clearly repeats
+  const DEDUPE_DUPLICATE_BOOKINGS = true;
+
   // ============================================================
   // Helpers
   // ============================================================
@@ -28,15 +31,28 @@
     : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
 
+  // ✅ IMPORTANT: treat YYYY-MM-DD as *local* date, not UTC (prevents -1 day in EST)
   const parseISOish = (v) => {
     if (!v) return null;
     const s = String(v).trim();
+
+    // DD-MM-YYYY (your reservations format)
     const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
     if (ddmmyyyy) {
       const [, dd, mm, yyyy] = ddmmyyyy;
-      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`); // local midnight
       return isNaN(d.getTime()) ? null : d;
     }
+
+    // YYYY-MM-DD (treat as local date, not UTC)
+    const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymd) {
+      const [, yyyy, mm, dd] = ymd;
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`); // local midnight
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // Fallback: timestamps / month names
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   };
@@ -108,7 +124,7 @@
   }
 
   // ============================================================
-  // Dedupe helpers (remove booking-like CALL rows when BOOKING exists)
+  // Dedupe helpers
   // ============================================================
   function normKey(v) {
     return safeStr(v).trim().toLowerCase();
@@ -157,7 +173,6 @@
   function extractNameFromSummary(summary) {
     const s = safeStr(summary).trim();
     if (!s) return "";
-    // "Reservation confirmed for Key Glock, ..."
     const m = s.match(/\bfor\s+([^,•.\n]{2,80})/i);
     if (!m) return "";
     const raw = safeStr(m[1]).trim();
@@ -177,8 +192,8 @@
     );
   }
 
+  // Hide booking-like CALL rows when a BOOKING exists for the same guest+arrival
   function dedupeBookingLikeCalls(rows) {
-    // Build set of known booking keys (guest + arrival) using canonical formats
     const bookingKeySet = new Set();
     for (const r of rows) {
       if (r.kind !== "booking") continue;
@@ -191,7 +206,6 @@
       if (r.kind !== "call") return true;
       if (!isBookingLikeCall(r.summary)) return true;
 
-      // Prefer structured booking payload from call logs (if present)
       const callBooking = (r.booking && typeof r.booking === "object") ? r.booking : null;
 
       const guestFromCall = normKey(canonicalGuestName(
@@ -202,12 +216,46 @@
         callBooking?.arrival_date || r.arrival || extractISODateFromText(r.summary)
       ));
 
-      // If we can't parse both, keep the call (better to show than hide incorrectly)
       if (!guestFromCall || !arrivalFromCall) return true;
 
-      // If matching booking exists, hide the call row
       return !bookingKeySet.has(`${guestFromCall}__${arrivalFromCall}`);
     });
+  }
+
+  // Hide duplicate BOOKING rows that appear to be repeated writes
+  // Keeps the newest instance (newest-first)
+  function dedupeDuplicateBookings(rows) {
+    const seen = new Set();
+    const out = [];
+
+    const sorted = [...rows].sort((a, b) => {
+      const ta = a.when ? a.when.getTime() : -Infinity;
+      const tb = b.when ? b.when.getTime() : -Infinity;
+      return tb - ta;
+    });
+
+    for (const r of sorted) {
+      if (r.kind !== "booking") {
+        out.push(r);
+        continue;
+      }
+
+      const g = normKey(canonicalGuestName(r.guest));
+      const a = normKey(canonicalYMDFromAnyDateStr(r.arrival));
+      const n = Number.isFinite(r.nights) ? String(r.nights) : "";
+      const t = Number.isFinite(r.totalDue) ? String(r.totalDue) : "";
+
+      // Key: guest + arrival + nights + total_due
+      // (prevents hiding legitimate separate reservations with different totals)
+      const key = `${g}__${a}__${n}__${t}`;
+      if (g && a && seen.has(key)) continue;
+
+      if (g && a) seen.add(key);
+      out.push(r);
+    }
+
+    // Return to original (descending time) order in renderFeed anyway
+    return out;
   }
 
   // ============================================================
@@ -688,11 +736,9 @@
     const box = $("opsInsights");
     if (!box) return;
 
-    // Simple status for watchlist
     const negColor = (k.negativeCount > 0) ? "--bad" : "--good";
     const longColor = (k.longCalls > 0) ? "--warn" : "--good";
 
-    // Neater layout with dot rows
     box.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:12px;">
         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -886,7 +932,6 @@
       for (const r of (resv.data || [])) normalized.push(normalizeReservationRow(r, resv.tsField));
       for (const c of (calls.data || [])) normalized.push(normalizeCallLogRow(c, calls.tsField));
 
-      // Apply dedupe before storing
       let merged = normalized.map(r => {
         if (!r.when) r.when = parseISOish(r.whenRaw);
         return r;
@@ -894,6 +939,10 @@
 
       if (HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS) {
         merged = dedupeBookingLikeCalls(merged);
+      }
+
+      if (DEDUPE_DUPLICATE_BOOKINGS) {
+        merged = dedupeDuplicateBookings(merged);
       }
 
       allRows = merged;
@@ -937,7 +986,6 @@
     initAuthHandlers();
 
     if (ALWAYS_REQUIRE_LOGIN) {
-      // Optional "shared computer lock mode"
       clearSupabaseAuthStorage();
       showOverlay(true);
       clearDataUI("Please sign in to load dashboard data.");
