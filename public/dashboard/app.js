@@ -11,6 +11,10 @@
   // Do not persist sessions (prevents silent auto-login after refresh)
   const PERSIST_SESSION = false;
 
+  // If a CALL row clearly represents a confirmed booking AND a matching BOOKING row exists,
+  // hide the CALL row to prevent duplicates/confusion.
+  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true;
+
   // ============================================================
   // Helpers
   // ============================================================
@@ -80,6 +84,84 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  // ============================================================
+  // Dedupe helpers (remove booking-like CALL rows when BOOKING exists)
+  // ============================================================
+  function normKey(v) {
+    return safeStr(v).trim().toLowerCase();
+  }
+
+  function extractISODateFromText(text) {
+    const s = safeStr(text);
+
+    // ISO date: 2026-01-15
+    const iso = s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
+    if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+    // Month name: Jan 15, 2026
+    const m = s.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2}),\s+(20\d{2})\b/i);
+    if (m) {
+      const monthMap = {
+        jan: "01", january: "01", feb: "02", february: "02",
+        mar: "03", march: "03", apr: "04", april: "04",
+        may: "05", jun: "06", june: "06", jul: "07", july: "07",
+        aug: "08", august: "08", sep: "09", sept: "09", september: "09",
+        oct: "10", october: "10", nov: "11", november: "11", dec: "12", december: "12",
+      };
+      const mon = monthMap[m[1].toLowerCase()] || "";
+      const day = String(Number(m[2])).padStart(2, "0");
+      const year = m[3];
+      if (mon) return `${year}-${mon}-${day}`;
+    }
+
+    return "";
+  }
+
+  function extractNameFromSummary(summary) {
+    const s = safeStr(summary).trim();
+    if (!s) return "";
+    // "Reservation confirmed for Key Glock, ..."
+    const m = s.match(/\bfor\s+([^,•.\n]{2,80})/i);
+    if (!m) return "";
+    const name = safeStr(m[1]).trim();
+    if (name.length < 2 || /^\d+$/.test(name)) return "";
+    return name;
+  }
+
+  function isBookingLikeCall(summary) {
+    const s = safeStr(summary).toLowerCase();
+    return (
+      s.includes("reservation confirmed") ||
+      s.includes("reservation for") ||
+      s.includes("booking confirmed")
+    );
+  }
+
+  function dedupeBookingLikeCalls(rows) {
+    // Build set of known booking keys (guest + arrival)
+    const bookingKeySet = new Set();
+    for (const r of rows) {
+      if (r.kind !== "booking") continue;
+      const g = normKey(r.guest);
+      const a = normKey(r.arrival);
+      if (g && a) bookingKeySet.add(`${g}__${a}`);
+    }
+
+    return rows.filter(r => {
+      if (r.kind !== "call") return true;
+      if (!isBookingLikeCall(r.summary)) return true;
+
+      const guestFromCall = normKey(r.guest) || normKey(extractNameFromSummary(r.summary));
+      const arrivalFromCall = normKey(r.arrival) || normKey(extractISODateFromText(r.summary));
+
+      // If we can't parse both, keep the call (better to show than hide incorrectly)
+      if (!guestFromCall || !arrivalFromCall) return true;
+
+      // If matching booking exists, hide the call row
+      return !bookingKeySet.has(`${guestFromCall}__${arrivalFromCall}`);
+    });
   }
 
   // ============================================================
@@ -420,7 +502,16 @@
 
     const event = safeStr(r?.event || r?.type || "call");
     const callId = safeStr(r?.call_id || r?.call_sid || r?.sid || r?.id || "");
-    const phone = safeStr(r?.from || r?.caller || r?.phone || r?.caller_phone || "");
+
+    const rawPhone =
+      r?.from ??
+      r?.caller ??
+      r?.phone ??
+      r?.caller_phone ??
+      r?.from_number ??
+      r?.caller_number ??
+      "";
+
     const duration = Number(r?.duration_seconds ?? r?.duration ?? NaN);
     const sentiment = safeStr(r?.sentiment || r?.call_sentiment || "");
 
@@ -428,15 +519,21 @@
       safeStr(r?.summary) ||
       safeStr(r?.notes) ||
       safeStr(r?.transcript_summary) ||
-      `${event}${callId ? ` • ${callId}` : ""}${phone ? ` • ${phone}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
+      `${event}${callId ? ` • ${callId}` : ""}${rawPhone ? ` • ${safeStr(rawPhone)}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
+
+    const explicitName = safeStr(r?.guest_name || r?.caller_name || r?.name || "").trim();
+    const extractedName = extractNameFromSummary(summary);
+    const guestDisplay = explicitName || extractedName || safeStr(rawPhone).trim() || callId;
+
+    const arrivalFromText = extractISODateFromText(summary);
 
     return {
       kind: "call",
       when,
       whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
       event,
-      guest: phone || callId,
-      arrival: "",
+      guest: guestDisplay,
+      arrival: arrivalFromText || "",
       nights: null,
       totalDue: null,
       sentiment,
@@ -514,25 +611,68 @@
     }
   }
 
+  // Tiny colored dot helper (uses existing CSS vars: --good, --warn, --bad, --accent)
+  function dot(colorVar) {
+    return `<span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(${colorVar});margin-right:8px;transform:translateY(-1px);"></span>`;
+  }
+
   function renderOpsSignals(k) {
     const box = $("opsInsights");
     if (!box) return;
 
+    // Simple status for watchlist
+    const negColor = (k.negativeCount > 0) ? "--bad" : "--good";
+    const longColor = (k.longCalls > 0) ? "--warn" : "--good";
+
+    // Neater layout with dot rows
     box.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <div>
-          <b>Watchlist</b><br/>
-          <span style="color: var(--muted); font-size: 13px;">
-            Negative sentiment: <b>${fmtInt(k.negativeCount)}</b><br/>
-            Long calls (4m+): <b>${fmtInt(k.longCalls)}</b>
-          </span>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:700; font-size:13px;">Watchlist</div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; align-items:center; gap:0; min-width:0;">
+              ${dot(negColor)}
+              <span style="color:var(--muted); font-size:13px; white-space:nowrap;">Negative sentiment</span>
+            </div>
+            <div style="font-weight:700; font-size:13px;">${fmtInt(k.negativeCount)}</div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; align-items:center; gap:0; min-width:0;">
+              ${dot(longColor)}
+              <span style="color:var(--muted); font-size:13px; white-space:nowrap;">Long calls (4m+)</span>
+            </div>
+            <div style="font-weight:700; font-size:13px;">${fmtInt(k.longCalls)}</div>
+          </div>
         </div>
-        <div>
-          <b>Snapshot</b><br/>
-          <span style="color: var(--muted); font-size: 13px;">
-            Calls: <b>${fmtInt(k.totalCalls)}</b> • Bookings: <b>${fmtInt(k.totalBookings)}</b><br/>
-            Conversion: <b>${fmtPct(k.conv)}</b> • Revenue: <b>${fmtMoney(k.revenue)}</b>
-          </span>
+
+        <div style="height:1px; background: rgba(255,255,255,0.08);"></div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:700; font-size:13px;">Snapshot</div>
+
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Calls</span></div>
+              <div style="font-weight:700; font-size:13px;">${fmtInt(k.totalCalls)}</div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Bookings</span></div>
+              <div style="font-weight:700; font-size:13px;">${fmtInt(k.totalBookings)}</div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Conversion</span></div>
+              <div style="font-weight:700; font-size:13px;">${fmtPct(k.conv)}</div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center;">${dot("--accent")}<span style="color:var(--muted); font-size:13px;">Revenue</span></div>
+              <div style="font-weight:700; font-size:13px;">${fmtMoney(k.revenue)}</div>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -678,10 +818,17 @@
       for (const r of (resv.data || [])) normalized.push(normalizeReservationRow(r, resv.tsField));
       for (const c of (calls.data || [])) normalized.push(normalizeCallLogRow(c, calls.tsField));
 
-      allRows = normalized.map(r => {
+      // Apply dedupe before storing
+      let merged = normalized.map(r => {
         if (!r.when) r.when = parseISOish(r.whenRaw);
         return r;
       });
+
+      if (HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS) {
+        merged = dedupeBookingLikeCalls(merged);
+      }
+
+      allRows = merged;
 
       if (!allRows.length) {
         const probes = await probeAccess();
