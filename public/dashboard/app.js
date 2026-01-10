@@ -1,52 +1,27 @@
 // public/dashboard/app.js
 (() => {
   // ============================================================
-  // IMPORTANT SETTINGS
+  // Settings
   // ============================================================
-  // If true: even if a session is saved, we sign out on page load.
-  // This forces the dashboard to ALWAYS prompt for login.
-  const FORCE_REAUTH_EACH_VISIT = true;
-
-  // Founder email (used for friendly messaging; RLS is enforced in Supabase SQL)
   const FOUNDER_EMAIL = "founder@nightshifthotels.com";
+
+  // Always show login overlay until user signs in (prevents "URL bypass")
+  const ALWAYS_REQUIRE_LOGIN = true;
+
+  // Never persist sessions (prevents silent auto-login across refresh)
+  const PERSIST_SESSION = false;
 
   // ============================================================
   // Helpers
   // ============================================================
   const $ = (id) => document.getElementById(id);
   const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
+
   const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
   const fmtMoney = (n) => Number.isFinite(n)
     ? n.toLocaleString(undefined, { style: "currency", currency: "USD" })
     : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
-
-  const toast = (msg) => {
-    const el = $("toast");
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
-  };
-
-  function setAuthError(msg) {
-    const el = $("authError");
-    if (!el) return;
-    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
-    el.style.display = "block";
-    el.textContent = msg;
-  }
-
-  function clearSupabaseAuthStorage() {
-    // Supabase tokens are stored like: sb-<projectref>-auth-token
-    try {
-      const keys = Object.keys(localStorage);
-      for (const k of keys) {
-        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
-      }
-    } catch {}
-  }
 
   const parseISOish = (v) => {
     if (!v) return null;
@@ -72,6 +47,33 @@
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
   const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
+  const toast = (msg) => {
+    const el = $("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+  };
+
+  function setAuthError(msg) {
+    const el = $("authError");
+    if (!el) return;
+    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
+    el.style.display = "block";
+    el.textContent = msg;
+  }
+
+  // Hard clear any Supabase auth tokens that might be stuck in localStorage
+  function clearSupabaseAuthStorage() {
+    try {
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
+      }
+    } catch {}
+  }
+
   // ============================================================
   // Theme
   // ============================================================
@@ -94,45 +96,36 @@
   // ============================================================
   function getSupabaseClient() {
     const cfg = window.NSA_CONFIG || {};
-
-    const url =
-      cfg.SUPABASE_URL ||
-      window.SUPABASE_URL ||
-      window.supabaseUrl ||
-      window.NIGHTSHIFT_SUPABASE_URL;
-
-    const key =
-      cfg.SUPABASE_ANON_KEY ||
-      window.SUPABASE_ANON_KEY ||
-      window.supabaseAnonKey ||
-      window.NIGHTSHIFT_SUPABASE_ANON_KEY;
+    const url = cfg.SUPABASE_URL;
+    const key = cfg.SUPABASE_ANON_KEY;
 
     if (!url || !key || !window.supabase) {
-      throw new Error(
-        "Missing Supabase config. Ensure dashboard/config.js sets window.NSA_CONFIG.SUPABASE_URL and SUPABASE_ANON_KEY, and supabase-js is loaded."
-      );
+      throw new Error("Missing Supabase config. Ensure dashboard/config.js sets window.NSA_CONFIG.SUPABASE_URL and SUPABASE_ANON_KEY, and supabase-js is loaded.");
     }
 
-    // NOTE: persistSession false ensures refresh does NOT silently keep session.
     return window.supabase.createClient(url, key, {
       auth: {
-        persistSession: false,       // << forces login on refresh if you reload
+        persistSession: PERSIST_SESSION,
         autoRefreshToken: false,
-        detectSessionInUrl: true,    // << magic link token in URL gets parsed
+        detectSessionInUrl: true,
       }
     });
   }
 
   // ============================================================
-  // Tables / State
+  // Tables
   // ============================================================
   const TABLES = {
     reservations: "reservations",
-    callEvents: "call_events",
+    callLogs: "call_logs",   // ✅ your real table with 30 rows
   };
 
-  const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts"];
+  // Try these as timestamp columns in order
+  const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts", "time", "createdAt"];
 
+  // ============================================================
+  // State
+  // ============================================================
   let supabaseClient = null;
   let allRows = [];
   let filteredRows = [];
@@ -160,19 +153,13 @@
     if (authStatus) authStatus.textContent = email ? `Signed in as ${email}` : "Not signed in";
   }
 
-  async function hardSignOutAndReload() {
+  async function hardSignOut() {
     try {
-      // Supabase v2 supports scope. If not, it will ignore.
       await supabaseClient.auth.signOut({ scope: "local" });
     } catch (e) {
       console.warn("signOut threw:", e);
     }
     clearSupabaseAuthStorage();
-    // Also clear any UI state
-    setSessionUI(null);
-    clearDataUI("Please sign in to load dashboard data.");
-    showOverlay(true);
-    setTimeout(() => window.location.reload(), 200);
   }
 
   async function ensureAuthGate() {
@@ -184,26 +171,46 @@
     if (!session) {
       showOverlay(true);
       $("stateBox").textContent = "Please sign in to load dashboard data.";
-      return false;
+      return { ok: false, session: null };
     }
 
     showOverlay(false);
-    return true;
+    return { ok: true, session };
   }
 
   function initAuthHandlers() {
     $("btnAuth")?.addEventListener("click", () => showOverlay(true));
     $("btnCloseAuth")?.addEventListener("click", () => showOverlay(false));
+
     $("btnSendLink")?.addEventListener("click", sendMagicLink);
     $("btnResendLink")?.addEventListener("click", sendMagicLink);
 
     $("btnLogout")?.addEventListener("click", async () => {
       toast("Signing out…");
-      await hardSignOutAndReload();
+      await hardSignOut();
+      setSessionUI(null);
+      showOverlay(true);
+      clearDataUI("Signed out. Please sign in to view dashboard data.");
+      // reload to fully reset in-memory state
+      setTimeout(() => window.location.reload(), 250);
     });
 
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       setSessionUI(session);
+
+      if (ALWAYS_REQUIRE_LOGIN) {
+        // Always require explicit login each visit; once logged in, we load.
+        if (session) {
+          showOverlay(false);
+          await loadAndRender();
+        } else {
+          showOverlay(true);
+          clearDataUI("Please sign in to load dashboard data.");
+        }
+        return;
+      }
+
+      // Default behavior
       if (session) {
         showOverlay(false);
         await loadAndRender();
@@ -219,7 +226,7 @@
     const email = safeStr($("authEmail")?.value).trim();
     if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
 
-    // Force redirect specifically to dashboard
+    // ✅ must be allowed in Supabase Auth redirect URLs
     const redirectTo = `${window.location.origin}/dashboard/`;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
@@ -229,8 +236,7 @@
 
     if (error) {
       console.error("Magic link error:", error);
-      setAuthError(error.message || "Failed to send magic link.");
-      return;
+      return setAuthError(error.message || "Failed to send magic link.");
     }
 
     toast("Magic link sent. Check your email.");
@@ -286,6 +292,7 @@
     const now = new Date();
 
     if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
+
     if (mode === "7" || mode === "30") {
       const days = Number(mode);
       const s = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
@@ -312,7 +319,7 @@
     const startISO = range.start.toISOString();
     const endISO = range.end.toISOString();
 
-    // Try filter on candidate timestamp columns
+    // Attempt range filter using different timestamp columns
     for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
@@ -322,42 +329,42 @@
         .order(tsField, { ascending: false })
         .limit(limit);
 
-      if (!error) return { data: data || [], tsField };
+      if (!error) return { data: data || [], tsField, mode: `range:${tsField}` };
     }
 
-    // Fallback: order only
+    // Fallback: order by timestamp column without range filter
     for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
         .select("*")
         .order(tsField, { ascending: false })
-        .limit(Math.min(limit, 200));
+        .limit(Math.min(limit, 500));
 
-      if (!error) return { data: data || [], tsField };
+      if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
     }
 
     // Final fallback: raw limit
     const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
     if (error) throw error;
-    return { data: data || [], tsField: "" };
+    return { data: data || [], tsField: "", mode: "raw" };
   }
 
   async function probeAccess() {
-    const out = [];
-    for (const t of [TABLES.reservations, TABLES.callEvents]) {
+    const res = [];
+    for (const t of [TABLES.reservations, TABLES.callLogs]) {
       const { data, error } = await supabaseClient.from(t).select("*").limit(1);
-      out.push({
+      res.push({
         table: t,
         ok: !error,
         rows: (data || []).length,
         error: error?.message || ""
       });
     }
-    return out;
+    return res;
   }
 
   // ============================================================
-  // Normalize
+  // Normalize to unified feed rows
   // ============================================================
   function normalizeReservationRow(r, tsField) {
     const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
@@ -387,25 +394,25 @@
     };
   }
 
-  function normalizeCallEventRow(e, tsField) {
-    const when = parseISOish(e?.[tsField]) || parseISOish(e?.created_at) || parseISOish(e?.inserted_at) || null;
+  function normalizeCallLogRow(r, tsField) {
+    const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
 
-    const event = safeStr(e?.event || e?.type || e?.name || "call_event");
-    const callId = safeStr(e?.call_id || e?.call_sid || e?.id || "");
-    const phone = safeStr(e?.from || e?.caller || e?.phone || e?.caller_phone || "");
-    const sentiment = safeStr(e?.sentiment || e?.call_sentiment || "");
-    const duration = Number(e?.duration_seconds ?? e?.duration ?? NaN);
+    const event = safeStr(r?.event || r?.type || "call");
+    const callId = safeStr(r?.call_id || r?.call_sid || r?.sid || r?.id || "");
+    const phone = safeStr(r?.from || r?.caller || r?.phone || r?.caller_phone || "");
+    const duration = Number(r?.duration_seconds ?? r?.duration ?? NaN);
+    const sentiment = safeStr(r?.sentiment || r?.call_sentiment || "");
 
     const summary =
-      safeStr(e?.summary) ||
-      safeStr(e?.notes) ||
-      safeStr(e?.transcript_summary) ||
+      safeStr(r?.summary) ||
+      safeStr(r?.notes) ||
+      safeStr(r?.transcript_summary) ||
       `${event}${callId ? ` • ${callId}` : ""}${phone ? ` • ${phone}` : ""}${Number.isFinite(duration) ? ` • ${Math.round(duration)}s` : ""}`;
 
     return {
       kind: "call",
       when,
-      whenRaw: e?.[tsField] || e?.created_at || e?.inserted_at || "",
+      whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
       event,
       guest: phone || callId,
       arrival: "",
@@ -414,12 +421,12 @@
       sentiment,
       summary,
       durationSeconds: Number.isFinite(duration) ? duration : null,
-      raw: e,
+      raw: r,
     };
   }
 
   // ============================================================
-  // Filtering / KPIs / Render
+  // Filtering / KPIs / UI
   // ============================================================
   function applyFilters() {
     const range = lastRange || getSelectedRange();
@@ -438,7 +445,6 @@
 
       let rawStr = "";
       try { rawStr = JSON.stringify(row.raw).toLowerCase(); } catch {}
-
       return hay.includes(q) || rawStr.includes(q);
     });
   }
@@ -465,11 +471,11 @@
     el.innerHTML = "";
 
     const tiles = [
-      { name: "Total calls", value: fmtInt(k.totalCalls), sub: "call events in range" },
-      { name: "Bookings", value: fmtInt(k.totalBookings), sub: "reservations captured" },
+      { name: "Total calls", value: fmtInt(k.totalCalls), sub: "call logs in range" },
+      { name: "Bookings", value: fmtInt(k.totalBookings), sub: "reservations in range" },
       { name: "Conversion", value: fmtPct(k.conv), sub: "bookings ÷ calls" },
-      { name: "Booking revenue", value: fmtMoney(k.revenue), sub: "sum total_due (if present)" },
-      { name: "Avg call duration", value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", sub: "duration_seconds (if present)" },
+      { name: "Booking revenue", value: fmtMoney(k.revenue), sub: "sum total_due" },
+      { name: "Avg call duration", value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", sub: "duration_seconds" },
     ];
 
     for (const t of tiles) {
@@ -481,12 +487,12 @@
   }
 
   function renderFeed(rows) {
-    $("badgeCount").textContent = fmtInt(rows.length);
-    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
-
     const state = $("stateBox");
     const wrap = $("tableWrap");
     const tbody = $("feedTbody");
+
+    $("badgeCount").textContent = fmtInt(rows.length);
+    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
 
     if (!rows.length) {
       wrap.style.display = "none";
@@ -575,8 +581,13 @@
   // Load
   // ============================================================
   async function loadAndRender() {
-    const ok = await ensureAuthGate();
-    if (!ok) return;
+    const gate = await ensureAuthGate();
+    if (!gate.ok) return;
+
+    const email = gate.session?.user?.email || "";
+    if (email && email !== FOUNDER_EMAIL) {
+      toast("Signed in. Access depends on Supabase RLS.");
+    }
 
     const state = $("stateBox");
     const wrap = $("tableWrap");
@@ -590,12 +601,12 @@
 
       const [resv, calls] = await Promise.all([
         fetchTableInRange(TABLES.reservations, lastRange, 2000),
-        fetchTableInRange(TABLES.callEvents, lastRange, 3000),
+        fetchTableInRange(TABLES.callLogs, lastRange, 3000),
       ]);
 
       const normalized = [];
       for (const r of (resv.data || [])) normalized.push(normalizeReservationRow(r, resv.tsField));
-      for (const e of (calls.data || [])) normalized.push(normalizeCallEventRow(e, calls.tsField));
+      for (const c of (calls.data || [])) normalized.push(normalizeCallLogRow(c, calls.tsField));
 
       allRows = normalized.map(r => {
         if (!r.when) r.when = parseISOish(r.whenRaw);
@@ -603,17 +614,16 @@
       });
 
       if (!allRows.length) {
-        // tell you whether RLS is blocking
         const probes = await probeAccess();
-        const lines = probes.map(p =>
-          `• ${p.table}: ${p.ok ? "OK" : "BLOCKED"}${p.error ? ` — ${p.error}` : ""}`
+        const probeText = probes.map(p =>
+          `• ${p.table}: ${p.ok ? `OK (rows visible: ${p.rows})` : `BLOCKED — ${p.error || "RLS"}`}`
         ).join("\n");
 
         state.textContent =
-          `Signed in, but no rows returned.\n\n` +
-          `Most common cause: RLS is blocking SELECT.\n\n` +
-          `Probe:\n${lines}\n\n` +
-          `If tables are not empty in Supabase editor, you must add SELECT policies.`;
+          "Signed in, but no rows returned.\n\n" +
+          "If you can see rows in Supabase Table Editor but dashboard shows none, RLS is blocking SELECT.\n\n" +
+          "Probe:\n" + probeText + "\n\n" +
+          "Fix by adding SELECT policies for founder email (already provided).";
       }
 
       renderAll();
@@ -642,26 +652,20 @@
 
     initAuthHandlers();
 
-    // Always show login overlay first (so /dashboard isn't "open")
-    showOverlay(true);
-    clearDataUI("Please sign in to load dashboard data.");
+    // Always prompt login first (prevents "URL bypass" view)
+    if (ALWAYS_REQUIRE_LOGIN) {
+      showOverlay(true);
+      clearDataUI("Please sign in to load dashboard data.");
 
-    // If you want NO silent session carry-over, force sign out every visit:
-    if (FORCE_REAUTH_EACH_VISIT) {
-      await hardSignOutAndReload();
-      return; // hardSignOut reloads
+      // If Supabase detects a magic-link token in URL, it will create a session
+      // and onAuthStateChange will fire, then loadAndRender() runs.
+      await ensureAuthGate();
+      return;
     }
 
-    // Otherwise: process magic-link session if present in URL
-    await ensureAuthGate();
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) await loadAndRender();
-
-    // Friendly hint
-    const { data: { session: s2 } } = await supabaseClient.auth.getSession();
-    if (s2?.user?.email && s2.user.email !== FOUNDER_EMAIL) {
-      toast("Signed in (non-founder). Access depends on Supabase RLS policies.");
-    }
+    // Normal mode
+    const gate = await ensureAuthGate();
+    if (gate.ok) await loadAndRender();
   }
 
   document.addEventListener("DOMContentLoaded", init);
