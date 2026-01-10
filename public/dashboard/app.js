@@ -1,5 +1,5 @@
-// public/dashboard/app.js  — v9.2 (FIX: activity feed renders + theme toggle restored)
-// NOTE: Auth, fetching, filtering, KPIs, charts, export, search, logout remain untouched.
+// public/dashboard/app.js  — v9.3 (Ops traffic-light dots + real charts with axes + 7-day line fix)
+// NOTE: Auth, fetching, filtering, KPIs, export, search, logout remain untouched.
 
 (() => {
   // ============================================================
@@ -103,7 +103,6 @@
 
   // ============================================================
   // Theme (dark/light/system) — restored safely
-  // Expects your CSS to use `.dark ...` patterns (Tailwind darkMode: "class" OR your custom rules)
   // ============================================================
   function systemPrefersDark() {
     try {
@@ -141,12 +140,9 @@
     const btn = $("btnTheme") || $("themeToggle") || $("btnToggleTheme");
     if (!btn) return;
 
-    // Don’t assume inner structure; set text safely if it looks like a simple button.
-    // If you already have an icon, this won’t break it—only affects textContent when button is plain.
     const label = resolved === "dark" ? "Dark" : "Light";
     const hint = theme === "system" ? " (System)" : "";
     if (!btn.dataset.preserveText) {
-      // If you need to preserve your own HTML inside, add data-preserve-text="1" to the button in HTML.
       btn.textContent = `${label}${hint}`;
     }
     btn.setAttribute("aria-pressed", resolved === "dark" ? "true" : "false");
@@ -154,7 +150,6 @@
   }
 
   function cycleTheme(current) {
-    // Minimal, intuitive: toggle between light and dark; keep system if user explicitly selects it elsewhere
     const resolved = resolveTheme(current);
     return resolved === "dark" ? "light" : "dark";
   }
@@ -173,7 +168,6 @@
       };
     }
 
-    // If stored theme is system, reflect OS changes live
     try {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
       const onChange = () => {
@@ -399,7 +393,7 @@
   }
 
   // ============================================================
-  // KPIs + Ops (UNCHANGED)
+  // KPIs + Ops
   // ============================================================
   function computeKPIs(rows) {
     const calls = rows.filter(r => r.kind === "call");
@@ -437,17 +431,86 @@
     }
   }
 
+  // ✅ Traffic-light helpers for Ops Signals
+  function classify(value, { good, warn, higherIsBetter = true }) {
+    if (!Number.isFinite(value)) return "warn";
+    if (higherIsBetter) {
+      if (value >= good) return "good";
+      if (value >= warn) return "warn";
+      return "bad";
+    } else {
+      if (value <= good) return "good";
+      if (value <= warn) return "warn";
+      return "bad";
+    }
+  }
+
+  // ✅ Ops Signals with dots (no background gradients)
   function renderOps(k) {
+    const convPct = Number.isFinite(k.conv) ? k.conv * 100 : NaN;
+
+    const convClass = classify(convPct, { good: 18, warn: 8, higherIsBetter: true });
+    const negClass  = classify(k.negative, { good: 0, warn: 3, higherIsBetter: false });
+    const longClass = classify(k.longCalls, { good: 0, warn: 2, higherIsBetter: false });
+    const revClass  = (k.totalCalls > 0 && k.revenue <= 0) ? "warn" : "good";
+
     $("opsInsights").innerHTML = `
-      Neg sentiment: ${fmtInt(k.negative)}<br>
-      Long calls (4m+): ${fmtInt(k.longCalls)}<br>
-      Conversion: ${fmtPct(k.conv)}<br>
-      Revenue: ${fmtMoney(k.revenue)}
+      <div class="opsBox">
+        <div class="opsSection">
+          <div class="opsTitle">
+            <span>Signals</span>
+            <span class="pillMini">live</span>
+          </div>
+          <div class="opsList">
+
+            <div class="opsItem">
+              <div class="opsLeft">
+                <span class="dotMini ${negClass}"></span>
+                <span class="opsLabel">Neg sentiment</span>
+              </div>
+              <div class="opsRight">
+                <span class="opsValue">${fmtInt(k.negative)}</span>
+              </div>
+            </div>
+
+            <div class="opsItem">
+              <div class="opsLeft">
+                <span class="dotMini ${longClass}"></span>
+                <span class="opsLabel">Long calls (4m+)</span>
+              </div>
+              <div class="opsRight">
+                <span class="opsValue">${fmtInt(k.longCalls)}</span>
+              </div>
+            </div>
+
+            <div class="opsItem">
+              <div class="opsLeft">
+                <span class="dotMini ${convClass}"></span>
+                <span class="opsLabel">Conversion</span>
+              </div>
+              <div class="opsRight">
+                <span class="opsValue">${fmtPct(k.conv)}</span>
+              </div>
+            </div>
+
+            <div class="opsItem">
+              <div class="opsLeft">
+                <span class="dotMini ${revClass}"></span>
+                <span class="opsLabel">Revenue</span>
+              </div>
+              <div class="opsRight">
+                <span class="opsValue">${fmtMoney(k.revenue)}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     `;
   }
 
   // ============================================================
-  // Charts (UNCHANGED)
+  // Charts (axes + labels + 7-day line fix)
   // ============================================================
   function groupByDay(rows, kind) {
     const map = {};
@@ -459,48 +522,122 @@
     return map;
   }
 
-  function renderChart(canvasId, data) {
+  function renderChart(canvasId, data, opts = {}) {
     const c = $(canvasId); if (!c) return;
+
+    // Size canvas to container (prevents 0-width/blur/disappearing line)
+    c.style.width = "100%";
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = Math.max(1, c.clientWidth || 300);
+    const cssH = Math.max(1, c.clientHeight || c.height || 140);
+    c.width = Math.floor(cssW * dpr);
+    c.height = Math.floor(cssH * dpr);
+
     const ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
 
-    const keys = Object.keys(data).sort();
-    if (!keys.length) return;
+    const keys = Object.keys(data || {}).sort();
 
-    const vals = keys.map(k => data[k]);
-    const max = Math.max(...vals);
+    const padL = 38, padR = 12, padT = 14, padB = 28;
 
-    const w = c.width, h = c.height;
-    const pad = 20;
-    const step = (w - pad * 2) / (keys.length - 1 || 1);
+    const isDark = document.documentElement.classList.contains("dark");
+    const axisColor = isDark ? "rgba(255,255,255,0.14)" : "rgba(10,15,25,0.18)";
+    const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(10,15,25,0.10)";
+    const textColor = isDark ? "rgba(255,255,255,0.70)" : "rgba(10,15,25,0.62)";
+
+    // Axes
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, cssH - padB);
+    ctx.lineTo(cssW - padR, cssH - padB);
+    ctx.stroke();
+
+    // Legend
+    const seriesLabel = opts.seriesLabel || "Series";
+    ctx.fillStyle = textColor;
+    ctx.font = "12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(seriesLabel, padL, 12);
+
+    // No data state
+    if (!keys.length) {
+      ctx.fillText("No data in this range", padL, Math.floor(cssH / 2));
+      return;
+    }
+
+    const vals = keys.map(k => Number((data || {})[k] || 0));
+    let max = Math.max(...vals);
+
+    // ✅ Critical: prevent 0/0 => NaN line disappearing
+    if (!Number.isFinite(max) || max <= 0) max = 1;
+
+    // Y grid + labels (3 ticks)
+    const ticks = 3;
+    ctx.strokeStyle = gridColor;
+    ctx.fillStyle = textColor;
+    ctx.font = "11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+
+    for (let i = 0; i <= ticks; i++) {
+      const t = i / ticks;
+      const y = padT + (1 - t) * (cssH - padT - padB);
+      const v = Math.round(t * max);
+
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(cssW - padR, y);
+      ctx.stroke();
+
+      ctx.fillText(String(v), 8, y + 4);
+    }
+
+    // X labels: first + last
+    const first = keys[0];
+    const last = keys[keys.length - 1];
+    ctx.fillText(first, padL, cssH - 8);
+    const lastW = ctx.measureText(last).width;
+    ctx.fillText(last, Math.max(padL, cssW - padR - lastW), cssH - 8);
+
+    // Plot
+    const plotW = cssW - padL - padR;
+    const plotH = cssH - padT - padB;
+    const step = plotW / (keys.length - 1 || 1);
 
     ctx.strokeStyle = "#6ea8ff";
+    ctx.lineWidth = 2;
     ctx.beginPath();
 
     keys.forEach((k, i) => {
-      const x = pad + i * step;
-      const y = h - pad - (vals[i] / max) * (h - pad * 2);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      const x = padL + i * step;
+      const y = padT + (1 - (vals[i] / max)) * plotH;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     });
 
     ctx.stroke();
+
+    // Points for clarity
+    ctx.fillStyle = "#6ea8ff";
+    keys.forEach((k, i) => {
+      const x = padL + i * step;
+      const y = padT + (1 - (vals[i] / max)) * plotH;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 
   // ============================================================
   // Activity Feed — FIXED (renders into either table tbody OR div list)
-  // - If your HTML uses <tbody id="feedTbody"> it will fill it (same as v9)
-  // - If your HTML instead has a <div id="feedList"> it will fill that
-  // - If your HTML has both, table wins
   // ============================================================
   function renderFeed(rows) {
     $("badgeCount").textContent = fmtInt(rows.length);
     $("feedMeta").textContent = `${rows.length} items`;
 
-    // Attempt to unhide common containers if they exist
     const feedSection = $("feedSection") || $("activityFeed") || $("activityFeedSection");
     if (feedSection && feedSection.classList.contains("hidden")) feedSection.classList.remove("hidden");
 
-    // 1) Table mode (original v9)
     const tbody = $("feedTbody");
     if (tbody) {
       tbody.innerHTML = "";
@@ -522,7 +659,6 @@
       return;
     }
 
-    // 2) Div list fallback (in case your UI is not a table anymore)
     const list = $("feedList");
     if (list) {
       list.innerHTML = "";
@@ -574,9 +710,6 @@
       }
       return;
     }
-
-    // If neither exists, don’t crash the render pipeline
-    // (This prevents a silent failure that could have been causing “counter updates but list stays empty”)
   }
 
   function exportCSV(rows) {
@@ -613,8 +746,8 @@
     renderKPIs(k);
     renderOps(k);
 
-    renderChart("chartCalls", groupByDay(filteredRows, "call"));
-    renderChart("chartBookings", groupByDay(filteredRows, "booking"));
+    renderChart("chartCalls", groupByDay(filteredRows, "call"), { seriesLabel: "Calls / day" });
+    renderChart("chartBookings", groupByDay(filteredRows, "booking"), { seriesLabel: "Bookings / day" });
 
     renderFeed(filteredRows);
     $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
@@ -661,10 +794,7 @@
     try { supabaseClient = getSupabaseClient(); }
     catch (e) { clearDataUI(e.message); return; }
 
-    // ✅ Theme restored first (pure UI; does not touch auth/data)
     initTheme();
-
-    // ✅ Auth + controls unchanged
     initAuthHandlers();
     initControls();
 
