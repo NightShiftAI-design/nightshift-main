@@ -1,14 +1,52 @@
 // public/dashboard/app.js
 (() => {
-  // ---------- Helpers ----------
-  const $ = (id) => document.getElementById(id);
+  // ============================================================
+  // IMPORTANT SETTINGS
+  // ============================================================
+  // If true: even if a session is saved, we sign out on page load.
+  // This forces the dashboard to ALWAYS prompt for login.
+  const FORCE_REAUTH_EACH_VISIT = true;
 
+  // Founder email (used for friendly messaging; RLS is enforced in Supabase SQL)
+  const FOUNDER_EMAIL = "founder@nightshifthotels.com";
+
+  // ============================================================
+  // Helpers
+  // ============================================================
+  const $ = (id) => document.getElementById(id);
+  const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
   const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
   const fmtMoney = (n) => Number.isFinite(n)
     ? n.toLocaleString(undefined, { style: "currency", currency: "USD" })
     : "—";
   const fmtPct = (n) => Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : "—";
-  const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
+
+  const toast = (msg) => {
+    const el = $("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+  };
+
+  function setAuthError(msg) {
+    const el = $("authError");
+    if (!el) return;
+    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
+    el.style.display = "block";
+    el.textContent = msg;
+  }
+
+  function clearSupabaseAuthStorage() {
+    // Supabase tokens are stored like: sb-<projectref>-auth-token
+    try {
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
+      }
+    } catch {}
+  }
 
   const parseISOish = (v) => {
     if (!v) return null;
@@ -34,34 +72,9 @@
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
   const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
-  const toast = (msg) => {
-    const el = $("toast");
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => el.classList.remove("show"), 2200);
-  };
-
-  function setAuthError(msg) {
-    const el = $("authError");
-    if (!el) return;
-    if (!msg) { el.style.display = "none"; el.textContent = ""; return; }
-    el.style.display = "block";
-    el.textContent = msg;
-  }
-
-  function clearSupabaseAuthStorage() {
-    // Supabase v2 stores auth tokens in localStorage keys like: sb-<projectref>-auth-token
-    try {
-      const keys = Object.keys(localStorage);
-      for (const k of keys) {
-        if (k.startsWith("sb-") && k.endsWith("-auth-token")) localStorage.removeItem(k);
-      }
-    } catch {}
-  }
-
-  // ---------- Theme ----------
+  // ============================================================
+  // Theme
+  // ============================================================
   function initTheme() {
     const saved = localStorage.getItem("ns_theme");
     if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
@@ -76,7 +89,9 @@
     });
   }
 
-  // ---------- Supabase ----------
+  // ============================================================
+  // Supabase
+  // ============================================================
   function getSupabaseClient() {
     const cfg = window.NSA_CONFIG || {};
 
@@ -98,31 +113,34 @@
       );
     }
 
+    // NOTE: persistSession false ensures refresh does NOT silently keep session.
     return window.supabase.createClient(url, key, {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
+        persistSession: false,       // << forces login on refresh if you reload
+        autoRefreshToken: false,
+        detectSessionInUrl: true,    // << magic link token in URL gets parsed
       }
     });
   }
 
-  // ---------- Tables ----------
+  // ============================================================
+  // Tables / State
+  // ============================================================
   const TABLES = {
     reservations: "reservations",
     callEvents: "call_events",
   };
 
-  // Timestamp candidates we will try (because schemas differ)
   const TS_CANDIDATES = ["created_at", "inserted_at", "timestamp", "ts"];
 
-  // ---------- State ----------
   let supabaseClient = null;
   let allRows = [];
   let filteredRows = [];
   let lastRange = null;
 
-  // ---------- Auth UI ----------
+  // ============================================================
+  // Auth UI
+  // ============================================================
   function showOverlay(show) {
     const o = $("authOverlay");
     if (!o) return;
@@ -132,7 +150,6 @@
 
   function setSessionUI(session) {
     const email = session?.user?.email || "";
-
     $("authBadge").textContent = email ? "Unlocked" : "Locked";
     $("btnAuth").textContent = email ? "Account" : "Login";
 
@@ -143,6 +160,21 @@
     if (authStatus) authStatus.textContent = email ? `Signed in as ${email}` : "Not signed in";
   }
 
+  async function hardSignOutAndReload() {
+    try {
+      // Supabase v2 supports scope. If not, it will ignore.
+      await supabaseClient.auth.signOut({ scope: "local" });
+    } catch (e) {
+      console.warn("signOut threw:", e);
+    }
+    clearSupabaseAuthStorage();
+    // Also clear any UI state
+    setSessionUI(null);
+    clearDataUI("Please sign in to load dashboard data.");
+    showOverlay(true);
+    setTimeout(() => window.location.reload(), 200);
+  }
+
   async function ensureAuthGate() {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     if (error) console.warn("getSession error:", error);
@@ -151,7 +183,7 @@
 
     if (!session) {
       showOverlay(true);
-      if ($("stateBox")) $("stateBox").textContent = "Please sign in to load dashboard data.";
+      $("stateBox").textContent = "Please sign in to load dashboard data.";
       return false;
     }
 
@@ -166,23 +198,8 @@
     $("btnResendLink")?.addEventListener("click", sendMagicLink);
 
     $("btnLogout")?.addEventListener("click", async () => {
-      try {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) console.warn("signOut error:", error);
-      } catch (e) {
-        console.warn("signOut threw:", e);
-      }
-
-      // Hard clear in case token is stuck
-      clearSupabaseAuthStorage();
-
-      toast("Signed out.");
-      setSessionUI(null);
-      showOverlay(true);
-      clearDataUI("Signed out. Please login to view data.");
-
-      // Force a clean state
-      setTimeout(() => window.location.reload(), 300);
+      toast("Signing out…");
+      await hardSignOutAndReload();
     });
 
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
@@ -200,12 +217,9 @@
   async function sendMagicLink() {
     setAuthError("");
     const email = safeStr($("authEmail")?.value).trim();
+    if (!email || !email.includes("@")) return setAuthError("Enter a valid email address.");
 
-    if (!email || !email.includes("@")) {
-      return setAuthError("Enter a valid email address.");
-    }
-
-    // MUST be allowed in Supabase Auth -> URL Configuration -> Redirect URLs
+    // Force redirect specifically to dashboard
     const redirectTo = `${window.location.origin}/dashboard/`;
 
     const { error } = await supabaseClient.auth.signInWithOtp({
@@ -223,7 +237,9 @@
     setAuthError("");
   }
 
-  // ---------- Controls ----------
+  // ============================================================
+  // Controls
+  // ============================================================
   function initControls() {
     const rangeSelect = $("rangeSelect");
     const customRange = $("customRange");
@@ -240,7 +256,6 @@
       syncCustomVisibility();
       await loadAndRender();
     });
-
     startDate?.addEventListener("change", loadAndRender);
     endDate?.addEventListener("change", loadAndRender);
 
@@ -250,7 +265,6 @@
     });
 
     $("btnRefresh")?.addEventListener("click", loadAndRender);
-
     $("btnExport")?.addEventListener("click", () => {
       if (!filteredRows.length) return toast("Nothing to export.");
       exportCSV(filteredRows);
@@ -284,23 +298,22 @@
     const e = eVal ? endOfDay(new Date(`${eVal}T00:00:00`)) : null;
 
     if (!s || !e || isNaN(s.getTime()) || isNaN(e.getTime())) {
-      const fallback = (() => {
-        const now2 = new Date();
-        const s2 = startOfDay(new Date(now2.getFullYear(), now2.getMonth(), now2.getDate() - 6));
-        return { label: "Last 7 days", start: s2, end: endOfDay(now2) };
-      })();
-      return fallback;
+      const s2 = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
+      return { label: "Last 7 days", start: s2, end: endOfDay(now) };
     }
+
     return { label: `${sVal} → ${eVal}`, start: s, end: e };
   }
 
-  // ---------- Fetch ----------
-  async function fetchTableInRange(tableName, range, limit, tsCandidates) {
+  // ============================================================
+  // Fetch
+  // ============================================================
+  async function fetchTableInRange(tableName, range, limit) {
     const startISO = range.start.toISOString();
     const endISO = range.end.toISOString();
 
-    // Try filtering by various timestamp fields
-    for (const tsField of tsCandidates) {
+    // Try filter on candidate timestamp columns
+    for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
         .select("*")
@@ -309,56 +322,43 @@
         .order(tsField, { ascending: false })
         .limit(limit);
 
-      if (!error) return { data: data || [], tsField, mode: `range:${tsField}` };
+      if (!error) return { data: data || [], tsField };
     }
 
-    // Fallback: try ordering by candidates (no filtering)
-    for (const tsField of tsCandidates) {
+    // Fallback: order only
+    for (const tsField of TS_CANDIDATES) {
       const { data, error } = await supabaseClient
         .from(tableName)
         .select("*")
         .order(tsField, { ascending: false })
-        .limit(Math.min(limit, 500));
+        .limit(Math.min(limit, 200));
 
-      if (!error) return { data: data || [], tsField, mode: `order:${tsField}` };
+      if (!error) return { data: data || [], tsField };
     }
 
-    // Final fallback: just limit(200) raw
-    const { data, error } = await supabaseClient
-      .from(tableName)
-      .select("*")
-      .limit(200);
-
-    if (error) return { data: [], tsField: "", mode: "raw", error };
-    return { data: data || [], tsField: "", mode: "raw" };
+    // Final fallback: raw limit
+    const { data, error } = await supabaseClient.from(tableName).select("*").limit(50);
+    if (error) throw error;
+    return { data: data || [], tsField: "" };
   }
 
-  async function fetchReservations(range) {
-    return fetchTableInRange(TABLES.reservations, range, 2000, TS_CANDIDATES);
-  }
-
-  async function fetchCallEvents(range) {
-    return fetchTableInRange(TABLES.callEvents, range, 3000, TS_CANDIDATES);
-  }
-
-  async function probeWhyEmpty() {
-    // Small probes that help us distinguish: (1) RLS vs (2) wrong table/columns
-    const probes = [];
-
+  async function probeAccess() {
+    const out = [];
     for (const t of [TABLES.reservations, TABLES.callEvents]) {
       const { data, error } = await supabaseClient.from(t).select("*").limit(1);
-      probes.push({
+      out.push({
         table: t,
         ok: !error,
-        rowReturned: !!(data && data.length),
+        rows: (data || []).length,
         error: error?.message || ""
       });
     }
-
-    return probes;
+    return out;
   }
 
-  // ---------- Normalize ----------
+  // ============================================================
+  // Normalize
+  // ============================================================
   function normalizeReservationRow(r, tsField) {
     const when = parseISOish(r?.[tsField]) || parseISOish(r?.created_at) || parseISOish(r?.inserted_at) || null;
     const bookingObj = r?.booking && typeof r.booking === "object" ? r.booking : null;
@@ -379,13 +379,10 @@
       kind: "booking",
       when,
       whenRaw: r?.[tsField] || r?.created_at || r?.inserted_at || "",
-      event,
-      guest,
-      arrival,
+      event, guest, arrival,
       nights: Number.isFinite(nights) ? nights : null,
       totalDue: Number.isFinite(totalDue) ? totalDue : null,
-      sentiment,
-      summary,
+      sentiment, summary,
       raw: r,
     };
   }
@@ -421,7 +418,9 @@
     };
   }
 
-  // ---------- Filtering / KPIs / Feed ----------
+  // ============================================================
+  // Filtering / KPIs / Render
+  // ============================================================
   function applyFilters() {
     const range = lastRange || getSelectedRange();
     const q = (safeStr($("searchInput")?.value)).toLowerCase().trim();
@@ -431,7 +430,6 @@
       if (t !== null) {
         if (t < range.start.getTime() || t > range.end.getTime()) return false;
       }
-
       if (!q) return true;
 
       const hay = [
@@ -458,14 +456,7 @@
 
     const revenue = bookings.map(b => b.totalDue).filter(n => Number.isFinite(n)).reduce((a,b)=>a+b,0);
 
-    const sentimentCounts = rows.reduce((acc, r) => {
-      const s = safeStr(r.sentiment).toLowerCase();
-      if (!s) return acc;
-      acc[s] = (acc[s] || 0) + 1;
-      return acc;
-    }, {});
-
-    return { totalCalls, totalBookings, conv, avgDur, revenue, sentimentCounts };
+    return { totalCalls, totalBookings, conv, avgDur, revenue };
   }
 
   function renderKPIs(k) {
@@ -474,14 +465,11 @@
     el.innerHTML = "";
 
     const tiles = [
-      { name: "Total calls", value: fmtInt(k.totalCalls), sub: "all call events in range" },
+      { name: "Total calls", value: fmtInt(k.totalCalls), sub: "call events in range" },
       { name: "Bookings", value: fmtInt(k.totalBookings), sub: "reservations captured" },
       { name: "Conversion", value: fmtPct(k.conv), sub: "bookings ÷ calls" },
-      { name: "Booking revenue", value: fmtMoney(k.revenue), sub: "sum of total_due (if present)" },
-      { name: "Avg call duration", value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", sub: "based on duration_seconds" },
-      { name: "Positive sentiment", value: fmtInt(k.sentimentCounts["positive"] || 0), sub: "rows tagged positive" },
-      { name: "Neutral sentiment", value: fmtInt(k.sentimentCounts["neutral"] || 0), sub: "rows tagged neutral" },
-      { name: "Negative sentiment", value: fmtInt(k.sentimentCounts["negative"] || 0), sub: "rows tagged negative" },
+      { name: "Booking revenue", value: fmtMoney(k.revenue), sub: "sum total_due (if present)" },
+      { name: "Avg call duration", value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", sub: "duration_seconds (if present)" },
     ];
 
     for (const t of tiles) {
@@ -492,40 +480,30 @@
     }
   }
 
-  function renderOpsInsights(_k, _rows) {
-    const box = $("opsInsights");
-    if (!box) return;
-    box.innerHTML = `<div class="state">Signals will populate when data loads.</div>`;
-  }
-
   function renderFeed(rows) {
+    $("badgeCount").textContent = fmtInt(rows.length);
+    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
+
     const state = $("stateBox");
     const wrap = $("tableWrap");
     const tbody = $("feedTbody");
 
-    $("badgeCount").textContent = fmtInt(rows.length);
-    $("feedMeta").textContent = `${fmtInt(rows.length)} items`;
-
     if (!rows.length) {
-      if (wrap) wrap.style.display = "none";
-      if (state) {
-        state.style.display = "block";
-        state.textContent = "No data returned for this range (or access blocked).";
-      }
+      wrap.style.display = "none";
+      state.style.display = "block";
+      state.textContent = "No data returned (empty tables OR RLS blocked).";
       return;
     }
 
-    if (state) state.style.display = "none";
-    if (wrap) wrap.style.display = "block";
-    if (!tbody) return;
+    state.style.display = "none";
+    wrap.style.display = "block";
+    tbody.innerHTML = "";
 
-    const sorted = [...rows].sort((a, b) => {
+    const sorted = [...rows].sort((a,b) => {
       const ta = a.when ? a.when.getTime() : -Infinity;
       const tb = b.when ? b.when.getTime() : -Infinity;
       return tb - ta;
     });
-
-    tbody.innerHTML = "";
 
     for (const r of sorted.slice(0, 500)) {
       const tr = document.createElement("tr");
@@ -552,23 +530,16 @@
   function exportCSV(rows) {
     const cols = ["kind","time","event","guest_or_caller","arrival_date","nights","total_due","sentiment","summary"];
     const lines = [cols.join(",")];
-
     for (const r of rows) {
       const time = r.when ? r.when.toISOString() : safeStr(r.whenRaw);
       const vals = [
-        r.kind,
-        time,
-        safeStr(r.event),
-        safeStr(r.guest),
-        safeStr(r.arrival),
+        r.kind, time, safeStr(r.event), safeStr(r.guest), safeStr(r.arrival),
         Number.isFinite(r.nights) ? r.nights : "",
         Number.isFinite(r.totalDue) ? r.totalDue : "",
-        safeStr(r.sentiment),
-        safeStr(r.summary),
+        safeStr(r.sentiment), safeStr(r.summary),
       ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
       lines.push(vals.join(","));
     }
-
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -584,12 +555,9 @@
   function renderAll() {
     applyFilters();
     $("badgeWindow").textContent = lastRange?.label || "—";
-
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
-    renderOpsInsights(k, filteredRows);
     renderFeed(filteredRows);
-
     $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
   }
 
@@ -598,33 +566,31 @@
     filteredRows = [];
     $("badgeCount").textContent = "—";
     $("kpiGrid").innerHTML = "";
-    $("opsInsights").innerHTML = "";
     $("tableWrap").style.display = "none";
     $("stateBox").style.display = "block";
     $("stateBox").textContent = msg || "—";
   }
 
-  // ---------- Load ----------
+  // ============================================================
+  // Load
+  // ============================================================
   async function loadAndRender() {
     const ok = await ensureAuthGate();
     if (!ok) return;
 
     const state = $("stateBox");
     const wrap = $("tableWrap");
-
-    if (wrap) wrap.style.display = "none";
-    if (state) {
-      state.style.display = "block";
-      state.textContent = "Loading…";
-    }
+    wrap.style.display = "none";
+    state.style.display = "block";
+    state.textContent = "Loading…";
 
     try {
       lastRange = getSelectedRange();
       $("badgeWindow").textContent = lastRange.label;
 
       const [resv, calls] = await Promise.all([
-        fetchReservations(lastRange),
-        fetchCallEvents(lastRange),
+        fetchTableInRange(TABLES.reservations, lastRange, 2000),
+        fetchTableInRange(TABLES.callEvents, lastRange, 3000),
       ]);
 
       const normalized = [];
@@ -637,31 +603,31 @@
       });
 
       if (!allRows.length) {
-        const probes = await probeWhyEmpty();
-        const probeText = probes.map(p =>
-          `• ${p.table}: ${p.ok ? "OK" : "ERROR"} ${p.rowReturned ? "(row exists)" : "(no row returned)"}${p.error ? ` — ${p.error}` : ""}`
+        // tell you whether RLS is blocking
+        const probes = await probeAccess();
+        const lines = probes.map(p =>
+          `• ${p.table}: ${p.ok ? "OK" : "BLOCKED"}${p.error ? ` — ${p.error}` : ""}`
         ).join("\n");
 
-        if (state) {
-          state.textContent =
-            "Signed in, but no rows were returned.\n\n" +
-            "This is almost always RLS blocking SELECT, or the table is empty.\n\n" +
-            "Probe:\n" + probeText + "\n\n" +
-            "If probe shows OK but no rows: table is empty.\n" +
-            "If probe shows ERROR or OK/no rows while you KNOW there is data: RLS is blocking reads.";
-        }
+        state.textContent =
+          `Signed in, but no rows returned.\n\n` +
+          `Most common cause: RLS is blocking SELECT.\n\n` +
+          `Probe:\n${lines}\n\n` +
+          `If tables are not empty in Supabase editor, you must add SELECT policies.`;
       }
 
       renderAll();
       toast("Dashboard refreshed.");
     } catch (err) {
       console.error(err);
-      if (state) state.textContent = `Error: ${err?.message || err}`;
+      state.textContent = `Error: ${err?.message || err}`;
       toast("Load failed. Check console + Supabase settings.");
     }
   }
 
-  // ---------- Init ----------
+  // ============================================================
+  // Init
+  // ============================================================
   async function init() {
     initTheme();
     initControls();
@@ -676,10 +642,26 @@
 
     initAuthHandlers();
 
-    await ensureAuthGate();
+    // Always show login overlay first (so /dashboard isn't "open")
+    showOverlay(true);
+    clearDataUI("Please sign in to load dashboard data.");
 
+    // If you want NO silent session carry-over, force sign out every visit:
+    if (FORCE_REAUTH_EACH_VISIT) {
+      await hardSignOutAndReload();
+      return; // hardSignOut reloads
+    }
+
+    // Otherwise: process magic-link session if present in URL
+    await ensureAuthGate();
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) await loadAndRender();
+
+    // Friendly hint
+    const { data: { session: s2 } } = await supabaseClient.auth.getSession();
+    if (s2?.user?.email && s2.user.email !== FOUNDER_EMAIL) {
+      toast("Signed in (non-founder). Access depends on Supabase RLS policies.");
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);
