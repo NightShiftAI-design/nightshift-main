@@ -428,6 +428,106 @@ button, input, textarea { font: inherit; }
 }
 
 /* -------------------------
+   DEMO MEDIA (NEW)
+------------------------- */
+.demo-actions{
+  margin-top: 18px; /* more breathing room */
+  display:flex;
+  gap: 14px;        /* more space between buttons */
+  flex-wrap: wrap;
+  align-items:center;
+}
+
+/* Demo buttons: slightly tighter + consistent */
+.demo-actions .btn-secondary{
+  padding: 12px 18px;
+}
+
+/* Optional: balance both buttons so they don't look cramped */
+@media (min-width: 560px){
+  .demo-actions .btn-secondary{
+    min-width: 190px;
+  }
+}
+
+/* Mobile: stack full width */
+@media (max-width: 560px){
+  .demo-actions{
+    gap: 10px;
+  }
+  .demo-actions .btn-secondary{
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* -------------------------
+   DEMO MODAL (NEW)
+------------------------- */
+.demo-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+}
+
+.demo-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(2,6,23,.85);
+  backdrop-filter: blur(6px);
+}
+
+.demo-modal-content{
+  position: relative;
+  max-width: 880px;
+  margin: 6vh auto;
+  background:
+    radial-gradient(600px 240px at 10% 0%, rgba(124,58,237,.18), transparent 55%),
+    linear-gradient(180deg, rgba(11,16,38,.95), rgba(2,6,23,.95));
+  border: 1px solid rgba(46,107,255,.25);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 40px 120px rgba(0,0,0,.7);
+}
+
+.demo-modal-content video{
+  width:100%;
+  border-radius: 14px;
+  background: #000;
+}
+
+.demo-close{
+  position:absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
+.demo-close:hover{
+  background: rgba(46,107,255,.25);
+}
+
+.demo-fallback{
+  text-align:center;
+  padding: 40px 10px;
+  color: rgba(234,240,255,.75);
+}
+
+/* Make modal usable on small screens */
+@media (max-width: 980px){
+  .demo-modal-content{
+    max-width: calc(100% - 28px);
+    margin: 10vh auto;
+  }
+}
+
+/* -------------------------
    FOOTER
 ------------------------- */
 .site-footer{
@@ -536,4 +636,3 @@ button, input, textarea { font: inherit; }
 
   .trust-strip .sep{ display:none; }
 }
-::contentReference[oaicite:0]{index=0}
