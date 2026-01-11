@@ -442,10 +442,61 @@ button, input, textarea { font: inherit; }
   margin: 0 auto;
   display:flex;
   justify-content:space-between;
+  align-items:center;
   gap: 18px;
   flex-wrap: wrap;
   font-size: 13px;
   color: rgba(234,240,255,.70);
+}
+
+/* Footer links (keeps your current HTML working) */
+.footer-links{
+  display:flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-links a{
+  color: rgba(234,240,255,.75);
+  font-weight: 650;
+  transition: color .15s ease, opacity .15s ease;
+}
+
+.footer-links a:hover{
+  color: #ffffff;
+}
+
+/* Social icons */
+.social-links{
+  display:flex;
+  gap: 12px;
+  align-items:center;
+}
+
+.social-links a{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.social-links a:hover{
+  background: rgba(46,107,255,.22);
+  border-color: rgba(46,107,255,.35);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(46,107,255,.18);
+}
+
+.social-links svg{
+  width: 17px;
+  height: 17px;
+  fill: #ffffff;
+  opacity: .92;
 }
 
 /* -------------------------
