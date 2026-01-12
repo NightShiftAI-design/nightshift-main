@@ -14,18 +14,103 @@
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
 
   <style>
+    /* ============================================================
+       HARD LAYOUT FIXES (prevents sideways scroll on Mac)
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100%; overflow-x: hidden; margin: 0; }
+    body { overflow-x: hidden; }
+
+    /* ============================================================
+       THEME VARIABLES (your app.js toggles: documentElement.classList.toggle("dark", ...))
+       So we style based on html.dark
+    ============================================================ */
+    :root{
+      color-scheme: light;
+      --page-bg: #f6f7fb;
+      --panel-bg: linear-gradient(180deg, rgba(255,255,255,.92), rgba(245,247,255,.96));
+      --panel-border: rgba(15,23,42,.12);
+      --panel-shadow: 0 30px 100px rgba(2,6,23,.12);
+
+      --card-bg: rgba(255,255,255,.75);
+      --card-border: rgba(15,23,42,.10);
+
+      --text: #0b1026;
+      --muted: rgba(15,23,42,.72);
+      --muted2: rgba(15,23,42,.58);
+
+      --accent: rgba(46,107,255,.38);
+      --btn-bg: rgba(255,255,255,.70);
+      --btn-border: rgba(15,23,42,.14);
+
+      --danger-bg: rgba(239,68,68,.10);
+      --danger-border: rgba(239,68,68,.22);
+      --danger-text: rgba(127,29,29,.95);
+
+      --table-bg: rgba(255,255,255,.72);
+      --row-hover: rgba(46,107,255,.06);
+      --th: rgba(30,41,59,.75);
+    }
+
+    html.dark{
+      color-scheme: dark;
+      --page-bg: #050816;
+      --panel-bg: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
+      --panel-border: rgba(99,102,241,.22);
+      --panel-shadow: 0 30px 100px rgba(0,0,0,.60);
+
+      --card-bg: rgba(2,6,23,.55);
+      --card-border: rgba(99,102,241,.18);
+
+      --text: #f8fafc;
+      --muted: rgba(234,240,255,.78);
+      --muted2: rgba(234,240,255,.65);
+
+      --accent: rgba(46,107,255,.30);
+      --btn-bg: rgba(2,6,23,.70);
+      --btn-border: rgba(99,102,241,.25);
+
+      --danger-bg: rgba(248,113,113,.10);
+      --danger-border: rgba(248,113,113,.20);
+      --danger-text: rgba(254,226,226,.95);
+
+      --table-bg: rgba(2,6,23,.45);
+      --row-hover: rgba(99,102,241,.06);
+      --th: rgba(165,180,252,.95);
+    }
+
+    body{
+      background: var(--page-bg);
+      color: var(--text);
+    }
+
     /* ===========
        Layout
     =========== */
-    .dash-wrap{ max-width: 1280px; margin: 0 auto; padding: 22px 14px 42px; }
-    .shell{ display:grid; grid-template-columns: 270px 1fr; gap: 16px; }
-    @media (max-width: 980px){ .shell{ grid-template-columns: 1fr; } }
+    .dash-wrap{
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px 14px 42px;
+    }
+    .shell{
+      display:grid;
+      grid-template-columns: 270px 1fr;
+      gap: 16px;
+      width: 100%;
+      max-width: 100%;
+    }
+    @media (max-width: 980px){
+      .shell{ grid-template-columns: 1fr; }
+    }
 
     .panel{
-      background: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
-      border: 1px solid rgba(99,102,241,.22);
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
       border-radius: 18px;
-      box-shadow: 0 30px 100px rgba(0,0,0,.60);
+      box-shadow: var(--panel-shadow);
+      max-width: 100%;
+      overflow: hidden; /* prevents inner elements from forcing page scroll */
     }
 
     /* ===========
@@ -34,42 +119,55 @@
     .side{ padding: 14px; position: sticky; top: 14px; height: fit-content; }
     @media (max-width: 980px){ .side{ position: static; } }
 
-    .brand{ display:flex; align-items:center; gap: 10px; padding: 8px 10px 14px; border-bottom:1px solid rgba(99,102,241,.14); }
+    .brand{ display:flex; align-items:center; gap: 10px; padding: 8px 10px 14px; border-bottom:1px solid var(--panel-border); }
     .logo{
       width: 38px; height: 38px; border-radius: 14px;
       background: rgba(99,102,241,.16);
       border:1px solid rgba(99,102,241,.18);
       display:flex; align-items:center; justify-content:center;
       font-weight: 950; color: #f8fafc;
+      flex: 0 0 auto;
     }
-    .brand-title{ font-weight: 950; color:#f8fafc; line-height: 1.05; }
-    .brand-sub{ font-size: 12px; color: rgba(234,240,255,.65); margin-top: 3px; }
+    .brand-title{ font-weight: 950; color: var(--text); line-height: 1.05; }
+    .brand-sub{ font-size: 12px; color: var(--muted2); margin-top: 3px; }
 
-    .side-actions{ padding: 12px 10px; display:flex; gap:10px; flex-wrap:wrap; }
+    /* ✅ FIX: sidebar buttons perfectly aligned (no flex wrap weirdness) */
+    .side-actions{
+      padding: 12px 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
     .btn{
+      display:block;
+      width: 100%;
       border-radius: 14px;
       padding: 10px 12px;
       font-weight: 950;
-      border: 1px solid rgba(99,102,241,.25);
-      background: rgba(2,6,23,.70);
-      color: rgba(234,240,255,.92);
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--text);
       cursor:pointer;
       transition: transform .12s ease;
+      text-align: center;
     }
     .btn:hover{ transform: translateY(-1px); }
     .btn.primary{
       background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28));
       border-color: rgba(46,107,255,.32);
+      color: var(--text);
     }
-    .btn.full{ width: 100%; }
 
     .acct{
       margin: 10px;
       padding: 12px;
       border-radius: 16px;
-      border:1px solid rgba(255,255,255,.08);
+      border:1px solid var(--card-border);
       background: rgba(255,255,255,.06);
     }
+    html:not(.dark) .acct{ background: rgba(15,23,42,.03); }
+
     .acct .row{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .badge{
       display:inline-flex;
@@ -81,17 +179,18 @@
       letter-spacing: .10em;
       text-transform: uppercase;
       font-weight: 950;
-      border:1px solid rgba(255,255,255,.10);
+      border:1px solid var(--card-border);
       background: rgba(255,255,255,.06);
-      color: rgba(234,240,255,.85);
+      color: var(--text);
+      white-space: nowrap;
     }
 
-    .muted{ color: rgba(234,240,255,.70); }
+    .muted{ color: var(--muted); }
 
     /* ===========
        Main
     =========== */
-    .main{ padding: 16px; }
+    .main{ padding: 16px; overflow-x: hidden; } /* ✅ prevents table forcing page scroll */
     .topbar{
       display:flex;
       justify-content:space-between;
@@ -99,18 +198,18 @@
       gap: 12px;
       flex-wrap: wrap;
       padding-bottom: 14px;
-      border-bottom:1px solid rgba(99,102,241,.14);
+      border-bottom:1px solid var(--panel-border);
     }
     .title{
       font-size: 26px;
       font-weight: 950;
       margin: 0;
-      color:#f8fafc;
+      color: var(--text);
     }
     .sub{
       margin: 8px 0 0;
       max-width: 900px;
-      color: rgba(234,240,255,.70);
+      color: var(--muted2);
       line-height: 1.55;
     }
 
@@ -127,15 +226,15 @@
 
     .input, .select{
       border-radius: 14px;
-      border: 1px solid rgba(99,102,241,.25);
-      background: rgba(2,6,23,.70);
-      color: #f8fafc;
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--text);
       padding: 10px 12px;
       outline: none;
       min-width: 200px;
+      max-width: 100%;
     }
-    .select{ min-width: 200px; }
-    .small{ font-size: 12px; color: rgba(234,240,255,.65); }
+    .small{ font-size: 12px; color: var(--muted2); }
 
     /* ===========
        KPI grid
@@ -149,8 +248,8 @@
     @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
     .kpi{
       border-radius: 18px;
-      border: 1px solid rgba(99,102,241,.18);
-      background: rgba(2,6,23,.55);
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
       padding: 14px;
     }
     .kpi .name{
@@ -158,14 +257,14 @@
       font-size: 12px;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: rgba(165,180,252,.95);
+      color: var(--th);
       font-weight: 950;
     }
     .kpi .value{
       margin: 8px 0 0;
       font-size: 26px;
       font-weight: 950;
-      color: #f8fafc;
+      color: var(--text);
     }
 
     /* ===========
@@ -176,12 +275,27 @@
       grid-template-columns: 1fr 360px;
       gap: 12px;
       margin-top: 12px;
+      max-width: 100%;
     }
     @media (max-width: 1100px){ .cols{ grid-template-columns: 1fr; } }
 
-    .card{ padding: 14px; border-radius: 18px; border: 1px solid rgba(99,102,241,.18); background: rgba(2,6,23,.55); }
-    .card h3{ margin: 0 0 8px; color:#f8fafc; font-weight: 950; font-size: 14px; letter-spacing: .10em; text-transform: uppercase; }
-    .card .body{ color: rgba(234,240,255,.78); line-height: 1.6; font-size: 14px; }
+    .card{
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .card h3{
+      margin: 0 0 8px;
+      color: var(--text);
+      font-weight: 950;
+      font-size: 14px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+    }
+    .card .body{ color: var(--muted); line-height: 1.6; font-size: 14px; }
 
     /* ===========
        Charts
@@ -193,11 +307,35 @@
     /* ===========
        Table
     =========== */
-    .table-wrap{ margin-top: 12px; overflow:auto; border-radius: 18px; border: 1px solid rgba(99,102,241,.18); }
-    table{ width:100%; border-collapse: collapse; min-width: 860px; background: rgba(2,6,23,.45); }
-    th, td{ text-align:left; padding: 12px 10px; border-bottom: 1px solid rgba(99,102,241,.14); color: rgba(234,240,255,.84); font-size: 14px; }
-    th{ font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: rgba(165,180,252,.95); }
-    tr:hover td{ background: rgba(99,102,241,.06); }
+    .table-wrap{
+      margin-top: 12px;
+      overflow: auto;     /* ✅ horizontal scroll only inside table area */
+      max-width: 100%;    /* ✅ never force page width */
+      border-radius: 18px;
+      border: 1px solid var(--card-border);
+      -webkit-overflow-scrolling: touch;
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      min-width: 860px;          /* keeps columns readable */
+      background: var(--table-bg);
+    }
+    th, td{
+      text-align:left;
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(99,102,241,.14);
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    th{
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--th);
+    }
+    tr:hover td{ background: var(--row-hover); }
 
     /* ===========
        Status strip + toast
@@ -210,16 +348,16 @@
       flex-wrap: wrap;
       margin-top: 12px;
       padding-top: 12px;
-      border-top:1px solid rgba(99,102,241,.14);
+      border-top:1px solid var(--panel-border);
     }
 
     #stateBox{
       margin-top: 10px;
       padding: 12px;
       border-radius: 16px;
-      background: rgba(248,113,113,.10);
-      border:1px solid rgba(248,113,113,.20);
-      color: rgba(254,226,226,.95);
+      background: var(--danger-bg);
+      border:1px solid var(--danger-border);
+      color: var(--danger-text);
       display:none;
     }
 
@@ -240,13 +378,18 @@
       transition: opacity .15s ease, transform .15s ease;
       z-index: 9999;
     }
+    html:not(.dark) #toast{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(15,23,42,.14);
+      color: rgba(15,23,42,.92);
+    }
     #toast.show{
       opacity: 1;
       transform: translateX(-50%) translateY(-2px);
     }
 
     /* ===========
-       Auth overlay (your JS expects these IDs)
+       Auth overlay
     =========== */
     #authOverlay{
       position: fixed;
@@ -261,14 +404,15 @@
     .auth-card{
       width: min(520px, 96vw);
       border-radius: 18px;
-      border: 1px solid rgba(99,102,241,.25);
-      background: linear-gradient(180deg, rgba(11,16,38,.96), rgba(2,6,23,.98));
-      box-shadow: 0 40px 120px rgba(0,0,0,.75);
+      border: 1px solid var(--panel-border);
+      background: var(--panel-bg);
+      box-shadow: 0 40px 120px rgba(0,0,0,.35);
       padding: 16px;
+      overflow: hidden;
     }
     .auth-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    .auth-title{ font-weight: 950; color:#f8fafc; margin: 0; }
-    .auth-body{ margin-top: 12px; color: rgba(234,240,255,.78); }
+    .auth-title{ font-weight: 950; color: var(--text); margin: 0; }
+    .auth-body{ margin-top: 12px; color: var(--muted); }
     .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
   </style>
 </head>
@@ -288,9 +432,9 @@
         </div>
 
         <div class="side-actions">
-          <button class="btn full" id="btnAuth" type="button">Login</button>
-          <button class="btn full" id="btnLogout" type="button" style="display:none;">Sign out</button>
-          <button class="btn full" id="btnTheme" type="button">Theme</button>
+          <button class="btn" id="btnAuth" type="button">Login</button>
+          <button class="btn" id="btnLogout" type="button" style="display:none;">Sign out</button>
+          <button class="btn" id="btnTheme" type="button">Theme</button>
         </div>
 
         <div class="acct">
@@ -305,8 +449,8 @@
         </div>
 
         <div class="side-actions">
-          <a class="btn full primary" href="/contact.html" style="text-decoration:none; text-align:center;">Get a Quote Page</a>
-          <a class="btn full" href="/" style="text-decoration:none; text-align:center;">Back to Website</a>
+          <a class="btn primary" href="/contact.html" style="text-decoration:none;">Get a Quote Page</a>
+          <a class="btn" href="/" style="text-decoration:none;">Back to Website</a>
         </div>
       </aside>
 
@@ -315,9 +459,7 @@
         <div class="topbar">
           <div>
             <h1 class="title">NightShift AI — Dashboard</h1>
-            <p class="sub">
-              Calls, bookings, conversion, and operational signals — clean and fast.
-            </p>
+            <p class="sub">Calls, bookings, conversion, and operational signals — clean and fast.</p>
           </div>
 
           <div style="min-width:260px;">
@@ -347,12 +489,13 @@
         <!-- ERROR/STATE -->
         <div id="stateBox"></div>
 
-        <!-- KPI GRID (your JS renders inside #kpiGrid) -->
+        <!-- KPI GRID -->
         <div class="grid" id="kpiGrid"></div>
 
         <div class="cols">
           <div class="card">
             <h3>Activity Feed</h3>
+
             <div class="table-wrap" style="margin-top:10px;">
               <table>
                 <thead>
@@ -400,7 +543,7 @@
     </div>
   </div>
 
-  <!-- AUTH OVERLAY (your JS uses these IDs) -->
+  <!-- AUTH OVERLAY -->
   <div id="authOverlay">
     <div class="auth-card">
       <div class="auth-row">
@@ -429,10 +572,10 @@
   <!-- TOAST -->
   <div id="toast"></div>
 
-  <!-- ✅ Supabase first -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- ✅ NSA_CONFIG must exist BEFORE app.js runs -->
+  <!-- ✅ Fill these in -->
   <script>
     window.NSA_CONFIG = {
       SUPABASE_URL: "https://sbzdnzouoyxmawuhdvdi.supabase.co",
@@ -440,10 +583,10 @@
     };
   </script>
 
-  <!-- ✅ Then app.js -->
+  <!-- App -->
   <script src="/dashboard/app.js?v=1000"></script>
 
-  <!-- Keep your stateBox observer -->
+  <!-- stateBox observer -->
   <script>
     const stateBox = document.getElementById("stateBox");
     if (stateBox) {
