@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en" class="dark">
 <head>
@@ -13,6 +14,10 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Icons (Font Awesome) -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- NOTE: This dashboard is self-styled (not relying on site.css) to avoid layout drift -->
   <style>
@@ -489,6 +494,631 @@
       color: var(--text);
       border-bottom-color: rgba(110,168,255,.45);
     }
+
+    /* ============================================================
+       Booking-style Extranet Layout Additions (keeps your theme)
+    ============================================================ */
+
+    /* Fixed top extranet nav */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(11,16,32,.92), rgba(11,16,32,.72));
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    html:not(.dark) .topnav{
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      border-bottom-color: rgba(10,15,25,.10);
+    }
+
+    .topnavInner{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 10px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .navLeft, .navRight{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .navBrand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color: inherit;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+    }
+    .navBrand:hover{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.08);
+    }
+    html:not(.dark) .navBrand:hover{
+      background: rgba(10,15,25,.04);
+      border-color: rgba(10,15,25,.10);
+    }
+
+    .navBrand .mark{
+      width: 36px; height: 36px;
+      border-radius: 14px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(110,168,255,.16);
+      border: 1px solid rgba(110,168,255,.28);
+      font-weight: 950;
+      letter-spacing: .02em;
+      flex:0 0 auto;
+    }
+
+    .navBrandText{
+      display:flex;
+      flex-direction:column;
+      line-height: 1.05;
+      min-width: 0;
+    }
+    .navBrandText b{ font-weight: 950; font-size: 13px; }
+    .navBrandText small{
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    .menu{
+      display:flex;
+      align-items:center;
+      gap: 4px;
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      overflow:auto;
+      max-width: 760px;
+      scrollbar-width: none;
+    }
+    .menu::-webkit-scrollbar{ display:none; }
+    html:not(.dark) .menu{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+
+    .navItem{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 900;
+      font-size: 13px;
+      white-space: nowrap;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .navItem i{ opacity:.92; }
+    .navItem:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+    }
+    html:not(.dark) .navItem:hover{
+      background: rgba(10,15,25,.04);
+      border-color: rgba(10,15,25,.10);
+    }
+    .navItem.active{
+      background: linear-gradient(180deg, rgba(110,168,255,.24), rgba(110,168,255,.12));
+      border-color: rgba(110,168,255,.40);
+      box-shadow: 0 0 0 3px rgba(110,168,255,.12);
+    }
+
+    .navPillBadge{
+      margin-left: 2px;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+    }
+    .navPillBadge.good{
+      border-color: rgba(66,211,146,.28);
+      background: rgba(66,211,146,.10);
+      color: var(--good);
+    }
+
+    .dotBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+    .dotBadge.accent{
+      border-color: rgba(110,168,255,.45);
+      background: rgba(110,168,255,.18);
+    }
+
+    .navSearch{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      min-width: 260px;
+      max-width: 520px;
+      flex: 1 1 320px;
+    }
+    html:not(.dark) .navSearch{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .navSearch i{ color: var(--muted); }
+    .navSearch input{
+      width: 100%;
+      border: 0;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+    }
+    .navIconBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    html:not(.dark) .navIconBtn{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .navIconBtn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(110,168,255,.35);
+    }
+
+    .flag{
+      font-size: 16px;
+      line-height: 1;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    html:not(.dark) .flag{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+
+    /* Dropdown */
+    .dd{ position: relative; }
+    .ddPanel{
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      min-width: 320px;
+      max-width: 380px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(11,16,32,.92);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding: 10px;
+      display:none;
+    }
+    html:not(.dark) .ddPanel{
+      background: rgba(255,255,255,.92);
+      border-color: rgba(10,15,25,.12);
+    }
+    .dd.open .ddPanel{ display:block; }
+    .ddGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .ddItem{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.03);
+      text-decoration:none;
+      color: var(--text);
+      cursor:pointer;
+    }
+    html:not(.dark) .ddItem{ background: rgba(10,15,25,.03); }
+    .ddItem:hover{
+      background: rgba(110,168,255,.10);
+      border-color: rgba(110,168,255,.28);
+    }
+    .ddItem i{
+      margin-top: 2px;
+      color: var(--muted);
+      width: 18px;
+      text-align:center;
+      flex: 0 0 18px;
+    }
+    .ddItem b{
+      display:block;
+      font-size: 13px;
+      font-weight: 950;
+    }
+    .ddItem small{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.25;
+    }
+    .ddDivider{
+      height: 1px;
+      background: rgba(255,255,255,.10);
+      margin: 8px 6px;
+    }
+    html:not(.dark) .ddDivider{ background: rgba(10,15,25,.10); }
+
+    /* Main area spacing under nav */
+    .page{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    /* Booking-like grid inside main */
+    .extranetGrid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 1100px){
+      .extranetGrid{ grid-template-columns: 1fr; }
+    }
+
+    .subhead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 8px 6px 12px;
+    }
+    .subhead h1{
+      margin:0;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: .01em;
+    }
+    .subhead p{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Reservations “Today” selector + tabs */
+    .resHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .resHeaderLeft{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .resTitle{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .resTitle b{
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .seg{
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    html:not(.dark) .seg{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .segBtn{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font-weight: 900;
+      font-size: 13px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+      white-space: nowrap;
+    }
+    .segBtn:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+    }
+    .segBtn.active{
+      background: rgba(110,168,255,.16);
+      border-color: rgba(110,168,255,.35);
+      box-shadow: 0 0 0 3px rgba(110,168,255,.10);
+    }
+
+    .countBadge{
+      font-size: 11px;
+      font-weight: 950;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+    }
+    .countBadge.zero{
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+    }
+    html:not(.dark) .countBadge{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+
+    .emptyState{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 26px 14px;
+      border-radius: var(--radius2);
+      border: 1px dashed rgba(255,255,255,.16);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+    }
+    html:not(.dark) .emptyState{
+      border-color: rgba(10,15,25,.18);
+      background: rgba(10,15,25,.03);
+    }
+    .emptyState .icon{
+      width: 54px; height: 54px;
+      border-radius: 18px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(110,168,255,.12);
+      border: 1px solid rgba(110,168,255,.22);
+      color: rgba(110,168,255,.95);
+      margin: 0 auto 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+    html:not(.dark) .emptyState .icon{
+      box-shadow: 0 10px 24px rgba(10,15,25,.10);
+    }
+    .emptyState h4{
+      margin: 0;
+      color: var(--text);
+      font-weight: 950;
+      font-size: 14px;
+    }
+    .emptyState p{
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .cardFoot{
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .linkBtn{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 950;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    html:not(.dark) .linkBtn{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .linkBtn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(110,168,255,.35);
+    }
+
+    /* Pending actions list */
+    .todoList{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .todoItem{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    html:not(.dark) .todoItem{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .todoItem i{
+      margin-top: 2px;
+      color: rgba(110,168,255,.95);
+      width: 18px;
+      text-align:center;
+    }
+    .todoItem b{ display:block; font-size: 13px; font-weight: 950; }
+    .todoItem span{ display:block; font-size: 12px; color: var(--muted); margin-top: 4px; line-height:1.35; }
+
+    /* Advice illustration placeholder */
+    .adviceHero{
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(520px 220px at 20% 25%, rgba(110,168,255,.22), transparent 55%),
+        radial-gradient(520px 220px at 80% 55%, rgba(66,211,146,.16), transparent 55%),
+        rgba(255,255,255,.03);
+      padding: 14px;
+      overflow:hidden;
+    }
+    html:not(.dark) .adviceHero{
+      border-color: rgba(10,15,25,.12);
+      background:
+        radial-gradient(520px 220px at 20% 25%, rgba(110,168,255,.18), transparent 55%),
+        radial-gradient(520px 220px at 80% 55%, rgba(66,211,146,.12), transparent 55%),
+        rgba(10,15,25,.03);
+    }
+
+    .illus{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    .illusArt{
+      width: 64px; height: 64px;
+      border-radius: 22px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 14px 40px rgba(0,0,0,.30);
+      position: relative;
+      flex: 0 0 auto;
+    }
+    html:not(.dark) .illusArt{ box-shadow: 0 14px 30px rgba(10,15,25,.10); }
+    .illusArt:before{
+      content:"";
+      position:absolute;
+      inset: -22px -22px auto auto;
+      width: 68px; height: 68px;
+      border-radius: 999px;
+      background: rgba(110,168,255,.18);
+      filter: blur(0px);
+    }
+    .illusArt i{ font-size: 24px; color: rgba(110,168,255,.95); position: relative; z-index: 2; }
+
+    .illusText b{ display:block; font-size: 13px; font-weight: 950; }
+    .illusText span{ display:block; margin-top: 4px; font-size: 12px; color: var(--muted); line-height:1.35; }
+
+    /* Mobile nav collapse */
+    .mobileToggle{ display:none; }
+    @media (max-width: 900px){
+      .menu{ display:none; }
+      .mobileToggle{ display:inline-flex; }
+      .navSearch{ min-width: 0; flex: 1 1 auto; }
+    }
+    .mobileMenu{
+      display:none;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 18px 12px;
+    }
+    .mobileMenu.open{ display:block; }
+    .mobileMenu .menu{ display:flex; max-width: 100%; }
+
+    /* Founder gate */
+    #founderGate{
+      display:none;
+      min-height: 100vh;
+      padding: 18px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .gateCard{
+      margin-top: 10vh;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .gateCard h2{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 950;
+    }
+    .gateCard p{
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+    .gateRow{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
   </style>
 
   <!-- Supabase JS -->
@@ -533,172 +1163,829 @@
     </div>
   </div>
 
-  <!-- APP -->
-  <div class="app">
-    <div class="shell">
-
-      <!-- SIDEBAR -->
-      <aside class="panel side">
-        <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
+  <!-- Founder-only gate (Requirement #5) -->
+  <div id="founderGate">
+    <div class="gateCard">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="brand" style="padding:10px 12px; margin:0; background: rgba(255,255,255,.04); border-radius: 16px;">
           <div class="mark">NS</div>
           <div>
             <b>NightShift AI</b>
             <small>Owner Extranet</small>
           </div>
+        </div>
+        <span class="badge" style="margin-left:auto;">Founder-only</span>
+      </div>
+
+      <h2 style="margin-top:14px;">Restricted access</h2>
+      <p>
+        This extranet is currently in founder-only testing mode.
+        If you believe you should have access, contact the founder.
+      </p>
+
+      <div class="gateRow">
+        <a class="linkBtn" href="/" aria-label="Back to NightShift AI homepage">
+          <i class="fa-solid fa-arrow-left"></i>
+          Back to NightShiftAI.com
+        </a>
+        <button class="linkBtn" id="btnRetryGate" type="button">
+          <i class="fa-solid fa-key"></i>
+          Try access key again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top extranet nav (Booking-style) -->
+  <header class="topnav" id="topnav">
+    <div class="topnavInner">
+      <div class="navLeft">
+        <a class="navBrand" href="/" aria-label="Back to NightShift AI homepage">
+          <div class="mark">NS</div>
+          <div class="navBrandText">
+            <b>NightShift AI</b>
+            <small>Partner Extranet • Reservations</small>
+          </div>
         </a>
 
-        <div class="sideBlock">
-          <p class="sideTitle">Workspace</p>
-          <div class="stack">
-            <div class="pill">
-              <b>Property</b>
-              <!-- ✅ property switcher (we will wire it in app.js) -->
-              <select id="propertySelect" style="border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);color:var(--text);padding:8px 10px;outline:none;max-width: 160px;">
-                <option value="__all__">All properties</option>
-              </select>
-            </div>
+        <button class="navIconBtn mobileToggle" id="btnMobileMenu" type="button" aria-label="Open menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
 
-            <div class="pill"><b>Date range</b><span class="badge" id="badgeWindow">—</span></div>
-            <div class="pill"><b>Activity items</b><span class="badge" id="badgeCount">0</span></div>
-            <div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
-          </div>
-        </div>
+        <nav class="menu" aria-label="Primary navigation">
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-house"></i> Home
+          </a>
 
-        <div class="sideBlock">
-          <p class="sideTitle">Actions</p>
-          <div class="btnRow">
-            <button class="btn" id="btnAuth" type="button">Login</button>
-            <button class="btn" id="btnLogout" type="button" style="display:none;">Sign out</button>
-            <button class="btn" id="btnTheme" type="button">Theme</button>
-            <button class="btn primary" id="btnRefresh" type="button">Refresh data</button>
-          </div>
-        </div>
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-regular fa-calendar"></i> Rates &amp; availability
+          </a>
 
-        <div class="sideBlock">
-          <p class="sideTitle">Note</p>
-          <div class="hint">
-            Tip: Search across calls + bookings. Use keywords like “booking”, guest name,
-            room type, event, or call_id.
-          </div>
-        </div>
-      </aside>
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-bolt"></i> Promotions
+          </a>
 
-      <!-- MAIN -->
-      <main class="panel main">
+          <a class="navItem active" href="javascript:void(0)" aria-current="page">
+            <i class="fa-solid fa-calendar-check"></i> Reservations
+          </a>
 
-        <div class="topbar">
-          <div class="title">
-            <h1>Executive Overview</h1>
-            <p>KPIs, ops signals, and a searchable activity feed — built like a real hotel extranet.</p>
-          </div>
+          <!-- Property dropdown -->
+          <div class="dd" id="ddProperty">
+            <button class="navItem" id="btnPropertyDd" type="button" aria-haspopup="true" aria-expanded="false">
+              <i class="fa-solid fa-building"></i> Property
+              <i class="fa-solid fa-caret-down" style="margin-left:2px; opacity:.85;"></i>
+            </button>
 
-          <div class="controls">
-            <div class="chip">
-              <label for="rangeSelect">Date</label>
-              <select id="rangeSelect">
-                <option value="today">Today</option>
-                <option value="7" selected>Last 7 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-
-            <div class="chip">
-              <label for="startDate">From</label>
-              <input id="startDate" type="date" />
-            </div>
-
-            <div class="chip">
-              <label for="endDate">To</label>
-              <input id="endDate" type="date" />
-            </div>
-
-            <div class="chip" style="min-width: 320px;">
-              <label for="searchInput">Search</label>
-              <input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
-            </div>
-
-            <button class="btn" id="btnExport" type="button">Export CSV</button>
-          </div>
-        </div>
-
-        <!-- KPIs rendered by app.js into #kpiGrid -->
-        <div class="grid" id="kpiGrid"></div>
-
-        <div class="content">
-          <!-- Activity -->
-          <section class="card">
-            <div class="cardHead">
-              <h3>Activity feed</h3>
-              <span id="feedMeta">0 items</span>
-            </div>
-
-            <div class="cardBody">
-              <div id="stateBox"></div>
-
-              <div class="tableWrap" style="margin-top:10px;">
-                <table>
-                  <thead>
-                    <tr>
-                      <th style="width:150px;">Time</th>
-                      <th style="width:90px;">Type</th>
-                      <th style="width:180px;">Guest/Caller</th>
-                      <th style="width:110px;">Arrival</th>
-                      <th style="width:60px;">N</th>
-                      <th style="width:110px;">Total</th>
-                      <th style="width:110px;">Sentiment</th>
-                      <th>Summary</th>
-                    </tr>
-                  </thead>
-                  <tbody id="feedTbody"></tbody>
-                </table>
-              </div>
-
-              <div style="margin-top:10px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:12px;">
-                <div id="lastUpdated">Updated —</div>
-                <div>Showing up to 500 items</div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Right column -->
-          <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
-            <section class="card">
-              <div class="cardHead">
-                <h3>Ops insights</h3>
-                <span>triage</span>
-              </div>
-              <div class="cardBody">
-                <div id="opsInsights" style="color:var(--muted); white-space:pre-wrap;">—</div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="cardHead">
-                <h3>Trends</h3>
-                <span>by day</span>
-              </div>
-              <div class="cardBody">
-                <div class="charts">
-                  <div class="card" style="padding:12px;">
-                    <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Calls</div>
-                    <canvas id="chartCalls" width="600" height="200"></canvas>
-                  </div>
-                  <div class="card" style="padding:12px;">
-                    <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Bookings</div>
-                    <canvas id="chartBookings" width="600" height="200"></canvas>
-                  </div>
+            <div class="ddPanel" role="menu" aria-label="Property menu">
+              <div class="ddGrid">
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-star"></i>
+                  <div><b>Quality rating</b><small>Maintain standards and performance</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <div><b>Property Page Score</b><small>Improve conversion on your listing</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-circle-info"></i>
+                  <div><b>General info &amp; property status</b><small>Address, check-in, status</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-receipt"></i>
+                  <div><b>VAT / Tax / Charges</b><small>Taxes, fees, and policies</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-regular fa-images"></i>
+                  <div><b>Photos</b><small>Upload and manage images</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <div><b>Policies</b><small>House rules and terms</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-list-check"></i>
+                  <div><b>Facilities &amp; services</b><small>Amenities and services</small></div>
+                </div>
+                <div class="ddDivider"></div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-bed"></i>
+                  <div><b>Room details</b><small>Inventory and configuration</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <div><b>Room amenities</b><small>What guests can expect</small></div>
+                </div>
+                <div class="ddDivider"></div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-user"></i>
+                  <div><b>Your profile</b><small>Profile and security</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-language"></i>
+                  <div><b>View your descriptions</b><small>See what guests see</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-envelope-open-text"></i>
+                  <div><b>Messaging preferences</b><small>Guest comms settings</small></div>
+                </div>
+                <div class="ddItem" role="menuitem">
+                  <i class="fa-solid fa-leaf"></i>
+                  <div><b>Sustainability</b><small>Eco-friendly initiatives</small></div>
                 </div>
               </div>
-            </section>
+            </div>
+          </div>
+
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-rocket"></i> Boost performance
+            <span class="navPillBadge good">New</span>
+          </a>
+
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-inbox"></i> Inbox
+            <span class="dotBadge accent" id="inboxBadge">2</span>
+          </a>
+
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-star-half-stroke"></i> Guest reviews
+          </a>
+
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-dollar-sign"></i> Finance
+          </a>
+
+          <a class="navItem" href="javascript:void(0)">
+            <i class="fa-solid fa-chart-pie"></i> Analytics
+          </a>
+        </nav>
+      </div>
+
+      <div class="navRight">
+        <!-- Global search (mirrors app searchInput) -->
+        <div class="navSearch" title="Search (guest, phone, event, room, call_id, summary…)">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="searchInput" type="text" placeholder="Search guest, phone, event, room, call_id, summary…" />
+        </div>
+
+        <div class="dd" id="ddLang">
+          <button class="flag" id="btnLangDd" type="button" aria-label="Language">
+            🇺🇸
+          </button>
+          <div class="ddPanel" style="right:0; left:auto; min-width: 240px;">
+            <div class="ddGrid">
+              <div class="ddItem" role="menuitem">
+                <i class="fa-solid fa-flag-usa"></i>
+                <div><b>English (US)</b><small>Default</small></div>
+              </div>
+              <div class="ddItem" role="menuitem">
+                <i class="fa-solid fa-flag"></i>
+                <div><b>Español</b><small>Spanish</small></div>
+              </div>
+              <div class="ddItem" role="menuitem">
+                <i class="fa-solid fa-flag"></i>
+                <div><b>Français</b><small>French</small></div>
+              </div>
+            </div>
           </div>
         </div>
 
-      </main>
+        <button class="navIconBtn" type="button" aria-label="Help">
+          <i class="fa-regular fa-circle-question"></i>
+        </button>
+
+        <!-- Quick actions (keeps your buttons/IDs) -->
+        <div class="dd" id="ddUser">
+          <button class="navIconBtn" id="btnUserDd" type="button" aria-label="Account menu">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <div class="ddPanel" style="right:0; left:auto; min-width: 360px;">
+            <div style="padding: 6px 6px 10px;">
+              <div style="font-weight:950; font-size:13px;">Workspace</div>
+              <div style="color:var(--muted); font-size:12px; margin-top:6px; line-height:1.35;">
+                Switch property, refresh data, theme, and session actions.
+              </div>
+            </div>
+
+            <div class="ddDivider"></div>
+
+            <div style="padding: 6px;">
+              <!-- Property selector kept + moved -->
+              <div class="pill" style="margin: 6px 0;">
+                <b><i class="fa-solid fa-hotel" style="margin-right:8px; color:var(--muted);"></i>Property</b>
+                <select id="propertySelect" style="border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);color:var(--text);padding:8px 10px;outline:none;max-width: 180px;">
+                  <option value="__all__">All properties</option>
+                </select>
+              </div>
+
+              <div class="pill" style="margin: 6px 0;">
+                <b><i class="fa-regular fa-calendar" style="margin-right:8px; color:var(--muted);"></i>Date range</b>
+                <span class="badge" id="badgeWindow">—</span>
+              </div>
+
+              <div class="pill" style="margin: 6px 0;">
+                <b><i class="fa-solid fa-layer-group" style="margin-right:8px; color:var(--muted);"></i>Activity items</b>
+                <span class="badge" id="badgeCount">0</span>
+              </div>
+
+              <div class="pill" style="margin: 6px 0;">
+                <b><i class="fa-solid fa-lock" style="margin-right:8px; color:var(--muted);"></i>Session</b>
+                <span class="badge" id="authBadge">Locked</span>
+              </div>
+
+              <div class="ddDivider"></div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 6px 0;">
+                <button class="btn" id="btnAuth" type="button" style="width:100%;">Login</button>
+                <button class="btn" id="btnLogout" type="button" style="display:none; width:100%;">Sign out</button>
+                <button class="btn" id="btnTheme" type="button" style="width:100%;">Theme</button>
+                <button class="btn primary" id="btnRefresh" type="button" style="width:100%;">Refresh</button>
+              </div>
+
+              <button class="btn" id="btnExport" type="button" style="width:100%; margin-top: 6px;">
+                <i class="fa-solid fa-file-export" style="margin-right:8px;"></i>
+                Export CSV
+              </button>
+
+              <div class="hint" style="margin-top: 10px;">
+                Tip: Search across calls + bookings. Use keywords like “booking”, guest name, room type, event, or call_id.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile menu row -->
+    <div class="mobileMenu" id="mobileMenu">
+      <nav class="menu" aria-label="Mobile navigation">
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-house"></i> Home</a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-regular fa-calendar"></i> Rates &amp; availability</a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-bolt"></i> Promotions</a>
+        <a class="navItem active" href="javascript:void(0)"><i class="fa-solid fa-calendar-check"></i> Reservations</a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-rocket"></i> Boost performance <span class="navPillBadge good">New</span></a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-inbox"></i> Inbox <span class="dotBadge accent">2</span></a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-star-half-stroke"></i> Guest reviews</a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-dollar-sign"></i> Finance</a>
+        <a class="navItem" href="javascript:void(0)"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- APP (keeps your IDs used by app.js; redesigned layout) -->
+  <div class="page" id="appRoot">
+    <!-- KPI grid (rendered by app.js into #kpiGrid) -->
+    <div class="subhead">
+      <div>
+        <h1>Reservations overview</h1>
+        <p>Today’s arrivals/departures and your latest activity — styled like a real hotel extranet.</p>
+      </div>
+
+      <!-- Date controls (keep IDs rangeSelect/startDate/endDate) -->
+      <div class="controls" style="margin:0; padding:0;">
+        <div class="chip">
+          <label for="rangeSelect">Date</label>
+          <select id="rangeSelect">
+            <option value="today">Today</option>
+            <option value="7" selected>Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div class="chip">
+          <label for="startDate">From</label>
+          <input id="startDate" type="date" />
+        </div>
+
+        <div class="chip">
+          <label for="endDate">To</label>
+          <input id="endDate" type="date" />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" id="kpiGrid"></div>
+
+    <div class="extranetGrid">
+      <!-- LEFT/CENTER COLUMN -->
+      <div style="display:flex; flex-direction:column; gap: 14px; min-width:0;">
+
+        <!-- Big Reservations card (Today + tabs + empty state) -->
+        <section class="card" aria-label="Reservations card">
+          <div class="cardHead">
+            <h3 style="display:flex; align-items:center; gap:10px;">
+              <i class="fa-solid fa-calendar-check" style="color: rgba(110,168,255,.95);"></i>
+              Reservations
+            </h3>
+            <span style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px;">
+              <span id="feedMeta">0 items</span>
+            </span>
+          </div>
+
+          <div class="cardBody">
+            <div class="resHeader">
+              <div class="resHeaderLeft">
+                <div class="resTitle">
+                  <b>Today</b>
+                  <span class="badge" id="todayLabel" title="Selected date">—</span>
+                </div>
+
+                <div class="seg" role="tablist" aria-label="Reservation segments">
+                  <button class="segBtn active" id="tabArrivals" type="button">
+                    <i class="fa-solid fa-arrow-down"></i> Arrivals
+                    <span class="countBadge zero" id="countArrivals">0</span>
+                  </button>
+                  <button class="segBtn" id="tabDepartures" type="button">
+                    <i class="fa-solid fa-arrow-up"></i> Departures
+                    <span class="countBadge zero" id="countDepartures">0</span>
+                  </button>
+                  <button class="segBtn" id="tabStayovers" type="button">
+                    <i class="fa-solid fa-moon"></i> Stay-overs
+                    <span class="countBadge zero" id="countStayovers">0</span>
+                  </button>
+                  <button class="segBtn" id="tabRequests" type="button">
+                    <i class="fa-solid fa-bell-concierge"></i> Guest requests
+                    <span class="countBadge zero" id="countRequests">0</span>
+                  </button>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <button class="btn primary" type="button" id="btnQuickRefresh" style="padding:10px 12px;">
+                  <i class="fa-solid fa-rotate" style="margin-right:8px;"></i> Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Placeholder / “no arrivals” -->
+            <div id="reservationsEmpty" class="emptyState" style="margin-top: 12px;">
+              <div style="max-width: 520px;">
+                <div class="icon"><i class="fa-regular fa-file-lines"></i></div>
+                <h4>No arrivals for selected date</h4>
+                <p>
+                  When bookings come in, they’ll show here by segment (arrivals, departures, stay-overs, and requests).
+                </p>
+              </div>
+            </div>
+
+            <div class="cardFoot">
+              <div style="color:var(--muted); font-size:12px;">
+                <span id="lastUpdated">Updated —</span>
+              </div>
+              <a class="linkBtn" href="javascript:void(0)" aria-label="View all reservations">
+                View all reservations
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Latest reservations card (uses your existing table + #feedTbody) -->
+        <section class="card" aria-label="Latest reservations">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-clock-rotate-left" style="margin-right:10px; color: rgba(110,168,255,.95);"></i>
+              Latest reservations
+            </h3>
+            <span class="badge" id="latestWindowBadgeReminder" title="Window is driven by your date range selector">Last 60 days</span>
+          </div>
+
+          <div class="cardBody">
+            <!-- app.js state box stays -->
+            <div id="stateBox"></div>
+
+            <!-- Empty placeholder shown when table has no rows -->
+            <div id="latestEmpty" class="emptyState" style="margin-top:10px;">
+              <div style="max-width: 560px;">
+                <div class="icon"><i class="fa-regular fa-calendar-xmark"></i></div>
+                <h4>You haven’t received any bookings in the last 60 days</h4>
+                <p>
+                  Once new calls or reservations are logged, they’ll appear here automatically.
+                </p>
+              </div>
+            </div>
+
+            <!-- Table wrapper (keeps your table + IDs) -->
+            <div class="tableWrap" id="latestTableWrap" style="margin-top:10px; display:none;">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:150px;">Time</th>
+                    <th style="width:90px;">Type</th>
+                    <th style="width:180px;">Guest/Caller</th>
+                    <th style="width:110px;">Arrival</th>
+                    <th style="width:60px;">N</th>
+                    <th style="width:110px;">Total</th>
+                    <th style="width:110px;">Sentiment</th>
+                    <th>Summary</th>
+                  </tr>
+                </thead>
+                <tbody id="feedTbody"></tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:10px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:12px;">
+              <div>Showing up to 500 items</div>
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <span class="badge" id="badgeCountMini">0 items</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Unanswered messages card -->
+        <section class="card" aria-label="Unanswered messages">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-message" style="margin-right:10px; color: rgba(110,168,255,.95);"></i>
+              Unanswered messages
+            </h3>
+            <span class="badge" id="unansweredBadge">0</span>
+          </div>
+
+          <div class="cardBody">
+            <div id="unansweredEmpty" class="emptyState">
+              <div style="max-width: 520px;">
+                <div class="icon"><i class="fa-regular fa-face-smile"></i></div>
+                <h4>No unanswered messages</h4>
+                <p>
+                  Great — your guest inbox reminder list is clear.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Trends + Ops insights (keep your existing IDs/canvases) -->
+        <section class="card" aria-label="Performance insights">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:10px; color: rgba(66,211,146,.95);"></i>
+              Performance insights
+            </h3>
+            <span style="color:var(--muted); font-size:12px;">triage • by day</span>
+          </div>
+
+          <div class="cardBody">
+            <div style="display:grid; grid-template-columns: 1fr; gap: 12px;">
+              <div class="card" style="padding:12px;">
+                <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Ops insights</div>
+                <div id="opsInsights" style="color:var(--muted); white-space:pre-wrap; margin-top: 8px;">—</div>
+              </div>
+
+              <div class="charts">
+                <div class="card" style="padding:12px;">
+                  <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Calls</div>
+                  <canvas id="chartCalls" width="600" height="200"></canvas>
+                </div>
+                <div class="card" style="padding:12px;">
+                  <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Bookings</div>
+                  <canvas id="chartBookings" width="600" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR COLUMN (Booking-style) -->
+      <aside style="display:flex; flex-direction:column; gap: 14px; min-width:0;">
+
+        <!-- Pending actions -->
+        <section class="card" aria-label="Pending actions">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-list-check" style="margin-right:10px; color: rgba(255,204,102,.95);"></i>
+              Pending actions
+            </h3>
+            <span class="badge" id="pendingBadge">3</span>
+          </div>
+          <div class="cardBody">
+            <div class="todoList">
+              <div class="todoItem">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <div>
+                  <b>Review missed-call escalations</b>
+                  <span>Confirm after-hours workflows and emergency contacts are current.</span>
+                </div>
+              </div>
+              <div class="todoItem">
+                <i class="fa-solid fa-image"></i>
+                <div>
+                  <b>Improve listing photos</b>
+                  <span>Fresh photos can increase conversion and reduce repetitive questions.</span>
+                </div>
+              </div>
+              <div class="todoItem">
+                <i class="fa-solid fa-shield"></i>
+                <div>
+                  <b>Confirm policies</b>
+                  <span>Double-check pet, smoking, and deposit policies for clean handoffs.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Advice / opportunity center -->
+        <section class="card" aria-label="Advice">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-rocket" style="margin-right:10px; color: rgba(110,168,255,.95);"></i>
+              Advice
+            </h3>
+            <span class="badge">Boost</span>
+          </div>
+          <div class="cardBody">
+            <div class="adviceHero">
+              <div class="illus">
+                <div class="illusArt" aria-hidden="true">
+                  <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div class="illusText">
+                  <b>Opportunity Center</b>
+                  <span>
+                    Quick wins to improve guest experience and booking performance — tailored to your activity.
+                  </span>
+                </div>
+              </div>
+
+              <div style="margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="linkBtn" href="javascript:void(0)" aria-label="Open the Opportunity Center" style="flex:1; justify-content:center;">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  Open the Opportunity Center
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Compact workspace snapshot (keeps your “sidebar elements” in spirit) -->
+        <section class="card" aria-label="Workspace snapshot">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-sliders" style="margin-right:10px; color: rgba(110,168,255,.95);"></i>
+              Workspace
+            </h3>
+            <span style="color:var(--muted); font-size:12px;">quick view</span>
+          </div>
+          <div class="cardBody">
+            <div class="stack">
+              <div class="pill">
+                <b>Session</b>
+                <span class="badge" id="authBadgeMirror">Locked</span>
+              </div>
+              <div class="pill">
+                <b>Date range</b>
+                <span class="badge" id="badgeWindowMirror">—</span>
+              </div>
+              <div class="pill">
+                <b>Activity items</b>
+                <span class="badge" id="badgeCountMirror">0</span>
+              </div>
+            </div>
+
+            <div class="hint" style="margin-top: 12px;">
+              Pro tip: Use the top search to instantly find a caller, guest name, arrival date, or call_id.
+            </div>
+          </div>
+        </section>
+      </aside>
     </div>
   </div>
 
   <!-- Toast -->
   <div id="toast"></div>
+
+  <!-- Lightweight UI wiring (does NOT replace app.js; just handles layout + placeholders) -->
+  <script>
+    // ============================================================
+    // Founder-only gate (Requirement #5)
+    // IMPORTANT: Replace this with your own secret key.
+    // ============================================================
+    (function founderGate(){
+      const SECRET = "your-secret-key"; // <-- change me
+      const appRoot = document.getElementById("appRoot");
+      const topnav = document.getElementById("topnav");
+      const gate = document.getElementById("founderGate");
+      const retry = document.getElementById("btnRetryGate");
+
+      function ask(){
+        try{
+          const key = prompt("Founder access key");
+          const ok = (key && key.trim() === SECRET);
+          if(ok){
+            gate.style.display = "none";
+            topnav.style.display = "";
+            appRoot.style.display = "";
+            window.NSA_FOUNDER_OK = true;
+          }else{
+            // Hide app UI but keep DOM intact for app.js safety.
+            topnav.style.display = "none";
+            appRoot.style.display = "none";
+            gate.style.display = "block";
+            window.NSA_FOUNDER_OK = false;
+          }
+        }catch(e){
+          topnav.style.display = "none";
+          appRoot.style.display = "none";
+          gate.style.display = "block";
+          window.NSA_FOUNDER_OK = false;
+        }
+      }
+
+      if(retry) retry.addEventListener("click", ask);
+      ask();
+    })();
+
+    // ============================================================
+    // Dropdowns + mobile menu
+    // ============================================================
+    (function navUI(){
+      const ddIds = ["ddProperty","ddLang","ddUser"];
+      const dds = ddIds.map(id => document.getElementById(id)).filter(Boolean);
+
+      function closeAll(except){
+        dds.forEach(dd => {
+          if(dd !== except) dd.classList.remove("open");
+        });
+      }
+
+      dds.forEach(dd => {
+        dd.addEventListener("click", (e) => {
+          const isButton = e.target.closest("button");
+          if(!isButton) return;
+          const willOpen = !dd.classList.contains("open");
+          closeAll(dd);
+          dd.classList.toggle("open", willOpen);
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if(e.target.closest(".dd")) return;
+        closeAll(null);
+      });
+
+      const btnMobile = document.getElementById("btnMobileMenu");
+      const mobileMenu = document.getElementById("mobileMenu");
+      if(btnMobile && mobileMenu){
+        btnMobile.addEventListener("click", () => {
+          mobileMenu.classList.toggle("open");
+        });
+      }
+    })();
+
+    // ============================================================
+    // Wire quick refresh button to your existing #btnRefresh
+    // ============================================================
+    (function quickRefresh(){
+      const quick = document.getElementById("btnQuickRefresh");
+      const real = document.getElementById("btnRefresh");
+      if(quick && real){
+        quick.addEventListener("click", () => real.click());
+      }
+    })();
+
+    // ============================================================
+    // Mirror badges into sidebar snapshot + show placeholders
+    // (Non-invasive: observes DOM changes from app.js)
+    // ============================================================
+    (function observeApp(){
+      const badgeCount = document.getElementById("badgeCount");
+      const badgeWindow = document.getElementById("badgeWindow");
+      const authBadge = document.getElementById("authBadge");
+
+      const mirrors = {
+        badgeCountMini: document.getElementById("badgeCountMini"),
+        badgeCountMirror: document.getElementById("badgeCountMirror"),
+        badgeWindowMirror: document.getElementById("badgeWindowMirror"),
+        authBadgeMirror: document.getElementById("authBadgeMirror")
+      };
+
+      function syncMirrors(){
+        if(mirrors.badgeCountMini && badgeCount) mirrors.badgeCountMini.textContent = (badgeCount.textContent || "0") + " items";
+        if(mirrors.badgeCountMirror && badgeCount) mirrors.badgeCountMirror.textContent = badgeCount.textContent || "0";
+        if(mirrors.badgeWindowMirror && badgeWindow) mirrors.badgeWindowMirror.textContent = badgeWindow.textContent || "—";
+        if(mirrors.authBadgeMirror && authBadge) mirrors.authBadgeMirror.textContent = authBadge.textContent || "Locked";
+      }
+
+      const todayLabel = document.getElementById("todayLabel");
+      function syncTodayLabel(){
+        const rs = document.getElementById("rangeSelect");
+        const sd = document.getElementById("startDate");
+        const ed = document.getElementById("endDate");
+        if(!todayLabel || !rs) return;
+
+        const v = rs.value;
+        if(v === "today"){
+          const d = new Date();
+          todayLabel.textContent = d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+        }else if(v === "custom" && sd && ed && sd.value && ed.value){
+          todayLabel.textContent = sd.value + " → " + ed.value;
+        }else{
+          todayLabel.textContent = "Last " + v + " days";
+        }
+      }
+
+      // Table empty state toggles
+      const feedTbody = document.getElementById("feedTbody");
+      const latestEmpty = document.getElementById("latestEmpty");
+      const latestWrap = document.getElementById("latestTableWrap");
+
+      // Reservation counts derived from activity “Type” column (best-effort without changing app.js)
+      const countArrivals = document.getElementById("countArrivals");
+      const countDepartures = document.getElementById("countDepartures");
+      const countStayovers = document.getElementById("countStayovers");
+      const countRequests = document.getElementById("countRequests");
+      const reservationsEmpty = document.getElementById("reservationsEmpty");
+
+      function setBadge(el, n){
+        if(!el) return;
+        el.textContent = String(n);
+        el.classList.toggle("zero", !n);
+      }
+
+      function computeCountsFromTable(){
+        if(!feedTbody) return { total:0, arrivals:0, departures:0, stayovers:0, requests:0 };
+
+        const rows = Array.from(feedTbody.querySelectorAll("tr"));
+        let arrivals=0, departures=0, stayovers=0, requests=0;
+
+        // Heuristic: looks at the "Type" cell text (2nd column)
+        rows.forEach(tr => {
+          const tds = tr.querySelectorAll("td");
+          const type = (tds[1]?.textContent || "").toLowerCase();
+          if(type.includes("arrival")) arrivals++;
+          else if(type.includes("departure")) departures++;
+          else if(type.includes("stay")) stayovers++;
+          else if(type.includes("request") || type.includes("message")) requests++;
+        });
+
+        return { total: rows.length, arrivals, departures, stayovers, requests };
+      }
+
+      function syncPlaceholders(){
+        const hasRows = !!(feedTbody && feedTbody.children && feedTbody.children.length > 0);
+        if(latestEmpty) latestEmpty.style.display = hasRows ? "none" : "";
+        if(latestWrap) latestWrap.style.display = hasRows ? "" : "none";
+
+        const c = computeCountsFromTable();
+        setBadge(countArrivals, c.arrivals);
+        setBadge(countDepartures, c.departures);
+        setBadge(countStayovers, c.stayovers);
+        setBadge(countRequests, c.requests);
+
+        // If ALL are zero, show the big empty state
+        const any = (c.arrivals + c.departures + c.stayovers + c.requests) > 0;
+        if(reservationsEmpty) reservationsEmpty.style.display = any ? "none" : "";
+      }
+
+      // Segment tabs (visual only)
+      function wireTabs(){
+        const tabs = [
+          document.getElementById("tabArrivals"),
+          document.getElementById("tabDepartures"),
+          document.getElementById("tabStayovers"),
+          document.getElementById("tabRequests")
+        ].filter(Boolean);
+
+        tabs.forEach(btn => {
+          btn.addEventListener("click", () => {
+            tabs.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+          });
+        });
+      }
+
+      wireTabs();
+      syncMirrors();
+      syncTodayLabel();
+      syncPlaceholders();
+
+      // Observe badges and table changes from app.js
+      const mo = new MutationObserver(() => {
+        syncMirrors();
+        syncTodayLabel();
+        syncPlaceholders();
+      });
+
+      [badgeCount, badgeWindow, authBadge, feedTbody].filter(Boolean).forEach(el => {
+        mo.observe(el, { childList:true, subtree:true, characterData:true });
+      });
+
+      // Also update when date controls change
+      const rs = document.getElementById("rangeSelect");
+      const sd = document.getElementById("startDate");
+      const ed = document.getElementById("endDate");
+      [rs, sd, ed].filter(Boolean).forEach(el => el.addEventListener("change", () => {
+        syncTodayLabel();
+        // allow app.js to refresh table; placeholder sync also
+        setTimeout(syncPlaceholders, 50);
+      }));
+    })();
+  </script>
 </body>
 </html>
+```
