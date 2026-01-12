@@ -429,19 +429,29 @@
   <!-- TOAST -->
   <div id="toast"></div>
 
-  <!-- Supabase JS must already be included in your dashboard folder, keep whatever you currently use -->
-  <!-- Your config must exist as window.NSA_CONFIG somewhere -->
+  <!-- ✅ Supabase first -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ✅ NSA_CONFIG must exist BEFORE app.js runs -->
+  <script>
+    window.NSA_CONFIG = {
+      SUPABASE_URL: "https://sbzdnzouoyxmawuhdvdi.supabase.co",
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiemRuem91b3l4bWF3dWhkdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY3ODgsImV4cCI6MjA4MDc4Mjc4OH0.SV4XppZoez27_g69NsjZNeJ989bhrEAAvR_XoD5w2Ho"
+    };
+  </script>
+
+  <!-- ✅ Then app.js -->
   <script src="/dashboard/app.js?v=1000"></script>
 
+  <!-- Keep your stateBox observer -->
   <script>
-    // Only for your existing clearDataUI behavior:
-    // show the state box if it gets text
     const stateBox = document.getElementById("stateBox");
-    const obs = new MutationObserver(() => {
-      stateBox.style.display = stateBox.textContent.trim() ? "block" : "none";
-    });
-    obs.observe(stateBox, { childList:true, subtree:true, characterData:true });
+    if (stateBox) {
+      const obs = new MutationObserver(() => {
+        stateBox.style.display = stateBox.textContent.trim() ? "block" : "none";
+      });
+      obs.observe(stateBox, { childList:true, subtree:true, characterData:true });
+    }
   </script>
 </body>
 </html>
