@@ -1,4 +1,3 @@
-```html
 <!doctype html>
 <html lang="en" class="dark">
 <head>
@@ -354,6 +353,7 @@
         inset 0 0 0 1px rgba(255,255,255,.04),
         0 18px 40px rgba(0,0,0,.35);
       transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      overflow:hidden;
     }
     html:not(.dark) .kpi{
       background:
@@ -440,6 +440,166 @@
       color: var(--bad);
     }
     .kpi.bad:after{ background: rgba(255,107,107,.16); }
+
+    /* ========== TIER A: OPS STRIP + MINI CARDS ========== */
+    .opsStrip{
+      margin: 12px 6px 0;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 240px at 10% 0%, rgba(110,168,255,.14), transparent 60%),
+        radial-gradient(900px 240px at 90% 0%, rgba(66,211,146,.10), transparent 60%),
+        rgba(255,255,255,.03);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    html:not(.dark) .opsStrip{
+      border-color: rgba(10,15,25,.12);
+      background:
+        radial-gradient(900px 240px at 10% 0%, rgba(110,168,255,.12), transparent 60%),
+        radial-gradient(900px 240px at 90% 0%, rgba(66,211,146,.08), transparent 60%),
+        rgba(10,15,25,.02);
+      box-shadow: 0 12px 30px rgba(10,15,25,.10);
+    }
+    .opsLeft{
+      display:flex; align-items:center; gap: 12px; flex-wrap:wrap; min-width: 0;
+    }
+    .opsTitle{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      min-width: 0;
+    }
+    html:not(.dark) .opsTitle{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .opsTitle .dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: rgba(66,211,146,.9);
+      box-shadow: 0 0 0 4px rgba(66,211,146,.12);
+      flex: 0 0 auto;
+    }
+    .opsTitle b{ font-weight: 950; font-size: 13px; }
+    .opsTitle small{
+      display:block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 520px;
+    }
+    .opsMeta{
+      display:flex; gap: 8px; align-items:center; flex-wrap:wrap;
+    }
+    .chipMini{
+      display:flex; align-items:center; gap: 8px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    html:not(.dark) .chipMini{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .chipMini i{ color: rgba(110,168,255,.95); }
+    .opsActions{ display:flex; gap: 10px; align-items:center; flex-wrap:wrap; }
+
+    .miniGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 1100px){ .miniGrid{ grid-template-columns: 1fr; } }
+
+    .miniCard{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+      overflow:hidden;
+    }
+    html:not(.dark) .miniCard{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .miniHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .miniHead b{
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .miniHead b i{ color: rgba(110,168,255,.95); }
+
+    .chartWrap{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.02);
+      padding: 10px;
+      overflow:hidden;
+    }
+    html:not(.dark) .chartWrap{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.02);
+    }
+    canvas.miniChart{
+      width: 100%;
+      height: 88px;
+      display:block;
+    }
+
+    .todo{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .todoItem{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    html:not(.dark) .todoItem{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .todoItem i{
+      margin-top: 2px;
+      color: rgba(255,204,102,.95);
+      flex: 0 0 auto;
+    }
+    .todoItem b{ color: var(--text); font-weight: 950; }
 
     /* ========== CARDS ========== */
     .card{
@@ -850,7 +1010,7 @@
     </div>
   </div>
 
-  <!-- Top nav (Elite: Calls • Bookings • Escalations • Policies • Export) -->
+  <!-- Top nav -->
   <header class="topnav" id="topnav">
     <div class="topnavInner">
       <div class="navLeft">
@@ -886,7 +1046,6 @@
       </div>
 
       <div class="navRight">
-        <!-- Search (app.js uses #searchInput) -->
         <div class="navSearch" title="Search (guest, phone, event, room, call_id, summary…)">
           <i class="fa-solid fa-magnifying-glass"></i>
           <input id="searchInput" type="text" placeholder="Search guest, phone, event, room, call_id, summary…" />
@@ -896,7 +1055,6 @@
           <i class="fa-regular fa-circle-question"></i>
         </button>
 
-        <!-- Account / Workspace dropdown (keeps your IDs used by app.js) -->
         <div class="dd" id="ddUser">
           <button class="navIconBtn" id="btnUserDd" type="button" aria-label="Account menu">
             <i class="fa-regular fa-user"></i>
@@ -967,7 +1125,6 @@
       </div>
     </div>
 
-    <!-- Mobile menu -->
     <div class="mobileMenu" id="mobileMenu">
       <nav class="menu" aria-label="Mobile navigation">
         <a class="navItem active" href="#sec-overview"><i class="fa-solid fa-gauge-high"></i> Overview</a>
@@ -992,7 +1149,6 @@
         </p>
       </div>
 
-      <!-- Date controls (keep IDs rangeSelect/startDate/endDate for app.js) -->
       <div class="controls">
         <div class="chip">
           <label for="rangeSelect">Date</label>
@@ -1019,9 +1175,89 @@
     <!-- KPI grid (rendered by app.js into #kpiGrid) -->
     <div class="grid" id="kpiGrid"></div>
 
+    <!-- ✅ TIER A: OPS STRIP (UI-only, safe) -->
+    <div class="opsStrip" id="opsStrip" aria-label="Operations status">
+      <div class="opsLeft">
+        <div class="opsTitle">
+          <span class="dot" aria-hidden="true"></span>
+          <div style="min-width:0;">
+            <b>Demo-ready operations</b>
+            <small>Keep the story tight: Answer → Intake → Summary → Escalate → Export</small>
+          </div>
+        </div>
+
+        <div class="opsMeta">
+          <div class="chipMini" title="Last refresh timestamp">
+            <i class="fa-solid fa-clock"></i>
+            <span id="lastUpdated">Updated —</span>
+          </div>
+          <div class="chipMini" title="Date window from app.js">
+            <i class="fa-regular fa-calendar"></i>
+            <span id="badgeWindowInline">Window: —</span>
+          </div>
+          <div class="chipMini" title="Total activity count from app.js">
+            <i class="fa-solid fa-layer-group"></i>
+            <span id="badgeCountInline">Items: 0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="opsActions">
+        <a class="btn" href="#sec-activity" style="padding:10px 12px;">
+          <i class="fa-solid fa-clock-rotate-left"></i> Activity
+        </a>
+        <button class="btn primary" type="button" id="btnTierARefresh" style="padding:10px 12px;">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
+        <button class="btn" type="button" id="btnTierAExport" style="padding:10px 12px;">
+          <i class="fa-solid fa-download"></i> Export
+        </button>
+      </div>
+    </div>
+
     <div class="layout">
-      <!-- LEFT: ACTIVITY (calls + booking intake) -->
+      <!-- LEFT -->
       <main style="display:flex; flex-direction:column; gap: 14px; min-width:0;">
+
+        <!-- ✅ TIER A: PERFORMANCE SNAPSHOT (Charts are drawn by app.js if it has renderChart; harmless if not) -->
+        <section class="card" aria-label="Performance snapshot">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-chart-line" style="color: rgba(110,168,255,.95);"></i>
+              Performance snapshot
+            </h3>
+            <span class="badge">last window</span>
+          </div>
+          <div class="cardBody">
+            <div class="miniGrid">
+              <div class="miniCard">
+                <div class="miniHead">
+                  <b><i class="fa-solid fa-phone"></i> Calls trend</b>
+                  <span class="badge" style="background: rgba(110,168,255,.10);">spark</span>
+                </div>
+                <div class="chartWrap">
+                  <canvas id="chartCalls" class="miniChart" width="520" height="120"></canvas>
+                </div>
+              </div>
+
+              <div class="miniCard">
+                <div class="miniHead">
+                  <b><i class="fa-solid fa-calendar-check"></i> Bookings trend</b>
+                  <span class="badge" style="background: rgba(66,211,146,.10); border-color: rgba(66,211,146,.22);">spark</span>
+                </div>
+                <div class="chartWrap">
+                  <canvas id="chartBookings" class="miniChart" width="520" height="120"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="hint" style="margin-top:12px;">
+              These mini charts are purely to make the demo video feel “alive” — they reinforce that calls &amp; bookings are being tracked across the selected window.
+            </div>
+          </div>
+        </section>
+
+        <!-- ACTIVITY -->
         <section class="card" id="sec-activity" aria-label="Calls and bookings activity">
           <div class="cardHead">
             <h3>
@@ -1034,7 +1270,6 @@
           </div>
 
           <div class="cardBody">
-            <!-- Filters (client-side only; does not change app.js fetching) -->
             <div class="filters" role="toolbar" aria-label="Feed filters" style="justify-content:space-between;">
               <div class="filters">
                 <button class="segBtn active" type="button" data-filter="all" id="filterAll">
@@ -1062,36 +1297,37 @@
               </div>
             </div>
 
-            <!-- app.js state box (useful for debugging + ops notes) -->
             <div id="stateBox"></div>
 
-            <div id="feedEmpty" class="emptyState" style="margin-top:10px;">
-              <div style="max-width: 560px;">
-                <div class="icon"><i class="fa-regular fa-calendar-xmark"></i></div>
-                <h4>No activity in the selected window</h4>
-                <p>
-                  When calls, booking intake, or escalation events are logged, they’ll appear here automatically.
-                </p>
+            <!-- ✅ Aliases for app.js (safe even if app.js doesn't use them) -->
+            <div id="latestEmpty">
+              <div id="feedEmpty" class="emptyState" style="margin-top:10px;">
+                <div style="max-width: 560px;">
+                  <div class="icon"><i class="fa-regular fa-calendar-xmark"></i></div>
+                  <h4>No activity in the selected window</h4>
+                  <p>When calls, booking intake, or escalation events are logged, they’ll appear here automatically.</p>
+                </div>
               </div>
             </div>
 
-            <!-- Table wrapper (keeps your table + IDs used by app.js) -->
-            <div class="tableWrap" id="feedTableWrap" style="margin-top:10px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width:150px;">Time</th>
-                    <th style="width:90px;">Type</th>
-                    <th style="width:180px;">Guest/Caller</th>
-                    <th style="width:110px;">Arrival</th>
-                    <th style="width:60px;">N</th>
-                    <th style="width:110px;">Total</th>
-                    <th style="width:110px;">Sentiment</th>
-                    <th>Summary</th>
-                  </tr>
-                </thead>
-                <tbody id="feedTbody"></tbody>
-              </table>
+            <div id="latestTableWrap" style="margin-top:10px;">
+              <div class="tableWrap" id="feedTableWrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:150px;">Time</th>
+                      <th style="width:90px;">Type</th>
+                      <th style="width:180px;">Guest/Caller</th>
+                      <th style="width:110px;">Arrival</th>
+                      <th style="width:60px;">N</th>
+                      <th style="width:110px;">Total</th>
+                      <th style="width:110px;">Sentiment</th>
+                      <th>Summary</th>
+                    </tr>
+                  </thead>
+                  <tbody id="feedTbody"></tbody>
+                </table>
+              </div>
             </div>
 
             <div style="margin-top:10px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:12px;">
@@ -1104,7 +1340,7 @@
           </div>
         </section>
 
-        <!-- Export section (Elite needs reporting/exports) -->
+        <!-- EXPORT -->
         <section class="card" id="sec-export" aria-label="Export and reporting">
           <div class="cardHead">
             <h3>
@@ -1131,9 +1367,9 @@
         </section>
       </main>
 
-      <!-- RIGHT: ELITE-NEEDED OPS PANELS -->
+      <!-- RIGHT -->
       <aside style="display:flex; flex-direction:column; gap: 14px; min-width:0;">
-        <!-- Workspace snapshot (uses same IDs as app.js) -->
+        <!-- Workspace -->
         <section class="card" aria-label="Workspace snapshot">
           <div class="cardHead">
             <h3>
@@ -1164,7 +1400,50 @@
           </div>
         </section>
 
-        <!-- Escalations (Elite: safety + routing) -->
+        <!-- ✅ TIER A: ATTENTION NEEDED (UI-only, app.js can inject opsInsights text if it wants) -->
+        <section class="card" aria-label="Attention needed">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-triangle-exclamation" style="color: rgba(255,204,102,.95);"></i>
+              Attention needed
+            </h3>
+            <span class="badge" style="background: rgba(255,204,102,.10); border-color: rgba(255,204,102,.22);">ops</span>
+          </div>
+          <div class="cardBody">
+            <div class="hint">
+              This card is what you talk through in the demo video: what matters overnight, what gets flagged, and what the owner can act on.
+            </div>
+
+            <!-- app.js-safe target (if present in your app.js it will populate) -->
+            <div id="opsInsights" class="hint" style="margin-top:10px;"></div>
+
+            <div class="todo" aria-label="Demo checklist">
+              <div class="todoItem">
+                <i class="fa-solid fa-bolt"></i>
+                <div>
+                  <b>Show 1–2 real calls</b><br/>
+                  Click into “Calls” filter and highlight summary clarity + duration.
+                </div>
+              </div>
+              <div class="todoItem">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div>
+                  <b>Show a booking intake</b><br/>
+                  Point out arrival date, nights, total, and “clean summary”.
+                </div>
+              </div>
+              <div class="todoItem">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div>
+                  <b>Show escalation handling</b><br/>
+                  Flip to “Escalations” filter and explain routing + safety.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Escalations -->
         <section class="card" id="sec-escalations" aria-label="Escalations">
           <div class="cardHead">
             <h3>
@@ -1189,7 +1468,7 @@
           </div>
         </section>
 
-        <!-- Policies & routing (config-focused) -->
+        <!-- Policies -->
         <section class="card" id="sec-policies" aria-label="Policies and routing">
           <div class="cardHead">
             <h3>
@@ -1221,6 +1500,7 @@
             </div>
           </div>
         </section>
+
       </aside>
     </div>
   </div>
@@ -1288,6 +1568,12 @@
 
       const refreshMirror = document.getElementById("btnRefreshMirror");
       if(refreshMirror && realRefresh) refreshMirror.addEventListener("click", () => realRefresh.click());
+
+      // Tier A buttons (safe)
+      const tierARefresh = document.getElementById("btnTierARefresh");
+      const tierAExport  = document.getElementById("btnTierAExport");
+      if(tierARefresh && realRefresh) tierARefresh.addEventListener("click", () => realRefresh.click());
+      if(tierAExport && realExport) tierAExport.addEventListener("click", () => realExport.click());
     })();
 
     // ============================================================
@@ -1301,6 +1587,10 @@
       const badgeCount = document.getElementById("badgeCount");
       const badgeWindow = document.getElementById("badgeWindow");
       const authBadge = document.getElementById("authBadge");
+
+      // Tier A inline mirrors
+      const badgeWindowInline = document.getElementById("badgeWindowInline");
+      const badgeCountInline = document.getElementById("badgeCountInline");
 
       const mirrors = {
         badgeCountMini: document.getElementById("badgeCountMini"),
@@ -1401,6 +1691,9 @@
         if(mirrors.badgeCountMirror && badgeCount) mirrors.badgeCountMirror.textContent = badgeCount.textContent || "0";
         if(mirrors.badgeWindowMirror && badgeWindow) mirrors.badgeWindowMirror.textContent = badgeWindow.textContent || "—";
         if(mirrors.authBadgeMirror && authBadge) mirrors.authBadgeMirror.textContent = authBadge.textContent || "Locked";
+
+        if(badgeWindowInline && badgeWindow) badgeWindowInline.textContent = "Window: " + (badgeWindow.textContent || "—");
+        if(badgeCountInline && badgeCount) badgeCountInline.textContent = "Items: " + (badgeCount.textContent || "0");
       }
 
       function updateCounts(){
@@ -1441,6 +1734,94 @@
     })();
 
     // ============================================================
+    // KPI Enhancer (Tier A visual polish, UI-only)
+    // - app.js renders .kpi with .name + .value
+    // - we inject icon row + color classes without touching app.js
+    // ============================================================
+    (function enhanceKpis(){
+      const grid = document.getElementById("kpiGrid");
+      if(!grid) return;
+
+      const iconFor = (label) => {
+        const t = (label || "").toLowerCase();
+        if(t.includes("total") && t.includes("call")) return "fa-phone";
+        if(t.includes("book")) return "fa-calendar-check";
+        if(t.includes("conver")) return "fa-arrow-trend-up";
+        if(t.includes("revenue")) return "fa-dollar-sign";
+        if(t.includes("avg")) return "fa-stopwatch";
+        return "fa-gauge-high";
+      };
+
+      const classify = (label, valueText) => {
+        const l = (label || "").toLowerCase();
+        const v = (valueText || "").toLowerCase();
+
+        if(l.includes("conversion")){
+          const n = parseFloat(v.replace("%","").trim());
+          if(Number.isFinite(n)){
+            if(n >= 10) return "good";
+            if(n >= 4) return "warn";
+            return "bad";
+          }
+          return "";
+        }
+        if(l.includes("avg")){
+          const n = parseFloat(v.replace("s","").trim());
+          if(Number.isFinite(n)){
+            if(n <= 90) return "good";
+            if(n <= 160) return "warn";
+            return "bad";
+          }
+          return "";
+        }
+        if(l.includes("revenue")){
+          const n = parseFloat(v.replace(/[^0-9.\-]/g,""));
+          if(Number.isFinite(n)){
+            if(n >= 500) return "good";
+            if(n >= 100) return "warn";
+            return "";
+          }
+          return "";
+        }
+        return "";
+      };
+
+      function decorate(){
+        const tiles = Array.from(grid.querySelectorAll(".kpi"));
+        tiles.forEach(tile => {
+          if(tile.dataset.enhanced === "1") return;
+
+          const nameEl = tile.querySelector(".name");
+          const valueEl = tile.querySelector(".value");
+          const name = nameEl?.textContent || "";
+          const value = valueEl?.textContent || "";
+
+          // Insert top row
+          const top = document.createElement("div");
+          top.className = "kpiTop";
+          top.innerHTML = `
+            <div class="kpiIcon"><i class="fa-solid ${iconFor(name)}"></i></div>
+            <p class="name">${name}</p>
+          `;
+
+          // Replace original name with our top row
+          if(nameEl) nameEl.remove();
+          tile.insertBefore(top, valueEl || tile.firstChild);
+
+          // Apply class based on heuristics
+          const cls = classify(name, value);
+          if(cls) tile.classList.add(cls);
+
+          tile.dataset.enhanced = "1";
+        });
+      }
+
+      const mo = new MutationObserver(decorate);
+      mo.observe(grid, { childList:true, subtree:true });
+      decorate();
+    })();
+
+    // ============================================================
     // Show auth overlay by default until app.js hides it on session
     // ============================================================
     (function defaultAuthOverlay(){
@@ -1454,4 +1835,3 @@
   </script>
 </body>
 </html>
-```
