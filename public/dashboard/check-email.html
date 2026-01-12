@@ -8,7 +8,13 @@
   <meta name="robots" content="noindex,nofollow" />
   <meta name="color-scheme" content="dark light" />
 
-  <!-- Optional: if you want theme toggle to still apply here, this reads localStorage and sets html.dark -->
+  <!-- FAVICONS (files are in /public) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Theme: reads localStorage("nsa_theme") and applies html.dark -->
   <script>
     (function(){
       try{
@@ -23,25 +29,33 @@
   <style>
     :root{
       --bg: #0b1020;
-      --panel: rgba(255,255,255,0.06);
-      --panel2: rgba(255,255,255,0.08);
-      --border: rgba(255,255,255,0.10);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.62);
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.09);
+      --panel3: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
       --accent: #6ea8ff;
-      --shadow: 0 12px 40px rgba(0,0,0,0.45);
-      --radius: 18px;
-      --ring: 0 0 0 3px rgba(110,168,255,0.20);
+      --good: #42d392;
+      --shadow: 0 18px 60px rgba(0,0,0,.48);
+      --shadow2: 0 10px 30px rgba(0,0,0,.30);
+      --radius: 22px;
+      --radius2: 16px;
+      --ring: 0 0 0 3px rgba(110,168,255,.20);
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
     html:not(.dark){
       --bg: #f6f7fb;
-      --panel: rgba(10,15,25,0.04);
-      --panel2: rgba(10,15,25,0.06);
-      --border: rgba(10,15,25,0.10);
-      --text: rgba(10,15,25,0.92);
-      --muted: rgba(10,15,25,0.62);
-      --shadow: 0 12px 30px rgba(10,15,25,0.10);
+      --panel: rgba(10,15,25,.04);
+      --panel2: rgba(10,15,25,.06);
+      --panel3: rgba(10,15,25,.03);
+      --border: rgba(10,15,25,.10);
+      --border2: rgba(10,15,25,.14);
+      --text: rgba(10,15,25,.92);
+      --muted: rgba(10,15,25,.62);
+      --shadow: 0 18px 50px rgba(10,15,25,.14);
+      --shadow2: 0 10px 24px rgba(10,15,25,.10);
     }
 
     *{ box-sizing:border-box; }
@@ -49,179 +63,437 @@
     body{
       margin:0;
       font-family: var(--font);
-      background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
-        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
-        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
-        var(--bg);
       color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,.08), transparent 55%),
+        var(--bg);
       display:flex;
       align-items:center;
       justify-content:center;
       padding: 22px;
+      overflow-x:hidden;
+    }
+
+    /* Subtle grid texture */
+    .bgGrid{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      opacity: .35;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(600px 500px at 50% 40%, rgba(0,0,0,1), transparent 70%);
+    }
+    html:not(.dark) .bgGrid{
+      opacity: .12;
+      background-image:
+        linear-gradient(to right, rgba(10,15,25,.10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(10,15,25,.10) 1px, transparent 1px);
+    }
+
+    .shell{
+      width: min(760px, 100%);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .topBar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .topBar a{
+      color: inherit;
+      text-decoration:none;
+      border-bottom: 1px dashed transparent;
+    }
+    .topBar a:hover{
+      color: var(--text);
+      border-bottom-color: rgba(110,168,255,.45);
     }
 
     .card{
-      width: min(640px, 100%);
-      border-radius: 22px;
+      border-radius: var(--radius);
       border: 1px solid var(--border);
-      background: var(--panel);
+      background: rgba(255,255,255,.06);
       box-shadow: var(--shadow);
       overflow:hidden;
+      position: relative;
+    }
+    html:not(.dark) .card{
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(10px);
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(500px 220px at 18% 8%, rgba(110,168,255,.22), transparent 60%),
+        radial-gradient(520px 240px at 82% 0%, rgba(66,211,146,.12), transparent 60%);
+      opacity: .9;
+      pointer-events:none;
+    }
+
+    .inner{
+      position: relative;
+      padding: 18px;
     }
 
     .head{
-      padding: 18px 18px 12px;
-      border-bottom: 1px solid var(--border);
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 12px;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap: 12px;
       text-decoration:none;
       color: inherit;
+      min-width: 0;
     }
-    .dot{
-      width:12px; height:12px; border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
-      box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 950;
+      letter-spacing: .02em;
+      background: rgba(110,168,255,.16);
+      border: 1px solid rgba(110,168,255,.30);
+      box-shadow: var(--shadow2);
       flex: 0 0 auto;
     }
-    .brand b{ font-size: 14px; }
-    .brand span{ display:block; font-size: 12px; color: var(--muted); margin-top:2px; }
+    html:not(.dark) .mark{
+      box-shadow: 0 10px 24px rgba(10,15,25,.10);
+    }
+    .brandText{
+      min-width: 0;
+      line-height: 1.15;
+    }
+    .brandText b{ font-size: 13px; font-weight: 950; display:block; }
+    .brandText span{
+      display:block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 520px;
+    }
 
-    .body{ padding: 18px; }
+    .metaRight{
+      text-align:right;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr 220px;
+      gap: 14px;
+      align-items:center;
+    }
+    @media (max-width: 680px){
+      .hero{ grid-template-columns: 1fr; }
+      .metaRight{ display:none; }
+    }
 
     h1{
-      font-size: 18px;
       margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 950;
       letter-spacing: -0.01em;
     }
     p{
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    .emailPill{
-      display:inline-flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel2);
-      font-size: 13px;
-      margin: 8px 0 14px;
-      max-width: 100%;
-      word-break: break-word;
-    }
-
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-
-    .btn{
-      border: 1px solid var(--border);
-      background: var(--panel);
-      color: var(--text);
-      padding: 11px 12px;
-      border-radius: 14px;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-      font-size: 13px;
-      user-select:none;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
-    .btn:focus{ outline:none; box-shadow: var(--ring); }
-
-    .btn.primary{
-      background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
-      border-color: rgba(110,168,255,0.45);
-    }
-
-    .tips{
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-    .tips ul{
-      margin: 8px 0 0;
-      padding-left: 18px;
+      margin: 0;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.6;
     }
 
-    .small{
+    .status{
+      border-radius: 18px;
+      border: 1px solid var(--border2);
+      background: rgba(255,255,255,.05);
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    html:not(.dark) .status{ background: rgba(10,15,25,.03); }
+
+    .spinner{
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(66,211,146,.12);
+      border: 1px solid rgba(66,211,146,.26);
+      box-shadow: var(--shadow2);
+      flex: 0 0 auto;
+      position: relative;
+      overflow:hidden;
+    }
+    .spinner::after{
+      content:"";
+      position:absolute;
+      inset:-10px;
+      background:
+        conic-gradient(from 180deg,
+          rgba(66,211,146,0) 0deg,
+          rgba(66,211,146,.85) 120deg,
+          rgba(66,211,146,0) 240deg,
+          rgba(66,211,146,0) 360deg);
+      animation: spin 1.2s linear infinite;
+      opacity: .9;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .statusText b{
+      display:block;
+      font-size: 13px;
+      font-weight: 950;
+    }
+    .statusText small{
+      display:block;
+      margin-top: 4px;
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .emailPill{
+      display:none;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel3);
+      font-size: 13px;
+      margin-top: 12px;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .actions{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .btn{
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-weight: 900;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      user-select:none;
+      gap: 10px;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: var(--panel2);
+      border-color: rgba(110,168,255,.35);
+    }
+    .btn:focus{ outline:none; box-shadow: var(--ring); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(110,168,255,.28), rgba(110,168,255,.16));
+      border-color: rgba(110,168,255,.45);
+    }
+
+    .divider{
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 680px){
+      .divider{ grid-template-columns: 1fr; }
+    }
+
+    .tipCard{
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+    }
+    html:not(.dark) .tipCard{ background: rgba(10,15,25,.03); }
+
+    .tipCard b{
+      display:block;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 950;
+    }
+    .tipCard ul{
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .foot{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+    }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .spinner::after{ animation: none; }
+      .btn{ transition:none; }
     }
   </style>
-  <!-- FAVICONS (files are in /public) -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 
 <body>
-  <div class="card" role="main" aria-label="Check your email">
-    <div class="head">
-      <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
-        <span class="dot"></span>
-        <div>
-          <b>NightShift AI</b>
-          <span>Secure sign-in</span>
+  <div class="bgGrid" aria-hidden="true"></div>
+
+  <div class="shell">
+    <div class="topBar" aria-label="Top links">
+      <a href="/" aria-label="Back to NightShift AI homepage">← NightShiftAI.com</a>
+      <span id="ts">—</span>
+    </div>
+
+    <main class="card" role="main" aria-label="Check your email">
+      <div class="inner">
+        <div class="head">
+          <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
+            <div class="mark" aria-hidden="true">NS</div>
+            <div class="brandText">
+              <b>NightShift AI</b>
+              <span>Secure sign-in • Magic link</span>
+            </div>
+          </a>
+          <div class="metaRight">
+            <div style="font-weight:900;">Dashboard access</div>
+            <div style="margin-top:4px;">Elite workspace</div>
+          </div>
         </div>
-      </a>
-      <div class="small" id="ts">—</div>
-    </div>
 
-    <div class="body">
-      <h1>Check your inbox for your secure sign-in link</h1>
-      <p>
-        We’ve sent a magic link to your email. Click the link to finish signing in to the dashboard.
-      </p>
+        <div class="hero">
+          <div>
+            <h1>Check your inbox to finish signing in</h1>
+            <p>
+              We sent a secure sign-in link to your email. Open it to complete authentication and return to the dashboard.
+            </p>
 
-      <div class="emailPill" id="emailPill" style="display:none;"></div>
+            <div class="emailPill" id="emailPill"></div>
 
-      <div class="row">
-        <a class="btn primary" href="/dashboard/">Back to Dashboard</a>
-        <a class="btn" href="/" rel="nofollow">Back to NightShiftAI.com</a>
+            <div class="actions">
+              <a class="btn primary" href="/dashboard/">Back to Dashboard</a>
+              <a class="btn" href="/" rel="nofollow">Back to website</a>
+            </div>
+
+            <div class="foot">
+              <span>Having trouble? Use <span class="kbd">Resend</span> in the dashboard login.</span>
+              <span>Link expires automatically for security.</span>
+            </div>
+          </div>
+
+          <div class="status" aria-label="Status">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="statusText">
+              <b>Waiting for sign-in</b>
+              <small>
+                Once you click the email link, you’ll be signed in and redirected back to Elite.
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <section class="divider" aria-label="Help tips">
+          <div class="tipCard">
+            <b>If you don’t see it</b>
+            <ul>
+              <li>Check Spam / Promotions</li>
+              <li>Search your inbox for “NightShift AI”</li>
+              <li>Wait 1–2 minutes, then try Resend</li>
+            </ul>
+          </div>
+
+          <div class="tipCard">
+            <b>Security note</b>
+            <ul>
+              <li>Magic links are one-time and time-limited</li>
+              <li>Don’t forward the link to others</li>
+              <li>Sign out when finished on shared devices</li>
+            </ul>
+          </div>
+        </section>
       </div>
-
-      <div class="tips">
-        <p class="small" style="margin:0;">
-          If you don’t see it within 1–2 minutes:
-        </p>
-        <ul>
-          <li>Check spam/promotions folders</li>
-          <li>Search for “NightShift AI”</li>
-          <li>Try Resend from the dashboard login</li>
-        </ul>
-      </div>
-    </div>
+    </main>
   </div>
 
   <script>
     (function(){
       try{
         document.getElementById("ts").textContent = "Sent " + new Date().toLocaleString();
+
         var params = new URLSearchParams(location.search);
         var email = params.get("email");
-        if (email){
-          var pill = document.getElementById("emailPill");
-          pill.style.display = "inline-flex";
-          pill.textContent = "Sent to: " + email;
+
+        var pill = document.getElementById("emailPill");
+        if (pill) {
+          if (email) {
+            pill.style.display = "inline-flex";
+            pill.textContent = "Sent to: " + email;
+          } else {
+            pill.style.display = "none";
+          }
         }
       }catch(e){}
     })();
