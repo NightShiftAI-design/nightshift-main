@@ -1,600 +1,559 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NightShift AI — Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NightShift AI • Dashboard</title>
 
-  <!-- FAVICONS -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="robots" content="noindex,nofollow" />
+<meta name="color-scheme" content="dark light" />
 
-  <link rel="stylesheet" href="/assets/site.css?v=1000" />
+<!-- Supabase JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    /* ============================================================
-       HARD LAYOUT FIXES (prevents sideways scroll on Mac)
-    ============================================================ */
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { width: 100%; max-width: 100%; overflow-x: hidden; margin: 0; }
-    body { overflow-x: hidden; }
+<!-- Your config + app logic -->
+<script defer src="/dashboard/config.js"></script>
+<script defer src="/dashboard/app.js"></script>
 
-    /* ============================================================
-       THEME VARIABLES (your app.js toggles: documentElement.classList.toggle("dark", ...))
-       So we style based on html.dark
-    ============================================================ */
-    :root{
-      color-scheme: light;
-      --page-bg: #f6f7fb;
-      --panel-bg: linear-gradient(180deg, rgba(255,255,255,.92), rgba(245,247,255,.96));
-      --panel-border: rgba(15,23,42,.12);
-      --panel-shadow: 0 30px 100px rgba(2,6,23,.12);
+<style>
+:root{
+--bg: #0b1020;
+--panel: rgba(255,255,255,0.06);
+--panel2: rgba(255,255,255,0.08);
+--border: rgba(255,255,255,0.10);
+--text: rgba(255,255,255,0.92);
+--muted: rgba(255,255,255,0.62);
+--accent: #6ea8ff;
+--good: #42d392;
+--warn: #ffcc66;
+--bad: #ff6b6b;
+--shadow: 0 12px 40px rgba(0,0,0,0.45);
+--radius: 18px;
+--radius2: 14px;
+--ring: 0 0 0 3px rgba(110,168,255,0.20);
+--font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
 
-      --card-bg: rgba(255,255,255,.75);
-      --card-border: rgba(15,23,42,.10);
+/* ============================================================
+      THEME BRIDGE (v9.2 uses html.dark class)
+      - Default visuals remain DARK (as before)
+      - When html does NOT have .dark => LIGHT vars apply
+      ============================================================ */
+html:not(.dark){
+--bg: #f6f7fb;
+--panel: rgba(10,15,25,0.04);
+--panel2: rgba(10,15,25,0.06);
+--border: rgba(10,15,25,0.10);
+--text: rgba(10,15,25,0.92);
+--muted: rgba(10,15,25,0.62);
+--shadow: 0 12px 30px rgba(10,15,25,0.10);
+}
 
-      --text: #0b1026;
-      --muted: rgba(15,23,42,.72);
-      --muted2: rgba(15,23,42,.58);
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+margin:0;
+font-family: var(--font);
+background:
+radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
+radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
+radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
+var(--bg);
+color: var(--text);
+}
 
-      --accent: rgba(46,107,255,.38);
-      --btn-bg: rgba(255,255,255,.70);
-      --btn-border: rgba(15,23,42,.14);
+/* Login overlay */
+.overlay{
+position: fixed; inset: 0;
+display: none;
+align-items: center; justify-content: center;
+padding: 22px;
+background: rgba(0,0,0,0.55);
+backdrop-filter: blur(10px);
+z-index: 999;
+}
+html:not(.dark) .overlay{ background: rgba(10,15,25,0.22); }
 
-      --danger-bg: rgba(239,68,68,.10);
-      --danger-border: rgba(239,68,68,.22);
-      --danger-text: rgba(127,29,29,.95);
+.loginCard{
+width: min(520px, 100%);
+border-radius: 22px;
+border: 1px solid var(--border);
+background: rgba(255,255,255,0.06);
+box-shadow: var(--shadow);
+overflow: hidden;
+}
+.loginHead{
+padding: 18px 18px 12px;
+border-bottom: 1px solid var(--border);
+display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.loginHead b{ font-size: 14px; }
+.loginHead span{ font-size: 12px; color: var(--muted); }
+.loginBody{ padding: 18px; }
+.loginBody p{ margin:0 0 14px; color: var(--muted); font-size: 13px; line-height:1.5; }
+.field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 14px; }
+.field label{ font-size: 12px; color: var(--muted); }
+.field input{
+width:100%;
+border: 1px solid rgba(255,255,255,0.10);
+background: rgba(255,255,255,0.06);
+color: var(--text);
+padding: 12px;
+border-radius: 14px;
+outline:none;
+font-size: 14px;
+}
+html:not(.dark) .field input{
+border-color: rgba(10,15,25,0.12);
+background: rgba(10,15,25,0.03);
+}
+.field input:focus{ box-shadow: var(--ring); }
+.row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.spacer{ flex:1; }
+.btn{
+border: 1px solid var(--border);
+background: var(--panel);
+color: var(--text);
+padding: 11px 12px;
+border-radius: 14px;
+cursor:pointer;
+transition: transform .12s ease, background .12s ease, border-color .12s ease;
+font-size: 13px;
+user-select:none;
+text-decoration:none;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+}
+.btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
+.btn:focus{ outline:none; box-shadow: var(--ring); }
+.btn.primary{
+background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
+border-color: rgba(110,168,255,0.45);
+}
+.error{ margin-top: 10px; color: #ffb4b4; font-size: 12px; display:none; }
+html:not(.dark) .error{ color: #b00020; }
 
-      --table-bg: rgba(255,255,255,.72);
-      --row-hover: rgba(46,107,255,.06);
-      --th: rgba(30,41,59,.75);
-    }
+/* Layout */
+.wrap{ display:grid; grid-template-columns: 300px 1fr; min-height:100vh; gap: 0; }
+.sidebar{
+position:sticky; top:0; height:100vh;
+padding:18px;
+border-right: 1px solid var(--border);
+background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+backdrop-filter: blur(10px);
+overflow:auto;
+}
+.main{ padding: 18px 18px 28px; min-width: 0; }
 
-    html.dark{
-      color-scheme: dark;
-      --page-bg: #050816;
-      --panel-bg: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
-      --panel-border: rgba(99,102,241,.22);
-      --panel-shadow: 0 30px 100px rgba(0,0,0,.60);
+/* Brand */
+.brand{
+display:flex; align-items:center; gap:10px;
+padding:12px;
+border: 1px solid var(--border);
+border-radius: var(--radius);
+background: var(--panel);
+box-shadow: var(--shadow);
+text-decoration:none;
+color: inherit;
+}
+.brand:hover{
+background: var(--panel2);
+border-color: rgba(110,168,255,0.35);
+transform: translateY(-1px);
+}
+.brand:focus{ outline:none; box-shadow: var(--ring); }
+.brand .dot{
+width:12px; height:12px; border-radius:50%;
+background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
+box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
+flex: 0 0 auto;
+}
+.brand h1{ font-size: 14px; margin:0; }
+.brand p{ margin:0; font-size: 12px; color: var(--muted); }
 
-      --card-bg: rgba(2,6,23,.55);
-      --card-border: rgba(99,102,241,.18);
+/* Sidebar stack */
+.nav{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+.pill{
+display:flex; align-items:center; justify-content:space-between; gap:10px;
+padding:12px; border-radius: 14px;
+border: 1px solid var(--border); background: var(--panel);
+}
+.badge{
+font-size:12px; padding:6px 10px; border-radius: 999px;
+border: 1px solid var(--border); background: rgba(110,168,255,0.14);
+white-space:nowrap;
+}
 
-      --text: #f8fafc;
-      --muted: rgba(234,240,255,.78);
-      --muted2: rgba(234,240,255,.65);
+.side-footer{
+margin-top: 12px;
+display:flex; flex-direction:column; gap:10px;
+}
+.hint{
+font-size:12px; color: var(--muted);
+padding:10px 12px; border-radius: 14px;
+border: 1px dashed var(--border); background: rgba(255,255,255,0.03);
+}
+.minirow{ display:flex; gap:10px; flex-wrap:wrap; }
 
-      --accent: rgba(46,107,255,.30);
-      --btn-bg: rgba(2,6,23,.70);
-      --btn-border: rgba(99,102,241,.25);
+/* Cards */
+.card{
+border-radius: var(--radius);
+border: 1px solid var(--border);
+background: var(--panel);
+box-shadow: var(--shadow);
+overflow:hidden;
+min-width: 0;
+}
+.card .head{
+padding: 14px 14px 10px;
+display:flex; align-items:center; justify-content:space-between; gap:10px;
+border-bottom: 1px solid var(--border);
+}
+.card .head h3{ margin:0; font-size: 14px; }
+.card .head span{ font-size: 12px; color: var(--muted); }
+.card .body{ padding: 14px; }
 
-      --danger-bg: rgba(248,113,113,.10);
-      --danger-border: rgba(248,113,113,.20);
-      --danger-text: rgba(254,226,226,.95);
+/* Main topbar */
+.topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom: 14px; }
+.title h2{ margin:0; font-size: 20px; }
+.title p{ margin:6px 0 0; font-size: 13px; color: var(--muted); }
 
-      --table-bg: rgba(2,6,23,.45);
-      --row-hover: rgba(99,102,241,.06);
-      --th: rgba(165,180,252,.95);
-    }
+.controls{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; align-items:center; }
+.chip{
+display:flex; align-items:center; gap:8px;
+padding:10px 12px; border-radius: 14px;
+border: 1px solid var(--border); background: var(--panel);
+}
+.chip label{ font-size:12px; color: var(--muted); white-space:nowrap; }
+.chip select, .chip input{
+border: 1px solid rgba(255,255,255,0.10);
+background: rgba(255,255,255,0.06);
+color: var(--text); padding:8px 10px; border-radius: 12px;
+outline:none; min-width: 140px;
+}
 
-    body{
-      background: var(--page-bg);
-      color: var(--text);
-    }
+.mainGrid{ display:flex; flex-direction:column; gap: 14px; }
 
-    /* ===========
-       Layout
-    =========== */
-    .dash-wrap{
-      width: 100%;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 22px 14px 42px;
-    }
-    .shell{
-      display:grid;
-      grid-template-columns: 270px 1fr;
-      gap: 16px;
-      width: 100%;
-      max-width: 100%;
-    }
-    @media (max-width: 980px){
-      .shell{ grid-template-columns: 1fr; }
-    }
+/* KPIs */
+.kpis{ display:grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
+.kpi{
+border-radius: var(--radius2);
+border: 1px solid var(--border);
+background: rgba(255,255,255,0.04);
+padding: 12px;
+min-height: 92px;
+min-width: 0;
+}
+.kpi .name{ font-size: 12px; color: var(--muted); margin:0 0 8px; }
+.kpi .value{ font-size: 20px; margin:0 0 6px; }
+.kpi .sub{ font-size: 12px; color: var(--muted); margin:0; }
 
-    .panel{
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 18px;
-      box-shadow: var(--panel-shadow);
-      max-width: 100%;
-      overflow: hidden; /* prevents inner elements from forcing page scroll */
-    }
+@media (max-width: 1200px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px){ .kpis{ grid-template-columns: 1fr; } }
 
-    /* ===========
-       Sidebar
-    =========== */
-    .side{ padding: 14px; position: sticky; top: 14px; height: fit-content; }
-    @media (max-width: 980px){ .side{ position: static; } }
+/* Activity table wrapper */
+.tablewrap{
+overflow-x: auto;
+border-radius: var(--radius2);
+border: 1px solid var(--border);
+background: rgba(255,255,255,0.02);
+}
 
-    .brand{ display:flex; align-items:center; gap: 10px; padding: 8px 10px 14px; border-bottom:1px solid var(--panel-border); }
-    .logo{
-      width: 38px; height: 38px; border-radius: 14px;
-      background: rgba(99,102,241,.16);
-      border:1px solid rgba(99,102,241,.18);
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 950; color: #f8fafc;
-      flex: 0 0 auto;
-    }
-    .brand-title{ font-weight: 950; color: var(--text); line-height: 1.05; }
-    .brand-sub{ font-size: 12px; color: var(--muted2); margin-top: 3px; }
+table{
+width:100%;
+border-collapse: collapse;
+min-width: 0;
+table-layout: fixed;
+}
+thead th{
+text-align:left; font-size: 12px; color: var(--muted); font-weight: 600;
+padding: 12px; border-bottom: 1px solid var(--border);
+background: rgba(255,255,255,0.02);
+position: sticky; top: 0; z-index: 2;
+backdrop-filter: blur(10px);
+white-space: nowrap;
+}
+tbody td{
+padding: 12px;
+border-bottom: 1px solid rgba(255,255,255,0.06);
+font-size: 13px;
+vertical-align: top;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+tbody tr:hover td{ background: rgba(110,168,255,0.07); }
 
-    /* ✅ FIX: sidebar buttons perfectly aligned (no flex wrap weirdness) */
-    .side-actions{
-      padding: 12px 10px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
+td.col-summary{ white-space: normal; }
+.summaryClamp{
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+line-height: 1.35;
+max-height: calc(1.35em * 2);
+}
 
-    .btn{
-      display:block;
-      width: 100%;
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 950;
-      border: 1px solid var(--btn-border);
-      background: var(--btn-bg);
-      color: var(--text);
-      cursor:pointer;
-      transition: transform .12s ease;
-      text-align: center;
-    }
-    .btn:hover{ transform: translateY(-1px); }
-    .btn.primary{
-      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28));
-      border-color: rgba(46,107,255,.32);
-      color: var(--text);
-    }
+/* Ops Signals (kept as-is) */
+.opsBox{ display:flex; flex-direction:column; gap:12px; }
+.opsSection{
+border: 1px solid rgba(255,255,255,0.08);
+background: rgba(255,255,255,0.03);
+border-radius: 14px;
+padding: 12px;
+}
+.opsTitle{
+display:flex; align-items:center; justify-content:space-between;
+margin:0 0 10px;
+font-size: 12px;
+color: var(--muted);
+letter-spacing: .2px;
+text-transform: uppercase;
+}
+.opsList{ display:flex; flex-direction:column; gap:8px; }
+.opsItem{
+display:flex; align-items:center; justify-content:space-between; gap:10px;
+font-size: 13px;
+padding: 8px 10px;
+border-radius: 12px;
+border: 1px solid rgba(255,255,255,0.06);
+background: rgba(255,255,255,0.02);
+min-width: 0;
+}
+.opsLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
+.opsLabel{ color: var(--text); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+.opsRight{ display:flex; align-items:center; gap:10px; }
+.opsValue{ font-weight: 700; color: var(--text); white-space: nowrap; }
 
-    .acct{
-      margin: 10px;
-      padding: 12px;
-      border-radius: 16px;
-      border:1px solid var(--card-border);
-      background: rgba(255,255,255,.06);
-    }
-    html:not(.dark) .acct{ background: rgba(15,23,42,.03); }
+/* State + Toast */
+.state{
+padding: 14px;
+border-radius: var(--radius2);
+border: 1px dashed var(--border);
+color: var(--muted);
+font-size: 13px;
+background: rgba(255,255,255,0.02);
+white-space: pre-wrap;
+}
+#stateBox:empty{ display:none; }
 
-    .acct .row{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      font-weight: 950;
-      border:1px solid var(--card-border);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      white-space: nowrap;
-    }
+.toast{
+position: fixed; right: 16px; bottom: 16px; max-width: 360px;
+padding: 12px 14px; border-radius: 14px;
+border: 1px solid var(--border);
+background: rgba(10,15,25,0.72);
+backdrop-filter: blur(10px);
+box-shadow: var(--shadow);
+font-size: 13px;
+opacity:0; transform: translateY(10px);
+pointer-events:none;
+transition: opacity .18s ease, transform .18s ease;
+z-index: 99;
+}
+html:not(.dark) .toast{ background: rgba(255,255,255,0.78); }
+.toast.show{ opacity:1; transform: translateY(0); }
 
-    .muted{ color: var(--muted); }
+/* ✅ Overlay "Back to site" link styling (low risk) */
+.overlayBackRow{
+margin-top: 12px;
+padding-top: 12px;
+border-top: 1px solid var(--border);
+display:flex;
+align-items:center;
+justify-content:flex-start;
+gap:10px;
+}
+.overlayBackRow a{
+color: var(--muted);
+font-size: 12px;
+text-decoration:none;
+border-bottom: 1px dashed transparent;
+}
+.overlayBackRow a:hover{
+color: var(--text);
+border-bottom-color: rgba(110,168,255,0.45);
+}
 
-    /* ===========
-       Main
-    =========== */
-    .main{ padding: 16px; overflow-x: hidden; } /* ✅ prevents table forcing page scroll */
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding-bottom: 14px;
-      border-bottom:1px solid var(--panel-border);
-    }
-    .title{
-      font-size: 26px;
-      font-weight: 950;
-      margin: 0;
-      color: var(--text);
-    }
-    .sub{
-      margin: 8px 0 0;
-      max-width: 900px;
-      color: var(--muted2);
-      line-height: 1.55;
-    }
-
-    /* ===========
-       Controls row
-    =========== */
-    .controls{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-      margin-top: 14px;
-    }
-
-    .input, .select{
-      border-radius: 14px;
-      border: 1px solid var(--btn-border);
-      background: var(--btn-bg);
-      color: var(--text);
-      padding: 10px 12px;
-      outline: none;
-      min-width: 200px;
-      max-width: 100%;
-    }
-    .small{ font-size: 12px; color: var(--muted2); }
-
-    /* ===========
-       KPI grid
-    =========== */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-top: 14px;
-    }
-    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
-    .kpi{
-      border-radius: 18px;
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      padding: 14px;
-    }
-    .kpi .name{
-      margin: 0;
-      font-size: 12px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--th);
-      font-weight: 950;
-    }
-    .kpi .value{
-      margin: 8px 0 0;
-      font-size: 26px;
-      font-weight: 950;
-      color: var(--text);
-    }
-
-    /* ===========
-       Two-column content
-    =========== */
-    .cols{
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap: 12px;
-      margin-top: 12px;
-      max-width: 100%;
-    }
-    @media (max-width: 1100px){ .cols{ grid-template-columns: 1fr; } }
-
-    .card{
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      max-width: 100%;
-      overflow: hidden;
-    }
-    .card h3{
-      margin: 0 0 8px;
-      color: var(--text);
-      font-weight: 950;
-      font-size: 14px;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-    }
-    .card .body{ color: var(--muted); line-height: 1.6; font-size: 14px; }
-
-    /* ===========
-       Charts
-    =========== */
-    .charts{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-    @media (max-width: 1100px){ .charts{ grid-template-columns: 1fr; } }
-    canvas{ width: 100%; height: 160px; display:block; }
-
-    /* ===========
-       Table
-    =========== */
-    .table-wrap{
-      margin-top: 12px;
-      overflow: auto;     /* ✅ horizontal scroll only inside table area */
-      max-width: 100%;    /* ✅ never force page width */
-      border-radius: 18px;
-      border: 1px solid var(--card-border);
-      -webkit-overflow-scrolling: touch;
-    }
-    table{
-      width:100%;
-      border-collapse: collapse;
-      min-width: 860px;          /* keeps columns readable */
-      background: var(--table-bg);
-    }
-    th, td{
-      text-align:left;
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(99,102,241,.14);
-      color: var(--muted);
-      font-size: 14px;
-      white-space: nowrap;
-    }
-    th{
-      font-size: 12px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--th);
-    }
-    tr:hover td{ background: var(--row-hover); }
-
-    /* ===========
-       Status strip + toast
-    =========== */
-    .meta-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top:1px solid var(--panel-border);
-    }
-
-    #stateBox{
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 16px;
-      background: var(--danger-bg);
-      border:1px solid var(--danger-border);
-      color: var(--danger-text);
-      display:none;
-    }
-
-    #toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(2,6,23,.92);
-      border: 1px solid rgba(99,102,241,.22);
-      color: rgba(234,240,255,.92);
-      font-weight: 900;
-      box-shadow: 0 20px 70px rgba(0,0,0,.55);
-      opacity: 0;
-      pointer-events:none;
-      transition: opacity .15s ease, transform .15s ease;
-      z-index: 9999;
-    }
-    html:not(.dark) #toast{
-      background: rgba(255,255,255,.92);
-      border: 1px solid rgba(15,23,42,.14);
-      color: rgba(15,23,42,.92);
-    }
-    #toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(-2px);
-    }
-
-    /* ===========
-       Auth overlay
-    =========== */
-    #authOverlay{
-      position: fixed;
-      inset: 0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      background: rgba(0,0,0,.60);
-      z-index: 9998;
-      padding: 18px;
-    }
-    .auth-card{
-      width: min(520px, 96vw);
-      border-radius: 18px;
-      border: 1px solid var(--panel-border);
-      background: var(--panel-bg);
-      box-shadow: 0 40px 120px rgba(0,0,0,.35);
-      padding: 16px;
-      overflow: hidden;
-    }
-    .auth-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    .auth-title{ font-weight: 950; color: var(--text); margin: 0; }
-    .auth-body{ margin-top: 12px; color: var(--muted); }
-    .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
-  </style>
+/* Mobile layout */
+@media (max-width: 1100px){
+.wrap{ grid-template-columns: 1fr; }
+.sidebar{ position:relative; height:auto; }
+.main{ padding-top: 0; }
+}
+</style>
+  <!-- FAVICONS (files are in /public) -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 
 <body>
-  <div class="dash-wrap">
-    <div class="shell">
+<!-- LOGIN OVERLAY -->
+<div class="overlay" id="authOverlay" aria-hidden="true">
+<div class="loginCard" role="dialog" aria-modal="true" aria-label="Sign in">
+<div class="loginHead">
+<div>
+<b>Sign in to Dashboard</b><br/>
+<span>Magic Link (email)</span>
+</div>
+<span id="authStatus">Not signed in</span>
+</div>
+<div class="loginBody">
+<p>Enter your email and we’ll send a magic link.</p>
 
-      <!-- SIDEBAR -->
-      <aside class="panel side">
-        <div class="brand">
-          <div class="logo">NS</div>
-          <div>
-            <div class="brand-title">NightShift AI</div>
-            <div class="brand-sub">Operations Dashboard</div>
-          </div>
-        </div>
+<div class="field">
+<label for="authEmail">Email</label>
+<input id="authEmail" type="email" placeholder="you@company.com" autocomplete="email" />
+</div>
 
-        <div class="side-actions">
-          <button class="btn" id="btnAuth" type="button">Login</button>
-          <button class="btn" id="btnLogout" type="button" style="display:none;">Sign out</button>
-          <button class="btn" id="btnTheme" type="button">Theme</button>
-        </div>
+<div class="row">
+<button class="btn primary" id="btnSendLink" type="button">Send magic link</button>
+<button class="btn" id="btnResendLink" type="button">Resend</button>
+<span class="spacer"></span>
+<button class="btn" id="btnCloseAuth" type="button">Close</button>
+</div>
 
-        <div class="acct">
-          <div class="row">
-            <span class="badge" id="authBadge">Locked</span>
-            <span class="badge" id="badgeWindow">Last 7 days</span>
-          </div>
-          <div class="muted" style="margin-top:10px;" id="authStatus">Not signed in</div>
-          <div class="small" style="margin-top:8px;">
-            Tip: Search works across calls + bookings.
-          </div>
-        </div>
+<div class="error" id="authError"></div>
 
-        <div class="side-actions">
-          <a class="btn primary" href="/contact.html" style="text-decoration:none;">Get a Quote Page</a>
-          <a class="btn" href="/" style="text-decoration:none;">Back to Website</a>
-        </div>
-      </aside>
+<!-- ✅ NEW: obvious escape hatch when not logged in -->
+<div class="overlayBackRow">
+<a href="/" aria-label="Back to NightShift AI homepage">← Back to NightShiftAI.com</a>
+</div>
+</div>
+</div>
+</div>
 
-      <!-- MAIN -->
-      <main class="panel main">
-        <div class="topbar">
-          <div>
-            <h1 class="title">NightShift AI — Dashboard</h1>
-            <p class="sub">Calls, bookings, conversion, and operational signals — clean and fast.</p>
-          </div>
+<div class="wrap">
+<!-- LEFT COLUMN -->
+<aside class="sidebar">
+<!-- ✅ NEW: clickable brand to main site -->
+<a class="brand" href="/" aria-label="Back to NightShift AI homepage">
+<div class="dot"></div>
+<div>
+<h1>NightShift AI</h1>
+<p>Owner Dashboard</p>
+</div>
+</a>
 
-          <div style="min-width:260px;">
-            <div class="badge" id="badgeCount">0</div>
-            <div class="small muted" id="feedMeta" style="margin-top:8px;">0 items</div>
-          </div>
-        </div>
+<div class="nav">
+<div class="pill"><b>Overview</b><span class="badge" id="badgeWindow">—</span></div>
+<div class="pill"><b>Activity</b><span class="badge" id="badgeCount">—</span></div>
+<div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
 
-        <!-- CONTROLS -->
-        <div class="controls">
-          <select class="select" id="rangeSelect">
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="today">Today</option>
-            <option value="custom">Custom</option>
-          </select>
+<section class="card" style="margin-top:10px;">
+<div class="head">
+<h3>Ops Signals</h3>
+<span>fast triage</span>
+</div>
+<div class="body">
+<div id="opsInsights" class="state">—</div>
+</div>
+</section>
+</div>
 
-          <input class="input" id="startDate" type="date" />
-          <input class="input" id="endDate" type="date" />
+<div class="side-footer">
+<div class="hint">Tip: Search guest, phone, event, room type, “booking”, call_id.</div>
+<div class="minirow">
+<button class="btn" id="btnTheme" type="button">Toggle theme</button>
+<button class="btn" id="btnAuth" type="button">Login</button>
+<button class="btn primary" id="btnRefresh" type="button">Refresh</button>
+<button class="btn" id="btnLogout" type="button" style="display:none;">Logout</button>
+</div>
+</div>
+</aside>
 
-          <input class="input" id="searchInput" placeholder="Search guest, summary, notes…" />
+<!-- MAIN AREA -->
+<main class="main">
+<div class="topbar">
+<div class="title">
+<h2>Executive Overview</h2>
+<p>KPIs, ops signals, searchable activity feed, date filters, CSV export, and simple charts.</p>
+</div>
 
-          <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
-          <button class="btn" id="btnExport" type="button">Export CSV</button>
-        </div>
+<div class="controls">
+<div class="chip">
+<label for="rangeSelect">Date</label>
+<select id="rangeSelect">
+<option value="today">Today</option>
+<option value="7" selected>Last 7 days</option>
+<option value="30">Last 30 days</option>
+<option value="custom">Custom</option>
+</select>
+</div>
 
-        <!-- ERROR/STATE -->
-        <div id="stateBox"></div>
+<div class="chip" id="customRange" style="display:none;">
+<label for="startDate">From</label>
+<input id="startDate" type="date"/>
+<label for="endDate">To</label>
+<input id="endDate" type="date"/>
+</div>
 
-        <!-- KPI GRID -->
-        <div class="grid" id="kpiGrid"></div>
+<div class="chip" style="min-width: 320px;">
+<label for="searchInput">Search</label>
+<input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
+</div>
 
-        <div class="cols">
-          <div class="card">
-            <h3>Activity Feed</h3>
+<button class="btn" id="btnExport" type="button">Export CSV</button>
+</div>
+</div>
 
-            <div class="table-wrap" style="margin-top:10px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Type</th>
-                    <th>Guest</th>
-                    <th>Arrival</th>
-                    <th>Nights</th>
-                    <th>Total</th>
-                    <th>Sentiment</th>
-                    <th>Summary</th>
-                  </tr>
-                </thead>
-                <tbody id="feedTbody"></tbody>
-              </table>
-            </div>
+<div class="mainGrid">
+<section class="card">
+<div class="head">
+<h3>Performance KPIs</h3>
+<span id="lastUpdated">—</span>
+</div>
 
-            <div class="meta-row">
-              <div class="small muted" id="lastUpdated">Updated —</div>
-              <div class="small muted">Showing up to 500 items</div>
-            </div>
-          </div>
+<div class="body">
+<div class="kpis" id="kpiGrid"></div>
 
-          <div>
-            <div class="card">
-              <h3>Ops Insights</h3>
-              <div class="body" id="opsInsights">—</div>
-            </div>
+<div style="height:16px"></div>
 
-            <div class="charts">
-              <div class="card">
-                <h3>Calls by Day</h3>
-                <canvas id="chartCalls" width="600" height="200"></canvas>
-              </div>
-              <div class="card">
-                <h3>Bookings by Day</h3>
-                <canvas id="chartBookings" width="600" height="200"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+<div class="card" style="padding:12px;">
+<b style="font-size:13px;">Calls per Day</b>
+<canvas id="chartCalls" height="140"></canvas>
+</div>
 
-      </main>
-    </div>
-  </div>
+<div class="card" style="padding:12px;">
+<b style="font-size:13px;">Bookings per Day</b>
+<canvas id="chartBookings" height="140"></canvas>
+</div>
+</div>
 
-  <!-- AUTH OVERLAY -->
-  <div id="authOverlay">
-    <div class="auth-card">
-      <div class="auth-row">
-        <h3 class="auth-title">Sign in</h3>
-        <button class="btn" id="btnCloseAuth" type="button" style="width:auto;">✕</button>
-      </div>
+<div class="row" style="margin-bottom:10px;">
+<b style="font-size:13px;">Activity Feed</b>
+<span class="spacer"></span>
+<span class="small" id="feedMeta">—</span>
+</div>
 
-      <div class="auth-body">
-        Enter your email to receive a secure magic link.
-        <div style="margin-top:12px;">
-          <input class="input" id="authEmail" type="email" placeholder="you@company.com" style="width:100%;" />
-        </div>
+<div id="stateBox" class="state"></div>
 
-        <div class="auth-actions">
-          <button class="btn primary" id="btnSendLink" type="button">Send magic link</button>
-          <button class="btn" id="btnResendLink" type="button">Resend</button>
-        </div>
+<div class="tablewrap" id="tableWrap">
+<table>
+<thead>
+<tr>
+<th style="width:140px;">Time</th>
+<th style="width:88px;">Type</th>
+<th style="width:170px;">Guest/Caller</th>
+<th style="width:110px;">Arrival</th>
+<th style="width:64px;">N</th>
+<th style="width:110px;">Total</th>
+<th style="width:110px;">Sentiment</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody id="feedTbody"></tbody>
+</table>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
 
-        <div class="small muted" style="margin-top:10px;">
-          You’ll be redirected after clicking the link in your inbox.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast"></div>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- ✅ Fill these in -->
-  <script>
-    window.NSA_CONFIG = {
-      SUPABASE_URL: "https://sbzdnzouoyxmawuhdvdi.supabase.co",
-      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiemRuem91b3l4bWF3dWhkdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY3ODgsImV4cCI6MjA4MDc4Mjc4OH0.SV4XppZoez27_g69NsjZNeJ989bhrEAAvR_XoD5w2Ho"
-    };
-  </script>
-
-  <!-- App -->
-  <script src="/dashboard/app.js?v=1000"></script>
-
-  <!-- stateBox observer -->
-  <script>
-    const stateBox = document.getElementById("stateBox");
-    if (stateBox) {
-      const obs = new MutationObserver(() => {
-        stateBox.style.display = stateBox.textContent.trim() ? "block" : "none";
-      });
-      obs.observe(stateBox, { childList:true, subtree:true, characterData:true });
-    }
-  </script>
+<div class="toast" id="toast"></div>
 </body>
 </html>
