@@ -1,6 +1,7 @@
-// public/dashboard/app.js  — v9.3 (ADD: property switcher + property_id filtering)
+// public/dashboard/app.js — v9.4 (HARDEN: works with new Extranet HTML + safer null-guards)
 // NOTE: Auth, fetching, KPIs, charts, export, search, logout remain intact.
-// Adds: property dropdown populated from data + filter applied across KPIs/charts/feed/export.
+// Keeps: property switcher + property_id filtering (v9.3)
+// Adds: extra UI sync (badge mirrors if present), safer rendering when elements are missing.
 
 (() => {
   // ============================================================
@@ -21,13 +22,14 @@
   // Theme
   const THEME_STORAGE_KEY = "nsa_theme"; // "light" | "dark" | "system"
 
-  // ✅ Property filter (uuid)
+  // Property filter (uuid)
   const PROPERTY_STORAGE_KEY = "nsa_property"; // "__all__" or uuid string
 
   // ============================================================
   // Helpers
   // ============================================================
   const $ = (id) => document.getElementById(id);
+
   const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
 
   const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
@@ -90,15 +92,21 @@
   }
 
   function toast(msg) {
-    const el = $("toast"); if (!el) return;
+    const el = $("toast");
+    if (!el) return;
     el.textContent = msg;
     el.classList.add("show");
     clearTimeout(toast._t);
     toast._t = setTimeout(() => el.classList.remove("show"), 2200);
   }
 
+  function setText(id, text) {
+    const el = $(id);
+    if (el) el.textContent = text;
+  }
+
   // ============================================================
-  // ✅ Property switcher helpers
+  // Property switcher
   // ============================================================
   function getStoredProperty() {
     try { return localStorage.getItem(PROPERTY_STORAGE_KEY) || "__all__"; }
@@ -117,34 +125,23 @@
   function shortUuid(u) {
     const s = safeStr(u);
     if (!s || s === "__all__") return "All properties";
-    // show: first 8 chars (safe, looks like Booking extranet internal ids)
     return s.length > 8 ? `${s.slice(0, 8)}…` : s;
-  }
-
-  function setPropertyBadgeUI() {
-    // optional: if you want to reflect selection somewhere else later
-    // right now, keep it minimal and non-breaking
   }
 
   function populatePropertySelect(rows) {
     const sel = $("propertySelect");
     if (!sel) return;
 
-    const current = getStoredProperty();
+    const currentStored = getStoredProperty();
+    const prev = sel.value || currentStored || "__all__";
 
-    // Gather uuids (from normalized rows)
     const set = new Set();
     for (const r of rows) {
       const pid = r?.property_id;
       if (pid && pid !== "__all__") set.add(String(pid));
     }
-
     const ids = Array.from(set).sort();
 
-    // Keep existing selection if possible
-    const prev = sel.value || current || "__all__";
-
-    // Rebuild options
     sel.innerHTML = "";
     const optAll = document.createElement("option");
     optAll.value = "__all__";
@@ -158,8 +155,7 @@
       sel.appendChild(opt);
     }
 
-    // Restore selection (fallback to __all__)
-    sel.value = ids.includes(prev) ? prev : (prev === "__all__" ? "__all__" : "__all__");
+    sel.value = (prev === "__all__") ? "__all__" : (ids.includes(prev) ? prev : "__all__");
     storeProperty(sel.value);
   }
 
@@ -167,19 +163,18 @@
     const sel = $("propertySelect");
     if (!sel) return;
 
-    // hydrate from storage early (options will be populated after data loads)
+    // hydrate from storage early (options populated after data loads)
     sel.value = getStoredProperty() || "__all__";
 
     sel.addEventListener("change", () => {
       storeProperty(sel.value || "__all__");
-      // No re-fetch needed; just re-filter + re-render
       renderAll();
       toast(sel.value === "__all__" ? "Showing all properties." : `Filtered: ${shortUuid(sel.value)}`);
     });
   }
 
   // ============================================================
-  // Theme (dark/light/system) — restored safely
+  // Theme
   // ============================================================
   function systemPrefersDark() {
     try {
@@ -207,23 +202,21 @@
     return systemPrefersDark() ? "dark" : "light";
   }
 
-  function applyTheme(theme) {
-    const resolved = resolveTheme(theme);
-    document.documentElement.classList.toggle("dark", resolved === "dark");
-    updateThemeButtonUI(theme, resolved);
-  }
-
   function updateThemeButtonUI(theme, resolved) {
     const btn = $("btnTheme") || $("themeToggle") || $("btnToggleTheme");
     if (!btn) return;
 
     const label = resolved === "dark" ? "Dark" : "Light";
     const hint = theme === "system" ? " (System)" : "";
-    if (!btn.dataset.preserveText) {
-      btn.textContent = `${label}${hint}`;
-    }
+    if (!btn.dataset.preserveText) btn.textContent = `${label}${hint}`;
     btn.setAttribute("aria-pressed", resolved === "dark" ? "true" : "false");
     btn.title = "Toggle theme";
+  }
+
+  function applyTheme(theme) {
+    const resolved = resolveTheme(theme);
+    document.documentElement.classList.toggle("dark", resolved === "dark");
+    updateThemeButtonUI(theme, resolved);
   }
 
   function cycleTheme(current) {
@@ -294,22 +287,25 @@
     return window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
       auth: { persistSession: PERSIST_SESSION, autoRefreshToken: true, detectSessionInUrl: true }
     });
-  }
+    }
 
   // ============================================================
-  // Auth UI (UNCHANGED)
+  // Auth UI
   // ============================================================
   function showOverlay(show) {
-    const o = $("authOverlay"); if (!o) return;
+    const o = $("authOverlay");
+    if (!o) return;
     o.style.display = show ? "flex" : "none";
   }
 
   function setSessionUI(session) {
     const email = session?.user?.email || "";
-    $("authBadge").textContent = email ? "Unlocked" : "Locked";
-    $("btnAuth").textContent = email ? "Account" : "Login";
-    $("btnLogout").style.display = email ? "inline-flex" : "none";
-    $("authStatus").textContent = email ? `Signed in as ${email}` : "Not signed in";
+    setText("authBadge", email ? "Unlocked" : "Locked");
+    const btnAuth = $("btnAuth");
+    if (btnAuth) btnAuth.textContent = email ? "Account" : "Login";
+    const btnLogout = $("btnLogout");
+    if (btnLogout) btnLogout.style.display = email ? "inline-flex" : "none";
+    setText("authStatus", email ? `Signed in as ${email}` : "Not signed in");
   }
 
   async function hardSignOut() {
@@ -336,24 +332,6 @@
 
     showOverlay(false);
     return true;
-  }
-
-  function initAuthHandlers() {
-    $("btnAuth").onclick = () => showOverlay(true);
-    $("btnCloseAuth").onclick = () => showOverlay(false);
-    $("btnSendLink").onclick = sendMagicLink;
-    $("btnResendLink").onclick = sendMagicLink;
-
-    $("btnLogout").onclick = async () => {
-      toast("Signing out…");
-      await hardSignOut();
-      location.href = "/";
-    };
-
-    supabaseClient.auth.onAuthStateChange(async (_, session) => {
-      setSessionUI(session);
-      if (session) loadAndRender();
-    });
   }
 
   async function sendMagicLink() {
@@ -383,6 +361,7 @@
         return;
       }
 
+      // your check-email page
       const target = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
       location.href = target;
     } finally {
@@ -391,36 +370,79 @@
     }
   }
 
+  function initAuthHandlers() {
+    const btnAuth = $("btnAuth");
+    if (btnAuth) btnAuth.onclick = () => showOverlay(true);
+
+    const btnClose = $("btnCloseAuth");
+    if (btnClose) btnClose.onclick = () => showOverlay(false);
+
+    const btnSend = $("btnSendLink");
+    if (btnSend) btnSend.onclick = sendMagicLink;
+
+    const btnResend = $("btnResendLink");
+    if (btnResend) btnResend.onclick = sendMagicLink;
+
+    const btnLogout = $("btnLogout");
+    if (btnLogout) {
+      btnLogout.onclick = async () => {
+        toast("Signing out…");
+        await hardSignOut();
+        location.href = "/";
+      };
+    }
+
+    supabaseClient.auth.onAuthStateChange(async (_, session) => {
+      setSessionUI(session);
+      if (session) loadAndRender();
+    });
+  }
+
   // ============================================================
   // Controls
   // ============================================================
   function initControls() {
-    $("rangeSelect").onchange = () => loadAndRender();
-    $("startDate").onchange = () => loadAndRender();
-    $("endDate").onchange = () => loadAndRender();
-    $("btnRefresh").onclick = () => loadAndRender();
-    $("btnExport").onclick = () => exportCSV(filteredRows);
+    const rs = $("rangeSelect");
+    const sd = $("startDate");
+    const ed = $("endDate");
 
-    $("searchInput").oninput = () => { applyFilters(); renderAll(); };
+    if (rs) rs.onchange = () => loadAndRender();
+    if (sd) sd.onchange = () => loadAndRender();
+    if (ed) ed.onchange = () => loadAndRender();
 
-    // ✅ NEW
+    const btnRefresh = $("btnRefresh");
+    if (btnRefresh) btnRefresh.onclick = () => loadAndRender();
+
+    const btnExport = $("btnExport");
+    if (btnExport) btnExport.onclick = () => exportCSV(filteredRows);
+
+    const search = $("searchInput");
+    if (search) {
+      search.oninput = () => {
+        applyFilters();
+        renderAll();
+      };
+    }
+
     initPropertyControl();
   }
 
   function getSelectedRange() {
-    const mode = $("rangeSelect").value;
+    const rs = $("rangeSelect");
+    const mode = rs?.value || "7";
     const now = new Date();
 
     if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
     if (mode === "7" || mode === "30") {
       const days = Number(mode);
-      const s = new Date(now); s.setDate(now.getDate() - (days - 1));
+      const s = new Date(now);
+      s.setDate(now.getDate() - (days - 1));
       return { label: `Last ${days} days`, start: startOfDay(s), end: endOfDay(now) };
     }
 
-    const sVal = $("startDate").value;
-    const eVal = $("endDate").value;
-    if (sVal && eVal) {
+    const sVal = $("startDate")?.value || "";
+    const eVal = $("endDate")?.value || "";
+    if (mode === "custom" && sVal && eVal) {
       return {
         label: `${sVal} → ${eVal}`,
         start: startOfDay(new Date(sVal)),
@@ -428,7 +450,8 @@
       };
     }
 
-    const s = new Date(now); s.setDate(now.getDate() - 6);
+    const s = new Date(now);
+    s.setDate(now.getDate() - 6);
     return { label: "Last 7 days", start: startOfDay(s), end: endOfDay(now) };
   }
 
@@ -454,8 +477,7 @@
       nights: toNum(r.nights),
       totalDue: toNum(r.total_due),
       sentiment: "",
-      summary: `Reservation for ${r.guest_name} • Arrive ${r.arrival_date}`,
-      // ✅ NEW: bring property_id up to top-level (uuid)
+      summary: `Reservation for ${safeStr(r.guest_name)} • Arrive ${safeStr(r.arrival_date)}`,
       property_id: safeStr(r.property_id),
       raw: r
     };
@@ -466,14 +488,13 @@
     return {
       kind: "call",
       when: parseISOish(r.created_at),
-      guest: booking?.guest_name || "",
-      arrival: booking?.arrival_date || "",
+      guest: safeStr(booking?.guest_name || ""),
+      arrival: safeStr(booking?.arrival_date || ""),
       nights: null,
       totalDue: null,
       sentiment: safeStr(r.sentiment),
       duration: toNum(r.duration_seconds),
       summary: safeStr(r.summary),
-      // ✅ NEW: bring property_id up to top-level (uuid)
       property_id: safeStr(r.property_id),
       raw: r
     };
@@ -487,11 +508,11 @@
   let lastRange = null;
 
   // ============================================================
-  // Filters (✅ now includes property filter)
+  // Filters (includes property filter)
   // ============================================================
   function applyFilters() {
-    const range = lastRange;
-    const q = $("searchInput").value.toLowerCase().trim();
+    const range = lastRange || getSelectedRange();
+    const q = ($("searchInput")?.value || "").toLowerCase().trim();
     const selectedProperty = getSelectedProperty(); // "__all__" or uuid
 
     filteredRows = allRows.filter(r => {
@@ -528,14 +549,17 @@
 
     const revenue = bookings.map(b => b.totalDue).filter(Number.isFinite).reduce((a, b) => a + b, 0);
 
-    const negative = calls.filter(c => c.sentiment.toLowerCase().includes("neg")).length;
-    const longCalls = calls.filter(c => c.duration >= 240).length;
+    const negative = calls.filter(c => safeStr(c.sentiment).toLowerCase().includes("neg")).length;
+    const longCalls = calls.filter(c => Number.isFinite(c.duration) && c.duration >= 240).length;
 
     return { totalCalls, totalBookings, conv, avgDur, revenue, negative, longCalls };
   }
 
   function renderKPIs(k) {
-    const el = $("kpiGrid"); el.innerHTML = "";
+    const el = $("kpiGrid");
+    if (!el) return;
+    el.innerHTML = "";
+
     const tiles = [
       ["Total calls", fmtInt(k.totalCalls)],
       ["Bookings", fmtInt(k.totalBookings)],
@@ -543,20 +567,23 @@
       ["Revenue", fmtMoney(k.revenue)],
       ["Avg call", Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—"]
     ];
+
     for (const [t, v] of tiles) {
       const d = document.createElement("div");
       d.className = "kpi";
-      d.innerHTML = `<p class="name">${t}</p><p class="value">${v}</p>`;
+      d.innerHTML = `<p class="name">${escHtml(t)}</p><p class="value">${escHtml(v)}</p>`;
       el.appendChild(d);
     }
   }
 
   function renderOps(k) {
-    $("opsInsights").innerHTML = `
-      Neg sentiment: ${fmtInt(k.negative)}<br>
-      Long calls (4m+): ${fmtInt(k.longCalls)}<br>
-      Conversion: ${fmtPct(k.conv)}<br>
-      Revenue: ${fmtMoney(k.revenue)}
+    const el = $("opsInsights");
+    if (!el) return;
+    el.innerHTML = `
+      Neg sentiment: ${escHtml(fmtInt(k.negative))}<br>
+      Long calls (4m+): ${escHtml(fmtInt(k.longCalls))}<br>
+      Conversion: ${escHtml(fmtPct(k.conv))}<br>
+      Revenue: ${escHtml(fmtMoney(k.revenue))}
     `;
   }
 
@@ -574,7 +601,9 @@
   }
 
   function renderChart(canvasId, data) {
-    const c = $(canvasId); if (!c) return;
+    const c = $(canvasId);
+    if (!c) return;
+
     const ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
 
@@ -582,7 +611,7 @@
     if (!keys.length) return;
 
     const vals = keys.map(k => data[k]);
-    const max = Math.max(...vals);
+    const max = Math.max(...vals, 1);
 
     const w = c.width, h = c.height;
     const pad = 20;
@@ -594,7 +623,8 @@
     keys.forEach((k, i) => {
       const x = pad + i * step;
       const y = h - pad - (vals[i] / max) * (h - pad * 2);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     });
 
     ctx.stroke();
@@ -604,46 +634,46 @@
   // Activity Feed
   // ============================================================
   function renderFeed(rows) {
-    $("badgeCount").textContent = fmtInt(rows.length);
-    $("feedMeta").textContent = `${rows.length} items`;
+    setText("badgeCount", fmtInt(rows.length));
+    setText("feedMeta", `${rows.length} items`);
 
     const tbody = $("feedTbody");
-    if (tbody) {
-      tbody.innerHTML = "";
+    if (!tbody) return;
 
-      for (const r of rows.slice(0, 500)) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r.when ? r.when.toLocaleString() : "—"}</td>
-          <td>${escHtml(r.kind || "—")}</td>
-          <td>${escHtml(r.guest || "—")}</td>
-          <td>${escHtml(r.arrival || "—")}</td>
-          <td>${Number.isFinite(r.nights) ? r.nights : "—"}</td>
-          <td>${Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—"}</td>
-          <td>${escHtml(r.sentiment || "—")}</td>
-          <td class="col-summary"><div class="summaryClamp">${escHtml(r.summary || "—")}</div></td>
-        `;
-        tbody.appendChild(tr);
-      }
-      return;
+    tbody.innerHTML = "";
+    for (const r of rows.slice(0, 500)) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.when ? escHtml(r.when.toLocaleString()) : "—"}</td>
+        <td>${escHtml(r.kind || "—")}</td>
+        <td>${escHtml(r.guest || "—")}</td>
+        <td>${escHtml(r.arrival || "—")}</td>
+        <td>${Number.isFinite(r.nights) ? escHtml(String(r.nights)) : "—"}</td>
+        <td>${Number.isFinite(r.totalDue) ? escHtml(fmtMoney(r.totalDue)) : "—"}</td>
+        <td>${escHtml(r.sentiment || "—")}</td>
+        <td class="col-summary"><div class="summaryClamp">${escHtml(r.summary || "—")}</div></td>
+      `;
+      tbody.appendChild(tr);
     }
   }
 
   function exportCSV(rows) {
     if (!rows.length) { toast("Nothing to export."); return; }
 
-    // ✅ include property_id in export
     const cols = ["property_id","kind","time","guest","arrival","nights","total","sentiment","summary"];
     const lines = [cols.join(",")];
 
     for (const r of rows) {
       const vals = [
         r.property_id || "",
-        r.kind,
+        r.kind || "",
         r.when ? r.when.toISOString() : "",
-        r.guest, r.arrival,
-        r.nights, r.totalDue,
-        r.sentiment, r.summary
+        r.guest || "",
+        r.arrival || "",
+        Number.isFinite(r.nights) ? r.nights : "",
+        Number.isFinite(r.totalDue) ? r.totalDue : "",
+        r.sentiment || "",
+        r.summary || ""
       ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
       lines.push(vals.join(","));
     }
@@ -651,7 +681,9 @@
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `nightshift_${Date.now()}.csv`; a.click();
+    a.href = url;
+    a.download = `nightshift_${Date.now()}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
     toast("CSV exported.");
   }
@@ -661,6 +693,7 @@
   // ============================================================
   function renderAll() {
     applyFilters();
+
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
     renderOps(k);
@@ -669,22 +702,31 @@
     renderChart("chartBookings", groupByDay(filteredRows, "booking"));
 
     renderFeed(filteredRows);
-    $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
+
+    setText("lastUpdated", `Updated ${new Date().toLocaleString()}`);
   }
 
   function clearDataUI(msg) {
-    $("stateBox").textContent = msg || "—";
+    setText("stateBox", msg || "—");
   }
 
   // ============================================================
   // Load
   // ============================================================
+  let _loading = false;
+
   async function loadAndRender() {
-    if (!(await ensureAuthGate())) return;
+    if (_loading) return;
+    _loading = true;
 
     try {
+      if (!(await ensureAuthGate())) return;
+
       lastRange = getSelectedRange();
-      $("badgeWindow").textContent = lastRange.label;
+      setText("badgeWindow", lastRange.label);
+
+      const latestWindowBadgeReminder = $("latestWindowBadgeReminder");
+      if (latestWindowBadgeReminder) latestWindowBadgeReminder.textContent = lastRange.label;
 
       const [resv, calls] = await Promise.all([
         fetchTable("reservations"),
@@ -696,7 +738,6 @@
         ...calls.map(normalizeCall)
       ];
 
-      // ✅ NEW: populate property dropdown from fetched data
       populatePropertySelect(allRows);
 
       renderAll();
@@ -704,6 +745,8 @@
     } catch (e) {
       console.error(e);
       clearDataUI("Load error.");
+    } finally {
+      _loading = false;
     }
   }
 
