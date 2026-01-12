@@ -1,7 +1,6 @@
-// public/dashboard/app.js — v9.4 (HARDEN: works with new Extranet HTML + safer null-guards)
-// NOTE: Auth, fetching, KPIs, charts, export, search, logout remain intact.
-// Keeps: property switcher + property_id filtering (v9.3)
-// Adds: extra UI sync (badge mirrors if present), safer rendering when elements are missing.
+// public/dashboard/app.js — v9.5
+// FIX: Populate Arrivals/Departures/Stayovers from reservations (arrival_date + nights)
+// Keeps: auth, fetching, KPIs, charts, export, search, logout, property switcher intact.
 
 (() => {
   // ============================================================
@@ -16,20 +15,16 @@
   const ALWAYS_REQUIRE_LOGIN = false;
   const PERSIST_SESSION = true;
 
-  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true; // (kept; not yet used here)
-  const DEDUPE_DUPLICATE_BOOKINGS = true;                   // (kept; not yet used here)
+  const HIDE_BOOKING_LIKE_CALLS_WHEN_BOOKING_EXISTS = true; // kept
+  const DEDUPE_DUPLICATE_BOOKINGS = true;                   // kept
 
-  // Theme
-  const THEME_STORAGE_KEY = "nsa_theme"; // "light" | "dark" | "system"
-
-  // Property filter (uuid)
+  const THEME_STORAGE_KEY = "nsa_theme";      // "light" | "dark" | "system"
   const PROPERTY_STORAGE_KEY = "nsa_property"; // "__all__" or uuid string
 
   // ============================================================
   // Helpers
   // ============================================================
   const $ = (id) => document.getElementById(id);
-
   const safeStr = (v) => (v === null || v === undefined) ? "" : String(v);
 
   const fmtInt = (n) => Number.isFinite(n) ? n.toLocaleString() : "—";
@@ -45,17 +40,28 @@
     const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
     if (ddmmyyyy) {
       const [, dd, mm, yyyy] = ddmmyyyy;
-      return new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      return isNaN(d.getTime()) ? null : d;
     }
 
     const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (ymd) {
       const [, yyyy, mm, dd] = ymd;
-      return new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      return isNaN(d.getTime()) ? null : d;
     }
 
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
+  };
+
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  const endOfDay   = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+
+  const addDays = (d, days) => {
+    const x = new Date(d);
+    x.setDate(x.getDate() + days);
+    return x;
   };
 
   const toYMD = (d) => {
@@ -64,9 +70,6 @@
     const day = String(d.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
   };
-
-  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-  const endOfDay   = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
   function escHtml(str) {
     return safeStr(str)
@@ -91,18 +94,17 @@
     return Number.isFinite(n) ? n : NaN;
   }
 
+  function setText(id, text) {
+    const el = $(id);
+    if (el) el.textContent = text;
+  }
+
   function toast(msg) {
-    const el = $("toast");
-    if (!el) return;
+    const el = $("toast"); if (!el) return;
     el.textContent = msg;
     el.classList.add("show");
     clearTimeout(toast._t);
     toast._t = setTimeout(() => el.classList.remove("show"), 2200);
-  }
-
-  function setText(id, text) {
-    const el = $(id);
-    if (el) el.textContent = text;
   }
 
   // ============================================================
@@ -115,13 +117,11 @@
   function storeProperty(v) {
     try { localStorage.setItem(PROPERTY_STORAGE_KEY, v); } catch {}
   }
-
   function getSelectedProperty() {
     const sel = $("propertySelect");
     const v = sel?.value || getStoredProperty();
     return v || "__all__";
   }
-
   function shortUuid(u) {
     const s = safeStr(u);
     if (!s || s === "__all__") return "All properties";
@@ -163,7 +163,6 @@
     const sel = $("propertySelect");
     if (!sel) return;
 
-    // hydrate from storage early (options populated after data loads)
     sel.value = getStoredProperty() || "__all__";
 
     sel.addEventListener("change", () => {
@@ -179,17 +178,12 @@
   function systemPrefersDark() {
     try {
       return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
   function getStoredTheme() {
-    try {
-      return localStorage.getItem(THEME_STORAGE_KEY) || "system";
-    } catch {
-      return "system";
-    }
+    try { return localStorage.getItem(THEME_STORAGE_KEY) || "system"; }
+    catch { return "system"; }
   }
 
   function storeTheme(v) {
@@ -205,23 +199,15 @@
   function updateThemeButtonUI(theme, resolved) {
     const btn = $("btnTheme") || $("themeToggle") || $("btnToggleTheme");
     if (!btn) return;
-
     const label = resolved === "dark" ? "Dark" : "Light";
     const hint = theme === "system" ? " (System)" : "";
     if (!btn.dataset.preserveText) btn.textContent = `${label}${hint}`;
-    btn.setAttribute("aria-pressed", resolved === "dark" ? "true" : "false");
-    btn.title = "Toggle theme";
   }
 
   function applyTheme(theme) {
     const resolved = resolveTheme(theme);
     document.documentElement.classList.toggle("dark", resolved === "dark");
     updateThemeButtonUI(theme, resolved);
-  }
-
-  function cycleTheme(current) {
-    const resolved = resolveTheme(current);
-    return resolved === "dark" ? "light" : "dark";
   }
 
   function initTheme() {
@@ -232,21 +218,11 @@
     if (btn) {
       btn.onclick = () => {
         const now = getStoredTheme();
-        const next = cycleTheme(now);
+        const next = resolveTheme(now) === "dark" ? "light" : "dark";
         storeTheme(next);
         applyTheme(next);
       };
     }
-
-    try {
-      const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      const onChange = () => {
-        const t = getStoredTheme();
-        if (t === "system") applyTheme("system");
-      };
-      if (mq.addEventListener) mq.addEventListener("change", onChange);
-      else mq.addListener(onChange);
-    } catch {}
   }
 
   // ============================================================
@@ -287,14 +263,13 @@
     return window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
       auth: { persistSession: PERSIST_SESSION, autoRefreshToken: true, detectSessionInUrl: true }
     });
-    }
+  }
 
   // ============================================================
   // Auth UI
   // ============================================================
   function showOverlay(show) {
-    const o = $("authOverlay");
-    if (!o) return;
+    const o = $("authOverlay"); if (!o) return;
     o.style.display = show ? "flex" : "none";
   }
 
@@ -361,9 +336,7 @@
         return;
       }
 
-      // your check-email page
-      const target = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
-      location.href = target;
+      location.href = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
     } finally {
       if (btnSend) { btnSend.disabled = false; btnSend.textContent = prevSendText; }
       if (btnResend) { btnResend.disabled = false; btnResend.textContent = prevResendText; }
@@ -371,26 +344,16 @@
   }
 
   function initAuthHandlers() {
-    const btnAuth = $("btnAuth");
-    if (btnAuth) btnAuth.onclick = () => showOverlay(true);
+    $("btnAuth") && ($("btnAuth").onclick = () => showOverlay(true));
+    $("btnCloseAuth") && ($("btnCloseAuth").onclick = () => showOverlay(false));
+    $("btnSendLink") && ($("btnSendLink").onclick = sendMagicLink);
+    $("btnResendLink") && ($("btnResendLink").onclick = sendMagicLink);
 
-    const btnClose = $("btnCloseAuth");
-    if (btnClose) btnClose.onclick = () => showOverlay(false);
-
-    const btnSend = $("btnSendLink");
-    if (btnSend) btnSend.onclick = sendMagicLink;
-
-    const btnResend = $("btnResendLink");
-    if (btnResend) btnResend.onclick = sendMagicLink;
-
-    const btnLogout = $("btnLogout");
-    if (btnLogout) {
-      btnLogout.onclick = async () => {
-        toast("Signing out…");
-        await hardSignOut();
-        location.href = "/";
-      };
-    }
+    $("btnLogout") && ($("btnLogout").onclick = async () => {
+      toast("Signing out…");
+      await hardSignOut();
+      location.href = "/";
+    });
 
     supabaseClient.auth.onAuthStateChange(async (_, session) => {
       setSessionUI(session);
@@ -402,37 +365,31 @@
   // Controls
   // ============================================================
   function initControls() {
-    const rs = $("rangeSelect");
-    const sd = $("startDate");
-    const ed = $("endDate");
+    $("rangeSelect") && ($("rangeSelect").onchange = () => loadAndRender());
+    $("startDate") && ($("startDate").onchange = () => loadAndRender());
+    $("endDate") && ($("endDate").onchange = () => loadAndRender());
+    $("btnRefresh") && ($("btnRefresh").onclick = () => loadAndRender());
+    $("btnExport") && ($("btnExport").onclick = () => exportCSV(filteredRows));
 
-    if (rs) rs.onchange = () => loadAndRender();
-    if (sd) sd.onchange = () => loadAndRender();
-    if (ed) ed.onchange = () => loadAndRender();
-
-    const btnRefresh = $("btnRefresh");
-    if (btnRefresh) btnRefresh.onclick = () => loadAndRender();
-
-    const btnExport = $("btnExport");
-    if (btnExport) btnExport.onclick = () => exportCSV(filteredRows);
-
-    const search = $("searchInput");
-    if (search) {
-      search.oninput = () => {
-        applyFilters();
-        renderAll();
-      };
-    }
+    $("searchInput") && ($("searchInput").oninput = () => { applyFilters(); renderAll(); });
 
     initPropertyControl();
+
+    // Scroll “View all reservations” to the latest table card if present
+    document.querySelectorAll('a[aria-label="View all reservations"]').forEach(a => {
+      a.addEventListener("click", () => {
+        const target = $("latestTableWrap") || $("feedTbody") || $("stateBox");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
   }
 
   function getSelectedRange() {
-    const rs = $("rangeSelect");
-    const mode = rs?.value || "7";
+    const mode = $("rangeSelect")?.value || "7";
     const now = new Date();
 
     if (mode === "today") return { label: "Today", start: startOfDay(now), end: endOfDay(now) };
+
     if (mode === "7" || mode === "30") {
       const days = Number(mode);
       const s = new Date(now);
@@ -443,11 +400,7 @@
     const sVal = $("startDate")?.value || "";
     const eVal = $("endDate")?.value || "";
     if (mode === "custom" && sVal && eVal) {
-      return {
-        label: `${sVal} → ${eVal}`,
-        start: startOfDay(new Date(sVal)),
-        end: endOfDay(new Date(eVal))
-      };
+      return { label: `${sVal} → ${eVal}`, start: startOfDay(new Date(sVal)), end: endOfDay(new Date(eVal)) };
     }
 
     const s = new Date(now);
@@ -469,15 +422,23 @@
   }
 
   function normalizeReservation(r) {
+    const arrivalDate = parseISOish(r.arrival_date);         // IMPORTANT
+    const nights = toNum(r.nights);
+    const checkoutDate = (arrivalDate && Number.isFinite(nights))
+      ? addDays(arrivalDate, Math.max(0, Math.floor(nights)))
+      : null;
+
     return {
       kind: "booking",
-      when: parseISOish(r.created_at),
+      when: parseISOish(r.created_at), // activity time
       guest: safeStr(r.guest_name),
       arrival: safeStr(r.arrival_date),
-      nights: toNum(r.nights),
+      arrivalDate,                    // for arrivals/departures/stayovers
+      checkoutDate,                   // arrival + nights
+      nights,
       totalDue: toNum(r.total_due),
       sentiment: "",
-      summary: `Reservation for ${safeStr(r.guest_name)} • Arrive ${safeStr(r.arrival_date)}`,
+      summary: safeStr(r.summary) || `Reservation for ${safeStr(r.guest_name)} • Arrive ${safeStr(r.arrival_date)}`,
       property_id: safeStr(r.property_id),
       raw: r
     };
@@ -508,28 +469,26 @@
   let lastRange = null;
 
   // ============================================================
-  // Filters (includes property filter)
+  // Filters (activity feed / KPIs / charts)
   // ============================================================
   function applyFilters() {
     const range = lastRange || getSelectedRange();
     const q = ($("searchInput")?.value || "").toLowerCase().trim();
-    const selectedProperty = getSelectedProperty(); // "__all__" or uuid
+    const selectedProperty = getSelectedProperty();
 
     filteredRows = allRows.filter(r => {
-      // property filter
       if (selectedProperty !== "__all__") {
         if (safeStr(r.property_id) !== safeStr(selectedProperty)) return false;
       }
 
-      // time filter
+      // Activity range filter:
+      // Calls: created_at; Bookings: created_at (keep original behavior for KPIs/feed)
       if (r.when) {
         if (r.when < range.start || r.when > range.end) return false;
       }
 
-      // search filter
       if (!q) return true;
-      const hay = JSON.stringify(r).toLowerCase();
-      return hay.includes(q);
+      return JSON.stringify(r).toLowerCase().includes(q);
     });
   }
 
@@ -603,7 +562,6 @@
   function renderChart(canvasId, data) {
     const c = $(canvasId);
     if (!c) return;
-
     const ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
 
@@ -619,19 +577,17 @@
 
     ctx.strokeStyle = "#6ea8ff";
     ctx.beginPath();
-
     keys.forEach((k, i) => {
       const x = pad + i * step;
       const y = h - pad - (vals[i] / max) * (h - pad * 2);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-
     ctx.stroke();
   }
 
   // ============================================================
-  // Activity Feed
+  // Activity Feed (Latest reservations table)
   // ============================================================
   function renderFeed(rows) {
     setText("badgeCount", fmtInt(rows.length));
@@ -689,21 +645,174 @@
   }
 
   // ============================================================
+  // ✅ Reservations “Today” (Arrivals/Departures/Stayovers)
+  // ============================================================
+  function getSelectedDayForReservations() {
+    // We treat the “Today” widget as the end-date of the selected range.
+    // If range is custom, it shows the end date.
+    // If range is today, it shows today.
+    const range = lastRange || getSelectedRange();
+    return startOfDay(range.end);
+  }
+
+  function bookingSegmentsForDay(bookings, dayStart) {
+    const dayEnd = endOfDay(dayStart);
+
+    const arrivals = [];
+    const departures = [];
+    const stayovers = [];
+
+    for (const b of bookings) {
+      if (!b.arrivalDate) continue;
+      const arr = startOfDay(b.arrivalDate);
+      const dep = b.checkoutDate ? startOfDay(b.checkoutDate) : null; // checkout day (not night)
+
+      // Arrivals: arrival date == selected day
+      if (arr.getTime() === dayStart.getTime()) arrivals.push(b);
+
+      // Departures: checkout day == selected day
+      if (dep && dep.getTime() === dayStart.getTime()) departures.push(b);
+
+      // Stayovers: in-house during the night before checkout
+      // A simple definition: arrived before day, and checkout after day
+      if (dep && arr.getTime() < dayStart.getTime() && dep.getTime() > dayStart.getTime()) {
+        stayovers.push(b);
+      }
+    }
+
+    return { arrivals, departures, stayovers, dayStart, dayEnd };
+  }
+
+  function ensureReservationsListContainer() {
+    // Creates a list container inside the big Reservations card without editing HTML.
+    let host = $("reservationsListHost");
+    if (host) return host;
+
+    const empty = $("reservationsEmpty");
+    if (!empty) return null;
+
+    host = document.createElement("div");
+    host.id = "reservationsListHost";
+    host.style.marginTop = "12px";
+    empty.insertAdjacentElement("afterend", host);
+    return host;
+  }
+
+  function renderReservationsToday(allBookings) {
+    const host = ensureReservationsListContainer();
+    if (!host) return;
+
+    const day = getSelectedDayForReservations();
+    const seg = bookingSegmentsForDay(allBookings, day);
+
+    // counts
+    const setBadge = (id, n) => {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = String(n);
+      el.classList.toggle("zero", !n);
+    };
+
+    setBadge("countArrivals", seg.arrivals.length);
+    setBadge("countDepartures", seg.departures.length);
+    setBadge("countStayovers", seg.stayovers.length);
+    setBadge("countRequests", 0); // placeholder until you build requests data source
+
+    // label
+    const tl = $("todayLabel");
+    if (tl) tl.textContent = day.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+
+    const any = seg.arrivals.length + seg.departures.length + seg.stayovers.length > 0;
+    const empty = $("reservationsEmpty");
+    if (empty) empty.style.display = any ? "none" : "";
+
+    // Determine active tab to display
+    const isActive = (id) => $(id)?.classList.contains("active");
+    const activeKind =
+      isActive("tabDepartures") ? "departures" :
+      isActive("tabStayovers") ? "stayovers" :
+      isActive("tabRequests") ? "requests" :
+      "arrivals";
+
+    const list = (activeKind === "departures") ? seg.departures
+      : (activeKind === "stayovers") ? seg.stayovers
+      : (activeKind === "requests") ? []
+      : seg.arrivals;
+
+    if (!any) {
+      host.innerHTML = "";
+      return;
+    }
+
+    if (activeKind === "requests") {
+      host.innerHTML = `
+        <div class="emptyState">
+          <div style="max-width:520px;">
+            <div class="icon"><i class="fa-regular fa-bell"></i></div>
+            <h4>Guest requests not connected yet</h4>
+            <p>When you add a “requests/messages” table, we’ll populate this tab.</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // Compact table
+    host.innerHTML = `
+      <div class="tableWrap" style="min-width:0;">
+        <table style="min-width:760px;">
+          <thead>
+            <tr>
+              <th style="width:240px;">Guest</th>
+              <th style="width:120px;">Arrival</th>
+              <th style="width:120px;">Nights</th>
+              <th style="width:140px;">Total</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map(b => {
+              const notes = safeStr(b.raw?.notes || b.raw?.summary || "");
+              return `
+                <tr>
+                  <td>${escHtml(b.guest || "—")}</td>
+                  <td>${escHtml(b.arrival || "—")}</td>
+                  <td>${Number.isFinite(b.nights) ? escHtml(String(b.nights)) : "—"}</td>
+                  <td>${Number.isFinite(b.totalDue) ? escHtml(fmtMoney(b.totalDue)) : "—"}</td>
+                  <td class="col-summary"><div class="summaryClamp">${escHtml(notes || "—")}</div></td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ============================================================
   // Render All
   // ============================================================
   function renderAll() {
     applyFilters();
 
+    // KPIs/charts/feed use filteredRows (activity time)
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
     renderOps(k);
-
     renderChart("chartCalls", groupByDay(filteredRows, "call"));
     renderChart("chartBookings", groupByDay(filteredRows, "booking"));
-
     renderFeed(filteredRows);
 
+    // ✅ Reservations Today view should come from ALL BOOKINGS (still property-filtered, but not "created_at filtered")
+    const selectedProperty = getSelectedProperty();
+    const allBookings = allRows
+      .filter(r => r.kind === "booking")
+      .filter(r => selectedProperty === "__all__" ? true : safeStr(r.property_id) === safeStr(selectedProperty));
+
+    renderReservationsToday(allBookings);
+
     setText("lastUpdated", `Updated ${new Date().toLocaleString()}`);
+    $("latestWindowBadgeReminder") && ($("latestWindowBadgeReminder").textContent = lastRange?.label || "—");
   }
 
   function clearDataUI(msg) {
@@ -724,9 +833,6 @@
 
       lastRange = getSelectedRange();
       setText("badgeWindow", lastRange.label);
-
-      const latestWindowBadgeReminder = $("latestWindowBadgeReminder");
-      if (latestWindowBadgeReminder) latestWindowBadgeReminder.textContent = lastRange.label;
 
       const [resv, calls] = await Promise.all([
         fetchTable("reservations"),
