@@ -28,42 +28,42 @@
 
   <style>
     :root{
-      --bg: #0b1020;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.09);
-      --panel3: rgba(255,255,255,.04);
-      --border: rgba(255,255,255,.10);
-      --border2: rgba(255,255,255,.14);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --accent: #6ea8ff;
-      --good: #42d392;
-      --shadow: 0 18px 60px rgba(0,0,0,.48);
-      --shadow2: 0 10px 30px rgba(0,0,0,.30);
-      --radius: 22px;
-      --radius2: 16px;
-      --ring: 0 0 0 3px rgba(110,168,255,.20);
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --bg:#0b1020;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.09);
+      --panel3:rgba(255,255,255,.04);
+      --border:rgba(255,255,255,.10);
+      --border2:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.62);
+      --accent:#6ea8ff;
+      --good:#42d392;
+      --shadow:0 18px 60px rgba(0,0,0,.48);
+      --shadow2:0 10px 30px rgba(0,0,0,.30);
+      --radius:22px;
+      --radius2:16px;
+      --ring:0 0 0 3px rgba(110,168,255,.20);
+      --font:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
     html:not(.dark){
-      --bg: #f6f7fb;
-      --panel: rgba(10,15,25,.04);
-      --panel2: rgba(10,15,25,.06);
-      --panel3: rgba(10,15,25,.03);
-      --border: rgba(10,15,25,.10);
-      --border2: rgba(10,15,25,.14);
-      --text: rgba(10,15,25,.92);
-      --muted: rgba(10,15,25,.62);
-      --shadow: 0 18px 50px rgba(10,15,25,.14);
-      --shadow2: 0 10px 24px rgba(10,15,25,.10);
+      --bg:#f6f7fb;
+      --panel:rgba(10,15,25,.04);
+      --panel2:rgba(10,15,25,.06);
+      --panel3:rgba(10,15,25,.03);
+      --border:rgba(10,15,25,.10);
+      --border2:rgba(10,15,25,.14);
+      --text:rgba(10,15,25,.92);
+      --muted:rgba(10,15,25,.62);
+      --shadow:0 18px 50px rgba(10,15,25,.14);
+      --shadow2:0 10px 24px rgba(10,15,25,.10);
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
     body{
       margin:0;
-      font-family: var(--font);
-      color: var(--text);
+      font-family:var(--font);
+      color:var(--text);
       background:
         radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,.18), transparent 60%),
         radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,.10), transparent 55%),
@@ -72,66 +72,66 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 22px;
+      padding:22px;
       overflow-x:hidden;
     }
 
     /* Subtle grid texture */
     .bgGrid{
-      position: fixed;
-      inset: 0;
+      position:fixed;
+      inset:0;
       pointer-events:none;
-      opacity: .35;
+      opacity:.28;
       background-image:
         linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
-      background-size: 64px 64px;
-      mask-image: radial-gradient(600px 500px at 50% 40%, rgba(0,0,0,1), transparent 70%);
+      background-size:64px 64px;
+      mask-image:radial-gradient(640px 520px at 50% 38%, rgba(0,0,0,1), transparent 70%);
     }
     html:not(.dark) .bgGrid{
-      opacity: .12;
+      opacity:.10;
       background-image:
         linear-gradient(to right, rgba(10,15,25,.10) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(10,15,25,.10) 1px, transparent 1px);
     }
 
     .shell{
-      width: min(760px, 100%);
+      width:min(820px, 100%);
       display:grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
+      grid-template-columns:1fr;
+      gap:14px;
     }
 
     .topBar{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
-      padding: 10px 4px;
-      color: var(--muted);
-      font-size: 12px;
+      gap:10px;
+      padding:10px 4px;
+      color:var(--muted);
+      font-size:12px;
     }
     .topBar a{
-      color: inherit;
+      color:inherit;
       text-decoration:none;
-      border-bottom: 1px dashed transparent;
+      border-bottom:1px dashed transparent;
     }
     .topBar a:hover{
-      color: var(--text);
-      border-bottom-color: rgba(110,168,255,.45);
+      color:var(--text);
+      border-bottom-color:rgba(110,168,255,.45);
     }
 
     .card{
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      box-shadow: var(--shadow);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      box-shadow:var(--shadow);
       overflow:hidden;
-      position: relative;
+      position:relative;
     }
     html:not(.dark) .card{
-      background: rgba(255,255,255,.78);
-      backdrop-filter: blur(10px);
+      background:rgba(255,255,255,.78);
+      backdrop-filter:blur(10px);
     }
 
     .card::before{
@@ -139,262 +139,310 @@
       position:absolute;
       inset:-2px;
       background:
-        radial-gradient(500px 220px at 18% 8%, rgba(110,168,255,.22), transparent 60%),
-        radial-gradient(520px 240px at 82% 0%, rgba(66,211,146,.12), transparent 60%);
-      opacity: .9;
+        radial-gradient(520px 220px at 18% 8%, rgba(110,168,255,.22), transparent 60%),
+        radial-gradient(560px 240px at 82% 0%, rgba(66,211,146,.12), transparent 60%);
+      opacity:.9;
       pointer-events:none;
     }
 
-    .inner{
-      position: relative;
-      padding: 18px;
-    }
+    .inner{position:relative; padding:18px;}
 
     .head{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
+      gap:14px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--border);
+      margin-bottom:14px;
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap: 12px;
+      gap:12px;
       text-decoration:none;
-      color: inherit;
-      min-width: 0;
+      color:inherit;
+      min-width:0;
     }
     .mark{
-      width: 42px;
-      height: 42px;
-      border-radius: 16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 950;
-      letter-spacing: .02em;
-      background: rgba(110,168,255,.16);
-      border: 1px solid rgba(110,168,255,.30);
-      box-shadow: var(--shadow2);
-      flex: 0 0 auto;
+      width:42px;height:42px;
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:950;
+      letter-spacing:.02em;
+      background:rgba(110,168,255,.16);
+      border:1px solid rgba(110,168,255,.30);
+      box-shadow:var(--shadow2);
+      flex:0 0 auto;
     }
-    html:not(.dark) .mark{
-      box-shadow: 0 10px 24px rgba(10,15,25,.10);
-    }
-    .brandText{
-      min-width: 0;
-      line-height: 1.15;
-    }
-    .brandText b{ font-size: 13px; font-weight: 950; display:block; }
+    .brandText{min-width:0;line-height:1.15;}
+    .brandText b{font-size:13px;font-weight:950;display:block;}
     .brandText span{
-      display:block;
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 520px;
+      display:block;margin-top:4px;
+      font-size:12px;color:var(--muted);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width:520px;
     }
-
     .metaRight{
       text-align:right;
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
     }
 
     .hero{
       display:grid;
-      grid-template-columns: 1fr 220px;
-      gap: 14px;
-      align-items:center;
+      grid-template-columns: 1fr 240px;
+      gap:14px;
+      align-items:start;
     }
-    @media (max-width: 680px){
-      .hero{ grid-template-columns: 1fr; }
-      .metaRight{ display:none; }
+    @media (max-width: 760px){
+      .hero{grid-template-columns:1fr;}
+      .metaRight{display:none;}
     }
 
     h1{
-      margin: 0 0 8px;
-      font-size: 20px;
-      font-weight: 950;
-      letter-spacing: -0.01em;
+      margin:0 0 8px;
+      font-size:20px;
+      font-weight:950;
+      letter-spacing:-0.01em;
     }
-    p{
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
+    p{margin:0;color:var(--muted);font-size:13px;line-height:1.6;}
+
+    .emailPill{
+      display:none;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--panel3);
+      font-size:13px;
+      margin-top:12px;
+      max-width:100%;
+      word-break:break-word;
     }
 
     .status{
-      border-radius: 18px;
-      border: 1px solid var(--border2);
-      background: rgba(255,255,255,.05);
-      padding: 12px;
+      border-radius:18px;
+      border:1px solid var(--border2);
+      background:rgba(255,255,255,.05);
+      padding:12px;
       display:flex;
       align-items:center;
-      gap: 12px;
+      gap:12px;
+      position:sticky;
+      top:12px;
     }
-    html:not(.dark) .status{ background: rgba(10,15,25,.03); }
+    html:not(.dark) .status{background:rgba(10,15,25,.03);}
 
     .spinner{
-      width: 36px;
-      height: 36px;
-      border-radius: 14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(66,211,146,.12);
-      border: 1px solid rgba(66,211,146,.26);
-      box-shadow: var(--shadow2);
-      flex: 0 0 auto;
-      position: relative;
+      width:36px;height:36px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(66,211,146,.12);
+      border:1px solid rgba(66,211,146,.26);
+      box-shadow:var(--shadow2);
+      flex:0 0 auto;
+      position:relative;
       overflow:hidden;
     }
     .spinner::after{
       content:"";
       position:absolute;
       inset:-10px;
-      background:
-        conic-gradient(from 180deg,
-          rgba(66,211,146,0) 0deg,
-          rgba(66,211,146,.85) 120deg,
-          rgba(66,211,146,0) 240deg,
-          rgba(66,211,146,0) 360deg);
-      animation: spin 1.2s linear infinite;
-      opacity: .9;
+      background:conic-gradient(from 180deg,
+        rgba(66,211,146,0) 0deg,
+        rgba(66,211,146,.85) 120deg,
+        rgba(66,211,146,0) 240deg,
+        rgba(66,211,146,0) 360deg);
+      animation:spin 1.2s linear infinite;
+      opacity:.9;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin{to{transform:rotate(360deg);}}
 
-    .statusText b{
-      display:block;
-      font-size: 13px;
-      font-weight: 950;
-    }
-    .statusText small{
-      display:block;
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-
-    .emailPill{
-      display:none;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel3);
-      font-size: 13px;
-      margin-top: 12px;
-      max-width: 100%;
-      word-break: break-word;
-    }
+    .statusText b{display:block;font-size:13px;font-weight:950;}
+    .statusText small{display:block;margin-top:4px;font-size:12px;color:var(--muted);line-height:1.35;}
 
     .actions{
-      margin-top: 14px;
+      margin-top:14px;
       display:flex;
-      gap: 10px;
+      gap:10px;
       flex-wrap:wrap;
       align-items:center;
     }
 
     .btn{
-      border-radius: 14px;
-      padding: 11px 12px;
-      font-weight: 900;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
+      border-radius:14px;
+      padding:11px 12px;
+      font-weight:900;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
       cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       text-decoration:none;
       user-select:none;
-      gap: 10px;
+      gap:10px;
     }
     .btn:hover{
-      transform: translateY(-1px);
-      background: var(--panel2);
-      border-color: rgba(110,168,255,.35);
+      transform:translateY(-1px);
+      background:var(--panel2);
+      border-color:rgba(110,168,255,.35);
     }
-    .btn:focus{ outline:none; box-shadow: var(--ring); }
-
+    .btn:focus{outline:none;box-shadow:var(--ring);}
     .btn.primary{
-      background: linear-gradient(180deg, rgba(110,168,255,.28), rgba(110,168,255,.16));
-      border-color: rgba(110,168,255,.45);
+      background:linear-gradient(180deg, rgba(110,168,255,.28), rgba(110,168,255,.16));
+      border-color:rgba(110,168,255,.45);
     }
+    .btn.ghost{
+      background:transparent;
+    }
+
+    .foot{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .kbd{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+    }
+
+    /* NEW: Inbox panel */
+    .inboxPanel{
+      margin-top:14px;
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      padding:12px;
+    }
+    html:not(.dark) .inboxPanel{ background: rgba(10,15,25,.03); }
+
+    .panelHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .panelHead b{
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:950;
+    }
+    .panelHint{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .mailRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .mailBtn{
+      border-radius:14px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      cursor:pointer;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      user-select:none;
+      font-weight:900;
+      font-size:13px;
+      min-width: 128px;
+      justify-content:center;
+    }
+    .mailBtn:hover{
+      transform:translateY(-1px);
+      background:var(--panel2);
+      border-color:rgba(110,168,255,.35);
+    }
+    .mailBtn:focus{outline:none;box-shadow:var(--ring);}
+    .mailBtn.reco{
+      border-color: rgba(66,211,146,.40);
+      background: rgba(66,211,146,.10);
+    }
+
+    .mailIcon{
+      width:18px;height:18px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .mailIcon svg{ width:18px; height:18px; display:block; }
+
+    /* brand tints */
+    .t-gmail   { color: #EA4335; }
+    .t-outlook { color: #0A66C2; }
+    .t-yahoo   { color: #7B0099; }
+    .t-icloud  { color: #9AA0A6; }
+    .t-mailapp { color: var(--accent); }
 
     .divider{
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+      margin-top:16px;
+      padding-top:16px;
+      border-top:1px solid var(--border);
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
-    @media (max-width: 680px){
-      .divider{ grid-template-columns: 1fr; }
-    }
+    @media (max-width: 760px){ .divider{ grid-template-columns:1fr; } }
 
     .tipCard{
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      padding:12px;
     }
     html:not(.dark) .tipCard{ background: rgba(10,15,25,.03); }
 
     .tipCard b{
       display:block;
-      font-size: 12px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 950;
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:950;
     }
     .tipCard ul{
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.65;
-    }
-
-    .foot{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
-      display:flex;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
     }
 
     /* Reduce motion */
     @media (prefers-reduced-motion: reduce){
-      .spinner::after{ animation: none; }
-      .btn{ transition:none; }
+      .spinner::after{ animation:none; }
+      .btn,.mailBtn{ transition:none; }
     }
   </style>
 </head>
@@ -425,55 +473,109 @@
         </div>
 
         <div class="hero">
-          <div>
+          <section>
             <h1>Check your inbox to finish signing in</h1>
-            <p>
-              We sent a secure sign-in link to your email. Open it to complete authentication and return to the dashboard.
-            </p>
+            <p>We sent a secure sign-in link to your email. Open it to complete authentication and return to the dashboard.</p>
 
             <div class="emailPill" id="emailPill"></div>
 
+            <!-- NEW: Open inbox provider shortcuts -->
+            <div class="inboxPanel" id="inboxPanel" style="display:none;">
+              <div class="panelHead">
+                <b>Open your inbox</b>
+                <span class="panelHint" id="mailHint">Opens in a new tab</span>
+              </div>
+
+              <div class="mailRow" aria-label="Inbox shortcuts">
+                <a class="mailBtn" id="btnGmail" target="_blank" rel="noopener noreferrer" href="https://mail.google.com/">
+                  <span class="mailIcon t-gmail" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M4 20h4V11.9L3 8.2V19c0 .6.4 1 1 1zm16 0c.6 0 1-.4 1-1V8.2l-5 3.7V20h4z"/>
+                      <path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v.8l10 7.5 10-7.5V6c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                  </span>
+                  Gmail
+                </a>
+
+                <a class="mailBtn" id="btnOutlook" target="_blank" rel="noopener noreferrer" href="https://outlook.live.com/mail/">
+                  <span class="mailIcon t-outlook" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M14 3h6c.6 0 1 .4 1 1v16c0 .6-.4 1-1 1h-6V3z"/>
+                      <path fill="currentColor" d="M3 6.5l10-2v17l-10-2V6.5zm4.3 4.1c1.4 0 2.4 1.2 2.4 2.9s-1 2.9-2.4 2.9-2.4-1.2-2.4-2.9 1-2.9 2.4-2.9z"/>
+                      <path fill="currentColor" d="M14 7l6 3.9-6 3.8V7z"/>
+                    </svg>
+                  </span>
+                  Outlook
+                </a>
+
+                <a class="mailBtn" id="btnYahoo" target="_blank" rel="noopener noreferrer" href="https://mail.yahoo.com/">
+                  <span class="mailIcon t-yahoo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M6 4h12l-6 8-6-8zm6 9 6-8v15h-4v-5H10v5H6V5l6 8z"/>
+                    </svg>
+                  </span>
+                  Yahoo
+                </a>
+
+                <a class="mailBtn" id="btnIcloud" target="_blank" rel="noopener noreferrer" href="https://www.icloud.com/mail">
+                  <span class="mailIcon t-icloud" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M19.4 10.7A7 7 0 0 0 5.6 9.5 4.8 4.8 0 0 0 6.2 19h12.6A4.2 4.2 0 0 0 19.4 10.7z"/>
+                    </svg>
+                  </span>
+                  iCloud
+                </a>
+
+                <a class="mailBtn" id="btnMailApp" href="#" style="min-width: 150px;">
+                  <span class="mailIcon t-mailapp" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M20 8V7l-8 5-8-5v1l8 5 8-5z"/>
+                      <path fill="currentColor" d="M4 6h16c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2zm0 2v10h16V8H4z"/>
+                    </svg>
+                  </span>
+                  Open Mail app
+                </a>
+              </div>
+            </div>
+
             <div class="actions">
               <a class="btn primary" href="/dashboard/">Back to Dashboard</a>
-              <a class="btn" href="/" rel="nofollow">Back to website</a>
+              <a class="btn ghost" href="/" rel="nofollow">Back to website</a>
             </div>
 
             <div class="foot">
               <span>Having trouble? Use <span class="kbd">Resend</span> in the dashboard login.</span>
               <span>Link expires automatically for security.</span>
             </div>
-          </div>
 
-          <div class="status" aria-label="Status">
+            <section class="divider" aria-label="Help tips">
+              <div class="tipCard">
+                <b>If you don’t see it</b>
+                <ul>
+                  <li>Check Spam / Promotions</li>
+                  <li>Search your inbox for “NightShift AI”</li>
+                  <li>Wait 1–2 minutes, then try Resend</li>
+                </ul>
+              </div>
+              <div class="tipCard">
+                <b>Security note</b>
+                <ul>
+                  <li>Magic links are one-time and time-limited</li>
+                  <li>Don’t forward the link to others</li>
+                  <li>Sign out when finished on shared devices</li>
+                </ul>
+              </div>
+            </section>
+          </section>
+
+          <aside class="status" aria-label="Status">
             <div class="spinner" aria-hidden="true"></div>
             <div class="statusText">
               <b>Waiting for sign-in</b>
-              <small>
-                Once you click the email link, you’ll be signed in and redirected back to Elite.
-              </small>
+              <small>Once you click the email link, you’ll be signed in and redirected back to Elite.</small>
             </div>
-          </div>
+          </aside>
         </div>
-
-        <section class="divider" aria-label="Help tips">
-          <div class="tipCard">
-            <b>If you don’t see it</b>
-            <ul>
-              <li>Check Spam / Promotions</li>
-              <li>Search your inbox for “NightShift AI”</li>
-              <li>Wait 1–2 minutes, then try Resend</li>
-            </ul>
-          </div>
-
-          <div class="tipCard">
-            <b>Security note</b>
-            <ul>
-              <li>Magic links are one-time and time-limited</li>
-              <li>Don’t forward the link to others</li>
-              <li>Sign out when finished on shared devices</li>
-            </ul>
-          </div>
-        </section>
       </div>
     </main>
   </div>
@@ -481,12 +583,17 @@
   <script>
     (function(){
       try{
-        document.getElementById("ts").textContent = "Sent " + new Date().toLocaleString();
+        var ts = document.getElementById("ts");
+        if(ts) ts.textContent = "Sent " + new Date().toLocaleString();
 
         var params = new URLSearchParams(location.search);
-        var email = params.get("email");
+        var email = (params.get("email") || "").trim();
+        var emailLower = email.toLowerCase();
 
         var pill = document.getElementById("emailPill");
+        var inboxPanel = document.getElementById("inboxPanel");
+        var hint = document.getElementById("mailHint");
+
         if (pill) {
           if (email) {
             pill.style.display = "inline-flex";
@@ -494,6 +601,48 @@
           } else {
             pill.style.display = "none";
           }
+        }
+
+        // Show inbox shortcuts only when we have an email
+        if (inboxPanel) inboxPanel.style.display = email ? "" : "none";
+        if (!email) return;
+
+        var domain = (emailLower.split("@")[1] || "").trim();
+
+        // Corporate domains: default to a reasonable choice
+        // - Google Workspace domains still use Gmail web UI
+        // - Microsoft 365 domains still use Outlook web UI
+        var recoId = null;
+
+        if (domain === "gmail.com" || domain === "googlemail.com") recoId = "btnGmail";
+        else if (
+          domain === "outlook.com" || domain === "hotmail.com" || domain === "live.com" ||
+          domain === "msn.com" || domain === "passport.com"
+        ) recoId = "btnOutlook";
+        else if (domain === "yahoo.com" || domain === "ymail.com") recoId = "btnYahoo";
+        else if (domain === "icloud.com" || domain === "me.com" || domain === "mac.com") recoId = "btnIcloud";
+        else {
+          // Heuristic: many custom domains are either Google Workspace or Microsoft 365
+          // We'll keep neutral UI and not over-claim—no highlight.
+          recoId = null;
+        }
+
+        // Highlight recommended
+        if (recoId) {
+          var el = document.getElementById(recoId);
+          if (el) el.classList.add("reco");
+          if (hint && el) hint.textContent = "Recommended: " + el.textContent.trim() + " (opens in new tab)";
+        } else {
+          if (hint) hint.textContent = "Open your inbox (opens in new tab)";
+        }
+
+        // Mobile / desktop mail app (best-effort)
+        var btnMailApp = document.getElementById("btnMailApp");
+        if (btnMailApp) {
+          btnMailApp.href = "mailto:" + encodeURIComponent(emailLower);
+          btnMailApp.addEventListener("click", function(){
+            // no-op; mailto will trigger OS mail app
+          });
         }
       }catch(e){}
     })();
