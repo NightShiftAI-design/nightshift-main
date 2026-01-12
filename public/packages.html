@@ -97,10 +97,9 @@
               <li>SMS / email summaries to staff</li>
             </ul>
 
-            <!-- DEMOS -->
+            <!-- DEMOS (AUDIO ONLY) -->
             <div class="demo-actions">
               <button class="btn-secondary demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
-              <button class="btn-secondary demo-video" data-video="/assets/videos/core.mp4" type="button">▶ Watch Workflow</button>
             </div>
 
             <div class="hero-cta-row" style="margin-top:16px;">
@@ -126,10 +125,9 @@
               <li>Custom voice and tone controls</li>
             </ul>
 
-            <!-- DEMOS -->
+            <!-- DEMOS (AUDIO ONLY) -->
             <div class="demo-actions">
               <button class="btn-secondary demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
-              <button class="btn-secondary demo-video" data-video="/assets/videos/pro.mp4" type="button">▶ Watch Workflow</button>
             </div>
 
             <div class="hero-cta-row" style="margin-top:16px;">
@@ -154,10 +152,10 @@
               <li>Ongoing monitoring and optimization</li>
             </ul>
 
-            <!-- DEMOS -->
+            <!-- DEMOS (AUDIO + VIDEO) -->
             <div class="demo-actions">
               <button class="btn-secondary demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
-              <button class="btn-secondary demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Full Workflow</button>
+              <button class="btn-secondary demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
             </div>
 
             <div class="hero-cta-row" style="margin-top:16px;">
@@ -180,10 +178,9 @@
               <li>Great for phased rollouts</li>
             </ul>
 
-            <!-- (Optional) Demo buttons for Flexible — remove if you prefer -->
+            <!-- DEMOS (AUDIO ONLY — uses Pro call demo) -->
             <div class="demo-actions">
               <button class="btn-secondary demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
-              <button class="btn-secondary demo-video" data-video="/assets/videos/pro.mp4" type="button">▶ Watch Workflow</button>
             </div>
 
             <div class="hero-cta-row" style="margin-top:16px;">
@@ -321,7 +318,7 @@
     const fallback = document.getElementById("demoFallback");
     const audio = document.getElementById("demoAudio");
 
-    // Video buttons -> open modal
+    // Video buttons -> open modal (Elite only now)
     document.querySelectorAll(".demo-video").forEach(btn => {
       btn.addEventListener("click", () => {
         const src = btn.dataset.video;
