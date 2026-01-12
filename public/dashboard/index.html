@@ -340,6 +340,107 @@
     @media (max-width: 1200px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px){ .grid{ grid-template-columns: 1fr; } }
 
+    /* ========== KPI BUBBLES (Elite) ========== */
+    .kpi{
+      position: relative;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(140px 80px at 20% 20%, rgba(110,168,255,.25), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      padding: 14px 16px 16px;
+      min-width: 0;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.04),
+        0 18px 40px rgba(0,0,0,.35);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    html:not(.dark) .kpi{
+      background:
+        radial-gradient(140px 80px at 20% 20%, rgba(110,168,255,.18), transparent 60%),
+        linear-gradient(180deg, rgba(10,15,25,.06), rgba(10,15,25,.02));
+      box-shadow:
+        inset 0 0 0 1px rgba(10,15,25,.03),
+        0 18px 40px rgba(10,15,25,.10);
+      border-color: rgba(10,15,25,.12);
+    }
+    .kpi:hover{
+      transform: translateY(-2px);
+      border-color: rgba(110,168,255,.45);
+      box-shadow:
+        inset 0 0 0 1px rgba(110,168,255,.25),
+        0 22px 60px rgba(0,0,0,.45);
+    }
+    .kpiTop{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 6px;
+      min-width: 0;
+    }
+    .kpiIcon{
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(110,168,255,.18);
+      border: 1px solid rgba(110,168,255,.35);
+      color: rgba(110,168,255,.95);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      flex: 0 0 auto;
+    }
+    html:not(.dark) .kpiIcon{
+      box-shadow: 0 10px 24px rgba(10,15,25,.10);
+    }
+    .kpi .name{
+      margin:0;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 900;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .kpi .value{
+      margin: 6px 0 0;
+      font-size: 24px;
+      font-weight: 950;
+      letter-spacing: .01em;
+    }
+    .kpi:after{
+      content:"";
+      position:absolute;
+      inset: auto auto -24px -24px;
+      width: 80px;
+      height: 80px;
+      background: rgba(110,168,255,.18);
+      filter: blur(28px);
+      border-radius: 999px;
+      pointer-events:none;
+    }
+    .kpi.good .kpiIcon{
+      background: rgba(66,211,146,.18);
+      border-color: rgba(66,211,146,.35);
+      color: var(--good);
+    }
+    .kpi.good:after{ background: rgba(66,211,146,.18); }
+    .kpi.warn .kpiIcon{
+      background: rgba(255,204,102,.18);
+      border-color: rgba(255,204,102,.35);
+      color: var(--warn);
+    }
+    .kpi.warn:after{ background: rgba(255,204,102,.18); }
+    .kpi.bad .kpiIcon{
+      background: rgba(255,107,107,.16);
+      border-color: rgba(255,107,107,.30);
+      color: var(--bad);
+    }
+    .kpi.bad:after{ background: rgba(255,107,107,.16); }
+
     /* ========== CARDS ========== */
     .card{
       border-radius: var(--radius);
@@ -1003,7 +1104,7 @@
           </div>
         </section>
 
-        <!-- Export section (Elite needs reporting/exports, not “finance/guest reviews”) -->
+        <!-- Export section (Elite needs reporting/exports) -->
         <section class="card" id="sec-export" aria-label="Export and reporting">
           <div class="cardHead">
             <h3>
@@ -1088,7 +1189,7 @@
           </div>
         </section>
 
-        <!-- Policies & routing (what you actually configure; no “property photos / amenities” fluff) -->
+        <!-- Policies & routing (config-focused) -->
         <section class="card" id="sec-policies" aria-label="Policies and routing">
           <div class="cardHead">
             <h3>
@@ -1192,7 +1293,6 @@
     // ============================================================
     // Feed filters (All / Booking / Call / Escalation)
     // - Does NOT affect fetching; only hides/shows rows already rendered by app.js.
-    // - Uses: row dataset.event if present OR the "Type" cell text.
     // ============================================================
     (function feedFilters(){
       const feedTbody = document.getElementById("feedTbody");
@@ -1236,22 +1336,18 @@
       }
 
       function rowType(tr){
-        // Prefer dataset.event
         const ev = (tr.dataset.event || "").toLowerCase();
         if(ev) return ev;
 
-        // Fallback: "Type" column
         const tds = tr.querySelectorAll("td");
         const typeCell = (tds[1]?.textContent || "").toLowerCase().trim();
 
-        // Normalize
         if(typeCell.includes("book")) return "booking";
         if(typeCell.includes("reserv")) return "booking";
         if(typeCell.includes("escal")) return "escalation";
         if(typeCell.includes("urgent")) return "escalation";
         if(typeCell.includes("call")) return "call";
 
-        // Also scan summary for escalation hints (best-effort)
         const summaryCell = (tds[7]?.textContent || "").toLowerCase();
         if(summaryCell.includes("escalat") || summaryCell.includes("urgent") || summaryCell.includes("911")) return "escalation";
 
@@ -1286,12 +1382,10 @@
           if(show) shown++;
         });
 
-        // Empty logic
         const hasAny = rows.length > 0;
         if(feedEmpty) feedEmpty.style.display = hasAny ? "none" : "";
         if(feedWrap) feedWrap.style.display = hasAny ? "" : "none";
 
-        // Filter pill
         if(filterPill){
           if(active === "all") filterPill.style.display = "none";
           else{
@@ -1318,7 +1412,6 @@
 
         if(feedMeta) feedMeta.textContent = c.total + " items";
 
-        // Escalations panel (simple: shows empty if none)
         if(escalationBadge) escalationBadge.textContent = c.escalation ? (c.escalation + " flagged") : "None";
         if(escalationsEmpty) escalationsEmpty.style.display = c.escalation ? "none" : "";
       }
@@ -1333,7 +1426,6 @@
 
       buttons.forEach(btn => btn.addEventListener("click", () => setActive(btn)));
 
-      // Observe app.js rendering
       const mo = new MutationObserver(() => {
         syncMirrors();
         updateCounts();
@@ -1343,7 +1435,6 @@
         mo.observe(el, { childList:true, subtree:true, characterData:true });
       });
 
-      // Init
       syncMirrors();
       updateCounts();
       apply();
