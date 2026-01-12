@@ -1,559 +1,704 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NightShift AI • Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NightShift AI • Dashboard</title>
 
-<meta name="robots" content="noindex,nofollow" />
-<meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="color-scheme" content="dark light" />
 
-<!-- Supabase JS -->
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-<!-- Your config + app logic -->
-<script defer src="/dashboard/config.js"></script>
-<script defer src="/dashboard/app.js"></script>
+  <!-- NOTE: This dashboard is self-styled (not relying on site.css) to avoid layout drift -->
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.09);
+      --border: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --accent: #6ea8ff;
+      --good: #42d392;
+      --warn: #ffcc66;
+      --bad:  #ff6b6b;
+      --shadow: 0 14px 46px rgba(0,0,0,.42);
+      --radius: 18px;
+      --radius2: 14px;
+      --ring: 0 0 0 3px rgba(110,168,255,.20);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
 
-<style>
-:root{
---bg: #0b1020;
---panel: rgba(255,255,255,0.06);
---panel2: rgba(255,255,255,0.08);
---border: rgba(255,255,255,0.10);
---text: rgba(255,255,255,0.92);
---muted: rgba(255,255,255,0.62);
---accent: #6ea8ff;
---good: #42d392;
---warn: #ffcc66;
---bad: #ff6b6b;
---shadow: 0 12px 40px rgba(0,0,0,0.45);
---radius: 18px;
---radius2: 14px;
---ring: 0 0 0 3px rgba(110,168,255,0.20);
---font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-}
+    /* Light theme when html does NOT have .dark (v9.2 toggles html.dark) */
+    html:not(.dark){
+      --bg: #f6f7fb;
+      --panel: rgba(10,15,25,.04);
+      --panel2: rgba(10,15,25,.07);
+      --border: rgba(10,15,25,.10);
+      --text: rgba(10,15,25,.92);
+      --muted: rgba(10,15,25,.62);
+      --shadow: 0 12px 30px rgba(10,15,25,.10);
+    }
 
-/* ============================================================
-      THEME BRIDGE (v9.2 uses html.dark class)
-      - Default visuals remain DARK (as before)
-      - When html does NOT have .dark => LIGHT vars apply
-      ============================================================ */
-html:not(.dark){
---bg: #f6f7fb;
---panel: rgba(10,15,25,0.04);
---panel2: rgba(10,15,25,0.06);
---border: rgba(10,15,25,0.10);
---text: rgba(10,15,25,0.92);
---muted: rgba(10,15,25,0.62);
---shadow: 0 12px 30px rgba(10,15,25,0.10);
-}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,.08), transparent 55%),
+        var(--bg);
+      overflow-x: hidden; /* ✅ prevents Mac sideways scrolling */
+    }
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
-body{
-margin:0;
-font-family: var(--font);
-background:
-radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
-radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
-radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
-var(--bg);
-color: var(--text);
-}
+    /* ========= Layout ========= */
+    .app{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px;
+      min-height: 100vh;
+    }
 
-/* Login overlay */
-.overlay{
-position: fixed; inset: 0;
-display: none;
-align-items: center; justify-content: center;
-padding: 22px;
-background: rgba(0,0,0,0.55);
-backdrop-filter: blur(10px);
-z-index: 999;
-}
-html:not(.dark) .overlay{ background: rgba(10,15,25,0.22); }
+    .shell{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap: 14px;
+      align-items:start;
+    }
 
-.loginCard{
-width: min(520px, 100%);
-border-radius: 22px;
-border: 1px solid var(--border);
-background: rgba(255,255,255,0.06);
-box-shadow: var(--shadow);
-overflow: hidden;
-}
-.loginHead{
-padding: 18px 18px 12px;
-border-bottom: 1px solid var(--border);
-display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-.loginHead b{ font-size: 14px; }
-.loginHead span{ font-size: 12px; color: var(--muted); }
-.loginBody{ padding: 18px; }
-.loginBody p{ margin:0 0 14px; color: var(--muted); font-size: 13px; line-height:1.5; }
-.field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 14px; }
-.field label{ font-size: 12px; color: var(--muted); }
-.field input{
-width:100%;
-border: 1px solid rgba(255,255,255,0.10);
-background: rgba(255,255,255,0.06);
-color: var(--text);
-padding: 12px;
-border-radius: 14px;
-outline:none;
-font-size: 14px;
-}
-html:not(.dark) .field input{
-border-color: rgba(10,15,25,0.12);
-background: rgba(10,15,25,0.03);
-}
-.field input:focus{ box-shadow: var(--ring); }
-.row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-.spacer{ flex:1; }
-.btn{
-border: 1px solid var(--border);
-background: var(--panel);
-color: var(--text);
-padding: 11px 12px;
-border-radius: 14px;
-cursor:pointer;
-transition: transform .12s ease, background .12s ease, border-color .12s ease;
-font-size: 13px;
-user-select:none;
-text-decoration:none;
-display:inline-flex;
-align-items:center;
-justify-content:center;
-}
-.btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
-.btn:focus{ outline:none; box-shadow: var(--ring); }
-.btn.primary{
-background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
-border-color: rgba(110,168,255,0.45);
-}
-.error{ margin-top: 10px; color: #ffb4b4; font-size: 12px; display:none; }
-html:not(.dark) .error{ color: #b00020; }
+    @media (max-width: 1100px){
+      .shell{ grid-template-columns: 1fr; }
+    }
 
-/* Layout */
-.wrap{ display:grid; grid-template-columns: 300px 1fr; min-height:100vh; gap: 0; }
-.sidebar{
-position:sticky; top:0; height:100vh;
-padding:18px;
-border-right: 1px solid var(--border);
-background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-backdrop-filter: blur(10px);
-overflow:auto;
-}
-.main{ padding: 18px 18px 28px; min-width: 0; }
+    .panel{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      min-width: 0; /* ✅ prevent grid overflow */
+    }
 
-/* Brand */
-.brand{
-display:flex; align-items:center; gap:10px;
-padding:12px;
-border: 1px solid var(--border);
-border-radius: var(--radius);
-background: var(--panel);
-box-shadow: var(--shadow);
-text-decoration:none;
-color: inherit;
-}
-.brand:hover{
-background: var(--panel2);
-border-color: rgba(110,168,255,0.35);
-transform: translateY(-1px);
-}
-.brand:focus{ outline:none; box-shadow: var(--ring); }
-.brand .dot{
-width:12px; height:12px; border-radius:50%;
-background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
-box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
-flex: 0 0 auto;
-}
-.brand h1{ font-size: 14px; margin:0; }
-.brand p{ margin:0; font-size: 12px; color: var(--muted); }
+    /* ========= Sidebar ========= */
+    .side{
+      position: sticky;
+      top: 18px;
+      padding: 14px;
+      height: fit-content;
+    }
+    @media (max-width: 1100px){
+      .side{ position: static; }
+    }
 
-/* Sidebar stack */
-.nav{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
-.pill{
-display:flex; align-items:center; justify-content:space-between; gap:10px;
-padding:12px; border-radius: 14px;
-border: 1px solid var(--border); background: var(--panel);
-}
-.badge{
-font-size:12px; padding:6px 10px; border-radius: 999px;
-border: 1px solid var(--border); background: rgba(110,168,255,0.14);
-white-space:nowrap;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      text-decoration:none;
+      color: inherit;
+    }
+    .brand:hover{ background: var(--panel2); }
+    .brand .mark{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(110,168,255,.16);
+      border: 1px solid rgba(110,168,255,.28);
+      font-weight: 950;
+      letter-spacing: .02em;
+    }
+    .brand b{ display:block; font-weight: 950; }
+    .brand small{ display:block; color: var(--muted); margin-top: 2px; }
 
-.side-footer{
-margin-top: 12px;
-display:flex; flex-direction:column; gap:10px;
-}
-.hint{
-font-size:12px; color: var(--muted);
-padding:10px 12px; border-radius: 14px;
-border: 1px dashed var(--border); background: rgba(255,255,255,0.03);
-}
-.minirow{ display:flex; gap:10px; flex-wrap:wrap; }
+    .sideBlock{ margin-top: 12px; }
+    .sideTitle{
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin: 0 0 10px;
+      font-weight: 900;
+    }
 
-/* Cards */
-.card{
-border-radius: var(--radius);
-border: 1px solid var(--border);
-background: var(--panel);
-box-shadow: var(--shadow);
-overflow:hidden;
-min-width: 0;
-}
-.card .head{
-padding: 14px 14px 10px;
-display:flex; align-items:center; justify-content:space-between; gap:10px;
-border-bottom: 1px solid var(--border);
-}
-.card .head h3{ margin:0; font-size: 14px; }
-.card .head span{ font-size: 12px; color: var(--muted); }
-.card .body{ padding: 14px; }
+    .stack{ display:flex; flex-direction:column; gap:10px; }
 
-/* Main topbar */
-.topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom: 14px; }
-.title h2{ margin:0; font-size: 20px; }
-.title p{ margin:6px 0 0; font-size: 13px; color: var(--muted); }
+    .pill{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      min-width: 0;
+    }
+    .pill b{ font-size: 13px; }
+    .badge{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(110,168,255,.14);
+      white-space:nowrap;
+    }
 
-.controls{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; align-items:center; }
-.chip{
-display:flex; align-items:center; gap:8px;
-padding:10px 12px; border-radius: 14px;
-border: 1px solid var(--border); background: var(--panel);
-}
-.chip label{ font-size:12px; color: var(--muted); white-space:nowrap; }
-.chip select, .chip input{
-border: 1px solid rgba(255,255,255,0.10);
-background: rgba(255,255,255,0.06);
-color: var(--text); padding:8px 10px; border-radius: 12px;
-outline:none; min-width: 140px;
-}
+    .btnRow{ display:flex; flex-direction:column; gap:10px; }
+    .btn{
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-weight: 900;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: var(--panel2);
+      border-color: rgba(110,168,255,.35);
+    }
+    .btn:focus{ outline:none; box-shadow: var(--ring); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(110,168,255,.28), rgba(110,168,255,.16));
+      border-color: rgba(110,168,255,.45);
+    }
 
-.mainGrid{ display:flex; flex-direction:column; gap: 14px; }
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px dashed var(--border);
+      background: rgba(255,255,255,.03);
+      line-height: 1.45;
+    }
 
-/* KPIs */
-.kpis{ display:grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
-.kpi{
-border-radius: var(--radius2);
-border: 1px solid var(--border);
-background: rgba(255,255,255,0.04);
-padding: 12px;
-min-height: 92px;
-min-width: 0;
-}
-.kpi .name{ font-size: 12px; color: var(--muted); margin:0 0 8px; }
-.kpi .value{ font-size: 20px; margin:0 0 6px; }
-.kpi .sub{ font-size: 12px; color: var(--muted); margin:0; }
+    /* ========= Main ========= */
+    .main{ padding: 14px; }
 
-@media (max-width: 1200px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px){ .kpis{ grid-template-columns: 1fr; } }
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title h1{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: .01em;
+    }
+    .title p{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 900px;
+    }
 
-/* Activity table wrapper */
-.tablewrap{
-overflow-x: auto;
-border-radius: var(--radius2);
-border: 1px solid var(--border);
-background: rgba(255,255,255,0.02);
-}
+    .controls{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items:center;
+      justify-content:flex-end;
+      min-width: 280px;
+    }
 
-table{
-width:100%;
-border-collapse: collapse;
-min-width: 0;
-table-layout: fixed;
-}
-thead th{
-text-align:left; font-size: 12px; color: var(--muted); font-weight: 600;
-padding: 12px; border-bottom: 1px solid var(--border);
-background: rgba(255,255,255,0.02);
-position: sticky; top: 0; z-index: 2;
-backdrop-filter: blur(10px);
-white-space: nowrap;
-}
-tbody td{
-padding: 12px;
-border-bottom: 1px solid rgba(255,255,255,0.06);
-font-size: 13px;
-vertical-align: top;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-}
-tbody tr:hover td{ background: rgba(110,168,255,0.07); }
+    .chip{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+    }
+    .chip label{
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .chip select, .chip input{
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 8px 10px;
+      outline:none;
+      min-width: 140px;
+    }
+    html:not(.dark) .chip select, html:not(.dark) .chip input{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .chip select:focus, .chip input:focus{ box-shadow: var(--ring); }
 
-td.col-summary{ white-space: normal; }
-.summaryClamp{
-display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
-line-height: 1.35;
-max-height: calc(1.35em * 2);
-}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      padding: 14px 10px 0;
+    }
+    @media (max-width: 1200px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px){ .grid{ grid-template-columns: 1fr; } }
 
-/* Ops Signals (kept as-is) */
-.opsBox{ display:flex; flex-direction:column; gap:12px; }
-.opsSection{
-border: 1px solid rgba(255,255,255,0.08);
-background: rgba(255,255,255,0.03);
-border-radius: 14px;
-padding: 12px;
-}
-.opsTitle{
-display:flex; align-items:center; justify-content:space-between;
-margin:0 0 10px;
-font-size: 12px;
-color: var(--muted);
-letter-spacing: .2px;
-text-transform: uppercase;
-}
-.opsList{ display:flex; flex-direction:column; gap:8px; }
-.opsItem{
-display:flex; align-items:center; justify-content:space-between; gap:10px;
-font-size: 13px;
-padding: 8px 10px;
-border-radius: 12px;
-border: 1px solid rgba(255,255,255,0.06);
-background: rgba(255,255,255,0.02);
-min-width: 0;
-}
-.opsLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
-.opsLabel{ color: var(--text); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
-.opsRight{ display:flex; align-items:center; gap:10px; }
-.opsValue{ font-weight: 700; color: var(--text); white-space: nowrap; }
+    .kpi{
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+      min-width: 0;
+    }
+    .kpi .name{
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+    .kpi .value{
+      margin: 8px 0 0;
+      font-size: 22px;
+      font-weight: 950;
+    }
 
-/* State + Toast */
-.state{
-padding: 14px;
-border-radius: var(--radius2);
-border: 1px dashed var(--border);
-color: var(--muted);
-font-size: 13px;
-background: rgba(255,255,255,0.02);
-white-space: pre-wrap;
-}
-#stateBox:empty{ display:none; }
+    .content{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap: 12px;
+      padding: 12px 10px 10px;
+      align-items:start;
+    }
+    @media (max-width: 1100px){
+      .content{ grid-template-columns: 1fr; }
+    }
 
-.toast{
-position: fixed; right: 16px; bottom: 16px; max-width: 360px;
-padding: 12px 14px; border-radius: 14px;
-border: 1px solid var(--border);
-background: rgba(10,15,25,0.72);
-backdrop-filter: blur(10px);
-box-shadow: var(--shadow);
-font-size: 13px;
-opacity:0; transform: translateY(10px);
-pointer-events:none;
-transition: opacity .18s ease, transform .18s ease;
-z-index: 99;
-}
-html:not(.dark) .toast{ background: rgba(255,255,255,0.78); }
-.toast.show{ opacity:1; transform: translateY(0); }
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+      min-width: 0;
+    }
+    .cardHead{
+      padding: 12px 12px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cardHead h3{
+      margin:0;
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .cardBody{ padding: 12px; }
 
-/* ✅ Overlay "Back to site" link styling (low risk) */
-.overlayBackRow{
-margin-top: 12px;
-padding-top: 12px;
-border-top: 1px solid var(--border);
-display:flex;
-align-items:center;
-justify-content:flex-start;
-gap:10px;
-}
-.overlayBackRow a{
-color: var(--muted);
-font-size: 12px;
-text-decoration:none;
-border-bottom: 1px dashed transparent;
-}
-.overlayBackRow a:hover{
-color: var(--text);
-border-bottom-color: rgba(110,168,255,0.45);
-}
+    .charts{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 1100px){
+      .charts{ grid-template-columns: 1fr; }
+    }
+    canvas{ width: 100%; height: 160px; display:block; }
 
-/* Mobile layout */
-@media (max-width: 1100px){
-.wrap{ grid-template-columns: 1fr; }
-.sidebar{ position:relative; height:auto; }
-.main{ padding-top: 0; }
-}
-</style>
-  <!-- FAVICONS (files are in /public) -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    /* ✅ Table horizontal scroll is contained inside wrapper, not page */
+    .tableWrap{
+      overflow:auto;
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      max-width: 100%;
+    }
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px; /* it can scroll INSIDE wrapper */
+      table-layout: fixed;
+    }
+    thead th{
+      text-align:left;
+      padding: 12px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+    tbody td{
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: 13px;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: top;
+    }
+    tbody tr:hover td{ background: rgba(110,168,255,.07); }
+
+    .col-summary{ white-space: normal; }
+    .summaryClamp{
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.35;
+      max-height: calc(1.35em * 2);
+    }
+
+    /* State + toast (IDs used by app.js) */
+    #stateBox{
+      padding: 12px;
+      border-radius: var(--radius2);
+      border: 1px dashed var(--border);
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      white-space: pre-wrap;
+      margin-top: 10px;
+    }
+    #stateBox:empty{ display:none; }
+
+    #toast{
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      max-width: 360px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(10,15,25,.72);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 99;
+    }
+    html:not(.dark) #toast{ background: rgba(255,255,255,.78); }
+    #toast.show{ opacity:1; transform: translateY(0); }
+
+    /* Auth overlay (IDs used by app.js) */
+    #authOverlay{
+      position: fixed;
+      inset: 0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+    }
+    html:not(.dark) #authOverlay{ background: rgba(10,15,25,.22); }
+
+    .authCard{
+      width: min(520px, 100%);
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .authHead{
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .authHead b{ font-size: 14px; }
+    .authHead span{ font-size: 12px; color: var(--muted); }
+
+    .authBody{ padding: 16px; }
+    .authBody p{ margin:0 0 12px; color: var(--muted); font-size: 13px; line-height:1.5; }
+
+    .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 12px; }
+    .field label{ font-size: 12px; color: var(--muted); }
+    .field input{
+      width:100%;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 14px;
+      outline:none;
+      font-size: 14px;
+    }
+    html:not(.dark) .field input{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .field input:focus{ box-shadow: var(--ring); }
+
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .spacer{ flex:1; }
+
+    /* Small link row */
+    .overlayBackRow{
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:10px;
+    }
+    .overlayBackRow a{
+      color: var(--muted);
+      font-size: 12px;
+      text-decoration:none;
+      border-bottom: 1px dashed transparent;
+    }
+    .overlayBackRow a:hover{
+      color: var(--text);
+      border-bottom-color: rgba(110,168,255,.45);
+    }
+  </style>
+
+  <!-- Supabase JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Your config + app logic -->
+  <script defer src="/dashboard/config.js"></script>
+  <script defer src="/dashboard/app.js?v=1000"></script>
 </head>
 
 <body>
-<!-- LOGIN OVERLAY -->
-<div class="overlay" id="authOverlay" aria-hidden="true">
-<div class="loginCard" role="dialog" aria-modal="true" aria-label="Sign in">
-<div class="loginHead">
-<div>
-<b>Sign in to Dashboard</b><br/>
-<span>Magic Link (email)</span>
-</div>
-<span id="authStatus">Not signed in</span>
-</div>
-<div class="loginBody">
-<p>Enter your email and we’ll send a magic link.</p>
+  <!-- AUTH OVERLAY (IDs expected by app.js) -->
+  <div id="authOverlay" aria-hidden="true">
+    <div class="authCard" role="dialog" aria-modal="true" aria-label="Sign in">
+      <div class="authHead">
+        <div>
+          <b>Sign in to Dashboard</b><br/>
+          <span>Magic link (email)</span>
+        </div>
+        <span id="authStatus">Not signed in</span>
+      </div>
 
-<div class="field">
-<label for="authEmail">Email</label>
-<input id="authEmail" type="email" placeholder="you@company.com" autocomplete="email" />
-</div>
+      <div class="authBody">
+        <p>Enter your email and we’ll send a secure magic link.</p>
 
-<div class="row">
-<button class="btn primary" id="btnSendLink" type="button">Send magic link</button>
-<button class="btn" id="btnResendLink" type="button">Resend</button>
-<span class="spacer"></span>
-<button class="btn" id="btnCloseAuth" type="button">Close</button>
-</div>
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" placeholder="you@company.com" autocomplete="email" />
+        </div>
 
-<div class="error" id="authError"></div>
+        <div class="row">
+          <button class="btn primary" id="btnSendLink" type="button">Send magic link</button>
+          <button class="btn" id="btnResendLink" type="button">Resend</button>
+          <span class="spacer"></span>
+          <button class="btn" id="btnCloseAuth" type="button">Close</button>
+        </div>
 
-<!-- ✅ NEW: obvious escape hatch when not logged in -->
-<div class="overlayBackRow">
-<a href="/" aria-label="Back to NightShift AI homepage">← Back to NightShiftAI.com</a>
-</div>
-</div>
-</div>
-</div>
+        <div class="overlayBackRow">
+          <a href="/" aria-label="Back to NightShift AI homepage">← Back to NightShiftAI.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div class="wrap">
-<!-- LEFT COLUMN -->
-<aside class="sidebar">
-<!-- ✅ NEW: clickable brand to main site -->
-<a class="brand" href="/" aria-label="Back to NightShift AI homepage">
-<div class="dot"></div>
-<div>
-<h1>NightShift AI</h1>
-<p>Owner Dashboard</p>
-</div>
-</a>
+  <!-- APP -->
+  <div class="app">
+    <div class="shell">
 
-<div class="nav">
-<div class="pill"><b>Overview</b><span class="badge" id="badgeWindow">—</span></div>
-<div class="pill"><b>Activity</b><span class="badge" id="badgeCount">—</span></div>
-<div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
+      <!-- SIDEBAR -->
+      <aside class="panel side">
+        <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
+          <div class="mark">NS</div>
+          <div>
+            <b>NightShift AI</b>
+            <small>Owner Extranet</small>
+          </div>
+        </a>
 
-<section class="card" style="margin-top:10px;">
-<div class="head">
-<h3>Ops Signals</h3>
-<span>fast triage</span>
-</div>
-<div class="body">
-<div id="opsInsights" class="state">—</div>
-</div>
-</section>
-</div>
+        <div class="sideBlock">
+          <p class="sideTitle">Workspace</p>
+          <div class="stack">
+            <div class="pill">
+              <b>Property</b>
+              <!-- ✅ property switcher (we will wire it in app.js) -->
+              <select id="propertySelect" style="border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);color:var(--text);padding:8px 10px;outline:none;max-width: 160px;">
+                <option value="__all__">All properties</option>
+              </select>
+            </div>
 
-<div class="side-footer">
-<div class="hint">Tip: Search guest, phone, event, room type, “booking”, call_id.</div>
-<div class="minirow">
-<button class="btn" id="btnTheme" type="button">Toggle theme</button>
-<button class="btn" id="btnAuth" type="button">Login</button>
-<button class="btn primary" id="btnRefresh" type="button">Refresh</button>
-<button class="btn" id="btnLogout" type="button" style="display:none;">Logout</button>
-</div>
-</div>
-</aside>
+            <div class="pill"><b>Date range</b><span class="badge" id="badgeWindow">—</span></div>
+            <div class="pill"><b>Activity items</b><span class="badge" id="badgeCount">0</span></div>
+            <div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
+          </div>
+        </div>
 
-<!-- MAIN AREA -->
-<main class="main">
-<div class="topbar">
-<div class="title">
-<h2>Executive Overview</h2>
-<p>KPIs, ops signals, searchable activity feed, date filters, CSV export, and simple charts.</p>
-</div>
+        <div class="sideBlock">
+          <p class="sideTitle">Actions</p>
+          <div class="btnRow">
+            <button class="btn" id="btnAuth" type="button">Login</button>
+            <button class="btn" id="btnLogout" type="button" style="display:none;">Sign out</button>
+            <button class="btn" id="btnTheme" type="button">Theme</button>
+            <button class="btn primary" id="btnRefresh" type="button">Refresh data</button>
+          </div>
+        </div>
 
-<div class="controls">
-<div class="chip">
-<label for="rangeSelect">Date</label>
-<select id="rangeSelect">
-<option value="today">Today</option>
-<option value="7" selected>Last 7 days</option>
-<option value="30">Last 30 days</option>
-<option value="custom">Custom</option>
-</select>
-</div>
+        <div class="sideBlock">
+          <p class="sideTitle">Note</p>
+          <div class="hint">
+            Tip: Search across calls + bookings. Use keywords like “booking”, guest name,
+            room type, event, or call_id.
+          </div>
+        </div>
+      </aside>
 
-<div class="chip" id="customRange" style="display:none;">
-<label for="startDate">From</label>
-<input id="startDate" type="date"/>
-<label for="endDate">To</label>
-<input id="endDate" type="date"/>
-</div>
+      <!-- MAIN -->
+      <main class="panel main">
 
-<div class="chip" style="min-width: 320px;">
-<label for="searchInput">Search</label>
-<input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
-</div>
+        <div class="topbar">
+          <div class="title">
+            <h1>Executive Overview</h1>
+            <p>KPIs, ops signals, and a searchable activity feed — built like a real hotel extranet.</p>
+          </div>
 
-<button class="btn" id="btnExport" type="button">Export CSV</button>
-</div>
-</div>
+          <div class="controls">
+            <div class="chip">
+              <label for="rangeSelect">Date</label>
+              <select id="rangeSelect">
+                <option value="today">Today</option>
+                <option value="7" selected>Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
 
-<div class="mainGrid">
-<section class="card">
-<div class="head">
-<h3>Performance KPIs</h3>
-<span id="lastUpdated">—</span>
-</div>
+            <div class="chip">
+              <label for="startDate">From</label>
+              <input id="startDate" type="date" />
+            </div>
 
-<div class="body">
-<div class="kpis" id="kpiGrid"></div>
+            <div class="chip">
+              <label for="endDate">To</label>
+              <input id="endDate" type="date" />
+            </div>
 
-<div style="height:16px"></div>
+            <div class="chip" style="min-width: 320px;">
+              <label for="searchInput">Search</label>
+              <input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
+            </div>
 
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
-<div class="card" style="padding:12px;">
-<b style="font-size:13px;">Calls per Day</b>
-<canvas id="chartCalls" height="140"></canvas>
-</div>
+            <button class="btn" id="btnExport" type="button">Export CSV</button>
+          </div>
+        </div>
 
-<div class="card" style="padding:12px;">
-<b style="font-size:13px;">Bookings per Day</b>
-<canvas id="chartBookings" height="140"></canvas>
-</div>
-</div>
+        <!-- KPIs rendered by app.js into #kpiGrid -->
+        <div class="grid" id="kpiGrid"></div>
 
-<div class="row" style="margin-bottom:10px;">
-<b style="font-size:13px;">Activity Feed</b>
-<span class="spacer"></span>
-<span class="small" id="feedMeta">—</span>
-</div>
+        <div class="content">
+          <!-- Activity -->
+          <section class="card">
+            <div class="cardHead">
+              <h3>Activity feed</h3>
+              <span id="feedMeta">0 items</span>
+            </div>
 
-<div id="stateBox" class="state"></div>
+            <div class="cardBody">
+              <div id="stateBox"></div>
 
-<div class="tablewrap" id="tableWrap">
-<table>
-<thead>
-<tr>
-<th style="width:140px;">Time</th>
-<th style="width:88px;">Type</th>
-<th style="width:170px;">Guest/Caller</th>
-<th style="width:110px;">Arrival</th>
-<th style="width:64px;">N</th>
-<th style="width:110px;">Total</th>
-<th style="width:110px;">Sentiment</th>
-<th>Summary</th>
-</tr>
-</thead>
-<tbody id="feedTbody"></tbody>
-</table>
-</div>
-</div>
-</section>
-</div>
-</main>
-</div>
+              <div class="tableWrap" style="margin-top:10px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:150px;">Time</th>
+                      <th style="width:90px;">Type</th>
+                      <th style="width:180px;">Guest/Caller</th>
+                      <th style="width:110px;">Arrival</th>
+                      <th style="width:60px;">N</th>
+                      <th style="width:110px;">Total</th>
+                      <th style="width:110px;">Sentiment</th>
+                      <th>Summary</th>
+                    </tr>
+                  </thead>
+                  <tbody id="feedTbody"></tbody>
+                </table>
+              </div>
 
-<div class="toast" id="toast"></div>
+              <div style="margin-top:10px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:12px;">
+                <div id="lastUpdated">Updated —</div>
+                <div>Showing up to 500 items</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Right column -->
+          <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
+            <section class="card">
+              <div class="cardHead">
+                <h3>Ops insights</h3>
+                <span>triage</span>
+              </div>
+              <div class="cardBody">
+                <div id="opsInsights" style="color:var(--muted); white-space:pre-wrap;">—</div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="cardHead">
+                <h3>Trends</h3>
+                <span>by day</span>
+              </div>
+              <div class="cardBody">
+                <div class="charts">
+                  <div class="card" style="padding:12px;">
+                    <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Calls</div>
+                    <canvas id="chartCalls" width="600" height="200"></canvas>
+                  </div>
+                  <div class="card" style="padding:12px;">
+                    <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Bookings</div>
+                    <canvas id="chartBookings" width="600" height="200"></canvas>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
 </body>
 </html>
