@@ -5,162 +5,443 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>NightShift AI — Dashboard</title>
 
-  <link rel="icon" href="/favicon.ico">
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
 
   <style>
-    .dash{ max-width:1200px; margin:0 auto; padding:24px 16px; }
-    .shell{ display:grid; grid-template-columns: 260px 1fr; gap:18px; }
+    /* ===========
+       Layout
+    =========== */
+    .dash-wrap{ max-width: 1280px; margin: 0 auto; padding: 22px 14px 42px; }
+    .shell{ display:grid; grid-template-columns: 270px 1fr; gap: 16px; }
     @media (max-width: 980px){ .shell{ grid-template-columns: 1fr; } }
 
-    .side{
+    .panel{
       background: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
-      border: 1px solid rgba(99,102,241,.25);
+      border: 1px solid rgba(99,102,241,.22);
       border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+      box-shadow: 0 30px 100px rgba(0,0,0,.60);
     }
-    .brand{ display:flex; gap:10px; align-items:center; padding:8px 10px 14px; }
-    .logo{ width:36px; height:36px; border-radius:12px; background:rgba(99,102,241,.18); display:flex; align-items:center; justify-content:center; font-weight:900; color:#f8fafc;}
-    .brandTitle{ font-weight:950; color:#f8fafc; line-height:1.1; }
-    .brandSub{ font-size:12px; color:rgba(234,240,255,.65); }
 
-    .nav{
-      display:flex; align-items:center; gap:10px;
-      padding: 10px 12px; border-radius: 12px;
-      color: rgba(234,240,255,.86); text-decoration:none; font-weight:900;
-      border: 1px solid rgba(255,255,255,0);
+    /* ===========
+       Sidebar
+    =========== */
+    .side{ padding: 14px; position: sticky; top: 14px; height: fit-content; }
+    @media (max-width: 980px){ .side{ position: static; } }
+
+    .brand{ display:flex; align-items:center; gap: 10px; padding: 8px 10px 14px; border-bottom:1px solid rgba(99,102,241,.14); }
+    .logo{
+      width: 38px; height: 38px; border-radius: 14px;
+      background: rgba(99,102,241,.16);
+      border:1px solid rgba(99,102,241,.18);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 950; color: #f8fafc;
     }
-    .nav:hover{ background: rgba(99,102,241,.12); border-color: rgba(99,102,241,.20); }
-    .nav.active{ background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28)); border-color: rgba(46,107,255,.30); }
+    .brand-title{ font-weight: 950; color:#f8fafc; line-height: 1.05; }
+    .brand-sub{ font-size: 12px; color: rgba(234,240,255,.65); margin-top: 3px; }
 
-    .acct{ margin-top:12px; padding:10px 12px; border-radius:14px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
-    .acct .email{ font-weight:900; color:#f8fafc; font-size:13px; }
-    .acct .meta{ color:rgba(234,240,255,.65); font-size:12px; margin-top:6px; }
-
+    .side-actions{ padding: 12px 10px; display:flex; gap:10px; flex-wrap:wrap; }
     .btn{
-      width:100%;
-      margin-top:10px;
-      border-radius:14px; padding:10px 12px; font-weight:950;
-      border:1px solid rgba(99,102,241,.25);
-      background: rgba(2,6,23,.7);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 950;
+      border: 1px solid rgba(99,102,241,.25);
+      background: rgba(2,6,23,.70);
       color: rgba(234,240,255,.92);
       cursor:pointer;
+      transition: transform .12s ease;
     }
     .btn:hover{ transform: translateY(-1px); }
-    .btn.primary{ background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28)); border-color: rgba(46,107,255,.30); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28));
+      border-color: rgba(46,107,255,.32);
+    }
+    .btn.full{ width: 100%; }
 
-    .main{
-      background: linear-gradient(180deg, rgba(11,16,38,.55), rgba(2,6,23,.65));
-      border: 1px solid rgba(99,102,241,.18);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 20px 70px rgba(0,0,0,.45);
-      min-height: 560px;
+    .acct{
+      margin: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.06);
+    }
+    .acct .row{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      font-weight: 950;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(234,240,255,.85);
     }
 
-    .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
-    .title{ margin:8px 0 0; font-size:28px; font-weight:950; color:#f8fafc; }
-    .sub{ margin:8px 0 0; color:rgba(234,240,255,.70); max-width:900px; }
+    .muted{ color: rgba(234,240,255,.70); }
 
-    .kpis{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-top:14px; }
-    @media (max-width: 980px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
+    /* ===========
+       Main
+    =========== */
+    .main{ padding: 16px; }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 14px;
+      border-bottom:1px solid rgba(99,102,241,.14);
+    }
+    .title{
+      font-size: 26px;
+      font-weight: 950;
+      margin: 0;
+      color:#f8fafc;
+    }
+    .sub{
+      margin: 8px 0 0;
+      max-width: 900px;
+      color: rgba(234,240,255,.70);
+      line-height: 1.55;
+    }
+
+    /* ===========
+       Controls row
+    =========== */
+    .controls{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      margin-top: 14px;
+    }
+
+    .input, .select{
+      border-radius: 14px;
+      border: 1px solid rgba(99,102,241,.25);
+      background: rgba(2,6,23,.70);
+      color: #f8fafc;
+      padding: 10px 12px;
+      outline: none;
+      min-width: 200px;
+    }
+    .select{ min-width: 200px; }
+    .small{ font-size: 12px; color: rgba(234,240,255,.65); }
+
+    /* ===========
+       KPI grid
+    =========== */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
     .kpi{
-      border-radius: 16px;
+      border-radius: 18px;
       border: 1px solid rgba(99,102,241,.18);
       background: rgba(2,6,23,.55);
       padding: 14px;
     }
-    .kpi .label{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color: rgba(165,180,252,.95); font-weight:900; }
-    .kpi .val{ font-size:26px; font-weight:950; margin-top:6px; color:#f8fafc; }
-    .kpi .mini{ font-size:12px; color: rgba(234,240,255,.65); margin-top:6px; }
-
-    .filters{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-    .input{
-      border-radius: 14px;
-      border: 1px solid rgba(99,102,241,.25);
-      background: rgba(2,6,23,.7);
+    .kpi .name{
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(165,180,252,.95);
+      font-weight: 950;
+    }
+    .kpi .value{
+      margin: 8px 0 0;
+      font-size: 26px;
+      font-weight: 950;
       color: #f8fafc;
-      padding: 10px 12px;
-      outline: none;
-      min-width: 220px;
     }
 
-    table{ width:100%; border-collapse: collapse; margin-top:14px; }
-    th, td{ text-align:left; padding:12px 10px; border-bottom: 1px solid rgba(99,102,241,.14); color: rgba(234,240,255,.84); font-size: 14px; }
-    th{ font-size:12px; text-transform:uppercase; letter-spacing:.12em; color: rgba(165,180,252,.95); }
-    tr:hover{ background: rgba(99,102,241,.06); }
-    .tag{ display:inline-flex; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:900; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.07); }
-    .tag.red{ background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.25); }
-    .tag.green{ background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.25); }
+    /* ===========
+       Two-column content
+    =========== */
+    .cols{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (max-width: 1100px){ .cols{ grid-template-columns: 1fr; } }
 
-    /* Drawer */
-    .drawer{ position:fixed; inset:0; display:none; }
-    .drawer.show{ display:block; }
-    .drawer .bg{ position:absolute; inset:0; background: rgba(0,0,0,.55); }
-    .drawer .panel{
-      position:absolute; right:0; top:0; height:100%; width:min(560px, 92vw);
-      background: linear-gradient(180deg, rgba(11,16,38,.96), rgba(2,6,23,.98));
-      border-left: 1px solid rgba(99,102,241,.22);
+    .card{ padding: 14px; border-radius: 18px; border: 1px solid rgba(99,102,241,.18); background: rgba(2,6,23,.55); }
+    .card h3{ margin: 0 0 8px; color:#f8fafc; font-weight: 950; font-size: 14px; letter-spacing: .10em; text-transform: uppercase; }
+    .card .body{ color: rgba(234,240,255,.78); line-height: 1.6; font-size: 14px; }
+
+    /* ===========
+       Charts
+    =========== */
+    .charts{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    @media (max-width: 1100px){ .charts{ grid-template-columns: 1fr; } }
+    canvas{ width: 100%; height: 160px; display:block; }
+
+    /* ===========
+       Table
+    =========== */
+    .table-wrap{ margin-top: 12px; overflow:auto; border-radius: 18px; border: 1px solid rgba(99,102,241,.18); }
+    table{ width:100%; border-collapse: collapse; min-width: 860px; background: rgba(2,6,23,.45); }
+    th, td{ text-align:left; padding: 12px 10px; border-bottom: 1px solid rgba(99,102,241,.14); color: rgba(234,240,255,.84); font-size: 14px; }
+    th{ font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: rgba(165,180,252,.95); }
+    tr:hover td{ background: rgba(99,102,241,.06); }
+
+    /* ===========
+       Status strip + toast
+    =========== */
+    .meta-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top:1px solid rgba(99,102,241,.14);
+    }
+
+    #stateBox{
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(248,113,113,.10);
+      border:1px solid rgba(248,113,113,.20);
+      color: rgba(254,226,226,.95);
+      display:none;
+    }
+
+    #toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(2,6,23,.92);
+      border: 1px solid rgba(99,102,241,.22);
+      color: rgba(234,240,255,.92);
+      font-weight: 900;
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .15s ease, transform .15s ease;
+      z-index: 9999;
+    }
+    #toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    /* ===========
+       Auth overlay (your JS expects these IDs)
+    =========== */
+    #authOverlay{
+      position: fixed;
+      inset: 0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background: rgba(0,0,0,.60);
+      z-index: 9998;
       padding: 18px;
-      overflow:auto;
     }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; white-space: pre-wrap; color: rgba(234,240,255,.80); }
+    .auth-card{
+      width: min(520px, 96vw);
+      border-radius: 18px;
+      border: 1px solid rgba(99,102,241,.25);
+      background: linear-gradient(180deg, rgba(11,16,38,.96), rgba(2,6,23,.98));
+      box-shadow: 0 40px 120px rgba(0,0,0,.75);
+      padding: 16px;
+    }
+    .auth-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .auth-title{ font-weight: 950; color:#f8fafc; margin: 0; }
+    .auth-body{ margin-top: 12px; color: rgba(234,240,255,.78); }
+    .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
   </style>
 </head>
 
 <body>
-  <div class="dash">
+  <div class="dash-wrap">
     <div class="shell">
-      <aside class="side">
+
+      <!-- SIDEBAR -->
+      <aside class="panel side">
         <div class="brand">
           <div class="logo">NS</div>
           <div>
-            <div class="brandTitle">NightShift AI</div>
-            <div class="brandSub">Dashboard</div>
+            <div class="brand-title">NightShift AI</div>
+            <div class="brand-sub">Operations Dashboard</div>
           </div>
         </div>
 
-        <a class="nav active" href="#overview" id="navOverview">📊 Overview</a>
-        <a class="nav" href="#calls" id="navCalls">📞 Call Inbox</a>
+        <div class="side-actions">
+          <button class="btn full" id="btnAuth" type="button">Login</button>
+          <button class="btn full" id="btnLogout" type="button" style="display:none;">Sign out</button>
+          <button class="btn full" id="btnTheme" type="button">Theme</button>
+        </div>
 
         <div class="acct">
-          <div class="email" id="acctEmail">Not signed in</div>
-          <div class="meta" id="acctMeta">—</div>
-        </div>
-
-        <button class="btn" id="logoutBtn" type="button">Sign out</button>
-        <a class="btn primary" href="/contact.html" style="display:block; text-align:center; text-decoration:none;">Get a Quote Page</a>
-      </aside>
-
-      <main class="main">
-        <div class="top">
-          <div>
-            <div class="eyebrow" id="viewEyebrow">Overview</div>
-            <div class="title" id="viewTitle">Loading…</div>
-            <div class="sub" id="viewSub"> </div>
+          <div class="row">
+            <span class="badge" id="authBadge">Locked</span>
+            <span class="badge" id="badgeWindow">Last 7 days</span>
+          </div>
+          <div class="muted" style="margin-top:10px;" id="authStatus">Not signed in</div>
+          <div class="small" style="margin-top:8px;">
+            Tip: Search works across calls + bookings.
           </div>
         </div>
 
-        <div id="view"></div>
+        <div class="side-actions">
+          <a class="btn full primary" href="/contact.html" style="text-decoration:none; text-align:center;">Get a Quote Page</a>
+          <a class="btn full" href="/" style="text-decoration:none; text-align:center;">Back to Website</a>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="panel main">
+        <div class="topbar">
+          <div>
+            <h1 class="title">NightShift AI — Dashboard</h1>
+            <p class="sub">
+              Calls, bookings, conversion, and operational signals — clean and fast.
+            </p>
+          </div>
+
+          <div style="min-width:260px;">
+            <div class="badge" id="badgeCount">0</div>
+            <div class="small muted" id="feedMeta" style="margin-top:8px;">0 items</div>
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+          <select class="select" id="rangeSelect">
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="today">Today</option>
+            <option value="custom">Custom</option>
+          </select>
+
+          <input class="input" id="startDate" type="date" />
+          <input class="input" id="endDate" type="date" />
+
+          <input class="input" id="searchInput" placeholder="Search guest, summary, notes…" />
+
+          <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
+          <button class="btn" id="btnExport" type="button">Export CSV</button>
+        </div>
+
+        <!-- ERROR/STATE -->
+        <div id="stateBox"></div>
+
+        <!-- KPI GRID (your JS renders inside #kpiGrid) -->
+        <div class="grid" id="kpiGrid"></div>
+
+        <div class="cols">
+          <div class="card">
+            <h3>Activity Feed</h3>
+            <div class="table-wrap" style="margin-top:10px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Guest</th>
+                    <th>Arrival</th>
+                    <th>Nights</th>
+                    <th>Total</th>
+                    <th>Sentiment</th>
+                    <th>Summary</th>
+                  </tr>
+                </thead>
+                <tbody id="feedTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="meta-row">
+              <div class="small muted" id="lastUpdated">Updated —</div>
+              <div class="small muted">Showing up to 500 items</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>Ops Insights</h3>
+              <div class="body" id="opsInsights">—</div>
+            </div>
+
+            <div class="charts">
+              <div class="card">
+                <h3>Calls by Day</h3>
+                <canvas id="chartCalls" width="600" height="200"></canvas>
+              </div>
+              <div class="card">
+                <h3>Bookings by Day</h3>
+                <canvas id="chartBookings" width="600" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </main>
     </div>
   </div>
 
-  <div class="drawer" id="drawer">
-    <div class="bg" id="drawerBg"></div>
-    <div class="panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-        <div>
-          <div class="eyebrow">Call Detail</div>
-          <div style="font-weight:950; color:#f8fafc;" id="dTitle">—</div>
-        </div>
-        <button class="btn" id="drawerClose" type="button" style="width:auto;">✕</button>
+  <!-- AUTH OVERLAY (your JS uses these IDs) -->
+  <div id="authOverlay">
+    <div class="auth-card">
+      <div class="auth-row">
+        <h3 class="auth-title">Sign in</h3>
+        <button class="btn" id="btnCloseAuth" type="button" style="width:auto;">✕</button>
       </div>
-      <div style="margin-top:14px;" id="dBody"></div>
+
+      <div class="auth-body">
+        Enter your email to receive a secure magic link.
+        <div style="margin-top:12px;">
+          <input class="input" id="authEmail" type="email" placeholder="you@company.com" style="width:100%;" />
+        </div>
+
+        <div class="auth-actions">
+          <button class="btn primary" id="btnSendLink" type="button">Send magic link</button>
+          <button class="btn" id="btnResendLink" type="button">Resend</button>
+        </div>
+
+        <div class="small muted" style="margin-top:10px;">
+          You’ll be redirected after clicking the link in your inbox.
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- Supabase JS must already be included in your dashboard folder, keep whatever you currently use -->
+  <!-- Your config must exist as window.NSA_CONFIG somewhere -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/dashboard/app.js?v=1000"></script>
+
+  <script>
+    // Only for your existing clearDataUI behavior:
+    // show the state box if it gets text
+    const stateBox = document.getElementById("stateBox");
+    const obs = new MutationObserver(() => {
+      stateBox.style.display = stateBox.textContent.trim() ? "block" : "none";
+    });
+    obs.observe(stateBox, { childList:true, subtree:true, characterData:true });
+  </script>
 </body>
 </html>
