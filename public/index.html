@@ -19,389 +19,1176 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-  <link rel="stylesheet" href="/assets/site.css?v=1000" />
+  <meta name="robots" content="index,follow" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- Theme: reads localStorage("nsa_theme") and applies html.dark -->
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem("nsa_theme") || "system";
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var resolved = (t === "dark") ? "dark" : (t === "light") ? "light" : (prefersDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }catch(e){}
+    })();
+  </script>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.09);
+      --panel3: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --accent: #6ea8ff;
+      --good: #42d392;
+      --warn: #ffcc66;
+      --bad:  #ff6b6b;
+      --shadow: 0 18px 60px rgba(0,0,0,.46);
+      --shadow2: 0 10px 30px rgba(0,0,0,.28);
+      --radius: 22px;
+      --radius2: 16px;
+      --ring: 0 0 0 3px rgba(110,168,255,.20);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --max: 1180px;
+    }
+    html:not(.dark){
+      --bg: #f6f7fb;
+      --panel: rgba(10,15,25,.04);
+      --panel2: rgba(10,15,25,.06);
+      --panel3: rgba(10,15,25,.03);
+      --border: rgba(10,15,25,.10);
+      --border2: rgba(10,15,25,.14);
+      --text: rgba(10,15,25,.92);
+      --muted: rgba(10,15,25,.62);
+      --shadow: 0 18px 50px rgba(10,15,25,.14);
+      --shadow2: 0 10px 24px rgba(10,15,25,.10);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,.08), transparent 55%),
+        var(--bg);
+      overflow-x:hidden;
+    }
+
+    a{ color: inherit; }
+    .container{
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    /* Subtle grid texture */
+    .bgGrid{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      opacity: .32;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(700px 520px at 50% 20%, rgba(0,0,0,1), transparent 72%);
+    }
+    html:not(.dark) .bgGrid{
+      opacity: .12;
+      background-image:
+        linear-gradient(to right, rgba(10,15,25,.10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(10,15,25,.10) 1px, transparent 1px);
+    }
+
+    /* NAV */
+    .nav{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(11,16,32,.92), rgba(11,16,32,.72));
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    html:not(.dark) .nav{
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      border-bottom-color: rgba(10,15,25,.10);
+    }
+
+    .navInner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 12px 0;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      text-decoration:none;
+      min-width: 0;
+      border-radius: 16px;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+    }
+    .brand:hover{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.08);
+    }
+    html:not(.dark) .brand:hover{
+      background: rgba(10,15,25,.04);
+      border-color: rgba(10,15,25,.10);
+    }
+
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 950;
+      letter-spacing: .02em;
+      background: rgba(110,168,255,.16);
+      border: 1px solid rgba(110,168,255,.30);
+      box-shadow: var(--shadow2);
+      flex: 0 0 auto;
+    }
+    html:not(.dark) .mark{
+      box-shadow: 0 10px 24px rgba(10,15,25,.10);
+    }
+
+    .brandText{
+      min-width: 0;
+      line-height: 1.1;
+    }
+    .brandText b{
+      display:block;
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: .01em;
+    }
+    .brandText span{
+      display:block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 520px;
+    }
+
+    .navRight{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+
+    .links{
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    html:not(.dark) .links{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+
+    .navA{
+      text-decoration:none;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      color: var(--text);
+      white-space: nowrap;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .navA:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+    }
+    html:not(.dark) .navA:hover{
+      background: rgba(10,15,25,.04);
+      border-color: rgba(10,15,25,.10);
+    }
+
+    .navA.subtle{
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    .btn{
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-weight: 950;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      user-select:none;
+      gap: 10px;
+      white-space: nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: var(--panel2);
+      border-color: rgba(110,168,255,.35);
+    }
+    .btn:focus{ outline:none; box-shadow: var(--ring); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(110,168,255,.28), rgba(110,168,255,.16));
+      border-color: rgba(110,168,255,.45);
+    }
+
+    .iconBtn{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      color: var(--text);
+    }
+    html:not(.dark) .iconBtn{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .iconBtn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(110,168,255,.35);
+    }
+
+    .hamburger{ display:none; }
+
+    @media (max-width: 980px){
+      .links{ display:none; }
+      .hamburger{ display:inline-flex; }
+    }
+
+    .mobileMenu{
+      display:none;
+      padding: 0 0 14px;
+    }
+    .mobileMenu.open{ display:block; }
+    .mobileCard{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 10px;
+      box-shadow: var(--shadow2);
+    }
+    html:not(.dark) .mobileCard{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .mobileCard a{
+      display:block;
+      padding: 12px 12px;
+      border-radius: 14px;
+      text-decoration:none;
+      font-weight: 900;
+      font-size: 13px;
+      color: var(--text);
+      border: 1px solid transparent;
+    }
+    .mobileCard a:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.10);
+    }
+
+    /* HERO */
+    .heroWrap{
+      padding: 34px 0 0;
+    }
+
+    .trustStrip{
+      margin-top: 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:center;
+      justify-content:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .trustPill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      white-space: nowrap;
+    }
+    html:not(.dark) .trustPill{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+      align-items:start;
+      margin-top: 22px;
+      padding-bottom: 10px;
+    }
+    @media (max-width: 980px){
+      .hero{ grid-template-columns: 1fr; }
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    html:not(.dark) .eyebrow{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(110,168,255,.95);
+      box-shadow: 0 0 0 4px rgba(110,168,255,.14);
+    }
+
+    .h1{
+      margin: 14px 0 10px;
+      font-size: 42px;
+      font-weight: 980;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    @media (max-width: 520px){
+      .h1{ font-size: 34px; }
+    }
+    .highlight{
+      background: linear-gradient(90deg, rgba(110,168,255,.95), rgba(66,211,146,.95));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .sub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 760px;
+    }
+
+    .ctaRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 16px;
+    }
+
+    .chips{
+      margin-top: 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    html:not(.dark) .chip{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+
+    .heroCard{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position: relative;
+    }
+    html:not(.dark) .heroCard{
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(10px);
+    }
+    .heroCard::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(520px 240px at 18% 10%, rgba(110,168,255,.22), transparent 60%),
+        radial-gradient(520px 240px at 82% 0%, rgba(66,211,146,.12), transparent 60%);
+      opacity: .9;
+      pointer-events:none;
+    }
+    .heroCard .inner{
+      position: relative;
+      padding: 16px;
+    }
+    .kicker{
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 950;
+    }
+    .cardTitle{
+      margin: 8px 0 8px;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -0.01em;
+    }
+    .cardText{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .list{
+      margin: 12px 0 0;
+      padding: 0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .li{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    html:not(.dark) .li{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .tick{
+      width: 24px; height: 24px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(66,211,146,.14);
+      border: 1px solid rgba(66,211,146,.24);
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+    .tick svg{ width: 14px; height: 14px; fill: rgba(66,211,146,.95); }
+
+    /* SECTIONS */
+    .section{
+      padding: 34px 0;
+    }
+    .sectionHead{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .h2{
+      margin: 10px 0 0;
+      font-size: 28px;
+      font-weight: 980;
+      letter-spacing: -0.01em;
+    }
+    .lead{
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 860px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    html:not(.dark) .card{
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(10px);
+    }
+    .cardPad{ padding: 14px; }
+    .card h3{
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+    .card p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* PRICING */
+    .pricing{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px){ .pricing{ grid-template-columns: 1fr; } }
+
+    .price{
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    html:not(.dark) .price{ background: rgba(255,255,255,.76); backdrop-filter: blur(10px); }
+
+    .priceTop{
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .pill{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(110,168,255,.12);
+      white-space: nowrap;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .priceName{
+      font-size: 16px;
+      font-weight: 980;
+      margin: 6px 0 4px;
+    }
+    .priceSub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .priceBody{ padding: 14px; }
+    .bullets{
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 13px;
+    }
+
+    .notice{
+      margin-top: 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(110,168,255,.20);
+      background:
+        radial-gradient(520px 240px at 20% 0%, rgba(110,168,255,.14), transparent 60%),
+        rgba(255,255,255,.03);
+      padding: 14px;
+      box-shadow: var(--shadow2);
+    }
+    html:not(.dark) .notice{
+      border-color: rgba(10,15,25,.12);
+      background:
+        radial-gradient(520px 240px at 20% 0%, rgba(110,168,255,.10), transparent 60%),
+        rgba(10,15,25,.02);
+    }
+    .notice h3{ margin:0 0 8px; font-size: 15px; font-weight: 980; }
+    .notice p{ margin:0; color: var(--muted); line-height: 1.6; font-size: 13px; }
+    .notice .ctaRow{ margin-top: 12px; }
+
+    /* FOOTER */
+    .footer{
+      margin-top: 34px;
+      padding: 20px 0 30px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    html:not(.dark) .footer{ border-top-color: rgba(10,15,25,.10); }
+
+    .footerInner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .footerLinks{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .footerLinks a{
+      text-decoration:none;
+      color: inherit;
+      border-bottom: 1px dashed transparent;
+    }
+    .footerLinks a:hover{
+      color: var(--text);
+      border-bottom-color: rgba(110,168,255,.45);
+    }
+
+    .social{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .social a{
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    html:not(.dark) .social a{
+      border-color: rgba(10,15,25,.12);
+      background: rgba(10,15,25,.03);
+    }
+    .social a:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(110,168,255,.35);
+    }
+    .social svg{ width: 18px; height: 18px; fill: currentColor; color: var(--text); opacity: .9; }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .btn, .navA, .iconBtn, .social a{ transition:none; }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="main-wrapper">
+  <div class="bgGrid" aria-hidden="true"></div>
 
-    <!-- NAVBAR -->
-   <nav class="site-nav">
-  <div class="nav-inner">
-    <a href="/index.html" class="nav-left" aria-label="NightShift AI Home">
-      <div class="nav-logo-circle">NS</div>
-      <div class="nav-brand-text">
-        <span>NightShift</span>
-        <span>AI Night Front Desk</span>
+  <!-- NAV -->
+  <header class="nav" role="banner">
+    <div class="container">
+      <div class="navInner">
+        <a href="/" class="brand" aria-label="NightShift AI Home">
+          <div class="mark" aria-hidden="true">NS</div>
+          <div class="brandText">
+            <b>NightShift AI</b>
+            <span>AI Night Front Desk for Hotels</span>
+          </div>
+        </a>
+
+        <div class="navRight">
+          <nav class="links" aria-label="Primary navigation">
+            <a class="navA" href="/product.html">Product</a>
+            <a class="navA" href="/who-we-serve.html">Who we serve</a>
+            <a class="navA" href="/packages.html">Packages</a>
+            <a class="navA" href="/faq.html">FAQ</a>
+            <a class="navA" href="/about.html">About</a>
+            <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
+          </nav>
+
+          <button class="iconBtn hamburger" id="btnMenu" type="button" aria-label="Open menu">
+            <!-- menu icon -->
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"></path>
+            </svg>
+          </button>
+
+          <button class="iconBtn" id="btnTheme" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <!-- half-moon icon -->
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M12 2a9.9 9.9 0 0 0 0 20V2zm1 2.06A8 8 0 1 1 13 19.94V4.06z"></path>
+            </svg>
+          </button>
+
+          <!-- PRIMARY CTA -->
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+        </div>
       </div>
-    </a>
 
-    <div class="nav-links">
-      <a href="/product.html">Product</a>
-      <a href="/who-we-serve.html">Who We Serve</a>
-      <a href="/packages.html">Packages</a>
-      <a href="/faq.html">FAQ</a>
-      <a href="/about.html">About</a>
-
-      <!-- ✅ Owner Dashboard -->
-      <a href="/dashboard/" class="nav-dashboard" rel="nofollow">Dashboard</a>
-
-      <a href="/contact.html" class="nav-cta">Get a Quote</a>
-    </div>
-  </div>
-</nav>
-
-
-    <!-- TRUST STRIP -->
-    <div class="container" style="margin-top:18px;">
-      <div class="trust-strip">
-        <span>✔ ADA-aware call flows</span>
-        <span class="sep">•</span>
-        <span>✔ Privacy-first architecture</span>
-        <span class="sep">•</span>
-        <span>✔ Safe escalation routing</span>
+      <!-- Mobile menu -->
+      <div class="mobileMenu" id="mobileMenu">
+        <div class="mobileCard" role="navigation" aria-label="Mobile navigation">
+          <a href="/product.html">Product</a>
+          <a href="/who-we-serve.html">Who we serve</a>
+          <a href="/packages.html">Packages</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/about.html">About</a>
+          <a href="/dashboard/" rel="nofollow">Dashboard</a>
+          <a href="/contact.html">Book a demo</a>
+        </div>
       </div>
     </div>
+  </header>
 
-    <!-- HERO -->
-    <header class="page-container" style="padding-top:54px; padding-bottom:0;">
-      <section class="hero">
-        <div>
-          <div class="hero-left-eyebrow">
-            <span class="dot"></span> NOT A CALL CENTER • VIRTUAL FRONT DESK
-          </div>
+  <!-- HERO -->
+  <main class="container heroWrap">
+    <div class="trustStrip" aria-label="Trust highlights">
+      <span class="trustPill">✔ ADA-aware call flows</span>
+      <span class="trustPill">✔ Privacy-first architecture</span>
+      <span class="trustPill">✔ Safe escalation routing</span>
+      <span class="trustPill">✔ Answers in &lt; 3 seconds</span>
+    </div>
 
-          <h1 class="hero-title">
-            Not a Call Center.<br />
-            A <span class="highlight">Virtual Front Desk</span> Trained on Your Hotel.
-          </h1>
+    <section class="hero" aria-label="Hero">
+      <div>
+        <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Not a call center • Virtual front desk</div>
 
-          <p class="hero-subtitle">
-            NightShift AI answers guest calls, handles operational questions, follows ADA-aware workflows,
-            and escalates emergencies using your property’s exact rules — not generic scripts.
-          </p>
+        <h1 class="h1">
+          Not a Call Center.<br/>
+          A <span class="highlight">Virtual Front Desk</span> trained on your hotel.
+        </h1>
 
-          <div class="badge-row">
-            <span class="badge-pill">✅ Property-specific answers</span>
-            <span class="badge-pill">✅ ADA-aware workflows</span>
-            <span class="badge-pill">✅ Emergency escalation</span>
-            <span class="badge-pill">✅ Brand-controlled experience</span>
-          </div>
+        <p class="sub">
+          NightShift AI answers guest calls, handles operational questions, follows ADA-aware workflows,
+          and escalates emergencies using your property’s rules — not generic scripts.
+        </p>
 
-          <div class="hero-cta-row" style="margin-top:18px;">
-            <a href="/contact.html" class="btn-primary">Get a Quote</a>
-            <a href="/product.html" class="btn-secondary">Explore the Product →</a>
-            <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">Call Center vs Virtual Front Desk →</a>
-          </div>
-
-          <p class="hero-subtitle" style="margin-top:14px;">
-            Typical install: under 10 minutes (no new phone system).
-          </p>
-
-          <div class="feature-card notice" style="margin-top:18px;">
-            <h3 style="margin:0 0 6px;">Not a reservation call center</h3>
-            <p style="margin:0;">
-              NightShift AI is a virtual front desk trained on your property, policies, and escalation rules —
-              built to handle guest operations, not just bookings.
-            </p>
-          </div>
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/packages.html">See packages</a>
+          <a class="btn" href="/virtual-front-desk-vs-call-center.html">Call center vs virtual front desk</a>
         </div>
 
-        <aside class="hero-card">
-          <div class="eyebrow">What it handles</div>
-          <h2 class="section-title" style="margin-top:6px;">Calls → Answers → Escalation</h2>
-          <p class="section-subtitle" style="margin-top:10px;">
-            NightShift answers guest questions, supports reservations through your existing process,
+        <div class="chips" aria-label="Highlights">
+          <span class="chip">✅ Property-specific answers</span>
+          <span class="chip">✅ Brand-controlled experience</span>
+          <span class="chip">✅ Emergency escalation</span>
+          <span class="chip">✅ Install in ~10 minutes</span>
+        </div>
+
+        <div class="notice" style="margin-top:16px;">
+          <h3>Built for hotel operations — not just reservations</h3>
+          <p>
+            NightShift is designed to handle the same calls your front desk does: late check-ins, lockouts,
+            noise complaints, policy questions, and safe routing for sensitive issues.
+          </p>
+        </div>
+      </div>
+
+      <aside class="heroCard" aria-label="What it handles">
+        <div class="inner">
+          <div class="kicker">What it handles</div>
+          <div class="cardTitle">Calls → Answers → Escalation</div>
+          <p class="cardText">
+            NightShift answers guest questions, supports reservation intake through your existing process,
             and routes true emergencies to the right person — fast.
           </p>
 
-          <div style="margin-top:14px;">
-            <div class="eyebrow">Common calls</div>
-            <p class="section-subtitle" style="margin-top:8px;">
-              Late check-ins • Pet / service animal questions • Directions & policies • Noise complaints • Lockouts • Safety issues
-            </p>
-          </div>
+          <ul class="list" aria-label="Common calls list">
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Common calls</b><br/>Late check-ins • Policies • Directions • Noise • Lockouts</div>
+            </li>
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Reservation intake</b><br/>Dates • Nights • Guests • Room type • Total due (summary)</div>
+            </li>
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Safe escalation</b><br/>Urgent issues routed by rules (time, call type, property, role)</div>
+            </li>
+          </ul>
 
-          <div class="hero-cta-row" style="margin-top:18px;">
-            <a href="/contact.html" class="btn-primary">Request Demo</a>
-            <a href="/packages.html" class="btn-secondary">See Packages →</a>
-          </div>
-        </aside>
-      </section>
-    </header>
-
-    <!-- MAIN -->
-    <main class="page-container" style="padding-top:0;">
-
-      <!-- WHAT IT DOES -->
-      <section class="section">
-        <div class="eyebrow">What it does</div>
-        <h2 class="section-title">Your Virtual Front Desk — 24/7</h2>
-        <p class="section-subtitle" style="max-width:860px;">
-          NightShift handles the calls your team normally answers at the front desk —
-          with structured workflows, property-specific answers, and clean escalation.
-        </p>
-
-        <div class="feature-grid">
-          <div class="feature-card">
-            <h3>Instant Answering</h3>
-            <p>Every call answered in under 3 seconds.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>Property-Specific Answers</h3>
-            <p>Trained on your hotel’s rules, policies, and operations — not generic scripts.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>ADA + Safety Handling</h3>
-            <p>ADA-aware flows and safe escalation routing for urgent issues.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>Reservation Intake</h3>
-            <p>Captures dates, nights, guests, room type, and summarizes accurately.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>Policy-Driven Calls</h3>
-            <p>Deposits, smoking, pets, weekly rates — handled consistently.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>Clean Summaries</h3>
-            <p>SMS/email summaries to staff with key details and outcomes.</p>
+          <div class="ctaRow" style="margin-top:14px;">
+            <a class="btn primary" href="/contact.html">Book a demo</a>
+            <a class="btn" href="/product.html">Explore product</a>
           </div>
         </div>
+      </aside>
+    </section>
 
-        <div class="hero-cta-row" style="margin-top:22px;">
-          <a href="/contact.html" class="btn-primary">Request a Demo</a>
-          <a href="/product.html" class="btn-secondary">View Product Details →</a>
-        </div>
-      </section>
-
-      <!-- COMPARE (SEO + internal link) -->
-      <section class="section">
-        <div class="eyebrow">Compare</div>
-        <h2 class="section-title">Call Center vs Virtual Front Desk</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          Many hotel call centers are optimized for reservation volume. NightShift is built for real operations:
-          property-specific answers, ADA-aware flows, and safe escalation.
-        </p>
-
-        <div class="feature-grid" style="margin-top:28px;">
-          <div class="feature-card">
-            <h3>Call centers = reservations</h3>
-            <p>Often limited to booking and basic FAQs, with weak handling for operational issues.</p>
-          </div>
-          <div class="feature-card">
-            <h3>NightShift = operations</h3>
-            <p>Handles late arrivals, lockouts, noise complaints, policies, and routes sensitive issues correctly.</p>
-          </div>
-          <div class="feature-card">
-            <h3>Control stays with you</h3>
-            <p>You decide scripts, policies, routing rules, and escalation contacts — not corporate scripts.</p>
-          </div>
-        </div>
-
-        <div class="feature-card notice" style="margin-top:18px;">
-          <h3 style="margin:0 0 6px;">See the full breakdown</h3>
-          <p style="margin:0;">
-            We explain the operational difference with a side-by-side comparison.
+    <!-- SECTION: What it does -->
+    <section class="section" aria-label="What it does">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> What it does</div>
+          <h2 class="h2">Your virtual front desk — 24/7</h2>
+          <p class="lead">
+            NightShift handles the calls your team normally answers at the front desk — with structured workflows,
+            property-specific answers, and clean escalation.
           </p>
-          <div class="hero-cta-row" style="margin-top:14px;">
-            <a href="/virtual-front-desk-vs-call-center.html" class="btn-primary">View Comparison Page →</a>
-            <a href="/contact.html" class="btn-secondary">Request Demo →</a>
-          </div>
         </div>
-      </section>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/product.html">Product details</a>
+        </div>
+      </div>
 
-      <!-- PACKAGES -->
-      <section class="section">
-        <div class="eyebrow">Packages</div>
-        <h2 class="section-title">Get a quote tailored to your property</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          We recommend the right package based on room count, call volume, brand requirements, and workflows.
-          You’ll receive a tailored quote quickly — with a clear plan for training, escalation, and rollout.
-        </p>
+      <div class="grid">
+        <div class="card"><div class="cardPad">
+          <h3>Instant answering</h3>
+          <p>Every call answered in under 3 seconds — no hold music, no voicemail pileups.</p>
+        </div></div>
 
-        <div class="pricing-grid">
-          <div class="price-card">
-            <div class="eyebrow">Core</div>
-            <h3 style="margin:8px 0 10px;">Essential after-hours coverage</h3>
-            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
-              Best for independent hotels & motels.
-            </p>
-            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+        <div class="card"><div class="cardPad">
+          <h3>Property-specific answers</h3>
+          <p>Trained on your hotel’s rules, policies, and operations — not generic scripts.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>ADA + safety handling</h3>
+          <p>ADA-aware flows and safety-minded routing for sensitive or urgent issues.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Reservation intake</h3>
+          <p>Captures dates, nights, guests, room type, and produces accurate summaries for staff.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Policy-driven calls</h3>
+          <p>Deposits, smoking, pets, weekly rates — handled consistently across shifts.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Clean summaries</h3>
+          <p>Clear, readable call summaries for follow-up and overnight accountability.</p>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- SECTION: Compare -->
+    <section class="section" aria-label="Compare">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Compare</div>
+          <h2 class="h2">Call center vs virtual front desk</h2>
+          <p class="lead">
+            Many hotel call centers optimize for reservation volume. NightShift is built for real operations:
+            property-specific answers, ADA-aware workflows, and safe escalation.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn" href="/virtual-front-desk-vs-call-center.html">View comparison</a>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><div class="cardPad">
+          <h3>Call centers = reservations</h3>
+          <p>Often limited to booking and basic FAQs, with weak handling for operational issues.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>NightShift = operations</h3>
+          <p>Handles late arrivals, lockouts, noise complaints, policies, and routes sensitive issues correctly.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Control stays with you</h3>
+          <p>You decide scripts, policies, routing rules, and escalation contacts — not corporate scripts.</p>
+        </div></div>
+      </div>
+
+      <div class="notice">
+        <h3>See the full breakdown</h3>
+        <p>We explain the operational difference with a side-by-side comparison.</p>
+        <div class="ctaRow">
+          <a class="btn primary" href="/virtual-front-desk-vs-call-center.html">View comparison</a>
+          <a class="btn" href="/contact.html">Book a demo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Packages -->
+    <section class="section" aria-label="Packages">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Packages</div>
+          <h2 class="h2">Get a quote tailored to your property</h2>
+          <p class="lead">
+            We recommend the right setup based on room count, call volume, brand requirements, and workflows.
+            You’ll get a clear plan for training, escalation, and rollout.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/packages.html">Compare packages</a>
+        </div>
+      </div>
+
+      <div class="pricing">
+        <div class="price">
+          <div class="priceTop">
+            <div>
+              <div class="pill">Core</div>
+              <div class="priceName">Essential after-hours coverage</div>
+              <p class="priceSub">Best for independent hotels &amp; motels.</p>
+            </div>
+          </div>
+          <div class="priceBody">
+            <ul class="bullets">
               <li>Property-specific answers</li>
               <li>Policies: pets, deposits, smoking, weekly rates</li>
               <li>Clean escalation to staff</li>
               <li>SMS/email summaries</li>
             </ul>
-            <div class="hero-cta-row" style="margin-top:16px;">
-              <a href="/contact.html" class="price-cta">Get a Quote for Core</a>
+            <div class="ctaRow" style="margin-top:14px;">
+              <a class="btn primary" href="/contact.html">Book a demo</a>
+              <a class="btn" href="/packages.html">See Core</a>
             </div>
           </div>
+        </div>
 
-          <div class="price-card price-card--outline">
-            <div class="eyebrow">Pro</div>
-            <h3 style="margin:8px 0 10px;">Franchise-ready + higher volume</h3>
-            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
-              Best for branded properties that need tighter scripting and structured flows.
-            </p>
-            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+        <div class="price">
+          <div class="priceTop">
+            <div>
+              <div class="pill" style="background: rgba(66,211,146,.10); border-color: rgba(66,211,146,.22);">Pro</div>
+              <div class="priceName">Franchise-ready + higher volume</div>
+              <p class="priceSub">For branded properties needing tighter scripting and structured flows.</p>
+            </div>
+          </div>
+          <div class="priceBody">
+            <ul class="bullets">
               <li>Brand-aligned scripting</li>
               <li>Advanced reservation intake</li>
               <li>Multi-language support</li>
               <li>Routing rules by role/time</li>
             </ul>
-            <div class="hero-cta-row" style="margin-top:16px;">
-              <a href="/contact.html" class="price-cta">Get a Quote for Pro</a>
+            <div class="ctaRow" style="margin-top:14px;">
+              <a class="btn primary" href="/contact.html">Book a demo</a>
+              <a class="btn" href="/packages.html">See Pro</a>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="feature-card notice" style="margin-top:18px;">
-          <h3 style="margin:0 0 6px;">Managing multiple hotels?</h3>
-          <p style="margin:0;">
-            NightShift Elite standardizes overnight handling across properties while preserving each hotel’s workflows.
+      <div class="notice">
+        <h3>Managing multiple hotels?</h3>
+        <p>Elite standardizes overnight handling across properties while preserving each hotel’s workflows.</p>
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book portfolio demo</a>
+          <a class="btn" href="/packages.html">Compare packages</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Trust & compliance -->
+    <section class="section" aria-label="Trust and compliance">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Trust &amp; compliance</div>
+          <h2 class="h2">Built for safety, privacy, and brand control</h2>
+          <p class="lead">
+            Designed for real hotel operations — with policy-driven handling, ADA-aware call flows, and escalation rules you control.
+            Clear guardrails and a professional guest experience.
           </p>
-          <div class="hero-cta-row" style="margin-top:14px;">
-            <a href="/contact.html" class="btn-primary">Request Portfolio Demo</a>
-            <a href="/packages.html" class="btn-secondary">Compare Packages →</a>
-          </div>
         </div>
-      </section>
-<!-- TRUST + COMPLIANCE -->
-<section class="section">
-  <div class="eyebrow">Trust & compliance</div>
-  <h2 class="section-title">Built for Safety, Privacy, and Brand Control</h2>
-  <p class="section-subtitle" style="max-width:900px;">
-    NightShift is designed for real hotel operations — with policy-driven handling, ADA-aware call flows,
-    and escalation rules you control. We prioritize clear guardrails, secure configuration, and professional guest experience.
-  </p>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn" href="/security.html">Security</a>
+          <a class="btn" href="/privacy.html">Privacy</a>
+        </div>
+      </div>
 
-  <div class="feature-grid" style="margin-top:28px;">
-    <div class="feature-card">
-      <h3>ADA-aware workflows</h3>
-      <p>
-        Service animal handling can be configured to follow ADA-aligned patterns and avoid risky or inconsistent questioning.
-      </p>
-    </div>
+      <div class="grid">
+        <div class="card"><div class="cardPad">
+          <h3>ADA-aware workflows</h3>
+          <p>Configurable handling to follow ADA-aligned patterns and reduce risky, inconsistent questioning.</p>
+        </div></div>
 
-    <div class="feature-card">
-      <h3>Privacy-first by design</h3>
-      <p>
-        NightShift is designed to avoid collecting guest payment card numbers over calls, and to keep call data focused on what’s necessary
-        for operations, logging, and follow-up.
-      </p>
-    </div>
+        <div class="card"><div class="cardPad">
+          <h3>Privacy-first by design</h3>
+          <p>Designed to avoid collecting payment card numbers over calls and keep logs focused on what’s necessary.</p>
+        </div></div>
 
-    <div class="feature-card">
-      <h3>Safe escalation</h3>
-      <p>
-        Urgent or sensitive issues can be routed to the right staff contact based on rules (time, call type, property, role) —
-        so emergencies don’t get stuck in loops.
-      </p>
-    </div>
+        <div class="card"><div class="cardPad">
+          <h3>Safe escalation</h3>
+          <p>Urgent issues routed by rules (time, call type, property, role) so emergencies don’t get stuck.</p>
+        </div></div>
 
-    <div class="feature-card">
-      <h3>Brand-controlled experience</h3>
-      <p>
-        Your tone, policies, fees, and workflows drive the conversation — not generic call center scripts.
-      </p>
-    </div>
+        <div class="card"><div class="cardPad">
+          <h3>Brand-controlled experience</h3>
+          <p>Your tone, policies, fees, and workflows drive the conversation — not generic scripts.</p>
+        </div></div>
 
-    <div class="feature-card">
-      <h3>Security-minded operations</h3>
-      <p>
-        Configuration and access controls are structured to reduce risk, limit exposure, and support reliable operations.
-        For details, see our Security page.
-      </p>
-    </div>
+        <div class="card"><div class="cardPad">
+          <h3>Security-minded operations</h3>
+          <p>Structured configuration and access controls aimed at reducing risk and keeping operations reliable.</p>
+        </div></div>
 
-    <div class="feature-card">
-      <h3>Clear policies</h3>
-      <p>
-        We publish straightforward terms, privacy, and cookies policies so owners and managers know what to expect.
-      </p>
-    </div>
-  </div>
+        <div class="card"><div class="cardPad">
+          <h3>Clear policies</h3>
+          <p>Straightforward terms and policy pages so owners and managers know what to expect.</p>
+        </div></div>
+      </div>
 
-  <!-- BADGES / POLICY LINKS -->
-  <div class="hero-card" style="margin-top:22px;">
-    <div class="eyebrow">Policies</div>
-    <h3 style="margin:8px 0 10px;">Transparency, written down</h3>
-    <p class="section-subtitle" style="margin:0; max-width:860px;">
-      Review how we handle data, cookies, and service terms. If you have enterprise requirements, ask us during your quote request.
-    </p>
-
-    <div class="badge-row" style="margin-top:14px;">
-      <span class="badge-pill">✅ ADA-aware call flows</span>
-      <span class="badge-pill">✅ Privacy-first architecture</span>
-      <span class="badge-pill">✅ Safe escalation routing</span>
-      <span class="badge-pill">✅ Policy-driven scripts</span>
-    </div>
-
-    <div class="hero-cta-row" style="margin-top:16px;">
-      <a href="/privacy.html" class="btn-secondary">Privacy →</a>
-      <a href="/cookies.html" class="btn-secondary">Cookies →</a>
-      <a href="/security.html" class="btn-secondary">Security →</a>
-      <a href="/terms.html" class="btn-secondary">Terms →</a>
-      <a href="/contact.html" class="btn-primary">Ask a Compliance Question</a>
-    </div>
-
-    <p class="section-subtitle" style="margin-top:14px; max-width:900px;">
-      <strong>Important:</strong> NightShift does not provide medical or legal advice. In emergencies, callers can be instructed to dial 911,
-      and escalation routes can notify your staff based on your preferred procedures.
-    </p>
-  </div>
-</section>
-      <!-- FINAL CTA -->
-      <section class="section">
-        <div class="eyebrow">Get started</div>
-        <h2 class="section-title">Ready to stop missing calls?</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          Tell us your room count, brand (if any), and call volume. We’ll recommend the right setup and respond fast.
+      <div class="notice">
+        <h3>Transparency, written down</h3>
+        <p>Review how we handle data, cookies, and service terms. If you have enterprise requirements, ask during your demo.</p>
+        <div class="ctaRow">
+          <a class="btn" href="/privacy.html">Privacy</a>
+          <a class="btn" href="/cookies.html">Cookies</a>
+          <a class="btn" href="/terms.html">Terms</a>
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+        </div>
+        <p class="lead" style="margin-top:12px; max-width:none;">
+          <b style="color:var(--text);">Important:</b> NightShift does not provide medical or legal advice. In emergencies, callers can be instructed to dial 911,
+          and escalation routes can notify your staff based on your preferred procedures.
         </p>
-        <div class="hero-cta-row" style="margin-top:18px;">
-          <a href="/contact.html" class="btn-primary">Get a Quote</a>
-          <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
-        </div>
-      </section>
+      </div>
+    </section>
 
-    </main>
+    <!-- FINAL CTA -->
+    <section class="section" aria-label="Final call to action">
+      <div class="notice">
+        <h3>Ready to stop missing calls?</h3>
+        <p>Tell us your room count, brand (if any), and call volume. We’ll recommend the right setup and respond fast.</p>
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="tel:4237715523">Call now</a>
+          <a class="btn" href="/dashboard/" rel="nofollow">Open dashboard</a>
+        </div>
+      </div>
+    </section>
 
     <!-- FOOTER -->
-   <footer class="site-footer">
-  <div class="footer-inner">
-    <div>© 2026 NightShift AI</div>
+    <footer class="footer" role="contentinfo">
+      <div class="footerInner">
+        <div>© 2026 NightShift AI</div>
 
-    <div class="footer-links">
-      <a href="/privacy.html">Privacy</a>
-      <a href="/cookies.html">Cookies</a>
-      <a href="/security.html">Security</a>
-      <a href="/terms.html">Terms</a>
-      <a href="/contact.html">Contact</a>
-    </div>
+        <div class="footerLinks">
+          <a href="/privacy.html">Privacy</a>
+          <a href="/cookies.html">Cookies</a>
+          <a href="/security.html">Security</a>
+          <a href="/terms.html">Terms</a>
+          <a href="/contact.html">Contact</a>
+        </div>
 
-    <!-- Social Icons -->
-    <div class="social-links">
-      <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
-        <svg viewBox="0 0 24 24"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
-      </a>
+        <div class="social" aria-label="Social links">
+          <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
+          </a>
 
-      <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
-        <svg viewBox="0 0 24 24"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
-      </a>
+          <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
+          </a>
 
-      <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
-        <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
-      </a>
-    </div>
-  </div>
-</footer>
+          <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </main>
 
-  </div>
+  <script>
+    // Mobile menu
+    (function(){
+      var btn = document.getElementById("btnMenu");
+      var menu = document.getElementById("mobileMenu");
+      if(btn && menu){
+        btn.addEventListener("click", function(){
+          menu.classList.toggle("open");
+        });
+      }
+      document.addEventListener("click", function(e){
+        if(!menu || !btn) return;
+        if(e.target.closest("#btnMenu") || e.target.closest("#mobileMenu")) return;
+        menu.classList.remove("open");
+      });
+    })();
+
+    // Theme toggle (uses same nsa_theme key as dashboard)
+    (function(){
+      function systemPrefersDark(){
+        try { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
+        catch(e){ return false; }
+      }
+      function resolveTheme(t){
+        if(t === "dark") return "dark";
+        if(t === "light") return "light";
+        return systemPrefersDark() ? "dark" : "light";
+      }
+      function applyTheme(t){
+        var resolved = resolveTheme(t);
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }
+      var btn = document.getElementById("btnTheme");
+      if(btn){
+        btn.addEventListener("click", function(){
+          var now = "system";
+          try{ now = localStorage.getItem("nsa_theme") || "system"; }catch(e){}
+          var next = resolveTheme(now) === "dark" ? "light" : "dark";
+          try{ localStorage.setItem("nsa_theme", next); }catch(e){}
+          applyTheme(next);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
