@@ -943,6 +943,16 @@
       border-color: rgba(110,168,255,.35);
       box-shadow: 0 0 0 3px rgba(110,168,255,.10);
     }
+
+    /* Escalations are not enabled yet (Option B) */
+    .segBtn.disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      pointer-events: none;
+      filter: grayscale(.15);
+    }
+    .segBtn.disabled .countBadge{ opacity: .75; }
+
     .countBadge{
       font-size: 11px;
       font-weight: 950;
@@ -1144,8 +1154,7 @@
       <div>
         <h1>Elite operations overview</h1>
         <p>
-          What Elite needs (and what your site advertises): instant call answering, reservation intake, policy-driven handling,
-          clean summaries, and safe escalation — standardized across properties.
+          Live operations view for calls and reservation intake — filter by date range, search, refresh, and export activity.
         </p>
       </div>
 
@@ -1252,7 +1261,7 @@
             </div>
 
             <div class="hint" style="margin-top:12px;">
-              These mini charts are purely to make the demo video feel “alive” — they reinforce that calls &amp; bookings are being tracked across the selected window.
+              Trend lines show calls and booking activity across the selected window.
             </div>
           </div>
         </section>
@@ -1284,9 +1293,11 @@
                   <i class="fa-solid fa-phone"></i> Calls
                   <span class="countBadge zero" id="countCalls">0</span>
                 </button>
-                <button class="segBtn" type="button" data-filter="escalation" id="filterEscalations">
+
+                <!-- Option B: visible but disabled -->
+                <button class="segBtn disabled" type="button" data-filter="escalation" id="filterEscalations" aria-disabled="true" title="Coming soon">
                   <i class="fa-solid fa-shield-halved"></i> Escalations
-                  <span class="countBadge zero" id="countEscalations">0</span>
+                  <span class="countBadge zero" id="countEscalations">—</span>
                 </button>
               </div>
 
@@ -1305,7 +1316,7 @@
                 <div style="max-width: 560px;">
                   <div class="icon"><i class="fa-regular fa-calendar-xmark"></i></div>
                   <h4>No activity in the selected window</h4>
-                  <p>When calls, booking intake, or escalation events are logged, they’ll appear here automatically.</p>
+                  <p>When calls or booking intake are logged, they’ll appear here automatically.</p>
                 </div>
               </div>
             </div>
@@ -1320,6 +1331,7 @@
                       <th style="width:180px;">Guest/Caller</th>
                       <th style="width:110px;">Arrival</th>
                       <th style="width:60px;">N</th>
+                      <th style="width:110px;">Rate</th>
                       <th style="width:110px;">Total</th>
                       <th style="width:110px;">Sentiment</th>
                       <th>Summary</th>
@@ -1435,8 +1447,8 @@
               <div class="todoItem">
                 <i class="fa-solid fa-shield-halved"></i>
                 <div>
-                  <b>Show escalation handling</b><br/>
-                  Flip to “Escalations” filter and explain routing + safety.
+                  <b>Explain escalation roadmap</b><br/>
+                  Mention escalation routing is a planned upgrade (triage rules + contacts) and will appear here once enabled.
                 </div>
               </div>
             </div>
@@ -1450,19 +1462,18 @@
               <i class="fa-solid fa-shield-halved" style="color: rgba(255,204,102,.95);"></i>
               Escalations
             </h3>
-            <span class="badge" id="escalationBadge">—</span>
+            <span class="badge" id="escalationBadge">Coming soon</span>
           </div>
           <div class="cardBody">
             <div class="hint">
-              This area is for triage. Your agent should flag urgent/sensitive calls and route them to the right person
-              based on rules (time, call type, property, role).
+              Escalations are not enabled in this Elite build yet. This panel becomes active once escalation events are logged and routed.
             </div>
 
             <div id="escalationsEmpty" class="emptyState" style="margin-top:10px;">
               <div style="max-width: 520px;">
                 <div class="icon"><i class="fa-regular fa-circle-check"></i></div>
-                <h4>No escalations detected</h4>
-                <p>When escalation events are logged, they’ll be visible via the feed filter.</p>
+                <h4>Escalations not enabled</h4>
+                <p>This area will populate once escalation logging + routing is turned on.</p>
               </div>
             </div>
           </div>
@@ -1638,7 +1649,8 @@
         if(typeCell.includes("urgent")) return "escalation";
         if(typeCell.includes("call")) return "call";
 
-        const summaryCell = (tds[7]?.textContent || "").toLowerCase();
+        // Summary column is now index 8 (because we inserted Rate at index 5)
+        const summaryCell = (tds[8]?.textContent || "").toLowerCase();
         if(summaryCell.includes("escalat") || summaryCell.includes("urgent") || summaryCell.includes("911")) return "escalation";
 
         return typeCell || "call";
@@ -1701,12 +1713,18 @@
         setCount(countAll, c.total);
         setCount(countBookings, c.booking);
         setCount(countCalls, c.call);
-        setCount(countEscalations, c.escalation);
+
+        // Escalations not enabled yet (Option B)
+        if(countEscalations){
+          countEscalations.textContent = "—";
+          countEscalations.classList.add("zero");
+        }
 
         if(feedMeta) feedMeta.textContent = c.total + " items";
 
-        if(escalationBadge) escalationBadge.textContent = c.escalation ? (c.escalation + " flagged") : "None";
-        if(escalationsEmpty) escalationsEmpty.style.display = c.escalation ? "none" : "";
+        // Keep escalation panel honest (do not overwrite)
+        if(escalationBadge) escalationBadge.textContent = "Coming soon";
+        if(escalationsEmpty) escalationsEmpty.style.display = "";
       }
 
       function setActive(btn){
