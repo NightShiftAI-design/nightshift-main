@@ -46,7 +46,10 @@
 
     // yyyy-mm-dd
     const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (ymd) return new Date(`${s}T00:00:00`);
+    if (ymd) {
+      const d = new Date(`${s}T00:00:00`);
+      return isNaN(d.getTime()) ? null : d;
+    }
 
     // ✅ Supabase timestamp with space -> convert to ISO
     // "2026-01-11 21:30:30.809526+00" -> "2026-01-11T21:30:30.809526Z"
@@ -552,6 +555,16 @@
   }
 
   // ============================================================
+  // ✅ Latest table visibility (no MutationObserver dependency)
+  // ============================================================
+  function setLatestReservationsVisibility(hasRows) {
+    const empty = $("latestEmpty");
+    const wrap  = $("latestTableWrap");
+    if (empty) empty.style.display = hasRows ? "none" : "";
+    if (wrap)  wrap.style.display  = hasRows ? "" : "none";
+  }
+
+  // ============================================================
   // Feed table (latest reservations / activity)
   // ============================================================
   function renderFeed(rows) {
@@ -559,7 +572,10 @@
     if ($("feedMeta")) $("feedMeta").textContent = `${rows.length} items`;
 
     const tbody = $("feedTbody");
-    if (!tbody) return;
+    if (!tbody) {
+      setLatestReservationsVisibility(false);
+      return;
+    }
 
     tbody.innerHTML = "";
 
@@ -584,6 +600,8 @@
       `;
       tbody.appendChild(tr);
     }
+
+    setLatestReservationsVisibility(tbody.children.length > 0);
   }
 
   function exportCSV(rows) {
@@ -626,7 +644,6 @@
 
   function getCheckoutDate(arrivalDate, nights) {
     if (!arrivalDate || !Number.isFinite(nights)) return null;
-    // checkout = arrival + nights (hotel convention)
     return addDays(arrivalDate, Math.max(0, Math.round(nights)));
   }
 
@@ -646,11 +663,9 @@
       const chk = getCheckoutDate(arr, nights);
 
       if (arr && sameYMD(arr, dayStart)) arrivals++;
-
       if (chk && sameYMD(chk, dayStart)) departures++;
 
       if (arr && chk) {
-        // stayover if: arrived before today AND checkout after today
         if (arr < dayStart && chk > dayEnd) stayovers++;
       }
     }
@@ -682,9 +697,10 @@
     s?.addEventListener("click", () => { segmentMode = "stayovers"; setActiveTab("tabStayovers"); renderReservationsPanel(); });
     r?.addEventListener("click", () => { segmentMode = "requests"; setActiveTab("tabRequests"); renderReservationsPanel(); });
 
-    // Hook "View all reservations"
+    // Hook "View all reservations" link
     const btnViewAll = document.querySelector('[aria-label="View all reservations"]');
-    btnViewAll?.addEventListener("click", () => {
+    btnViewAll?.addEventListener("click", (e) => {
+      e.preventDefault();
       showAllBookings = !showAllBookings;
       toast(showAllBookings ? "Showing all reservations (arrival-based)." : "Showing latest activity.");
       renderAll();
@@ -702,7 +718,9 @@
     const targetDay = startOfDay(target);
 
     if (todayLabel) {
-      todayLabel.textContent = targetDay.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+      todayLabel.textContent = targetDay.toLocaleDateString(undefined, {
+        weekday:"short", month:"short", day:"numeric", year:"numeric"
+      });
     }
 
     const bookings = filteredRows.filter(r => r.kind === "booking");
