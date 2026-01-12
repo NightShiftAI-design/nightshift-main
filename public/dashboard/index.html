@@ -1617,39 +1617,6 @@
           </div>
         </section>
 
-        <!-- Trends + Ops insights (keep your existing IDs/canvases) -->
-        <section class="card" aria-label="Performance insights">
-          <div class="cardHead">
-            <h3>
-              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:10px; color: rgba(66,211,146,.95);"></i>
-              Performance insights
-            </h3>
-            <span style="color:var(--muted); font-size:12px;">triage • by day</span>
-          </div>
-
-          <div class="cardBody">
-            <div style="display:grid; grid-template-columns: 1fr; gap: 12px;">
-              <div class="card" style="padding:12px;">
-                <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Ops insights</div>
-                <div id="opsInsights" style="color:var(--muted); white-space:pre-wrap; margin-top: 8px;">—</div>
-              </div>
-
-              <div class="charts">
-                <div class="card" style="padding:12px;">
-                  <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Calls</div>
-                  <canvas id="chartCalls" width="600" height="200"></canvas>
-                </div>
-                <div class="card" style="padding:12px;">
-                  <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Bookings</div>
-                  <canvas id="chartBookings" width="600" height="200"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
       <!-- RIGHT SIDEBAR COLUMN (Booking-style) -->
       <aside style="display:flex; flex-direction:column; gap: 14px; min-width:0;">
 
@@ -1755,7 +1722,38 @@
       </aside>
     </div>
   </div>
+ <!-- Trends + Ops insights (keep your existing IDs/canvases) -->
+        <section class="card" aria-label="Performance insights">
+          <div class="cardHead">
+            <h3>
+              <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:10px; color: rgba(66,211,146,.95);"></i>
+              Performance insights
+            </h3>
+            <span style="color:var(--muted); font-size:12px;">triage • by day</span>
+          </div>
 
+          <div class="cardBody">
+            <div style="display:grid; grid-template-columns: 1fr; gap: 12px;">
+              <div class="card" style="padding:12px;">
+                <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Ops insights</div>
+                <div id="opsInsights" style="color:var(--muted); white-space:pre-wrap; margin-top: 8px;">—</div>
+              </div>
+
+              <div class="charts">
+                <div class="card" style="padding:12px;">
+                  <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Calls</div>
+                  <canvas id="chartCalls" width="600" height="200"></canvas>
+                </div>
+                <div class="card" style="padding:12px;">
+                  <div style="font-weight:900; font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase;">Bookings</div>
+                  <canvas id="chartBookings" width="600" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
   <!-- Toast -->
   <div id="toast"></div>
 
