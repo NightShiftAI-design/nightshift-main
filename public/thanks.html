@@ -8,6 +8,7 @@
   <!-- FAVICONS -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
@@ -27,9 +28,7 @@
       padding: 28px;
       box-shadow: 0 40px 110px rgba(0,0,0,.75);
       border: 1px solid rgba(99,102,241,.25);
-      text-align: left;
     }
-
     .pill{
       display:inline-flex;
       align-items:center;
@@ -49,91 +48,76 @@
       background: #22c55e;
       box-shadow: 0 0 20px rgba(34,197,94,.65);
     }
-
     .mini{
       margin-top: 14px;
       font-size: 13px;
       color: rgba(234,240,255,.75);
       line-height: 1.6;
-      text-align: center;
     }
-
+    .tiny-note{
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(234,240,255,.62);
+      line-height: 1.55;
+    }
     .two-actions{
       display:flex;
       justify-content:center;
       gap:12px;
       flex-wrap: wrap;
-      margin-top:  14px;
+      margin-top: 18px;
     }
-
     .list{
       text-align:left;
       max-width: 640px;
-      margin: 10px auto 0;
+      margin: 14px auto 0;
       padding-left: 18px;
       color: rgba(234,240,255,.78);
       line-height: 1.75;
       font-size: 14px;
     }
-
     .next-step{
-      margin-top: 12px;
+      margin-top: 14px;
       background: rgba(99,102,241,.10);
       border: 1px solid rgba(99,102,241,.20);
       border-radius: 18px;
-      padding: 16px;
+      padding: 18px;
+      text-align: left;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .next-step h3{
-      margin: 0 0 6px;
+      margin: 0 0 8px;
       font-size: 14px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(234,240,255,.90);
-      font-weight: 900;
-    }
-    .next-step p{
-      margin: 0;
-      color: rgba(234,240,255,.78);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .link-card{
-      margin-top: 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(2,6,23,.55);
-      border: 1px solid rgba(255,255,255,.10);
-      flex-wrap: wrap;
-    }
-    .link-card .left{
-      text-align:left;
-      min-width: 240px;
-    }
-    .link-card .label{
-      font-size: 12px;
       letter-spacing: .10em;
       text-transform: uppercase;
       color: rgba(165,180,252,.95);
       font-weight: 900;
-      margin-bottom: 4px;
     }
-    .link-card .url{
+    .next-step p{
+      margin: 0;
+      color: rgba(234,240,255,.80);
       font-size: 14px;
-      color: rgba(234,240,255,.88);
-      word-break: break-all;
-      opacity: .9;
+      line-height: 1.6;
     }
-    .hint{
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(234,240,255,.70);
-      line-height: 1.55;
-      text-align:center;
+    .link-row{
+      margin-top: 12px;
+      display:flex;
+      gap:12px;
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content: flex-start;
+    }
+    .urlbox{
+      flex: 1 1 320px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(2,6,23,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(234,240,255,.88);
+      font-size: 13px;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -170,59 +154,55 @@
 
           <span class="pill"><span class="dot"></span> REQUEST RECEIVED</span>
 
-          <h1 class="section-title" style="margin-top:14px;">Thanks — We’ve Got Your Request ✅</h1>
+          <h1 class="section-title" style="margin-top:14px;">Thanks — Your Request Was Submitted ✅</h1>
 
           <p class="section-subtitle" style="max-width:760px; margin: 10px auto 0;">
-            Please check your inbox for a quick next step. We’ll email you a link to our configuration form so we can tailor
-            your setup and provide an accurate quote.
+            Next step: please complete our short configuration form so we can tailor setup to your property
+            and prepare an accurate quote.
           </p>
 
           <div class="thanks-card">
-            <div class="eyebrow" style="text-align:center;">Next steps</div>
+            <div class="eyebrow">Next Step (Required)</div>
 
             <div class="next-step">
-              <h3>Step 1 (Quick)</h3>
+              <h3>Complete the Configuration Form</h3>
               <p>
-                Open the email we just sent and complete the <strong>Custom Configuration & Onboarding Form</strong>.
-                It takes ~3–5 minutes and helps us tailor your policies, reservation handling, and escalation contacts.
+                This form tells us your after-hours workflow, reservation handling, and escalation contacts.
+                Once it’s submitted, we’ll review and reach out with your quote and next steps.
               </p>
 
-              <div class="two-actions" style="margin-top:12px;">
-                <a href="https://forms.gle/dXoxBWTMSgJkGMtZ6" class="btn-primary" target="_blank" rel="noopener">
+              <div class="link-row">
+                <a class="btn-primary" href="https://forms.gle/dXoxBWTMSgJkGMtZ6" target="_blank" rel="noopener">
                   Open Configuration Form →
                 </a>
-                <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
+                <a class="btn-secondary" href="tel:4237715523">📞 Call Now</a>
               </div>
 
-              <div class="link-card" aria-label="Configuration form link">
-                <div class="left">
-                  <div class="label">Configuration Form Link</div>
-                  <div class="url">https://forms.gle/dXoxBWTMSgJkGMtZ6</div>
-                </div>
-                <a href="https://forms.gle/dXoxBWTMSgJkGMtZ6" class="btn-secondary" target="_blank" rel="noopener">
-                  Open →
-                </a>
+              <div class="urlbox" aria-label="Configuration form link">
+                https://forms.gle/dXoxBWTMSgJkGMtZ6
               </div>
 
-              <div class="hint">
-                Didn’t see the email? Check spam/promotions or use the button above. If you still need help, call us anytime.
+              <div class="tiny-note">
+                <strong>Note:</strong> We do not automatically email this link yet. Please use the button above to open and submit the form.
+                <br/>
+                <span style="opacity:.95;">To receive a quote, the configuration form must be submitted.</span>
               </div>
             </div>
 
-            <ul class="list" style="margin-top:14px;">
-              <li>We review your details and confirm your coverage needs.</li>
-              <li>We recommend the right package (Core / Pro / Elite) based on volume + policies.</li>
-              <li>We send a tailored quote and next steps for install/onboarding.</li>
+            <ul class="list">
+              <li>We review your configuration form and confirm coverage needs.</li>
+              <li>We recommend the right package (Core / Pro / Elite) based on call volume + policies.</li>
+              <li>We reach out with a tailored quote and next steps.</li>
             </ul>
 
-            <div class="two-actions" style="margin-top:18px;">
-              <a href="/product.html" class="btn-secondary">Explore Product →</a>
+            <div class="two-actions">
               <a href="/packages.html" class="btn-secondary">See Packages →</a>
+              <a href="/product.html" class="btn-secondary">Explore Product →</a>
               <a href="/index.html" class="btn-secondary">Back to Home</a>
             </div>
 
             <div class="mini">
-              Typical install is under 10 minutes once details are confirmed.
+              Typical setup is under 10 minutes once details are confirmed.
             </div>
           </div>
 
@@ -271,6 +251,7 @@
           </a>
 
         </div>
+
       </div>
     </footer>
 
