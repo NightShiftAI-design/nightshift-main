@@ -1,5 +1,6 @@
-// public/dashboard/app.js  — v9.2 (FIX: activity feed renders + theme toggle restored)
-// NOTE: Auth, fetching, filtering, KPIs, charts, export, search, logout remain untouched.
+// public/dashboard/app.js  — v9.3 (ADD: property switcher + property_id filtering)
+// NOTE: Auth, fetching, KPIs, charts, export, search, logout remain intact.
+// Adds: property dropdown populated from data + filter applied across KPIs/charts/feed/export.
 
 (() => {
   // ============================================================
@@ -19,6 +20,9 @@
 
   // Theme
   const THEME_STORAGE_KEY = "nsa_theme"; // "light" | "dark" | "system"
+
+  // ✅ Property filter (uuid)
+  const PROPERTY_STORAGE_KEY = "nsa_property"; // "__all__" or uuid string
 
   // ============================================================
   // Helpers
@@ -93,12 +97,85 @@
     toast._t = setTimeout(() => el.classList.remove("show"), 2200);
   }
 
-  function fmtDuration(seconds) {
-    const s = Number(seconds);
-    if (!Number.isFinite(s) || s < 0) return "—";
-    const m = Math.floor(s / 60);
-    const r = Math.round(s % 60);
-    return m > 0 ? `${m}m ${String(r).padStart(2, "0")}s` : `${r}s`;
+  // ============================================================
+  // ✅ Property switcher helpers
+  // ============================================================
+  function getStoredProperty() {
+    try { return localStorage.getItem(PROPERTY_STORAGE_KEY) || "__all__"; }
+    catch { return "__all__"; }
+  }
+  function storeProperty(v) {
+    try { localStorage.setItem(PROPERTY_STORAGE_KEY, v); } catch {}
+  }
+
+  function getSelectedProperty() {
+    const sel = $("propertySelect");
+    const v = sel?.value || getStoredProperty();
+    return v || "__all__";
+  }
+
+  function shortUuid(u) {
+    const s = safeStr(u);
+    if (!s || s === "__all__") return "All properties";
+    // show: first 8 chars (safe, looks like Booking extranet internal ids)
+    return s.length > 8 ? `${s.slice(0, 8)}…` : s;
+  }
+
+  function setPropertyBadgeUI() {
+    // optional: if you want to reflect selection somewhere else later
+    // right now, keep it minimal and non-breaking
+  }
+
+  function populatePropertySelect(rows) {
+    const sel = $("propertySelect");
+    if (!sel) return;
+
+    const current = getStoredProperty();
+
+    // Gather uuids (from normalized rows)
+    const set = new Set();
+    for (const r of rows) {
+      const pid = r?.property_id;
+      if (pid && pid !== "__all__") set.add(String(pid));
+    }
+
+    const ids = Array.from(set).sort();
+
+    // Keep existing selection if possible
+    const prev = sel.value || current || "__all__";
+
+    // Rebuild options
+    sel.innerHTML = "";
+    const optAll = document.createElement("option");
+    optAll.value = "__all__";
+    optAll.textContent = "All properties";
+    sel.appendChild(optAll);
+
+    for (const id of ids) {
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = shortUuid(id);
+      sel.appendChild(opt);
+    }
+
+    // Restore selection (fallback to __all__)
+    sel.value = ids.includes(prev) ? prev : (prev === "__all__" ? "__all__" : "__all__");
+    storeProperty(sel.value);
+  }
+
+  function initPropertyControl() {
+    const sel = $("propertySelect");
+    if (!sel) return;
+
+    // hydrate from storage early (options will be populated after data loads)
+    sel.value = getStoredProperty() || "__all__";
+
+    sel.addEventListener("change", () => {
+      storeProperty(sel.value || "__all__");
+      // No re-fetch needed; just re-filter + re-render
+      renderAll();
+      toast(sel.value === "__all__" ? "Showing all properties." : `Filtered: ${shortUuid(sel.value)}`);
+    });
   }
 
   // ============================================================
@@ -270,7 +347,6 @@
     $("btnLogout").onclick = async () => {
       toast("Signing out…");
       await hardSignOut();
-      // ✅ You said this now redirects to homepage (keep your existing change)
       location.href = "/";
     };
 
@@ -280,7 +356,6 @@
     });
   }
 
-  // ✅ UPDATED: clear feedback + redirect to "Check email" page after sending
   async function sendMagicLink() {
     const emailEl = $("authEmail");
     const btnSend = $("btnSendLink");
@@ -292,7 +367,6 @@
       return;
     }
 
-    // prevent double clicks / ambiguity
     const prevSendText = btnSend?.textContent || "Send magic link";
     const prevResendText = btnResend?.textContent || "Resend";
     if (btnSend) { btnSend.disabled = true; btnSend.textContent = "Sending…"; }
@@ -309,19 +383,16 @@
         return;
       }
 
-      // ✅ Redirect to a dedicated confirmation page
-      // (No auth/session changes; just UI clarity)
       const target = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
       location.href = target;
     } finally {
-      // if something fails BEFORE redirect, restore buttons
       if (btnSend) { btnSend.disabled = false; btnSend.textContent = prevSendText; }
       if (btnResend) { btnResend.disabled = false; btnResend.textContent = prevResendText; }
     }
   }
 
   // ============================================================
-  // Controls (UNCHANGED)
+  // Controls
   // ============================================================
   function initControls() {
     $("rangeSelect").onchange = () => loadAndRender();
@@ -331,6 +402,9 @@
     $("btnExport").onclick = () => exportCSV(filteredRows);
 
     $("searchInput").oninput = () => { applyFilters(); renderAll(); };
+
+    // ✅ NEW
+    initPropertyControl();
   }
 
   function getSelectedRange() {
@@ -359,10 +433,14 @@
   }
 
   // ============================================================
-  // Fetch + Normalize (UNCHANGED)
+  // Fetch + Normalize
   // ============================================================
   async function fetchTable(table) {
-    const { data, error } = await supabaseClient.from(table).select("*").order("created_at", { ascending: false }).limit(3000);
+    const { data, error } = await supabaseClient
+      .from(table)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(3000);
     if (error) throw error;
     return data || [];
   }
@@ -377,6 +455,8 @@
       totalDue: toNum(r.total_due),
       sentiment: "",
       summary: `Reservation for ${r.guest_name} • Arrive ${r.arrival_date}`,
+      // ✅ NEW: bring property_id up to top-level (uuid)
+      property_id: safeStr(r.property_id),
       raw: r
     };
   }
@@ -393,28 +473,39 @@
       sentiment: safeStr(r.sentiment),
       duration: toNum(r.duration_seconds),
       summary: safeStr(r.summary),
+      // ✅ NEW: bring property_id up to top-level (uuid)
+      property_id: safeStr(r.property_id),
       raw: r
     };
   }
 
   // ============================================================
-  // State (UNCHANGED)
+  // State
   // ============================================================
   let allRows = [];
   let filteredRows = [];
   let lastRange = null;
 
   // ============================================================
-  // Filters (UNCHANGED)
+  // Filters (✅ now includes property filter)
   // ============================================================
   function applyFilters() {
     const range = lastRange;
     const q = $("searchInput").value.toLowerCase().trim();
+    const selectedProperty = getSelectedProperty(); // "__all__" or uuid
 
     filteredRows = allRows.filter(r => {
+      // property filter
+      if (selectedProperty !== "__all__") {
+        if (safeStr(r.property_id) !== safeStr(selectedProperty)) return false;
+      }
+
+      // time filter
       if (r.when) {
         if (r.when < range.start || r.when > range.end) return false;
       }
+
+      // search filter
       if (!q) return true;
       const hay = JSON.stringify(r).toLowerCase();
       return hay.includes(q);
@@ -422,7 +513,7 @@
   }
 
   // ============================================================
-  // KPIs + Ops (UNCHANGED)
+  // KPIs + Ops
   // ============================================================
   function computeKPIs(rows) {
     const calls = rows.filter(r => r.kind === "call");
@@ -470,7 +561,7 @@
   }
 
   // ============================================================
-  // Charts (UNCHANGED)
+  // Charts
   // ============================================================
   function groupByDay(rows, kind) {
     const map = {};
@@ -510,7 +601,7 @@
   }
 
   // ============================================================
-  // Activity Feed — FIXED
+  // Activity Feed
   // ============================================================
   function renderFeed(rows) {
     $("badgeCount").textContent = fmtInt(rows.length);
@@ -530,7 +621,7 @@
           <td>${Number.isFinite(r.nights) ? r.nights : "—"}</td>
           <td>${Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—"}</td>
           <td>${escHtml(r.sentiment || "—")}</td>
-          <td>${escHtml(r.summary || "—")}</td>
+          <td class="col-summary"><div class="summaryClamp">${escHtml(r.summary || "—")}</div></td>
         `;
         tbody.appendChild(tr);
       }
@@ -541,11 +632,13 @@
   function exportCSV(rows) {
     if (!rows.length) { toast("Nothing to export."); return; }
 
-    const cols = ["kind", "time", "guest", "arrival", "nights", "total", "sentiment", "summary"];
+    // ✅ include property_id in export
+    const cols = ["property_id","kind","time","guest","arrival","nights","total","sentiment","summary"];
     const lines = [cols.join(",")];
 
     for (const r of rows) {
       const vals = [
+        r.property_id || "",
         r.kind,
         r.when ? r.when.toISOString() : "",
         r.guest, r.arrival,
@@ -584,7 +677,7 @@
   }
 
   // ============================================================
-  // Load (UNCHANGED)
+  // Load
   // ============================================================
   async function loadAndRender() {
     if (!(await ensureAuthGate())) return;
@@ -602,6 +695,9 @@
         ...resv.map(normalizeReservation),
         ...calls.map(normalizeCall)
       ];
+
+      // ✅ NEW: populate property dropdown from fetched data
+      populatePropertySelect(allRows);
 
       renderAll();
       toast("Dashboard refreshed.");
