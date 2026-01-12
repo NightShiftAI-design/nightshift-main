@@ -2,558 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NightShift AI • Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NightShift AI — Dashboard</title>
 
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="color-scheme" content="dark light" />
-
-  <!-- Supabase JS -->
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Your config + app logic -->
-  <script defer src="/dashboard/config.js"></script>
-  <script defer src="/dashboard/app.js"></script>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/assets/site.css?v=1000" />
 
   <style>
-    :root{
-      --bg: #0b1020;
-      --panel: rgba(255,255,255,0.06);
-      --panel2: rgba(255,255,255,0.08);
-      --border: rgba(255,255,255,0.10);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.62);
-      --accent: #6ea8ff;
-      --good: #42d392;
-      --warn: #ffcc66;
-      --bad: #ff6b6b;
-      --shadow: 0 12px 40px rgba(0,0,0,0.45);
-      --radius: 18px;
-      --radius2: 14px;
-      --ring: 0 0 0 3px rgba(110,168,255,0.20);
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    }
+    .dash{ max-width:1200px; margin:0 auto; padding:24px 16px; }
+    .shell{ display:grid; grid-template-columns: 260px 1fr; gap:18px; }
+    @media (max-width: 980px){ .shell{ grid-template-columns: 1fr; } }
 
-    /* ============================================================
-       THEME BRIDGE (v9.2 uses html.dark class)
-       - Default visuals remain DARK (as before)
-       - When html does NOT have .dark => LIGHT vars apply
-       ============================================================ */
-    html:not(.dark){
-      --bg: #f6f7fb;
-      --panel: rgba(10,15,25,0.04);
-      --panel2: rgba(10,15,25,0.06);
-      --border: rgba(10,15,25,0.10);
-      --text: rgba(10,15,25,0.92);
-      --muted: rgba(10,15,25,0.62);
-      --shadow: 0 12px 30px rgba(10,15,25,0.10);
+    .side{
+      background: linear-gradient(180deg, rgba(11,16,38,.92), rgba(2,6,23,.95));
+      border: 1px solid rgba(99,102,241,.25);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
     }
+    .brand{ display:flex; gap:10px; align-items:center; padding:8px 10px 14px; }
+    .logo{ width:36px; height:36px; border-radius:12px; background:rgba(99,102,241,.18); display:flex; align-items:center; justify-content:center; font-weight:900; color:#f8fafc;}
+    .brandTitle{ font-weight:950; color:#f8fafc; line-height:1.1; }
+    .brandSub{ font-size:12px; color:rgba(234,240,255,.65); }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: var(--font);
-      background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(110,168,255,0.18), transparent 60%),
-        radial-gradient(900px 600px at 85% 20%, rgba(66,211,146,0.10), transparent 55%),
-        radial-gradient(900px 700px at 50% 110%, rgba(255,204,102,0.08), transparent 55%),
-        var(--bg);
-      color: var(--text);
+    .nav{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: 12px;
+      color: rgba(234,240,255,.86); text-decoration:none; font-weight:900;
+      border: 1px solid rgba(255,255,255,0);
     }
+    .nav:hover{ background: rgba(99,102,241,.12); border-color: rgba(99,102,241,.20); }
+    .nav.active{ background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28)); border-color: rgba(46,107,255,.30); }
 
-    /* Login overlay */
-    .overlay{
-      position: fixed; inset: 0;
-      display: none;
-      align-items: center; justify-content: center;
-      padding: 22px;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(10px);
-      z-index: 999;
-    }
-    html:not(.dark) .overlay{ background: rgba(10,15,25,0.22); }
+    .acct{ margin-top:12px; padding:10px 12px; border-radius:14px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
+    .acct .email{ font-weight:900; color:#f8fafc; font-size:13px; }
+    .acct .meta{ color:rgba(234,240,255,.65); font-size:12px; margin-top:6px; }
 
-    .loginCard{
-      width: min(520px, 100%);
-      border-radius: 22px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .loginHead{
-      padding: 18px 18px 12px;
-      border-bottom: 1px solid var(--border);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .loginHead b{ font-size: 14px; }
-    .loginHead span{ font-size: 12px; color: var(--muted); }
-    .loginBody{ padding: 18px; }
-    .loginBody p{ margin:0 0 14px; color: var(--muted); font-size: 13px; line-height:1.5; }
-    .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 14px; }
-    .field label{ font-size: 12px; color: var(--muted); }
-    .field input{
-      width:100%;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      padding: 12px;
-      border-radius: 14px;
-      outline:none;
-      font-size: 14px;
-    }
-    html:not(.dark) .field input{
-      border-color: rgba(10,15,25,0.12);
-      background: rgba(10,15,25,0.03);
-    }
-    .field input:focus{ box-shadow: var(--ring); }
-    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .spacer{ flex:1; }
     .btn{
-      border: 1px solid var(--border);
-      background: var(--panel);
-      color: var(--text);
-      padding: 11px 12px;
-      border-radius: 14px;
+      width:100%;
+      margin-top:10px;
+      border-radius:14px; padding:10px 12px; font-weight:950;
+      border:1px solid rgba(99,102,241,.25);
+      background: rgba(2,6,23,.7);
+      color: rgba(234,240,255,.92);
       cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-      font-size: 13px;
-      user-select:none;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
     }
-    .btn:hover{ transform: translateY(-1px); background: var(--panel2); border-color: rgba(110,168,255,0.35); }
-    .btn:focus{ outline:none; box-shadow: var(--ring); }
-    .btn.primary{
-      background: linear-gradient(180deg, rgba(110,168,255,0.28), rgba(110,168,255,0.16));
-      border-color: rgba(110,168,255,0.45);
-    }
-    .error{ margin-top: 10px; color: #ffb4b4; font-size: 12px; display:none; }
-    html:not(.dark) .error{ color: #b00020; }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn.primary{ background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(46,107,255,.28)); border-color: rgba(46,107,255,.30); }
 
-    /* Layout */
-    .wrap{ display:grid; grid-template-columns: 300px 1fr; min-height:100vh; gap: 0; }
-    .sidebar{
-      position:sticky; top:0; height:100vh;
-      padding:18px;
-      border-right: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      backdrop-filter: blur(10px);
+    .main{
+      background: linear-gradient(180deg, rgba(11,16,38,.55), rgba(2,6,23,.65));
+      border: 1px solid rgba(99,102,241,.18);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 20px 70px rgba(0,0,0,.45);
+      min-height: 560px;
+    }
+
+    .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+    .title{ margin:8px 0 0; font-size:28px; font-weight:950; color:#f8fafc; }
+    .sub{ margin:8px 0 0; color:rgba(234,240,255,.70); max-width:900px; }
+
+    .kpis{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-top:14px; }
+    @media (max-width: 980px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
+    .kpi{
+      border-radius: 16px;
+      border: 1px solid rgba(99,102,241,.18);
+      background: rgba(2,6,23,.55);
+      padding: 14px;
+    }
+    .kpi .label{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color: rgba(165,180,252,.95); font-weight:900; }
+    .kpi .val{ font-size:26px; font-weight:950; margin-top:6px; color:#f8fafc; }
+    .kpi .mini{ font-size:12px; color: rgba(234,240,255,.65); margin-top:6px; }
+
+    .filters{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .input{
+      border-radius: 14px;
+      border: 1px solid rgba(99,102,241,.25);
+      background: rgba(2,6,23,.7);
+      color: #f8fafc;
+      padding: 10px 12px;
+      outline: none;
+      min-width: 220px;
+    }
+
+    table{ width:100%; border-collapse: collapse; margin-top:14px; }
+    th, td{ text-align:left; padding:12px 10px; border-bottom: 1px solid rgba(99,102,241,.14); color: rgba(234,240,255,.84); font-size: 14px; }
+    th{ font-size:12px; text-transform:uppercase; letter-spacing:.12em; color: rgba(165,180,252,.95); }
+    tr:hover{ background: rgba(99,102,241,.06); }
+    .tag{ display:inline-flex; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:900; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.07); }
+    .tag.red{ background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.25); }
+    .tag.green{ background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.25); }
+
+    /* Drawer */
+    .drawer{ position:fixed; inset:0; display:none; }
+    .drawer.show{ display:block; }
+    .drawer .bg{ position:absolute; inset:0; background: rgba(0,0,0,.55); }
+    .drawer .panel{
+      position:absolute; right:0; top:0; height:100%; width:min(560px, 92vw);
+      background: linear-gradient(180deg, rgba(11,16,38,.96), rgba(2,6,23,.98));
+      border-left: 1px solid rgba(99,102,241,.22);
+      padding: 18px;
       overflow:auto;
     }
-    .main{ padding: 18px 18px 28px; min-width: 0; }
-
-    /* Brand */
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      padding:12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      text-decoration:none;
-      color: inherit;
-    }
-    .brand:hover{
-      background: var(--panel2);
-      border-color: rgba(110,168,255,0.35);
-      transform: translateY(-1px);
-    }
-    .brand:focus{ outline:none; box-shadow: var(--ring); }
-    .brand .dot{
-      width:12px; height:12px; border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
-      box-shadow: 0 0 0 4px rgba(110,168,255,0.18);
-      flex: 0 0 auto;
-    }
-    .brand h1{ font-size: 14px; margin:0; }
-    .brand p{ margin:0; font-size: 12px; color: var(--muted); }
-
-    /* Sidebar stack */
-    .nav{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
-    .pill{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:12px; border-radius: 14px;
-      border: 1px solid var(--border); background: var(--panel);
-    }
-    .badge{
-      font-size:12px; padding:6px 10px; border-radius: 999px;
-      border: 1px solid var(--border); background: rgba(110,168,255,0.14);
-      white-space:nowrap;
-    }
-
-    .side-footer{
-      margin-top: 12px;
-      display:flex; flex-direction:column; gap:10px;
-    }
-    .hint{
-      font-size:12px; color: var(--muted);
-      padding:10px 12px; border-radius: 14px;
-      border: 1px dashed var(--border); background: rgba(255,255,255,0.03);
-    }
-    .minirow{ display:flex; gap:10px; flex-wrap:wrap; }
-
-    /* Cards */
-    .card{
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      min-width: 0;
-    }
-    .card .head{
-      padding: 14px 14px 10px;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .card .head h3{ margin:0; font-size: 14px; }
-    .card .head span{ font-size: 12px; color: var(--muted); }
-    .card .body{ padding: 14px; }
-
-    /* Main topbar */
-    .topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom: 14px; }
-    .title h2{ margin:0; font-size: 20px; }
-    .title p{ margin:6px 0 0; font-size: 13px; color: var(--muted); }
-
-    .controls{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; align-items:center; }
-    .chip{
-      display:flex; align-items:center; gap:8px;
-      padding:10px 12px; border-radius: 14px;
-      border: 1px solid var(--border); background: var(--panel);
-    }
-    .chip label{ font-size:12px; color: var(--muted); white-space:nowrap; }
-    .chip select, .chip input{
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.06);
-      color: var(--text); padding:8px 10px; border-radius: 12px;
-      outline:none; min-width: 140px;
-    }
-
-    .mainGrid{ display:flex; flex-direction:column; gap: 14px; }
-
-    /* KPIs */
-    .kpis{ display:grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
-    .kpi{
-      border-radius: var(--radius2);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      padding: 12px;
-      min-height: 92px;
-      min-width: 0;
-    }
-    .kpi .name{ font-size: 12px; color: var(--muted); margin:0 0 8px; }
-    .kpi .value{ font-size: 20px; margin:0 0 6px; }
-    .kpi .sub{ font-size: 12px; color: var(--muted); margin:0; }
-
-    @media (max-width: 1200px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px){ .kpis{ grid-template-columns: 1fr; } }
-
-    /* Activity table wrapper */
-    .tablewrap{
-      overflow-x: auto;
-      border-radius: var(--radius2);
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.02);
-    }
-
-    table{
-      width:100%;
-      border-collapse: collapse;
-      min-width: 0;
-      table-layout: fixed;
-    }
-    thead th{
-      text-align:left; font-size: 12px; color: var(--muted); font-weight: 600;
-      padding: 12px; border-bottom: 1px solid var(--border);
-      background: rgba(255,255,255,0.02);
-      position: sticky; top: 0; z-index: 2;
-      backdrop-filter: blur(10px);
-      white-space: nowrap;
-    }
-    tbody td{
-      padding: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      font-size: 13px;
-      vertical-align: top;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    tbody tr:hover td{ background: rgba(110,168,255,0.07); }
-
-    td.col-summary{ white-space: normal; }
-    .summaryClamp{
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.35;
-      max-height: calc(1.35em * 2);
-    }
-
-    /* Ops Signals (kept as-is) */
-    .opsBox{ display:flex; flex-direction:column; gap:12px; }
-    .opsSection{
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      border-radius: 14px;
-      padding: 12px;
-    }
-    .opsTitle{
-      display:flex; align-items:center; justify-content:space-between;
-      margin:0 0 10px;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .2px;
-      text-transform: uppercase;
-    }
-    .opsList{ display:flex; flex-direction:column; gap:8px; }
-    .opsItem{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      font-size: 13px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-      min-width: 0;
-    }
-    .opsLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .opsLabel{ color: var(--text); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
-    .opsRight{ display:flex; align-items:center; gap:10px; }
-    .opsValue{ font-weight: 700; color: var(--text); white-space: nowrap; }
-
-    /* State + Toast */
-    .state{
-      padding: 14px;
-      border-radius: var(--radius2);
-      border: 1px dashed var(--border);
-      color: var(--muted);
-      font-size: 13px;
-      background: rgba(255,255,255,0.02);
-      white-space: pre-wrap;
-    }
-    #stateBox:empty{ display:none; }
-
-    .toast{
-      position: fixed; right: 16px; bottom: 16px; max-width: 360px;
-      padding: 12px 14px; border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(10,15,25,0.72);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      font-size: 13px;
-      opacity:0; transform: translateY(10px);
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 99;
-    }
-    html:not(.dark) .toast{ background: rgba(255,255,255,0.78); }
-    .toast.show{ opacity:1; transform: translateY(0); }
-
-    /* ✅ Overlay "Back to site" link styling (low risk) */
-    .overlayBackRow{
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      gap:10px;
-    }
-    .overlayBackRow a{
-      color: var(--muted);
-      font-size: 12px;
-      text-decoration:none;
-      border-bottom: 1px dashed transparent;
-    }
-    .overlayBackRow a:hover{
-      color: var(--text);
-      border-bottom-color: rgba(110,168,255,0.45);
-    }
-
-    /* Mobile layout */
-    @media (max-width: 1100px){
-      .wrap{ grid-template-columns: 1fr; }
-      .sidebar{ position:relative; height:auto; }
-      .main{ padding-top: 0; }
-    }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; white-space: pre-wrap; color: rgba(234,240,255,.80); }
   </style>
-  <!-- FAVICONS (files are in /public) -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 
 <body>
-  <!-- LOGIN OVERLAY -->
-  <div class="overlay" id="authOverlay" aria-hidden="true">
-    <div class="loginCard" role="dialog" aria-modal="true" aria-label="Sign in">
-      <div class="loginHead">
-        <div>
-          <b>Sign in to Dashboard</b><br/>
-          <span>Magic Link (email)</span>
-        </div>
-        <span id="authStatus">Not signed in</span>
-      </div>
-      <div class="loginBody">
-        <p>Enter your email and we’ll send a magic link.</p>
-
-        <div class="field">
-          <label for="authEmail">Email</label>
-          <input id="authEmail" type="email" placeholder="you@company.com" autocomplete="email" />
+  <div class="dash">
+    <div class="shell">
+      <aside class="side">
+        <div class="brand">
+          <div class="logo">NS</div>
+          <div>
+            <div class="brandTitle">NightShift AI</div>
+            <div class="brandSub">Dashboard</div>
+          </div>
         </div>
 
-        <div class="row">
-          <button class="btn primary" id="btnSendLink" type="button">Send magic link</button>
-          <button class="btn" id="btnResendLink" type="button">Resend</button>
-          <span class="spacer"></span>
-          <button class="btn" id="btnCloseAuth" type="button">Close</button>
+        <a class="nav active" href="#overview" id="navOverview">📊 Overview</a>
+        <a class="nav" href="#calls" id="navCalls">📞 Call Inbox</a>
+
+        <div class="acct">
+          <div class="email" id="acctEmail">Not signed in</div>
+          <div class="meta" id="acctMeta">—</div>
         </div>
 
-        <div class="error" id="authError"></div>
+        <button class="btn" id="logoutBtn" type="button">Sign out</button>
+        <a class="btn primary" href="/contact.html" style="display:block; text-align:center; text-decoration:none;">Get a Quote Page</a>
+      </aside>
 
-        <!-- ✅ NEW: obvious escape hatch when not logged in -->
-        <div class="overlayBackRow">
-          <a href="/" aria-label="Back to NightShift AI homepage">← Back to NightShiftAI.com</a>
+      <main class="main">
+        <div class="top">
+          <div>
+            <div class="eyebrow" id="viewEyebrow">Overview</div>
+            <div class="title" id="viewTitle">Loading…</div>
+            <div class="sub" id="viewSub"> </div>
+          </div>
         </div>
-      </div>
+
+        <div id="view"></div>
+      </main>
     </div>
   </div>
 
-  <div class="wrap">
-    <!-- LEFT COLUMN -->
-    <aside class="sidebar">
-      <!-- ✅ NEW: clickable brand to main site -->
-      <a class="brand" href="/" aria-label="Back to NightShift AI homepage">
-        <div class="dot"></div>
+  <div class="drawer" id="drawer">
+    <div class="bg" id="drawerBg"></div>
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
         <div>
-          <h1>NightShift AI</h1>
-          <p>Owner Dashboard</p>
+          <div class="eyebrow">Call Detail</div>
+          <div style="font-weight:950; color:#f8fafc;" id="dTitle">—</div>
         </div>
-      </a>
-
-      <div class="nav">
-        <div class="pill"><b>Overview</b><span class="badge" id="badgeWindow">—</span></div>
-        <div class="pill"><b>Activity</b><span class="badge" id="badgeCount">—</span></div>
-        <div class="pill"><b>Session</b><span class="badge" id="authBadge">Locked</span></div>
-
-        <section class="card" style="margin-top:10px;">
-          <div class="head">
-            <h3>Ops Signals</h3>
-            <span>fast triage</span>
-          </div>
-          <div class="body">
-            <div id="opsInsights" class="state">—</div>
-          </div>
-        </section>
+        <button class="btn" id="drawerClose" type="button" style="width:auto;">✕</button>
       </div>
-
-      <div class="side-footer">
-        <div class="hint">Tip: Search guest, phone, event, room type, “booking”, call_id.</div>
-        <div class="minirow">
-          <button class="btn" id="btnTheme" type="button">Toggle theme</button>
-          <button class="btn" id="btnAuth" type="button">Login</button>
-          <button class="btn primary" id="btnRefresh" type="button">Refresh</button>
-          <button class="btn" id="btnLogout" type="button" style="display:none;">Logout</button>
-        </div>
-      </div>
-    </aside>
-
-    <!-- MAIN AREA -->
-    <main class="main">
-      <div class="topbar">
-        <div class="title">
-          <h2>Executive Overview</h2>
-          <p>KPIs, ops signals, searchable activity feed, date filters, CSV export, and simple charts.</p>
-        </div>
-
-        <div class="controls">
-          <div class="chip">
-            <label for="rangeSelect">Date</label>
-            <select id="rangeSelect">
-              <option value="today">Today</option>
-              <option value="7" selected>Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-
-          <div class="chip" id="customRange" style="display:none;">
-            <label for="startDate">From</label>
-            <input id="startDate" type="date"/>
-            <label for="endDate">To</label>
-            <input id="endDate" type="date"/>
-          </div>
-
-          <div class="chip" style="min-width: 320px;">
-            <label for="searchInput">Search</label>
-            <input id="searchInput" type="text" placeholder="guest, phone, event, room, call_id, summary…" />
-          </div>
-
-          <button class="btn" id="btnExport" type="button">Export CSV</button>
-        </div>
-      </div>
-
-      <div class="mainGrid">
-        <section class="card">
-          <div class="head">
-            <h3>Performance KPIs</h3>
-            <span id="lastUpdated">—</span>
-          </div>
-
-          <div class="body">
-            <div class="kpis" id="kpiGrid"></div>
-
-            <div style="height:16px"></div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
-              <div class="card" style="padding:12px;">
-                <b style="font-size:13px;">Calls per Day</b>
-                <canvas id="chartCalls" height="140"></canvas>
-              </div>
-
-              <div class="card" style="padding:12px;">
-                <b style="font-size:13px;">Bookings per Day</b>
-                <canvas id="chartBookings" height="140"></canvas>
-              </div>
-            </div>
-
-            <div class="row" style="margin-bottom:10px;">
-              <b style="font-size:13px;">Activity Feed</b>
-              <span class="spacer"></span>
-              <span class="small" id="feedMeta">—</span>
-            </div>
-
-            <div id="stateBox" class="state"></div>
-
-            <div class="tablewrap" id="tableWrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width:140px;">Time</th>
-                    <th style="width:88px;">Type</th>
-                    <th style="width:170px;">Guest/Caller</th>
-                    <th style="width:110px;">Arrival</th>
-                    <th style="width:64px;">N</th>
-                    <th style="width:110px;">Total</th>
-                    <th style="width:110px;">Sentiment</th>
-                    <th>Summary</th>
-                  </tr>
-                </thead>
-                <tbody id="feedTbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
+      <div style="margin-top:14px;" id="dBody"></div>
+    </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <script src="/dashboard/app.js?v=1000"></script>
 </body>
 </html>
