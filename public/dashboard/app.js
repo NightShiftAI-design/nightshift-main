@@ -656,8 +656,9 @@ function dedupeRows(rows) {
   // ============================================================
   // Render All
   // ============================================================
-  function renderAll() {
-    applyFilters();
+ function renderAll() {
+  applyFilters();
+  filteredRows = dedupeRows(filteredRows); // ✅ remove visual duplicates
 
     const k = computeKPIs(filteredRows);
     renderKPIs(k);
