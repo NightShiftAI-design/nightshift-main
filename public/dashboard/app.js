@@ -102,7 +102,32 @@
     clearTimeout(toast._t);
     toast._t = setTimeout(() => el.classList.remove("show"), 2200);
   }
+function dedupeRows(rows) {
+  const seen = new Set();
+  const out = [];
 
+  for (const r of rows) {
+    const raw = r.raw || {};
+    const booking = safeJsonParse(raw.booking);
+
+    const fp = [
+      r.kind,
+      safeStr(r.property_id),
+      booking?.event || "",
+      booking?.guest_name || r.guest || "",
+      booking?.arrival_date || r.arrival || "",
+      booking?.room_type || "",
+      booking?.total_due || "",
+      r.when ? r.when.toISOString().slice(0,19) : ""
+    ].join("|");
+
+    if (seen.has(fp)) continue;
+    seen.add(fp);
+    out.push(r);
+  }
+
+  return out;
+}
   // ============================================================
   // Crash visibility (so you see errors inside the dashboard)
   // ============================================================
