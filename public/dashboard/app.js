@@ -1,7 +1,10 @@
-// public/dashboard/app.js — v9.6
-// FIX: bookings filtered by arrival_date (not created_at)
-// ADD: real Arrivals/Departures/Stay-overs counts + "View all reservations" toggle
-// NOTE: Auth overlay unchanged. Fetching/KPIs/charts/export/search/logout kept intact.
+```js
+// public/dashboard/app.js — v10.0 (MATCHES new index.html bubbles + feed IDs)
+// - KPI tiles render as “bubble” cards (uses .kpi / .kpiTop / .kpiIcon / .name / .value)
+// - Feed empty/wrap IDs aligned to index.html: #feedEmpty + #feedTableWrap (not latestEmpty/latestTableWrap)
+// - Adds dataset.event on rows so your index.html filter script can reliably filter
+// - Keeps: Auth overlay, fetching, charts (if present), export, search, logout, canonical, theme, property filter
+// - Reservations panel / “View all reservations” toggle runs ONLY if matching elements exist (safe/no-break)
 
 (() => {
   // ============================================================
@@ -352,7 +355,7 @@
     if ($("searchInput")) $("searchInput").oninput = () => { applyFilters(); renderAll(); };
 
     initPropertyControl();
-    initReservationsUI(); // ✅ NEW
+    initReservationsUI(); // safe/no-op if UI not present
   }
 
   function getSelectedRange() {
@@ -392,19 +395,20 @@
   // ✅ Booking "business date" = arrival_date (what matters for arrivals/departures)
   function normalizeReservation(r) {
     const arrival = safeStr(r.arrival_date);
-    const arrivalDate = parseISOish(arrival); // from yyyy-mm-dd
+    const arrivalDate = parseISOish(arrival);
     const nights = toNum(r.nights);
 
     return {
       kind: "booking",
-      when: parseISOish(r.created_at),         // created time (for table display)
-      businessDate: arrivalDate,              // ✅ arrival-based filtering/segments
+      when: parseISOish(r.created_at),
+      businessDate: arrivalDate,
       guest: safeStr(r.guest_name),
-      arrival: arrival,
+      arrival,
       nights,
       totalDue: toNum(r.total_due),
       sentiment: "",
-      summary: `Reservation for ${safeStr(r.guest_name)} • Arrive ${arrival}`,
+      duration: NaN,
+      summary: safeStr(r.summary) || `Reservation for ${safeStr(r.guest_name)} • Arrive ${arrival}`,
       property_id: safeStr(r.property_id),
       raw: r
     };
@@ -415,11 +419,11 @@
     return {
       kind: "call",
       when: parseISOish(r.created_at),
-      businessDate: parseISOish(r.created_at), // calls filter by created_at
-      guest: booking?.guest_name || "",
-      arrival: booking?.arrival_date || "",
-      nights: null,
-      totalDue: null,
+      businessDate: parseISOish(r.created_at),
+      guest: safeStr(booking?.guest_name || r.guest_name || ""),
+      arrival: safeStr(booking?.arrival_date || ""),
+      nights: Number.isFinite(toNum(booking?.nights)) ? toNum(booking?.nights) : NaN,
+      totalDue: Number.isFinite(toNum(booking?.total_due)) ? toNum(booking?.total_due) : NaN,
       sentiment: safeStr(r.sentiment),
       duration: toNum(r.duration_seconds),
       summary: safeStr(r.summary),
@@ -436,7 +440,7 @@
   let lastRange = null;
 
   // ============================================================
-  // Filters (now bookings filter by arrival_date)
+  // Filters (bookings filter by arrival_date)
   // ============================================================
   function applyFilters() {
     const range = lastRange;
@@ -463,7 +467,7 @@
   }
 
   // ============================================================
-  // KPIs + Ops
+  // KPIs
   // ============================================================
   function computeKPIs(rows) {
     const calls = rows.filter(r => r.kind === "call");
@@ -479,7 +483,7 @@
     const revenue = bookings.map(b => b.totalDue).filter(Number.isFinite).reduce((a, b) => a + b, 0);
 
     const negative = calls.filter(c => (c.sentiment || "").toLowerCase().includes("neg")).length;
-    const longCalls = calls.filter(c => c.duration >= 240).length;
+    const longCalls = calls.filter(c => Number.isFinite(c.duration) && c.duration >= 240).length;
 
     return { totalCalls, totalBookings, conv, avgDur, revenue, negative, longCalls };
   }
@@ -487,21 +491,31 @@
   function renderKPIs(k) {
     const el = $("kpiGrid"); if (!el) return;
     el.innerHTML = "";
+
+    // Bubble tiles that match your new index.html (.kpi + icon row)
     const tiles = [
-      ["Total calls", fmtInt(k.totalCalls)],
-      ["Bookings", fmtInt(k.totalBookings)],
-      ["Conversion", fmtPct(k.conv)],
-      ["Revenue", fmtMoney(k.revenue)],
-      ["Avg call", Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—"]
+      { key:"calls",     label:"Total calls", value: fmtInt(k.totalCalls), icon:"fa-phone-volume", tone:"" },
+      { key:"bookings",  label:"Bookings",    value: fmtInt(k.totalBookings), icon:"fa-calendar-check", tone:"good" },
+      { key:"conv",      label:"Conversion",  value: fmtPct(k.conv), icon:"fa-arrow-trend-up", tone:"" },
+      { key:"revenue",   label:"Revenue",     value: fmtMoney(k.revenue), icon:"fa-dollar-sign", tone:"good" },
+      { key:"avg",       label:"Avg call",    value: Number.isFinite(k.avgDur) ? `${Math.round(k.avgDur)}s` : "—", icon:"fa-clock", tone:"" },
     ];
-    for (const [t, v] of tiles) {
+
+    for (const t of tiles) {
       const d = document.createElement("div");
-      d.className = "kpi";
-      d.innerHTML = `<p class="name">${t}</p><p class="value">${v}</p>`;
+      d.className = `kpi ${t.tone || ""}`.trim();
+      d.innerHTML = `
+        <div class="kpiTop">
+          <div class="kpiIcon"><i class="fa-solid ${t.icon}"></i></div>
+          <p class="name">${escHtml(t.label)}</p>
+        </div>
+        <p class="value">${escHtml(t.value)}</p>
+      `;
       el.appendChild(d);
     }
   }
 
+  // Optional (only if you later add #opsInsights)
   function renderOps(k) {
     const el = $("opsInsights"); if (!el) return;
     el.innerHTML = `
@@ -513,7 +527,7 @@
   }
 
   // ============================================================
-  // Charts (unchanged)
+  // Charts (unchanged, but only runs if canvas exists)
   // ============================================================
   function groupByDay(rows, kind) {
     const map = {};
@@ -555,31 +569,39 @@
   }
 
   // ============================================================
-  // ✅ Latest table visibility (no MutationObserver dependency)
+  // Feed empty/wrap visibility (MATCH index.html IDs)
   // ============================================================
-  function setLatestReservationsVisibility(hasRows) {
-    const empty = $("latestEmpty");
-    const wrap  = $("latestTableWrap");
+  function setFeedVisibility(hasRows) {
+    const empty = $("feedEmpty");
+    const wrap  = $("feedTableWrap");
     if (empty) empty.style.display = hasRows ? "none" : "";
     if (wrap)  wrap.style.display  = hasRows ? "" : "none";
   }
 
   // ============================================================
-  // Feed table (latest reservations / activity)
+  // Feed table
   // ============================================================
+  function classifyEventKind(r) {
+    // You can refine this later if you add real escalation events.
+    // Right now: booking/call; escalation inferred by summary hints.
+    const sum = (r.summary || "").toLowerCase();
+    if (sum.includes("escalat") || sum.includes("urgent") || sum.includes("911")) return "escalation";
+    return r.kind === "booking" ? "booking" : "call";
+  }
+
   function renderFeed(rows) {
     if ($("badgeCount")) $("badgeCount").textContent = fmtInt(rows.length);
     if ($("feedMeta")) $("feedMeta").textContent = `${rows.length} items`;
 
     const tbody = $("feedTbody");
     if (!tbody) {
-      setLatestReservationsVisibility(false);
+      setFeedVisibility(false);
       return;
     }
 
     tbody.innerHTML = "";
 
-    // ✅ Show bookings first by ARRIVAL date (so “all reservations” is meaningful)
+    // ✅ Show bookings sorted by ARRIVAL date, calls by created_at
     const sorted = [...rows].sort((a, b) => {
       const ad = (a.kind === "booking" ? (a.businessDate || a.when) : (a.when || a.businessDate));
       const bd = (b.kind === "booking" ? (b.businessDate || b.when) : (b.when || b.businessDate));
@@ -588,22 +610,28 @@
 
     for (const r of sorted.slice(0, 500)) {
       const tr = document.createElement("tr");
+      const ev = classifyEventKind(r);
+      tr.dataset.event = ev; // ✅ used by your index.html filter script
+
       tr.innerHTML = `
         <td>${r.when ? r.when.toLocaleString() : "—"}</td>
-        <td>${escHtml(r.kind || "—")}</td>
+        <td>${escHtml(ev)}</td>
         <td>${escHtml(r.guest || "—")}</td>
         <td>${escHtml(r.arrival || "—")}</td>
-        <td>${Number.isFinite(r.nights) ? r.nights : "—"}</td>
-        <td>${Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—"}</td>
+        <td>${Number.isFinite(r.nights) ? escHtml(r.nights) : "—"}</td>
+        <td>${Number.isFinite(r.totalDue) ? escHtml(fmtMoney(r.totalDue)) : "—"}</td>
         <td>${escHtml(r.sentiment || "—")}</td>
-        <td class="col-summary"><div class="summaryClamp">${escHtml(r.summary || "—")}</div></td>
+        <td>${escHtml(r.summary || "—")}</td>
       `;
       tbody.appendChild(tr);
     }
 
-    setLatestReservationsVisibility(tbody.children.length > 0);
+    setFeedVisibility(tbody.children.length > 0);
   }
 
+  // ============================================================
+  // Export (unchanged)
+  // ============================================================
   function exportCSV(rows) {
     if (!rows.length) { toast("Nothing to export."); return; }
     const cols = ["property_id","kind","time","business_date","guest","arrival","nights","total","sentiment","summary"];
@@ -631,7 +659,7 @@
   }
 
   // ============================================================
-  // ✅ Reservations segments (Arrivals / Departures / Stay-overs)
+  // ✅ Reservations segments (optional UI; runs only if elements exist)
   // ============================================================
   let segmentMode = "arrivals"; // arrivals | departures | stayovers | requests
   let showAllBookings = false;
@@ -658,7 +686,7 @@
     let arrivals = 0, departures = 0, stayovers = 0;
 
     for (const b of bookings) {
-      const arr = b.businessDate; // arrival_date parsed
+      const arr = b.businessDate;
       const nights = b.nights;
       const chk = getCheckoutDate(arr, nights);
 
@@ -687,20 +715,26 @@
   }
 
   function initReservationsUI() {
+    // If these elements don’t exist in index.html, do nothing (no break).
     const a = $("tabArrivals");
     const d = $("tabDepartures");
     const s = $("tabStayovers");
     const r = $("tabRequests");
+
+    if (!(a || d || s || r)) return;
 
     a?.addEventListener("click", () => { segmentMode = "arrivals"; setActiveTab("tabArrivals"); renderReservationsPanel(); });
     d?.addEventListener("click", () => { segmentMode = "departures"; setActiveTab("tabDepartures"); renderReservationsPanel(); });
     s?.addEventListener("click", () => { segmentMode = "stayovers"; setActiveTab("tabStayovers"); renderReservationsPanel(); });
     r?.addEventListener("click", () => { segmentMode = "requests"; setActiveTab("tabRequests"); renderReservationsPanel(); });
 
-    // Hook "View all reservations" link
-    const btnViewAll = document.querySelector('[aria-label="View all reservations"]');
+    // Optional toggle if you add a button or link later:
+    const btnViewAll =
+      $("btnViewAllReservations") ||
+      document.querySelector('[aria-label="View all reservations"]');
+
     btnViewAll?.addEventListener("click", (e) => {
-      e.preventDefault();
+      e.preventDefault?.();
       showAllBookings = !showAllBookings;
       toast(showAllBookings ? "Showing all reservations (arrival-based)." : "Showing latest activity.");
       renderAll();
@@ -711,9 +745,6 @@
     const todayLabel = $("todayLabel");
     const empty = $("reservationsEmpty");
 
-    // pick “target day” from range selector:
-    // - Today: actual today
-    // - Other ranges: use range.end (most recent day)
     const target = (lastRange?.mode === "today") ? new Date() : (lastRange?.end || new Date());
     const targetDay = startOfDay(target);
 
@@ -729,8 +760,6 @@
     setCount("countArrivals", seg.arrivals);
     setCount("countDepartures", seg.departures);
     setCount("countStayovers", seg.stayovers);
-
-    // requests is not implemented yet (needs messages table), keep 0
     setCount("countRequests", 0);
 
     const any = (seg.arrivals + seg.departures + seg.stayovers) > 0;
@@ -743,7 +772,6 @@
   function renderAll() {
     applyFilters();
 
-    // If user clicked "View all reservations": show only bookings (arrival-based)
     const rowsForTable = showAllBookings
       ? filteredRows.filter(r => r.kind === "booking")
       : filteredRows;
@@ -758,10 +786,12 @@
     renderFeed(rowsForTable);
     renderReservationsPanel();
 
+    if ($("badgeWindow")) $("badgeWindow").textContent = lastRange?.label || "—";
     if ($("lastUpdated")) $("lastUpdated").textContent = `Updated ${new Date().toLocaleString()}`;
   }
 
   function clearDataUI(msg) {
+    // Keep this simple: show debug/state in #stateBox
     if ($("stateBox")) $("stateBox").textContent = msg || "—";
   }
 
@@ -826,3 +856,4 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+```
