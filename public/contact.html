@@ -272,21 +272,6 @@
               <!-- Quote type -->
               <input type="hidden" name="request_type" id="request_type" value="Single Property Quote" />
 
-              <!-- Auto-email to the person who submitted (also set via JS for reliability) -->
-              <input type="hidden" name="_autoresponse" value="Thanks for requesting a quote for NightShift AI.
-
-We’re a virtual front desk built specifically for hotels and motels — answering guest calls in seconds, following your exact policies, and escalating only when necessary. Each setup is customized to your property’s workflows and brand standards.
-
-To finalize your quote and configuration, please complete this short form:
-
-👉 https://forms.gle/dXoxBWTMSgJkGMtZ6
-
-Once this form is submitted, we’ll review your information and reach out shortly with your quote and next steps.
-
-Best regards,
-NightShift AI Team
-https://nightshifthotels.com" />
-
               <div class="form-grid">
 
                 <div class="field">
@@ -384,7 +369,7 @@ https://nightshifthotels.com" />
               <div class="actions">
                 <button id="submitBtn" type="submit" class="btn-primary">Send Request</button>
                 <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
-                <span class="tiny">Typical install: under 10 minutes • Portfolio onboarding available</span>
+                <span class="tiny">Next step after submitting: configuration form • Typical setup under 10 minutes</span>
               </div>
 
               <div id="status" class="status"></div>
@@ -537,22 +522,6 @@ https://nightshifthotels.com" />
           // Make your internal subject include request type
           fd.set("_subject", `NightShift AI — New Quote Request (${requestType.value})`);
 
-          // Force autoresponse in payload (reliable with fetch)
-          fd.set("_autoresponse",
-`Thanks for requesting a quote for NightShift AI.
-
-We’re a virtual front desk built specifically for hotels and motels — answering guest calls in seconds, following your exact policies, and escalating only when necessary. Each setup is customized to your property’s workflows and brand standards.
-
-To finalize your quote and configuration, please complete this short form:
-
-👉 https://forms.gle/dXoxBWTMSgJkGMtZ6
-
-Once this form is submitted, we’ll review your information and reach out shortly with your quote and next steps.
-
-Best regards,
-NightShift AI Team
-https://nightshifthotels.com`);
-
           const res = await fetch(endpoint, {
             method: "POST",
             headers: { "Accept": "application/json" },
@@ -560,8 +529,8 @@ https://nightshifthotels.com`);
           });
 
           if (res.ok) {
-            setStatus("Sent. Redirecting…", "ok");
-            setTimeout(() => window.location.href = "/thanks.html", 450);
+            setStatus("Sent. Next step: configuration form… Redirecting…", "ok");
+            setTimeout(() => window.location.href = "/thanks.html", 650);
           } else {
             setStatus("Something went wrong. Please try again or call us.", "err");
           }
