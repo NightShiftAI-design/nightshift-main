@@ -1,4 +1,5 @@
-// public/dashboard/app.js — v10.2 (ELITE KPI FIX + RATE FIX + SAFE + BOOKING-LIKE UI)
+// public/dashboard/app.js — v10.0 (FULL REWRITE, SAFE + BOOKING-LIKE UI)
+// public/dashboard/app.js — v10.1 (RATE FIX + SAFE + BOOKING-LIKE UI)
 // Goals:
 // - Keep every existing ID contract used by index.html (kpiGrid, feedTbody, feedEmpty, feedTableWrap, stateBox, toast, authOverlay, etc.)
 // - Auth handlers ALWAYS attach (magic link, overlay controls, logout)
@@ -10,18 +11,7 @@
 // - Feed renders with tr.dataset.event for filter script
 // - Charts render if canvases exist
 // - Updates “lastUpdated”/mirrors if present
-// - ✅ Rate column populates (reservations + call_logs.booking), fallback total/nights
-// - ✅ KPI logic now supports “bookings” as reservations OR call_logs booking events (configurable)
-// - ✅ Conversion = bookings / calls (calls exclude booking rows)
-// - ✅ Revenue defaults to reservations only (avoids double count)
-// public/dashboard/app.js — v10.3 (ELITE DATA WINDOW FIX + PRO SaaS POLISH + SAFE)
-// Keeps all existing index.html ID contracts and working behavior.
-// Key upgrades:
-// ✅ Reservations now show in 7/30-day windows by default (filters by created_at; still displays arrival_date)
-// ✅ Cleaner KPI logic (calls exclude booking-events; configurable)
-// ✅ Safer Supabase fetch (range-aware server filtering when possible; falls back cleanly)
-// ✅ Stronger date parsing + money parsing + schema drift tolerance
-// ✅ More professional state messaging + error surfacing without breaking UI
+// - ✅ Rate column now populates (reservations + call_logs.booking), with fallback to total/nights
 
 (() => {
 // ============================================================
@@ -46,33 +36,6 @@ const PROPERTY_STORAGE_KEY = "nsa_property";  // "__all__" | "<uuid>"
 // Data limits
 const FETCH_LIMIT = 3000;
 const FEED_MAX_ROWS = 500;
-
-// ============================================================
-// ✅ KPI behavior toggles
-// ============================================================
-  // If true, “Bookings” includes call_logs events like reservation_confirmed.
-  // If true, “Bookings” includes call_logs booking events like reservation_confirmed.
-// If false, “Bookings” uses reservations table only.
-const KPI_INCLUDE_CALLLOG_BOOKINGS = false;
-
-// If true, revenue also includes call_logs totals for booking events.
-// Default false to avoid double counting (recommended for demo cleanliness).
-const KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS = false;
-
-// Which events in call_logs.booking.event count as a “booking”
-const BOOKING_EVENTS = new Set([
-"reservation_confirmed",
-"booking_confirmed",
-"reservation_created"
-]);
-
-  // ============================================================
-  // ✅ Date-window behavior (THIS fixes “bookings not showing”)
-  // ============================================================
-  // If true, reservations are filtered by created_at for date windows.
-  // If false, reservations are filtered by arrival_date (stay date).
-  // For Elite demo realism, keep this TRUE.
-  const RESERVATION_WINDOW_BY_CREATED_AT = true;
 
 // ============================================================
 // DOM Helpers
@@ -112,9 +75,7 @@ return safeStr(str)
 function toNum(v) {
 if (v === null || v === undefined) return NaN;
 if (typeof v === "number") return v;
-    const s = String(v).replace(/[^0-9.\-]/g, "");
-    // Allow currency strings like "$74.06", "74.06", "74,06"
-    const s = String(v).trim().replace(/,/g, ".").replace(/[^0-9.\-]/g, "");
+const s = String(v).replace(/[^0-9.\-]/g, "");
 const n = Number(s);
 return Number.isFinite(n) ? n : NaN;
 }
@@ -132,9 +93,7 @@ try { return JSON.parse(v); } catch { return null; }
 function parseISOish(v) {
 if (!v) return null;
 const s = String(v).trim();
-    if (!s) return null;
 
-    // dd-mm-yyyy
 const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
 if (ddmmyyyy) {
 const [, dd, mm, yyyy] = ddmmyyyy;
@@ -142,7 +101,6 @@ const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
 return Number.isFinite(d.getTime()) ? d : null;
 }
 
-    // yyyy-mm-dd
 const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 if (ymd) {
 const d = new Date(`${s}T00:00:00`);
@@ -173,12 +131,6 @@ return `${y}-${m}-${day}`;
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
 const endOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
-  function clampStr(s, max = 220) {
-    const v = safeStr(s);
-    if (v.length <= max) return v;
-    return v.slice(0, max - 1) + "…";
-  }
-
 // ============================================================
 // Toast
 // ============================================================
@@ -199,13 +151,6 @@ try {
 if ($("stateBox")) $("stateBox").textContent = `JS error: ${e.message || e.error || "Unknown error"}`;
 } catch {}
 });
-
-  window.addEventListener("unhandledrejection", (e) => {
-    try {
-      const msg = (e && e.reason && e.reason.message) ? e.reason.message : String(e.reason || "Promise error");
-      if ($("stateBox")) $("stateBox").textContent = `Load error: ${msg}`;
-    } catch {}
-  });
 
 // ============================================================
 // Canonical URL
@@ -397,22 +342,12 @@ try { await supabaseClient.auth.signOut(); } catch {}
 clearSupabaseAuthStorage();
 }
 
-  function setFeedVisibility(hasRows) {
-    const empty = $("feedEmpty");
-    const wrap = $("feedTableWrap");
-    if (empty) empty.style.display = hasRows ? "none" : "";
-    if (wrap) wrap.style.display = hasRows ? "" : "none";
-  }
-
 function clearDataUI(msg) {
 setText("stateBox", msg || "—");
+    // leave feedEmpty visible, feedTableWrap hidden
 setFeedVisibility(false);
 setText("badgeCount", "0");
 setText("feedMeta", "0 items");
-    const tbody = $("feedTbody");
-    if (tbody) tbody.innerHTML = "";
-    const kpi = $("kpiGrid");
-    if (kpi) kpi.innerHTML = "";
 }
 
 async function ensureAuthGate() {
@@ -460,6 +395,7 @@ options: { emailRedirectTo: CANONICAL_URL }
 
 if (error) { alert(error.message); return; }
 
+      // redirect to your check-email page
 location.href = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
 } finally {
 if (btnSend) { btnSend.disabled = false; btnSend.textContent = prevSendText; }
@@ -487,6 +423,7 @@ location.href = "/";
 };
 }
 
+    // keep UI synced
 supabaseClient.auth.onAuthStateChange(async (_, session) => {
 setSessionUI(session);
 if (session) loadAndRender();
@@ -520,6 +457,7 @@ s.setDate(now.getDate() - (days - 1));
 return { label: `Last ${days} days`, start: startOfDay(s), end: endOfDay(now), mode };
 }
 
+    // custom
 enableCustomDates(true);
 const sVal = $("startDate") ? $("startDate").value : "";
 const eVal = $("endDate") ? $("endDate").value : "";
@@ -530,6 +468,7 @@ const ed = endOfDay(new Date(eVal));
 return { label: `${sVal} → ${eVal}`, start: sd, end: ed, mode: "custom" };
 }
 
+    // fallback
 const s = new Date(now);
 s.setDate(now.getDate() - 6);
 return { label: "Last 7 days", start: startOfDay(s), end: endOfDay(now), mode: "7" };
@@ -562,172 +501,100 @@ initPropertyControl();
 }
 
 // ============================================================
-  // Fetch + Normalize
-  // Fetch + Normalize (range-aware, schema-safe)
+// Fetch + Normalize
 // ============================================================
-  async function fetchTable(table) {
-    const { data, error } = await supabaseClient
-      .from(table)
-  function isoForSupabase(d) {
-    // Supabase accepts ISO timestamps
-    return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
-  }
-
-  async function fetchCalls(range) {
-    // call_logs should always be filterable by created_at
-    const q = supabaseClient
-      .from("call_logs")
+async function fetchTable(table) {
+const { data, error } = await supabaseClient
+.from(table)
 .select("*")
 .order("created_at", { ascending: false })
 .limit(FETCH_LIMIT);
 
-    // Range server-filter to avoid pulling entire history
-    if (range && range.start && range.end) {
-      q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
-    }
-
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
-  }
-
-  function canServerFilterReservationsByArrival(sampleVal) {
-    // Only safe if arrival_date looks like yyyy-mm-dd
-    const s = safeStr(sampleVal).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(s);
-  }
-
-  async function fetchReservations(range) {
-    // Prefer server filtering by created_at if we're windowing by created_at
-    // Otherwise, try arrival_date only if it's yyyy-mm-dd; else fallback to client filtering.
-    const q = supabaseClient
-      .from("reservations")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(FETCH_LIMIT);
-
-    if (range && range.start && range.end) {
-      if (RESERVATION_WINDOW_BY_CREATED_AT) {
-        q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
-      }
-      // If not windowing by created_at, we will client-filter by arrival_date because it may be dd-mm-yyyy.
-      // We'll keep the query broad (still limited) for safety.
-    }
-
-    const { data, error } = await q;
 if (error) throw error;
 return data || [];
 }
 
-// ✅ derive a trustworthy nightly rate from various shapes
-function computeRatePerNight({ rate, nightly_rate, rate_per_night, total_due, nights, adr, avg_rate }) {
-const direct =
-toNum(rate_per_night) ||
-toNum(nightly_rate) ||
-toNum(rate) ||
-toNum(adr) ||
-toNum(avg_rate);
+  // ✅ derive a trustworthy nightly rate from various shapes
+  function computeRatePerNight({ rate, nightly_rate, rate_per_night, total_due, nights, adr, avg_rate }) {
+    // 1) explicit values win
+    const direct =
+      toNum(rate_per_night) ||
+      toNum(nightly_rate) ||
+      toNum(rate) ||
+      toNum(adr) ||
+      toNum(avg_rate);
 
-if (Number.isFinite(direct) && direct > 0) return direct;
+    if (Number.isFinite(direct) && direct > 0) return direct;
 
-const t = toNum(total_due);
-const n = toNum(nights);
-if (Number.isFinite(t) && Number.isFinite(n) && n > 0) return t / n;
+    // 2) fallback: total/nights
+    const t = toNum(total_due);
+    const n = toNum(nights);
+    if (Number.isFinite(t) && Number.isFinite(n) && n > 0) return t / n;
 
-return NaN;
-}
+    return NaN;
+  }
 
 function normalizeReservation(r) {
 const arrival = safeStr(r.arrival_date);
 const arrivalDate = parseISOish(arrival);
-    const created = parseISOish(r.created_at);
-
 const nights = toNum(r.nights);
 
-const ratePerNight = computeRatePerNight({
-rate_per_night: r.rate_per_night,
-nightly_rate: r.nightly_rate,
-rate: r.rate,
-adr: r.adr,
-avg_rate: r.avg_rate,
-total_due: r.total_due,
-nights: r.nights
-});
-
-    // ✅ KEY FIX:
-    // "Last 7/30 days" usually means bookings created recently, not future arrival date.
-    const windowDate = RESERVATION_WINDOW_BY_CREATED_AT ? created : arrivalDate;
-
-    const guest = safeStr(r.guest_name);
-    const summary =
-      safeStr(r.summary) ||
-      (guest || arrival
-        ? `Reservation for ${guest || "Guest"} • Arrive ${arrival || "—"}`
-        : "Reservation created");
+    const ratePerNight = computeRatePerNight({
+      rate_per_night: r.rate_per_night,
+      nightly_rate: r.nightly_rate,
+      rate: r.rate,
+      adr: r.adr,
+      avg_rate: r.avg_rate,
+      total_due: r.total_due,
+      nights: r.nights
+    });
 
 return {
 kind: "booking",
-      when: parseISOish(r.created_at),
-      businessDate: arrivalDate,
-      guest: safeStr(r.guest_name),
-      when: created || arrivalDate,
-      businessDate: windowDate || created || arrivalDate,
-      guest,
+when: parseISOish(r.created_at),
+businessDate: arrivalDate,
+guest: safeStr(r.guest_name),
 arrival,
 nights,
-ratePerNight,
+      ratePerNight, // ✅
 totalDue: toNum(r.total_due),
 sentiment: "",
 duration: NaN,
-      summary: safeStr(r.summary) || `Reservation for ${safeStr(r.guest_name)} • Arrive ${arrival}`,
-      summary,
+summary: safeStr(r.summary) || `Reservation for ${safeStr(r.guest_name)} • Arrive ${arrival}`,
 property_id: safeStr(r.property_id),
 raw: r
 };
 }
 
 function normalizeCall(r) {
-const booking = safeJsonParse(r.booking) || {};
-
-    const guest =
-      safeStr(booking.guest_name || booking.guest || r.guest_name || "");
-
-    const arrival = safeStr(booking.arrival_date || booking.arrival || "");
-
-const nights = toNum(booking.nights);
+    const booking = safeJsonParse(r.booking);
+    const booking = safeJsonParse(r.booking) || {};
+    const nights = toNum(booking.nights);
     const totalDue = toNum(booking.total_due);
-    const totalDue = toNum(booking.total_due || booking.total || booking.total_due_usd);
 
-const ratePerNight = computeRatePerNight({
+    const ratePerNight = computeRatePerNight({
       rate_per_night: booking.rate_per_night ?? booking.ratePerNight ?? booking.rate_per_night_usd ?? booking.rate_nightly,
-      rate_per_night:
-        booking.rate_per_night ??
-        booking.ratePerNight ??
-        booking.rate_per_night_usd ??
-        booking.rate_nightly,
-nightly_rate: booking.nightly_rate,
-rate: booking.rate,
-adr: booking.adr,
-avg_rate: booking.avg_rate,
-total_due: booking.total_due,
-nights: booking.nights
-});
-
-    const when = parseISOish(r.created_at);
+      nightly_rate: booking.nightly_rate,
+      rate: booking.rate,
+      adr: booking.adr,
+      avg_rate: booking.avg_rate,
+      total_due: booking.total_due,
+      nights: booking.nights
+    });
 
 return {
 kind: "call",
-      when: parseISOish(r.created_at),
-      businessDate: parseISOish(r.created_at),
+when: parseISOish(r.created_at),
+businessDate: parseISOish(r.created_at),
+      guest: safeStr((booking && booking.guest_name) || r.guest_name || ""),
+      arrival: safeStr(booking && booking.arrival_date),
+      nights: toNum(booking && booking.nights),
+      totalDue: toNum(booking && booking.total_due),
       guest: safeStr(booking.guest_name || r.guest_name || ""),
       arrival: safeStr(booking.arrival_date),
-      when,
-      businessDate: when,
-      guest,
-      arrival,
-nights,
-ratePerNight,
-totalDue,
+      nights,
+      ratePerNight, // ✅
+      totalDue,
 sentiment: safeStr(r.sentiment),
 duration: toNum(r.duration_seconds),
 summary: safeStr(r.summary),
@@ -754,16 +621,22 @@ const out = [];
 
 for (const r of rows) {
 const raw = r.raw || {};
-const booking = safeJsonParse(raw.booking) || {};
+      const booking = safeJsonParse(raw.booking);
+      const booking = safeJsonParse(raw.booking) || {};
 
 const fp = [
 r.kind,
 safeStr(r.property_id),
-safeStr(booking.event || ""),
-safeStr(booking.guest_name || r.guest || ""),
-safeStr(booking.arrival_date || r.arrival || ""),
-safeStr(booking.room_type || ""),
-safeStr(booking.total_due || r.totalDue || ""),
+        booking?.event || "",
+        booking?.guest_name || r.guest || "",
+        booking?.arrival_date || r.arrival || "",
+        booking?.room_type || "",
+        booking?.total_due || "",
+        safeStr(booking.event || ""),
+        safeStr(booking.guest_name || r.guest || ""),
+        safeStr(booking.arrival_date || r.arrival || ""),
+        safeStr(booking.room_type || ""),
+        safeStr(booking.total_due || r.totalDue || ""),
 r.when ? r.when.toISOString().slice(0, 19) : ""
 ].join("|");
 
@@ -789,78 +662,38 @@ if (selectedProperty !== "__all__" && safeStr(r.property_id) !== safeStr(selecte
 return false;
 }
 
-      // Date window filtering
 const d = r.businessDate || r.when;
 if (d) {
 if (d < range.start || d > range.end) return false;
 }
 
 if (!q) return true;
-      const hay = JSON.stringify(r).toLowerCase();
-
-      // More professional search: only search key fields + summary (faster than JSON stringify)
-      const hay = [
-        r.kind,
-        r.property_id,
-        r.guest,
-        r.arrival,
-        r.sentiment,
-        r.summary
-      ].map(x => safeStr(x).toLowerCase()).join(" | ");
-
+const hay = JSON.stringify(r).toLowerCase();
 return hay.includes(q);
 });
 
+    // remove dupes after filtering (so property/range/search behaves correctly)
 state.filteredRows = dedupeRows(state.filteredRows);
-}
-
-// ============================================================
-// ✅ KPI helpers
-// ============================================================
-function isCallLogBookingEvent(r) {
-if (!r || r.kind !== "call") return false;
-const b = safeJsonParse(r.raw && r.raw.booking) || {};
-const ev = safeStr(b.event).trim();
-return BOOKING_EVENTS.has(ev);
 }
 
 // ============================================================
 // KPIs (Bubbles)
 // ============================================================
 function computeKPIs(rows) {
-    // Calls are only call rows (never count reservations table rows as calls)
 const calls = rows.filter(r => r.kind === "call");
-const bookingsTable = rows.filter(r => r.kind === "booking");
+const bookings = rows.filter(r => r.kind === "booking");
 
-const bookingEventsFromCalls = KPI_INCLUDE_CALLLOG_BOOKINGS
-? calls.filter(isCallLogBookingEvent)
-: [];
-
-    const totalCalls = calls.length;
-    const totalBookings = bookingsTable.length + bookingEventsFromCalls.length;
-    // ✅ Calls metric should exclude booking-confirmation rows (more realistic conversion)
-    const totalCalls = calls.filter(c => !isCallLogBookingEvent(c)).length;
-
-    const conv = totalCalls ? totalBookings / totalCalls : NaN;
-    const totalBookings = bookingsTable.length + bookingEventsFromCalls.length;
-    const conv = totalCalls ? (totalBookings / totalCalls) : NaN;
+const totalCalls = calls.length;
+const totalBookings = bookings.length;
+const conv = totalCalls ? totalBookings / totalCalls : NaN;
 
 const durations = calls.map(c => c.duration).filter(Number.isFinite);
 const avgDur = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : NaN;
 
-// Revenue: safest by default is reservations table only (avoids double counting)
-let revenue = bookingsTable
+const revenue = bookings
 .map(b => b.totalDue)
 .filter(Number.isFinite)
 .reduce((a, b) => a + b, 0);
-
-if (KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS && bookingEventsFromCalls.length) {
-const callRevenue = bookingEventsFromCalls
-.map(r => r.totalDue)
-.filter(Number.isFinite)
-.reduce((a, b) => a + b, 0);
-revenue += callRevenue;
-}
 
 return { totalCalls, totalBookings, conv, avgDur, revenue };
 }
@@ -941,15 +774,14 @@ ctx.stroke();
 }
 
 // ============================================================
-  // Feed visibility (match index.html IDs)
-  // Feed
+// Feed visibility (match index.html IDs)
 // ============================================================
-  function setFeedVisibility(hasRows) {
-    const empty = $("feedEmpty");
-    const wrap = $("feedTableWrap");
-    if (empty) empty.style.display = hasRows ? "none" : "";
-    if (wrap) wrap.style.display = hasRows ? "" : "none";
-  }
+function setFeedVisibility(hasRows) {
+const empty = $("feedEmpty");
+const wrap = $("feedTableWrap");
+if (empty) empty.style.display = hasRows ? "none" : "";
+if (wrap) wrap.style.display = hasRows ? "" : "none";
+}
 
 function classifyEvent(r) {
 const sum = (r.summary || "").toLowerCase();
@@ -967,10 +799,8 @@ if (!tbody) { setFeedVisibility(false); return; }
 tbody.innerHTML = "";
 
 const sorted = rows.slice().sort((a, b) => {
-      const ad = (a.kind === "booking" ? (a.businessDate || a.when) : (a.when || a.businessDate));
-      const bd = (b.kind === "booking" ? (b.businessDate || b.when) : (b.when || b.businessDate));
-      const ad = (a.kind === "booking" ? (a.when || a.businessDate) : (a.when || a.businessDate));
-      const bd = (b.kind === "booking" ? (b.when || b.businessDate) : (b.when || b.businessDate));
+const ad = (a.kind === "booking" ? (a.businessDate || a.when) : (a.when || a.businessDate));
+const bd = (b.kind === "booking" ? (b.businessDate || b.when) : (b.when || b.businessDate));
 return (bd && bd.getTime ? bd.getTime() : 0) - (ad && ad.getTime ? ad.getTime() : 0);
 });
 
@@ -978,26 +808,25 @@ for (const r of sorted.slice(0, FEED_MAX_ROWS)) {
 const ev = classifyEvent(r);
 
 const tr = document.createElement("tr");
-      tr.dataset.event = ev;
-      tr.dataset.event = ev; // ✅ required by your filter script
+tr.dataset.event = ev; // ✅ used by index.html filter script
 
-const rateCell = Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : "—";
-      const totalCell = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
-      const nightsCell = Number.isFinite(r.nights) ? String(r.nights) : "—";
+      // NOTE: Your current index.html table columns are:
+      // Time | Type | Guest/Caller | Arrival | N | Rate | Total | Sentiment | Summary
+      // But your current normalized objects don't include rate_per_night yet.
+      // So we render Rate as "—" for now to keep alignment.
+      const rateCell = "—";
+      const rateCell = Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : "—";
 
 tr.innerHTML = `
        <td>${r.when ? escHtml(r.when.toLocaleString()) : "—"}</td>
        <td>${escHtml(ev)}</td>
        <td>${escHtml(r.guest || "—")}</td>
        <td>${escHtml(r.arrival || "—")}</td>
-        <td>${Number.isFinite(r.nights) ? escHtml(r.nights) : "—"}</td>
-        <td>${escHtml(nightsCell)}</td>
+       <td>${Number.isFinite(r.nights) ? escHtml(r.nights) : "—"}</td>
        <td>${escHtml(rateCell)}</td>
-        <td>${Number.isFinite(r.totalDue) ? escHtml(fmtMoney(r.totalDue)) : "—"}</td>
-        <td>${escHtml(totalCell)}</td>
+       <td>${Number.isFinite(r.totalDue) ? escHtml(fmtMoney(r.totalDue)) : "—"}</td>
        <td>${escHtml(r.sentiment || "—")}</td>
-        <td>${escHtml(r.summary || "—")}</td>
-        <td>${escHtml(clampStr(r.summary || "—", 260))}</td>
+       <td>${escHtml(r.summary || "—")}</td>
      `;
 tbody.appendChild(tr);
 }
@@ -1023,7 +852,8 @@ r.businessDate ? r.businessDate.toISOString() : "",
 r.guest || "",
 r.arrival || "",
 Number.isFinite(r.nights) ? r.nights : "",
-Number.isFinite(r.ratePerNight) ? r.ratePerNight : "",
+        "", // rate placeholder (when you add rate_per_night later, plug it here)
+        Number.isFinite(r.ratePerNight) ? r.ratePerNight : "",
 Number.isFinite(r.totalDue) ? r.totalDue : "",
 r.sentiment || "",
 r.summary || ""
@@ -1045,12 +875,13 @@ toast("CSV exported.");
 }
 
 // ============================================================
-  // Render All
-  // UI badges + “last updated”
+// Render All
 // ============================================================
 function updateWindowBadges() {
 const label = state.lastRange ? state.lastRange.label : "—";
 setText("badgeWindow", label);
+
+    // Optional (present in your new index.html)
 setText("badgeWindowInline", `Window: ${label}`);
 setText("badgeWindowMirror", label);
 }
@@ -1060,9 +891,6 @@ const t = new Date().toLocaleString();
 setText("lastUpdated", `Updated ${t}`);
 }
 
-  // ============================================================
-  // Render All
-  // ============================================================
 function renderAll() {
 applyFilters();
 
@@ -1081,13 +909,6 @@ updateLastUpdated();
 // ============================================================
 // Load
 // ============================================================
-  function setLoadingState(isLoading) {
-    // Professional SaaS feel: status line changes without breaking layout
-    const sb = $("stateBox");
-    if (!sb) return;
-    sb.textContent = isLoading ? "Loading data…" : "";
-  }
-
 async function loadAndRender() {
 if (!(await ensureAuthGate())) return;
 
@@ -1095,39 +916,25 @@ try {
 state.lastRange = getSelectedRange();
 updateWindowBadges();
 
-      const [resv, calls] = await Promise.all([
-        fetchTable("reservations"),
-        fetchTable("call_logs")
-      setLoadingState(true);
-
-      const [resvRaw, callsRaw] = await Promise.all([
-        fetchReservations(state.lastRange),
-        fetchCalls(state.lastRange)
+const [resv, calls] = await Promise.all([
+fetchTable("reservations"),
+fetchTable("call_logs")
 ]);
 
-      state.allRows = []
-        .concat((resv || []).map(normalizeReservation))
-        .concat((calls || []).map(normalizeCall));
-      // Normalize
-      const resv = (resvRaw || []).map(normalizeReservation);
-      const calls = (callsRaw || []).map(normalizeCall);
-
-      // If reservations are not server-filtered by arrival_date (custom format), ensure client filter still applies.
-      // (applyFilters() will filter by businessDate automatically)
-      state.allRows = resv.concat(calls);
+state.allRows = []
+.concat((resv || []).map(normalizeReservation))
+.concat((calls || []).map(normalizeCall));
 
 populatePropertySelect(state.allRows);
 
-      setLoadingState(false);
+      // Clear old message on successful load
 setText("stateBox", "");
 
 renderAll();
 toast("Dashboard refreshed.");
 } catch (e) {
 console.error(e);
-      clearDataUI("Load error.");
-      setLoadingState(false);
-      clearDataUI(`Load error: ${e && e.message ? e.message : "Unknown error"}`);
+clearDataUI("Load error.");
 }
 }
 
@@ -1137,11 +944,13 @@ console.error(e);
 async function init() {
 if (enforceCanonicalUrl()) return;
 
+    // supabase client
 try { supabaseClient = getSupabaseClient(); }
 catch (e) { clearDataUI(e.message); return; }
 
 initTheme();
-initAuthHandlers();
+    initAuthHandlers();     // ✅ attach handlers before any early returns
+    initAuthHandlers(); // ✅ attach handlers before any early returns
 initControls();
 
 if (ALWAYS_REQUIRE_LOGIN) {
@@ -1151,14 +960,15 @@ clearDataUI("Please sign in to load dashboard data.");
 return;
 }
 
+    // auto-load if already logged in
 if (await ensureAuthGate()) loadAndRender();
 
-    // Refresh when returning to tab
+    // refresh when tab becomes visible again
 document.addEventListener("visibilitychange", () => {
 if (document.visibilityState === "visible") loadAndRender();
 });
 
-    // Refresh when bfcache restores page
+    // refresh when BFCache restores the page
 window.addEventListener("pageshow", (e) => {
 if (e.persisted) loadAndRender();
 });
