@@ -46,6 +46,12 @@
       margin-top: 14px;
     }
 
+    /* Optional: subtle playing state indicator on demo-audio buttons */
+    .demo-audio.isPlaying{
+      border-color: rgba(110,168,255,.55);
+      box-shadow: 0 0 0 3px rgba(110,168,255,.18);
+    }
+
     /* Demo Modal */
     .demoModal.hidden{ display:none; }
     .demoModal{
@@ -606,6 +612,22 @@
       var closeBtn = document.querySelector(".demoClose");
       var backdrop = document.querySelector(".demoBackdrop");
 
+      // Store default label for each audio button so we can reset it
+      function seedAudioLabels(){
+        document.querySelectorAll(".demo-audio").forEach(function(btn){
+          if(!btn.dataset.label) btn.dataset.label = btn.textContent.trim();
+        });
+      }
+      seedAudioLabels();
+
+      function resetAudioButtons(){
+        document.querySelectorAll(".demo-audio").forEach(function(btn){
+          btn.textContent = btn.dataset.label || "🔊 Hear Call Demo";
+          btn.classList.remove("isPlaying");
+          btn.setAttribute("aria-pressed","false");
+        });
+      }
+
       function openModal(src){
         fallback.classList.remove("show");
         video.style.display = "block";
@@ -638,21 +660,61 @@
         video.src = "";
       }
 
+      // Video demo buttons
       document.querySelectorAll(".demo-video").forEach(function(btn){
         btn.addEventListener("click", function(){
           openModal(btn.getAttribute("data-video"));
         });
       });
 
+      // Audio demo buttons: toggle + visible playing state
       document.querySelectorAll(".demo-audio").forEach(function(btn){
         btn.addEventListener("click", function(){
           var src = btn.getAttribute("data-audio");
+
+          var currentSrc = audio.dataset.src || "";
+          var isSame = (currentSrc === src);
+          var isPlaying = audio && !audio.paused && !audio.ended;
+
+          // If same button and currently playing -> stop/reset
+          if(isSame && isPlaying){
+            try { audio.pause(); } catch(e) {}
+            try { audio.currentTime = 0; } catch(e) {}
+            audio.dataset.src = "";
+            resetAudioButtons();
+            return;
+          }
+
+          // Otherwise: stop previous audio, reset buttons
+          try { audio.pause(); } catch(e) {}
+          try { audio.currentTime = 0; } catch(e) {}
+          resetAudioButtons();
+
+          // Play new audio
+          audio.dataset.src = src;
           audio.src = src;
           audio.load();
-          audio.play().catch(function(){});
+
+          audio.play().then(function(){
+            btn.textContent = "⏸ Stop demo";
+            btn.classList.add("isPlaying");
+            btn.setAttribute("aria-pressed","true");
+          }).catch(function(){
+            // If blocked, keep normal label
+            btn.textContent = btn.dataset.label || "🔊 Hear Call Demo";
+            btn.classList.remove("isPlaying");
+            btn.setAttribute("aria-pressed","false");
+          });
         });
       });
 
+      // When audio ends, reset UI
+      audio.addEventListener("ended", function(){
+        audio.dataset.src = "";
+        resetAudioButtons();
+      });
+
+      // Close modal handlers
       if(closeBtn) closeBtn.addEventListener("click", closeModal);
       if(backdrop) backdrop.addEventListener("click", closeModal);
 
