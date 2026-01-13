@@ -1,11 +1,11 @@
-// public/dashboard/app.js — v10.3 (ELITE DATA WINDOW FIX + PRO SaaS POLISH + SAFE)
+// public/dashboard/app.js — v10.4 (REALISTIC KPI FIX + ELITE WINDOW + PRO SaaS POLISH + SAFE)
 // Keeps all existing index.html ID contracts and working behavior.
-// Key upgrades:
-// ✅ Reservations now show in 7/30-day windows by default (filters by created_at; still displays arrival_date)
-// ✅ Cleaner KPI logic (calls exclude booking-events; configurable)
-// ✅ Safer Supabase fetch (range-aware server filtering when possible; falls back cleanly)
-// ✅ Stronger date parsing + money parsing + schema drift tolerance
-// ✅ More professional state messaging + error surfacing without breaking UI
+// Fixes:
+// ✅ Conversion no longer goes >100% due to booking-payload calls being excluded incorrectly
+// ✅ Total calls = all call rows in window (matches your SQL counts)
+// ✅ Optional: include call_logs booking events in bookings/revenue without breaking anything
+// ✅ Reservations window uses created_at by default (demo realism), still shows arrival_date in feed
+// ✅ Range-aware server filtering + schema drift tolerance preserved
 
 (() => {
   // ============================================================
@@ -17,32 +17,25 @@
   const CANONICAL_PATH = "/dashboard/";
   const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
 
-  // If true: user must click "Login" and sign in every time
   const ALWAYS_REQUIRE_LOGIN = false;
-
-  // If true: Supabase will persist session in localStorage
   const PERSIST_SESSION = true;
 
-  // Storage keys
   const THEME_STORAGE_KEY = "nsa_theme";        // "light" | "dark" | "system"
   const PROPERTY_STORAGE_KEY = "nsa_property";  // "__all__" | "<uuid>"
 
-  // Data limits
   const FETCH_LIMIT = 3000;
   const FEED_MAX_ROWS = 500;
 
   // ============================================================
-  // ✅ KPI behavior toggles
+  // KPI behavior toggles
   // ============================================================
-  // If true, “Bookings” includes call_logs booking events like reservation_confirmed.
-  // If false, “Bookings” uses reservations table only.
+  // Bookings count from reservations table only (recommended)
   const KPI_INCLUDE_CALLLOG_BOOKINGS = false;
 
-  // If true, revenue also includes call_logs totals for booking events.
-  // Default false to avoid double counting (recommended for demo cleanliness).
+  // Revenue from reservations table only (recommended; avoids double count)
   const KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS = false;
 
-  // Which events in call_logs.booking.event count as a “booking”
+  // call_logs.booking.event values that represent booking events
   const BOOKING_EVENTS = new Set([
     "reservation_confirmed",
     "booking_confirmed",
@@ -50,11 +43,10 @@
   ]);
 
   // ============================================================
-  // ✅ Date-window behavior (THIS fixes “bookings not showing”)
+  // Date-window behavior
   // ============================================================
-  // If true, reservations are filtered by created_at for date windows.
-  // If false, reservations are filtered by arrival_date (stay date).
-  // For Elite demo realism, keep this TRUE.
+  // TRUE = reservations are windowed by created_at (best for dashboard demo)
+  // FALSE = reservations are windowed by arrival_date (stay date)
   const RESERVATION_WINDOW_BY_CREATED_AT = true;
 
   // ============================================================
@@ -65,11 +57,6 @@
   const setText = (id, text) => {
     const el = $(id);
     if (el) el.textContent = (text === null || text === undefined) ? "" : String(text);
-  };
-
-  const showEl = (id, show) => {
-    const el = $(id);
-    if (el) el.style.display = show ? "" : "none";
   };
 
   // ============================================================
@@ -95,7 +82,6 @@
   function toNum(v) {
     if (v === null || v === undefined) return NaN;
     if (typeof v === "number") return v;
-    // Allow currency strings like "$74.06", "74.06", "74,06"
     const s = String(v).trim().replace(/,/g, ".").replace(/[^0-9.\-]/g, "");
     const n = Number(s);
     return Number.isFinite(n) ? n : NaN;
@@ -107,16 +93,11 @@
     try { return JSON.parse(v); } catch { return null; }
   }
 
-  // Accepts:
-  // - dd-mm-yyyy
-  // - yyyy-mm-dd
-  // - timestamps / ISO-ish
   function parseISOish(v) {
     if (!v) return null;
     const s = String(v).trim();
     if (!s) return null;
 
-    // dd-mm-yyyy
     const ddmmyyyy = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
     if (ddmmyyyy) {
       const [, dd, mm, yyyy] = ddmmyyyy;
@@ -124,14 +105,12 @@
       return Number.isFinite(d.getTime()) ? d : null;
     }
 
-    // yyyy-mm-dd
     const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (ymd) {
       const d = new Date(`${s}T00:00:00`);
       return Number.isFinite(d.getTime()) ? d : null;
     }
 
-    // "2026-01-09 09:28:03.721+00:00" or +00
     if (/^\d{4}-\d{2}-\d{2}\s/.test(s) && (s.includes("+00") || s.includes("+00:00"))) {
       const iso = s
         .replace(" ", "T")
@@ -174,7 +153,7 @@
   }
 
   // ============================================================
-  // Crash visibility (surface errors in stateBox)
+  // Crash visibility
   // ============================================================
   window.addEventListener("error", (e) => {
     try {
@@ -543,22 +522,19 @@
   }
 
   // ============================================================
-  // Fetch + Normalize (range-aware, schema-safe)
+  // Fetch (range-aware)
   // ============================================================
   function isoForSupabase(d) {
-    // Supabase accepts ISO timestamps
     return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
   }
 
   async function fetchCalls(range) {
-    // call_logs should always be filterable by created_at
     const q = supabaseClient
       .from("call_logs")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(FETCH_LIMIT);
 
-    // Range server-filter to avoid pulling entire history
     if (range && range.start && range.end) {
       q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
     }
@@ -568,15 +544,7 @@
     return data || [];
   }
 
-  function canServerFilterReservationsByArrival(sampleVal) {
-    // Only safe if arrival_date looks like yyyy-mm-dd
-    const s = safeStr(sampleVal).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(s);
-  }
-
   async function fetchReservations(range) {
-    // Prefer server filtering by created_at if we're windowing by created_at
-    // Otherwise, try arrival_date only if it's yyyy-mm-dd; else fallback to client filtering.
     const q = supabaseClient
       .from("reservations")
       .select("*")
@@ -587,8 +555,6 @@
       if (RESERVATION_WINDOW_BY_CREATED_AT) {
         q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
       }
-      // If not windowing by created_at, we will client-filter by arrival_date because it may be dd-mm-yyyy.
-      // We'll keep the query broad (still limited) for safety.
     }
 
     const { data, error } = await q;
@@ -596,7 +562,9 @@
     return data || [];
   }
 
-  // ✅ derive a trustworthy nightly rate from various shapes
+  // ============================================================
+  // Normalize
+  // ============================================================
   function computeRatePerNight({ rate, nightly_rate, rate_per_night, total_due, nights, adr, avg_rate }) {
     const direct =
       toNum(rate_per_night) ||
@@ -631,8 +599,6 @@
       nights: r.nights
     });
 
-    // ✅ KEY FIX:
-    // "Last 7/30 days" usually means bookings created recently, not future arrival date.
     const windowDate = RESERVATION_WINDOW_BY_CREATED_AT ? created : arrivalDate;
 
     const guest = safeStr(r.guest_name);
@@ -662,9 +628,7 @@
   function normalizeCall(r) {
     const booking = safeJsonParse(r.booking) || {};
 
-    const guest =
-      safeStr(booking.guest_name || booking.guest || r.guest_name || "");
-
+    const guest = safeStr(booking.guest_name || booking.guest || r.guest_name || "");
     const arrival = safeStr(booking.arrival_date || booking.arrival || "");
 
     const nights = toNum(booking.nights);
@@ -713,7 +677,7 @@
   };
 
   // ============================================================
-  // Dedupe (visual duplicates)
+  // Dedupe
   // ============================================================
   function dedupeRows(rows) {
     const seen = new Set();
@@ -755,7 +719,6 @@
         return false;
       }
 
-      // Date window filtering
       const d = r.businessDate || r.when;
       if (d) {
         if (d < range.start || d > range.end) return false;
@@ -763,7 +726,6 @@
 
       if (!q) return true;
 
-      // More professional search: only search key fields + summary (faster than JSON stringify)
       const hay = [
         r.kind,
         r.property_id,
@@ -780,7 +742,7 @@
   }
 
   // ============================================================
-  // ✅ KPI helpers
+  // KPI helpers
   // ============================================================
   function isCallLogBookingEvent(r) {
     if (!r || r.kind !== "call") return false;
@@ -790,7 +752,7 @@
   }
 
   // ============================================================
-  // KPIs (Bubbles)
+  // KPIs
   // ============================================================
   function computeKPIs(rows) {
     const calls = rows.filter(r => r.kind === "call");
@@ -800,8 +762,8 @@
       ? calls.filter(isCallLogBookingEvent)
       : [];
 
-    // ✅ Calls metric should exclude booking-confirmation rows (more realistic conversion)
-    const totalCalls = calls.filter(c => !isCallLogBookingEvent(c)).length;
+    // ✅ FIX: Total calls should reflect ALL calls in the window (matches SQL, prevents >100% inflation)
+    const totalCalls = calls.length;
 
     const totalBookings = bookingsTable.length + bookingEventsFromCalls.length;
     const conv = totalCalls ? (totalBookings / totalCalls) : NaN;
@@ -809,7 +771,7 @@
     const durations = calls.map(c => c.duration).filter(Number.isFinite);
     const avgDur = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : NaN;
 
-    // Revenue: safest by default is reservations table only (avoids double counting)
+    // Revenue default: reservations only
     let revenue = bookingsTable
       .map(b => b.totalDue)
       .filter(Number.isFinite)
@@ -855,7 +817,7 @@
   }
 
   // ============================================================
-  // Charts (only if canvases exist)
+  // Charts (if canvases exist)
   // ============================================================
   function groupByDay(rows, kind) {
     const map = {};
@@ -920,15 +882,15 @@
     tbody.innerHTML = "";
 
     const sorted = rows.slice().sort((a, b) => {
-      const ad = (a.kind === "booking" ? (a.when || a.businessDate) : (a.when || a.businessDate));
-      const bd = (b.kind === "booking" ? (b.when || b.businessDate) : (b.when || b.businessDate));
+      const ad = (a.when || a.businessDate);
+      const bd = (b.when || b.businessDate);
       return (bd && bd.getTime ? bd.getTime() : 0) - (ad && ad.getTime ? ad.getTime() : 0);
     });
 
     for (const r of sorted.slice(0, FEED_MAX_ROWS)) {
       const ev = classifyEvent(r);
       const tr = document.createElement("tr");
-      tr.dataset.event = ev; // ✅ required by your filter script
+      tr.dataset.event = ev;
 
       const rateCell = Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : "—";
       const totalCell = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
@@ -991,7 +953,7 @@
   }
 
   // ============================================================
-  // UI badges + “last updated”
+  // UI badges + last updated
   // ============================================================
   function updateWindowBadges() {
     const label = state.lastRange ? state.lastRange.label : "—";
@@ -1027,7 +989,6 @@
   // Load
   // ============================================================
   function setLoadingState(isLoading) {
-    // Professional SaaS feel: status line changes without breaking layout
     const sb = $("stateBox");
     if (!sb) return;
     sb.textContent = isLoading ? "Loading data…" : "";
@@ -1047,12 +1008,9 @@
         fetchCalls(state.lastRange)
       ]);
 
-      // Normalize
       const resv = (resvRaw || []).map(normalizeReservation);
       const calls = (callsRaw || []).map(normalizeCall);
 
-      // If reservations are not server-filtered by arrival_date (custom format), ensure client filter still applies.
-      // (applyFilters() will filter by businessDate automatically)
       state.allRows = resv.concat(calls);
 
       populatePropertySelect(state.allRows);
@@ -1091,12 +1049,10 @@
 
     if (await ensureAuthGate()) loadAndRender();
 
-    // Refresh when returning to tab
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") loadAndRender();
     });
 
-    // Refresh when bfcache restores page
     window.addEventListener("pageshow", (e) => {
       if (e.persisted) loadAndRender();
     });
