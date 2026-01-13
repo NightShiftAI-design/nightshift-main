@@ -121,6 +121,17 @@
       display:none;
     }
     .demoFallback.show{ display:block; }
+
+    /* Pro demo stack (3 buttons) - keeps layout pretty on mobile */
+    .demoRow.stack3 .btn{
+      flex: 1 1 auto;
+    }
+    @media (max-width: 520px){
+      .demoRow.stack3 .btn{
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
   </style>
 </head>
 
@@ -381,7 +392,7 @@
               <li>PCI-safe handling (no card numbers)</li>
             </ul>
 
-            <div class="demoRow">
+            <div class="demoRow stack3">
               <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_greeting_matilda.mp3" type="button">🔊 Greeting Example</button>
               <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_reservation_confirmation.mp3" type="button">🔊 Booking Confirmation Example</button>
               <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_emergency_matilda.mp3" type="button">🔊 Emergency Handling Example</button>
@@ -467,7 +478,7 @@
       </div>
     </section>
 
-    <!-- SECTION: IMPLEMENTATION (same style as index sections) -->
+    <!-- SECTION: IMPLEMENTATION -->
     <section class="section" aria-label="Implementation">
       <div class="sectionHead">
         <div>
@@ -506,7 +517,7 @@
       </div>
     </section>
 
-    <!-- FINAL CTA (matches index: a notice block in a section) -->
+    <!-- FINAL CTA -->
     <section class="section" aria-label="Final call to action">
       <div class="notice">
         <h3>Ready to stop missing calls?</h3>
@@ -622,7 +633,6 @@
       var closeBtn = document.querySelector(".demoClose");
       var backdrop = document.querySelector(".demoBackdrop");
 
-      // Store default label for each audio button so we can reset it
       function seedAudioLabels(){
         document.querySelectorAll(".demo-audio").forEach(function(btn){
           if(!btn.dataset.label) btn.dataset.label = btn.textContent.trim();
@@ -670,14 +680,12 @@
         video.src = "";
       }
 
-      // Video demo buttons
       document.querySelectorAll(".demo-video").forEach(function(btn){
         btn.addEventListener("click", function(){
           openModal(btn.getAttribute("data-video"));
         });
       });
 
-      // Audio demo buttons: toggle + visible playing state
       document.querySelectorAll(".demo-audio").forEach(function(btn){
         btn.addEventListener("click", function(){
           var src = btn.getAttribute("data-audio");
@@ -686,7 +694,6 @@
           var isSame = (currentSrc === src);
           var isPlaying = audio && !audio.paused && !audio.ended;
 
-          // If same button and currently playing -> stop/reset
           if(isSame && isPlaying){
             try { audio.pause(); } catch(e) {}
             try { audio.currentTime = 0; } catch(e) {}
@@ -695,12 +702,10 @@
             return;
           }
 
-          // Otherwise: stop previous audio, reset buttons
           try { audio.pause(); } catch(e) {}
           try { audio.currentTime = 0; } catch(e) {}
           resetAudioButtons();
 
-          // Play new audio
           audio.dataset.src = src;
           audio.src = src;
           audio.load();
@@ -710,7 +715,6 @@
             btn.classList.add("isPlaying");
             btn.setAttribute("aria-pressed","true");
           }).catch(function(){
-            // If blocked, keep normal label
             btn.textContent = btn.dataset.label || "🔊 Hear Call Demo";
             btn.classList.remove("isPlaying");
             btn.setAttribute("aria-pressed","false");
@@ -718,13 +722,11 @@
         });
       });
 
-      // When audio ends, reset UI
       audio.addEventListener("ended", function(){
         audio.dataset.src = "";
         resetAudioButtons();
       });
 
-      // Close modal handlers
       if(closeBtn) closeBtn.addEventListener("click", closeModal);
       if(backdrop) backdrop.addEventListener("click", closeModal);
 
