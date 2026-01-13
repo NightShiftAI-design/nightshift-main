@@ -36,23 +36,25 @@
   </script>
 
   <style>
-    /* Page-only “SaaS pricing” polish (keeps your site.css intact) */
-    .pkg-hero{
+    /* ✅ Keep your existing site.css + existing class names (pricing-grid/price-card) */
+    /* Only light polish + fixes, scoped to this page */
+
+    .page-hero{
       position: relative;
       overflow: hidden;
       border-radius: 22px;
       padding: 34px 26px;
       border: 1px solid rgba(255,255,255,.10);
       background:
-        radial-gradient(920px 440px at 18% 10%, rgba(110,168,255,.20), transparent 60%),
-        radial-gradient(820px 420px at 82% 6%, rgba(66,211,146,.12), transparent 60%),
+        radial-gradient(900px 420px at 18% 12%, rgba(110,168,255,.22), transparent 60%),
+        radial-gradient(820px 420px at 82% 4%, rgba(66,211,146,.12), transparent 60%),
         rgba(255,255,255,.05);
     }
-    html:not(.dark) .pkg-hero{
+    html:not(.dark) .page-hero{
       border-color: rgba(10,15,25,.10);
       background:
-        radial-gradient(920px 440px at 18% 10%, rgba(110,168,255,.14), transparent 60%),
-        radial-gradient(820px 420px at 82% 6%, rgba(66,211,146,.10), transparent 60%),
+        radial-gradient(900px 420px at 18% 12%, rgba(110,168,255,.14), transparent 60%),
+        radial-gradient(820px 420px at 82% 4%, rgba(66,211,146,.10), transparent 60%),
         rgba(10,15,25,.03);
     }
 
@@ -87,318 +89,25 @@
     .pill.good .dot{ background: rgba(66,211,146,.95); box-shadow: 0 0 0 4px rgba(66,211,146,.16); }
     .pill.warn .dot{ background: rgba(255,204,102,.95); box-shadow: 0 0 0 4px rgba(255,204,102,.14); }
 
-    .pkg-grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+    /* Pricing grid: ensure consistent spacing and equal card heights without changing your core styling */
+    .pricing-grid{
       margin-top: 22px;
       align-items: stretch;
     }
-    @media (max-width: 980px){
-      .pkg-grid{ grid-template-columns: 1fr; }
-    }
-
-    .pkg-card{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 18px;
-      position: relative;
-      overflow: hidden;
+    .price-card{
       display:flex;
       flex-direction: column;
-      min-height: 100%;
+      height: 100%;
     }
-    html:not(.dark) .pkg-card{
-      border-color: rgba(10,15,25,.10);
-      background: rgba(10,15,25,.03);
-    }
-
-    .pkg-card.featured{
-      border-color: rgba(110,168,255,.32);
-      background:
-        radial-gradient(620px 260px at 20% 0%, rgba(110,168,255,.14), transparent 60%),
-        rgba(255,255,255,.04);
-      box-shadow: 0 30px 90px rgba(0,0,0,.35);
-    }
-    html:not(.dark) .pkg-card.featured{
-      background:
-        radial-gradient(620px 260px at 20% 0%, rgba(110,168,255,.10), transparent 60%),
-        rgba(10,15,25,.03);
-      box-shadow: 0 30px 80px rgba(10,15,25,.12);
-    }
-
-    .pkg-top{
+    .demo-actions{
       display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .pkg-name{
-      margin: 6px 0 4px;
-      font-size: 18px;
-      font-weight: 950;
-      letter-spacing: -0.01em;
-      color: rgba(234,240,255,.92);
-    }
-    html:not(.dark) .pkg-name{ color: rgba(10,15,25,.92); }
-    .pkg-desc{
-      margin: 0;
-      color: rgba(234,240,255,.72);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-    html:not(.dark) .pkg-desc{ color: rgba(10,15,25,.62); }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(234,240,255,.86);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    html:not(.dark) .badge{
-      border-color: rgba(10,15,25,.12);
-      background: rgba(10,15,25,.04);
-      color: rgba(10,15,25,.78);
-    }
-    .badge .spark{
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(110,168,255,.95);
-      box-shadow: 0 0 0 4px rgba(110,168,255,.16);
-    }
-    .badge.good .spark{ background: rgba(66,211,146,.95); box-shadow: 0 0 0 4px rgba(66,211,146,.14); }
-
-    .price{
+      gap:10px;
+      flex-wrap:wrap;
       margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255,255,255,.10);
     }
-    html:not(.dark) .price{ border-top-color: rgba(10,15,25,.10); }
+    .price-card .hero-cta-row{ margin-top: auto; }
 
-    .price strong{
-      display:block;
-      font-size: 26px;
-      letter-spacing: -0.02em;
-      color: rgba(234,240,255,.92);
-      line-height: 1.1;
-    }
-    html:not(.dark) .price strong{ color: rgba(10,15,25,.92); }
-    .price span{
-      display:block;
-      margin-top: 4px;
-      color: rgba(234,240,255,.70);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-    html:not(.dark) .price span{ color: rgba(10,15,25,.60); }
-
-    .pkg-list{
-      margin: 14px 0 0;
-      padding-left: 18px;
-      color: rgba(234,240,255,.78);
-      line-height: 1.75;
-      font-size: 13px;
-    }
-    html:not(.dark) .pkg-list{ color: rgba(10,15,25,.70); }
-
-    .pkg-actions{
-      margin-top: auto;
-      padding-top: 14px;
-      display:flex;
-      gap:10px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-
-    .price-cta{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 950;
-      text-decoration:none;
-      border: 1px solid rgba(110,168,255,.36);
-      background: linear-gradient(180deg, rgba(110,168,255,.20), rgba(255,255,255,.04));
-      color: rgba(234,240,255,.92);
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-    }
-    html:not(.dark) .price-cta{
-      color: rgba(10,15,25,.92);
-      background: linear-gradient(180deg, rgba(110,168,255,.12), rgba(10,15,25,.02));
-    }
-    .price-cta:hover{ transform: translateY(-1px); border-color: rgba(110,168,255,.52); }
-
-    .ghost-cta{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 950;
-      text-decoration:none;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      color: rgba(234,240,255,.86);
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-    }
-    html:not(.dark) .ghost-cta{
-      border-color: rgba(10,15,25,.12);
-      background: rgba(10,15,25,.03);
-      color: rgba(10,15,25,.82);
-    }
-    .ghost-cta:hover{ transform: translateY(-1px); border-color: rgba(110,168,255,.28); }
-
-    .compare{
-      margin-top: 18px;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-      overflow: hidden;
-    }
-    html:not(.dark) .compare{
-      border-color: rgba(10,15,25,.10);
-      background: rgba(10,15,25,.02);
-    }
-    .compare-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    html:not(.dark) .compare-head{ border-bottom-color: rgba(10,15,25,.10); }
-    .compare-head h3{ margin: 0; font-size: 15px; }
-    .toggle-row{ display:flex; gap:8px; flex-wrap:wrap; }
-    .toggle{
-      appearance:none;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      color: rgba(234,240,255,.88);
-      border-radius: 999px;
-      padding: 9px 12px;
-      font-weight: 950;
-      cursor:pointer;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-      font-size: 12px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    html:not(.dark) .toggle{
-      border-color: rgba(10,15,25,.12);
-      background: rgba(10,15,25,.03);
-      color: rgba(10,15,25,.82);
-    }
-    .toggle:hover{ transform: translateY(-1px); }
-    .toggle.active{
-      background: rgba(110,168,255,.16);
-      border-color: rgba(110,168,255,.32);
-    }
-
-    .table-wrap{ overflow:auto; }
-    table{
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 820px;
-      font-size: 13px;
-    }
-    th, td{
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      vertical-align: top;
-    }
-    html:not(.dark) th, html:not(.dark) td{ border-bottom-color: rgba(10,15,25,.10); }
-    th{
-      text-align:left;
-      color: rgba(234,240,255,.78);
-      font-weight: 950;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      font-size: 11px;
-      position: sticky;
-      top: 0;
-      background: rgba(2,6,23,.88);
-      z-index: 1;
-    }
-    html:not(.dark) th{
-      background: rgba(255,255,255,.92);
-      color: rgba(10,15,25,.60);
-    }
-    td{ color: rgba(234,240,255,.80); }
-    html:not(.dark) td{ color: rgba(10,15,25,.72); }
-
-    .yes{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 7px 10px; border-radius: 999px;
-      border: 1px solid rgba(66,211,146,.22);
-      background: rgba(66,211,146,.10);
-      color: rgba(234,240,255,.90);
-      font-weight: 900; font-size: 12px;
-    }
-    .maybe{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 7px 10px; border-radius: 999px;
-      border: 1px solid rgba(255,204,102,.22);
-      background: rgba(255,204,102,.10);
-      color: rgba(234,240,255,.90);
-      font-weight: 900; font-size: 12px;
-    }
-    .no{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 7px 10px; border-radius: 999px;
-      border: 1px solid rgba(248,113,113,.22);
-      background: rgba(248,113,113,.10);
-      color: rgba(234,240,255,.90);
-      font-weight: 900; font-size: 12px;
-    }
-    html:not(.dark) .yes, html:not(.dark) .maybe, html:not(.dark) .no{ color: rgba(10,15,25,.88); }
-
-    .sub-note{
-      margin-top: 10px;
-      color: rgba(234,240,255,.70);
-      font-size: 12px;
-      line-height: 1.55;
-    }
-    html:not(.dark) .sub-note{ color: rgba(10,15,25,.60); }
-
-    .process-grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 18px;
-    }
-    @media (max-width: 980px){
-      .process-grid{ grid-template-columns: 1fr; }
-    }
-    .step{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 14px;
-    }
-    html:not(.dark) .step{
-      border-color: rgba(10,15,25,.10);
-      background: rgba(10,15,25,.03);
-    }
-    .step h3{ margin: 6px 0 8px; font-size: 15px; }
-    .step p{ margin: 0; color: rgba(234,240,255,.72); line-height: 1.6; font-size: 13px; }
-    html:not(.dark) .step p{ color: rgba(10,15,25,.62); }
-
-    /* Demo modal */
+    /* Demo modal: minimal support if your site.css already has these */
     .demo-modal.hidden{ display:none; }
     .demo-modal{
       position: fixed;
@@ -406,7 +115,8 @@
       z-index: 999;
     }
     .demo-backdrop{
-      position:absolute; inset:0;
+      position:absolute;
+      inset:0;
       background: rgba(0,0,0,.72);
       backdrop-filter: blur(6px);
     }
@@ -464,7 +174,7 @@
 <body>
   <div class="main-wrapper">
 
-    <!-- NAVBAR (kept consistent) -->
+    <!-- NAVBAR -->
     <nav class="site-nav">
       <div class="nav-inner">
         <a href="/index.html" class="nav-left" aria-label="NightShift AI Home">
@@ -487,16 +197,18 @@
       </div>
     </nav>
 
+    <!-- PAGE CONTENT -->
     <main class="page-container">
 
-      <!-- HERO -->
+      <!-- HERO / HEADER (matches your About page style) -->
       <section class="section">
-        <div class="pkg-hero">
+        <div class="page-hero">
           <div class="eyebrow">Packages</div>
-          <h1 class="section-title" style="margin-top:10px;">Virtual front desk coverage — configured for your operation</h1>
-          <p class="section-subtitle" style="max-width: 980px;">
-            NightShift AI is not a call center and not a generic AI bot. We configure a virtual front desk trained on your property,
-            policies, and escalation rules. Packages reflect how much operational responsibility NightShift handles for your hotel.
+          <h1 class="section-title" style="margin-top:10px;">Virtual Front Desk Coverage — Configured for Your Operation</h1>
+          <p class="section-subtitle" style="max-width:980px;">
+            NightShift AI is not a call center and not a generic AI bot.
+            We configure a virtual front desk trained on your property, policies, and escalation rules.
+            Packages reflect how much operational responsibility NightShift handles for your hotel.
           </p>
 
           <div class="pill-row" aria-label="Key highlights">
@@ -508,270 +220,171 @@
 
           <div class="hero-cta-row" style="margin-top:18px;">
             <a href="/contact.html" class="btn-primary">Get a Quote</a>
-            <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">Why not a call center →</a>
-            <a href="tel:4237715523" class="btn-secondary">📞 Call now</a>
+            <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">Why Not a Call Center →</a>
+            <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
           </div>
 
           <div class="feature-card notice" style="margin-top:20px;">
             <div class="eyebrow">Every package includes</div>
             <h3 style="margin:8px 0 10px;">Real front desk workflows — not scripts</h3>
             <p class="section-subtitle" style="margin:0;">
-              Property-specific answers, ADA-aware call handling, emergency escalation rules, and automated summaries routed to your team.
-              Configured, tested, and ready to go live fast.
+              Property-specific answers, ADA-aware call handling, emergency escalation rules,
+              and automated summaries routed to your team. Configured, tested, and ready to go live fast.
             </p>
           </div>
         </div>
       </section>
 
-      <!-- CARDS -->
+      <!-- TIERS (keeps your original structure + class names) -->
       <section class="section">
-        <div class="eyebrow">Coverage levels</div>
+        <div class="eyebrow">Coverage Levels</div>
         <h2 class="section-title">Choose how much of your overnight desk NightShift replaces</h2>
         <p class="section-subtitle" style="max-width:900px;">
-          Start with a package below. Then we customize how calls are handled, what gets escalated, how reservations are supported,
-          and who receives notifications.
+          Start with a package below. Then we customize how calls are handled, what gets escalated,
+          how reservations are supported, and who receives notifications.
         </p>
 
-        <div class="pkg-grid">
+        <div class="pricing-grid">
 
           <!-- CORE -->
-          <article class="pkg-card" aria-label="Core package">
-            <div class="pkg-top">
-              <div>
-                <div class="badge"><span class="spark" aria-hidden="true"></span> Best for independents</div>
-                <h3 class="pkg-name">Core</h3>
-                <p class="pkg-desc">
-                  Essential overnight call coverage for independent hotels & motels that want reliability without staffing the desk.
-                </p>
-              </div>
-            </div>
+          <div class="price-card">
+            <div class="eyebrow">Core</div>
+            <h3 style="margin:8px 0 10px;">Essential overnight call coverage</h3>
+            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
+              Best for independent hotels and motels that want reliable after-hours guest handling
+              without staffing the desk overnight.
+            </p>
 
-            <div class="price" aria-label="Core pricing">
-              <strong>From $350<span style="font-size:16px; font-weight:900;">/mo</span></strong>
-              <span>Tailored by rooms, call volume, and your routing rules.</span>
-            </div>
-
-            <ul class="pkg-list">
-              <li>Answers after-hours calls (fast pickup)</li>
-              <li>Property FAQs: policies, directions, amenities</li>
-              <li>Nightly + weekly quote logic (your rules)</li>
+            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+              <li>Answers guest calls 24/7</li>
+              <li>Rates, availability, and property FAQs</li>
+              <li>Weekly and nightly rate logic</li>
               <li>Pets + service animal workflows (policy-driven)</li>
-              <li>Urgent issue detection + escalation</li>
+              <li>Emergency detection and escalation</li>
               <li>SMS / email summaries to staff</li>
             </ul>
 
-            <div class="pkg-actions">
-              <button class="ghost-cta demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear call demo</button>
-              <a class="price-cta" href="/contact.html">Get a Core quote →</a>
+            <div class="demo-actions">
+              <button class="btn-secondary demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
             </div>
 
-            <p class="sub-note">Great starting point for replacing overnight answering and protecting bookings.</p>
-          </article>
-
-          <!-- PRO (featured) -->
-          <article class="pkg-card featured" aria-label="Pro package">
-            <div class="pkg-top">
-              <div>
-                <div class="badge good"><span class="spark" aria-hidden="true"></span> Most popular</div>
-                <h3 class="pkg-name">Pro</h3>
-                <p class="pkg-desc">
-                  Brand-aligned front desk automation for franchises or higher-volume properties that need tighter structure and consistency.
-                </p>
-              </div>
+            <div class="hero-cta-row" style="margin-top:16px;">
+              <a href="/contact.html" class="price-cta">Get a Quote for Core</a>
             </div>
+          </div>
 
-            <div class="price" aria-label="Pro pricing">
-              <strong>From $900<span style="font-size:16px; font-weight:900;">/mo</span></strong>
-              <span>More structured workflows, routing, and optional multilingual detection.</span>
-            </div>
+          <!-- PRO -->
+          <div class="price-card price-card--outline">
+            <div class="eyebrow">Pro</div>
+            <h3 style="margin:8px 0 10px;">Brand-aligned front desk automation</h3>
+            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
+              Best for franchise and higher-volume properties needing tighter scripting,
+              structured flows, and compliance consistency.
+            </p>
 
-            <ul class="pkg-list">
+            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
               <li>Everything in Core</li>
-              <li>Brand voice + terminology alignment</li>
+              <li>Brand voice and terminology alignment</li>
               <li>Advanced reservation support workflows</li>
-              <li>Multi-language auto-detection (optional)</li>
-              <li>Rule-based routing by role/time (GM/FD/on-call)</li>
-              <li>Custom tone controls + tighter policy enforcement</li>
+              <li>Multi-language auto-detection</li>
+              <li>Rule-based routing to GM or FD</li>
+              <li>Custom voice and tone controls</li>
             </ul>
 
-            <div class="pkg-actions">
-              <button class="ghost-cta demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear call demo</button>
-              <a class="price-cta" href="/contact.html">Get a Pro quote →</a>
+            <div class="demo-actions">
+              <button class="btn-secondary demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
             </div>
 
-            <p class="sub-note">Built for consistency at scale: fewer edge-case mistakes, clearer escalation, better control.</p>
-          </article>
+            <div class="hero-cta-row" style="margin-top:16px;">
+              <a href="/contact.html" class="price-cta">Get a Quote for Pro</a>
+            </div>
+          </div>
 
           <!-- ELITE -->
-          <article class="pkg-card" aria-label="Elite package">
-            <div class="pkg-top">
-              <div>
-                <div class="badge"><span class="spark" aria-hidden="true"></span> For portfolios</div>
-                <h3 class="pkg-name">Elite</h3>
-                <p class="pkg-desc">
-                  Portfolio-level virtual front desk for ownership groups and management companies operating multiple properties.
-                </p>
-              </div>
-            </div>
+          <div class="price-card">
+            <div class="eyebrow">Elite</div>
+            <h3 style="margin:8px 0 10px;">Portfolio-level virtual front desk</h3>
+            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
+              Built for ownership groups and management companies operating multiple properties.
+            </p>
 
-            <div class="price" aria-label="Elite pricing">
-              <strong>From $2,500<span style="font-size:16px; font-weight:900;">/mo</span></strong>
-              <span>Typically includes a setup fee for onboarding + multi-property configuration.</span>
-            </div>
-
-            <ul class="pkg-list">
+            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
               <li>Everything in Pro</li>
-              <li>Multi-property routing + property identification logic</li>
-              <li>Shared dashboards and roll-up reporting (portfolio view)</li>
+              <li>Multi-property routing and logic</li>
+              <li>Shared dashboards and roll-up reporting</li>
               <li>Owner-level performance insights</li>
-              <li>White-glove onboarding + playbook standardization</li>
-              <li>Ongoing monitoring and workflow optimization</li>
+              <li>White-glove setup and onboarding</li>
+              <li>Ongoing monitoring and optimization</li>
             </ul>
 
-            <div class="pkg-actions">
-              <button class="ghost-cta demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear call demo</button>
-              <button class="ghost-cta demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch dashboard demo</button>
-              <a class="price-cta" href="/contact.html">Request portfolio quote →</a>
+            <div class="demo-actions">
+              <button class="btn-secondary demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
+              <button class="btn-secondary demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
             </div>
 
-            <p class="sub-note">Best for operators who want standardized call handling across multiple properties.</p>
-          </article>
+            <div class="hero-cta-row" style="margin-top:16px;">
+              <a href="/contact.html" class="price-cta">Request Portfolio Quote</a>
+            </div>
+          </div>
+
+          <!-- FLEX / MONTHLY -->
+          <div class="price-card price-card--outline">
+            <div class="eyebrow">Flexible</div>
+            <h3 style="margin:8px 0 10px;">Lower upfront, scalable deployment</h3>
+            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
+              Ideal for new owners or properties that want to start lean and expand coverage over time.
+            </p>
+
+            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+              <li>Lower initial commitment</li>
+              <li>Updates and workflow improvements included</li>
+              <li>Scale with call volume</li>
+              <li>Great for phased rollouts</li>
+            </ul>
+
+            <div class="demo-actions">
+              <button class="btn-secondary demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
+            </div>
+
+            <div class="hero-cta-row" style="margin-top:16px;">
+              <a href="/contact.html" class="price-cta">Request Flexible Quote</a>
+            </div>
+          </div>
 
         </div>
       </section>
 
-      <!-- COMPARISON TABLE -->
-      <section class="section">
-        <div class="eyebrow">Compare</div>
-        <h2 class="section-title">What’s included by tier</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          These are the most common operational capabilities owners ask about. We tailor the exact workflows to your property.
-        </p>
-
-        <div class="compare" aria-label="Package comparison">
-          <div class="compare-head">
-            <h3>Feature comparison</h3>
-            <div class="toggle-row" aria-label="Comparison density">
-              <button class="toggle active" type="button" data-mode="standard">Standard</button>
-              <button class="toggle" type="button" data-mode="compact">Compact</button>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:34%;">Capability</th>
-                  <th>Core</th>
-                  <th>Pro</th>
-                  <th>Elite</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Fast answering + after-hours coverage</strong><br><span style="color:rgba(234,240,255,.62);">Pick up quickly to protect bookings.</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Property-trained FAQs</strong><br><span style="color:rgba(234,240,255,.62);">Policies, amenities, directions, hours.</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Weekly + nightly rate quoting logic</strong><br><span style="color:rgba(234,240,255,.62);">Your rules and guardrails.</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Reservation support workflows</strong><br><span style="color:rgba(234,240,255,.62);">Intake + routing based on your process.</span></td>
-                  <td><span class="maybe">◐ Basic</span></td>
-                  <td><span class="yes">✓ Advanced</span></td>
-                  <td><span class="yes">✓ Advanced</span></td>
-                </tr>
-                <tr>
-                  <td><strong>ADA-aware handling</strong><br><span style="color:rgba(234,240,255,.62);">Service animal / sensitive scenarios with escalation options.</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Rule-based escalation routing</strong><br><span style="color:rgba(234,240,255,.62);">GM / front desk / on-call maintenance.</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Brand voice + terminology</strong><br><span style="color:rgba(234,240,255,.62);">Franchise-aligned language and tone.</span></td>
-                  <td><span class="no">— Not typical</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Multi-language auto-detection</strong><br><span style="color:rgba(234,240,255,.62);">Optional based on your setup.</span></td>
-                  <td><span class="maybe">◐ Optional</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Portfolio / multi-property routing</strong><br><span style="color:rgba(234,240,255,.62);">Identify property + apply correct rules.</span></td>
-                  <td><span class="no">—</span></td>
-                  <td><span class="maybe">◐ Limited</span></td>
-                  <td><span class="yes">✓ Included</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Dashboard + roll-up reporting</strong><br><span style="color:rgba(234,240,255,.62);">Visibility across calls, outcomes, trends.</span></td>
-                  <td><span class="maybe">◐ Basic</span></td>
-                  <td><span class="maybe">◐ Enhanced</span></td>
-                  <td><span class="yes">✓ Portfolio</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <p class="sub-note" style="margin-top:10px;">
-          Exact configuration varies by brand requirements, phone setup, and your desired escalation policy.
-        </p>
-      </section>
-
-      <!-- IMPLEMENTATION -->
+      <!-- PROCESS -->
       <section class="section">
         <div class="eyebrow">Implementation</div>
         <h2 class="section-title">Fast quote. Real configuration.</h2>
         <p class="section-subtitle" style="max-width:900px;">
-          We don’t sell a login. We build a working virtual front desk for your hotel — then test key flows before you go live.
+          We don’t sell a login. We build a working virtual front desk for your hotel.
         </p>
 
-        <div class="process-grid">
-          <div class="step">
-            <div class="eyebrow">Step 1</div>
-            <h3>Quick intake</h3>
-            <p>Room count, call volume, brand rules, and what you want handled after-hours.</p>
+        <div class="feature-grid" style="margin-top:28px;">
+          <div class="feature-card">
+            <h3>1) Quick intake</h3>
+            <p>Room count, call volume, brand rules, and what you want handled overnight.</p>
           </div>
-          <div class="step">
-            <div class="eyebrow">Step 2</div>
-            <h3>Workflow build</h3>
-            <p>Policies, escalation routing, reservation flow, and summaries configured for your operation.</p>
+          <div class="feature-card">
+            <h3>2) Workflow build</h3>
+            <p>We configure policies, escalation, booking support, and notifications.</p>
           </div>
-          <div class="step">
-            <div class="eyebrow">Step 3</div>
-            <h3>Go live</h3>
-            <p>Forward after-hours calls from your existing phone line — no new phone system required.</p>
+          <div class="feature-card">
+            <h3>3) Go live</h3>
+            <p>Your existing phone line forwards to NightShift — no new phone system required.</p>
           </div>
         </div>
 
-        <div class="hero-card" style="margin-top:18px;">
-          <div class="eyebrow">What we confirm</div>
+        <div class="hero-card" style="margin-top:22px;">
+          <div class="eyebrow">What we’ll confirm</div>
           <h3 style="margin:8px 0 10px;">Key operational rules</h3>
           <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
             <li>Property type (independent / franchise / portfolio)</li>
-            <li>Room count + estimated call volume</li>
-            <li>Deposits, smoking, pets/service animals, late check-ins, weekly rates</li>
-            <li>Who gets escalations (by role/time)</li>
+            <li>Room count and estimated call volume</li>
+            <li>Pets, deposits, smoking, late check-ins, weekly rates</li>
+            <li>Who gets escalations (GM / FD / on-call maintenance)</li>
           </ul>
         </div>
       </section>
@@ -781,7 +394,8 @@
         <div class="eyebrow">Get started</div>
         <h2 class="section-title">Ready to replace overnight call handling?</h2>
         <p class="section-subtitle" style="max-width:900px;">
-          Request a quote and we’ll recommend the right tier, confirm your requirements, and outline exactly how NightShift will operate for your property.
+          Request a quote and we’ll recommend the right package, confirm your requirements,
+          and outline exactly how NightShift will operate for your property.
         </p>
 
         <div class="hero-cta-row" style="margin-top:18px;">
@@ -793,7 +407,7 @@
 
     </main>
 
-    <!-- FOOTER (kept consistent) -->
+    <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-inner">
         <div>© 2026 NightShift AI</div>
@@ -833,113 +447,78 @@
         Your browser does not support video playback.
       </video>
 
-      <p class="demo-fallback hidden" id="demoFallback">
-        Demo video coming soon.
-      </p>
+      <p class="demo-fallback hidden" id="demoFallback">Demo video coming soon.</p>
     </div>
   </div>
 
   <!-- AUDIO PLAYER (one per page) -->
   <audio id="demoAudio"></audio>
 
+  <!-- DEMO SCRIPT (kept very close to your original) -->
   <script>
-    // Compact/standard comparison toggle (simple density switch)
-    (function(){
-      const toggles = document.querySelectorAll(".toggle");
-      const table = document.querySelector(".compare table");
-      if(!toggles.length || !table) return;
+    const modal = document.getElementById("demoModal");
+    const video = document.getElementById("demoVideo");
+    const fallback = document.getElementById("demoFallback");
+    const audio = document.getElementById("demoAudio");
 
-      function setMode(mode){
-        toggles.forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
-        if(mode === "compact"){
-          table.style.fontSize = "12px";
-          table.querySelectorAll("th,td").forEach(cell => cell.style.padding = "10px 10px");
-        } else {
-          table.style.fontSize = "13px";
-          table.querySelectorAll("th,td").forEach(cell => cell.style.padding = "12px 12px");
-        }
-      }
+    // Video buttons -> open modal (Elite)
+    document.querySelectorAll(".demo-video").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const src = btn.dataset.video;
 
-      toggles.forEach(t => t.addEventListener("click", () => setMode(t.dataset.mode)));
-      setMode("standard");
-    })();
+        // reset
+        fallback.classList.add("hidden");
+        video.classList.remove("hidden");
+        video.onerror = null;
+        video.onloadeddata = null;
 
-    // Demo modal + audio
-    (function(){
-      const modal = document.getElementById("demoModal");
-      const video = document.getElementById("demoVideo");
-      const fallback = document.getElementById("demoFallback");
-      const audio = document.getElementById("demoAudio");
-      const closeBtn = document.querySelector(".demo-close");
-      const backdrop = document.querySelector(".demo-backdrop");
-
-      function openModal(){
+        video.src = src;
+        video.load();
         modal.classList.remove("hidden");
         modal.setAttribute("aria-hidden","false");
         document.body.style.overflow = "hidden";
-      }
-      function closeModal(){
-        modal.classList.add("hidden");
-        modal.setAttribute("aria-hidden","true");
-        document.body.style.overflow = "";
-        try { video.pause(); } catch(e) {}
-        video.removeAttribute("src");
-        try { video.load(); } catch(e) {}
-      }
 
-      // Video buttons -> open modal
-      document.querySelectorAll(".demo-video").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const src = btn.dataset.video || "";
+        video.onerror = () => {
+          video.classList.add("hidden");
+          fallback.classList.remove("hidden");
+        };
 
-          fallback.classList.add("hidden");
+        video.onloadeddata = () => {
           video.classList.remove("hidden");
-
-          video.onerror = null;
-          video.onloadeddata = null;
-
-          if(!src){
-            video.classList.add("hidden");
-            fallback.classList.remove("hidden");
-            openModal();
-            return;
-          }
-
-          video.src = src;
-          try { video.load(); } catch(e) {}
-          openModal();
-
-          video.onerror = () => {
-            video.classList.add("hidden");
-            fallback.classList.remove("hidden");
-          };
-
-          video.onloadeddata = () => {
-            video.classList.remove("hidden");
-            fallback.classList.add("hidden");
-            try { video.play(); } catch(e) {}
-          };
-        });
+          fallback.classList.add("hidden");
+          try { video.play(); } catch(e) {}
+        };
       });
+    });
 
-      // Audio buttons -> play
-      document.querySelectorAll(".demo-audio").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const src = btn.dataset.audio || "";
-          if(!src) return;
-          audio.src = src;
-          try { audio.load(); } catch(e) {}
-          audio.play().catch(() => {});
-        });
+    // Audio buttons -> play
+    document.querySelectorAll(".demo-audio").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const src = btn.dataset.audio;
+        audio.src = src;
+        audio.load();
+        audio.play().catch(() => {});
       });
+    });
 
-      // Close actions
-      if(closeBtn) closeBtn.addEventListener("click", closeModal);
-      if(backdrop) backdrop.addEventListener("click", closeModal);
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && modal && !modal.classList.contains("hidden")) closeModal();
-      });
-    })();
+    // Close modal
+    const closeBtn = document.querySelector(".demo-close");
+    const backdrop = document.querySelector(".demo-backdrop");
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (backdrop) backdrop.addEventListener("click", closeModal);
+
+    // ESC to close
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+    });
+
+    function closeModal(){
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+      try { video.pause(); } catch(e) {}
+      video.src = "";
+    }
   </script>
 </body>
 </html>
