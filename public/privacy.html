@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy – NightShift AI</title>
 
+  <title>Privacy Policy – NightShift AI</title>
   <meta name="description" content="NightShift AI is privacy-first by design. Learn what data we collect, how we use it to operate your virtual front desk, and how we protect guest and hotel information." />
 
   <!-- Open Graph -->
@@ -13,341 +13,631 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nightshifthotels.com/privacy.html" />
 
-  <!-- FAVICONS (files in /public) -->
+  <!-- FAVICONS (files are in /public) -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
+  <meta name="robots" content="index,follow" />
+  <meta name="color-scheme" content="dark light" />
+
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
+
+  <!-- Theme: reads localStorage("nsa_theme") and applies html.dark -->
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem("nsa_theme") || "system";
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var resolved = (t === "dark") ? "dark" : (t === "light") ? "light" : (prefersDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }catch(e){}
+    })();
+  </script>
+
+  <!-- Page-only helpers (keep minimal; matches design system) -->
+  <style>
+    /* Make long-policy text feel like the rest of the site without changing site.css */
+    .policyWrap{ margin-top: 18px; }
+    .policyCard{
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    html:not(.dark) .policyCard{
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(10px);
+    }
+    .policyPad{ padding: 14px; }
+
+    .policyCard h3{
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+    .policyCard p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .policyCard p + p{ margin-top: 10px; }
+
+    .policyCard ul{
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+    .policyCard ul + p{ margin-top: 10px; }
+
+    .policyCard a{ text-decoration: underline; }
+
+    .miniRow{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items:flex-start;
+      justify-content: space-between;
+    }
+    .stamp{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      padding-top: 6px;
+    }
+
+    /* Sticky section links (optional; stays on-brand) */
+    .toc{
+      margin-top: 14px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 12px;
+      text-decoration:none;
+      white-space: nowrap;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    html:not(.dark) .toc a{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+    }
+    .toc a:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.05);
+      border-color: rgba(110,168,255,.28);
+      color: var(--text);
+    }
+  </style>
 </head>
 
 <body>
-  <div class="main-wrapper">
+  <div class="bgGrid" aria-hidden="true"></div>
 
-    <!-- NAVBAR -->
-    <nav class="site-nav">
-      <div class="nav-inner">
-        <a href="/index.html" class="nav-left" aria-label="NightShift AI Home">
-          <div class="nav-logo-circle">NS</div>
-          <div class="nav-brand-text">
-            <span>NightShift</span>
-            <span>AI Night Front Desk</span>
+  <!-- NAV (MATCHES INDEX) -->
+  <header class="nav" role="banner">
+    <div class="container">
+      <div class="navInner">
+        <a href="/" class="brand" aria-label="NightShift AI Home">
+          <div class="mark" aria-hidden="true">NS</div>
+          <div class="brandText">
+            <b>NightShift AI</b>
+            <span>AI Night Front Desk for Hotels</span>
           </div>
         </a>
 
-        <div class="nav-links">
+        <div class="navRight">
+          <nav class="links" aria-label="Primary navigation">
+            <a class="navA" href="/product.html">Product</a>
+            <a class="navA" href="/who-we-serve.html">Who we serve</a>
+            <a class="navA" href="/packages.html">Packages</a>
+            <a class="navA" href="/faq.html">FAQ</a>
+            <a class="navA" href="/about.html">About</a>
+            <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
+          </nav>
+
+          <button class="iconBtn hamburger" id="btnMenu" type="button" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"></path>
+            </svg>
+          </button>
+
+          <button class="iconBtn" id="btnTheme" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M12 2a9.9 9.9 0 0 0 0 20V2zm1 2.06A8 8 0 1 1 13 19.94V4.06z"></path>
+            </svg>
+          </button>
+
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="mobileMenu" id="mobileMenu">
+        <div class="mobileCard" role="navigation" aria-label="Mobile navigation">
           <a href="/product.html">Product</a>
-          <a href="/who-we-serve.html">Who We Serve</a>
+          <a href="/who-we-serve.html">Who we serve</a>
           <a href="/packages.html">Packages</a>
           <a href="/faq.html">FAQ</a>
           <a href="/about.html">About</a>
-          <a href="/contact.html" class="nav-cta">Get a Quote</a>
+          <a href="/dashboard/" rel="nofollow">Dashboard</a>
+          <a href="/contact.html">Book a demo</a>
         </div>
-      </div>
-    </nav>
-
-    <!-- TRUST STRIP -->
-    <div class="container" style="margin-top:18px;">
-      <div class="trust-strip">
-        <span>✔ Privacy-first design</span>
-        <span class="sep">•</span>
-        <span>✔ No card numbers via AI</span>
-        <span class="sep">•</span>
-        <span>✔ Safety-focused escalation</span>
       </div>
     </div>
+  </header>
 
-    <!-- PAGE CONTENT -->
-    <main class="page-container">
+  <!-- HERO WRAP (MATCHES INDEX) -->
+  <main class="container heroWrap">
 
-      <!-- HEADER -->
-      <section class="section">
-        <div class="eyebrow">Privacy Policy</div>
-        <h1 class="section-title">How NightShift AI Handles Data</h1>
-        <p class="section-subtitle" style="max-width:980px;">
-          <strong>Last updated:</strong> January 2026<br />
+    <!-- TRUST STRIP (MATCHES INDEX POSITION) -->
+    <div class="trustStrip" aria-label="Trust highlights">
+      <span class="trustPill">✔ Privacy-first design</span>
+      <span class="trustPill">✔ No card numbers via AI</span>
+      <span class="trustPill">✔ Safety-focused escalation</span>
+      <span class="trustPill">✔ Operational guardrails</span>
+    </div>
+
+    <!-- HERO (MATCHES INDEX GRID) -->
+    <section class="hero" aria-label="Privacy policy hero">
+      <div>
+        <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Privacy • Trust &amp; compliance</div>
+
+        <h1 class="h1">
+          Privacy-first by design.<br/>
+          Built for <span class="highlight">hotel operations</span>.
+        </h1>
+
+        <p class="sub">
           This Privacy Policy explains how NightShift AI (“NightShift,” “we,” “us,” or “our”) collects, uses,
-          and protects information when you use our website, dashboard, and AI call-handling services
-          (collectively, the “Service”).
+          and protects information when you use our website, dashboard, and AI call-handling services (the “Service”).
         </p>
 
-        <div class="hero-card" style="margin-top:18px;">
-          <div class="eyebrow">Important note</div>
-          <p class="section-subtitle" style="margin:0; max-width:980px;">
-            NightShift AI is a <strong>virtual front desk</strong> trained on your property’s rules — not a generic call center.
-            We design our system to be privacy-first and operationally safe. Hotels control configuration choices
-            (what the AI can answer, what gets logged, and who gets escalations).
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/security.html">Security</a>
+          <a class="btn" href="/cookies.html">Cookie policy</a>
+        </div>
+
+        <div class="toc" aria-label="Quick links">
+          <a href="#summary">Summary</a>
+          <a href="#collect">What we collect</a>
+          <a href="#use">How we use it</a>
+          <a href="#share">Sharing</a>
+          <a href="#security">Security</a>
+          <a href="#rights">Your rights</a>
+        </div>
+
+        <div class="notice" style="margin-top:16px;">
+          <h3>Important note</h3>
+          <p>
+            NightShift AI is a <b style="color:var(--text);">virtual front desk</b> trained on your property’s rules — not a generic call center.
+            Hotels control configuration choices (what the AI can answer, what gets logged, and who receives escalations).
           </p>
         </div>
-      </section>
+      </div>
 
-      <!-- QUICK SUMMARY -->
-      <section class="section">
-        <div class="hero-card">
-          <div class="eyebrow">Summary</div>
-          <h3 style="margin:8px 0 10px;">Key points</h3>
-          <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
-            <li>We do <strong>not</strong> sell your data.</li>
-            <li>We use data to operate the Service and support your hotel/business.</li>
-            <li>NightShift is designed to <strong>avoid collecting guest payment card numbers</strong> over calls.</li>
-            <li>Hotels control what gets configured, logged, and escalated.</li>
-            <li>You can request access, correction, or deletion where applicable.</li>
+      <aside class="heroCard" aria-label="Policy overview">
+        <div class="inner">
+          <div class="kicker">Policy overview</div>
+          <div class="cardTitle">How NightShift handles data</div>
+          <p class="cardText">
+            We use data to operate your virtual front desk: answer calls, follow property rules, create summaries,
+            and route escalations. We do not sell your data.
+          </p>
+
+          <ul class="list" aria-label="Key commitments">
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">No selling data</b><br/>We do not sell personal information.</div>
+            </li>
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Avoid card numbers</b><br/>Designed to avoid collecting payment card numbers via AI calls.</div>
+            </li>
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Hotel-controlled workflows</b><br/>You control configuration, logging, and escalation routes.</div>
+            </li>
           </ul>
-        </div>
-      </section>
 
-      <!-- MAIN CONTENT -->
-      <section class="section">
-        <div class="eyebrow">Policy details</div>
-
-        <div class="feature-grid">
-
-          <!-- 1 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">1. Information We Collect</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              We collect information necessary to operate NightShift and deliver services to hotels, motels, portfolios,
-              and other supported businesses. Depending on your use of the Service, this may include:
-            </p>
-            <ul style="margin:12px 0 0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
-              <li><strong>Account & Business Information</strong> – name, email, phone number, business name, role/title.</li>
-              <li><strong>Configuration Data</strong> – address, amenities, policies (pets, deposits, smoking), and routing/escalation contacts.</li>
-              <li><strong>Call Metadata</strong> – caller number, call time, duration, and high-level outcome tags.</li>
-              <li><strong>Call Content</strong> – call transcripts, summaries, or structured notes generated for logging and follow-up (based on configuration).</li>
-              <li><strong>Reservation Details</strong> – guest name, dates, nights, room type, guest count, notes (configured to avoid card numbers).</li>
-              <li><strong>Website & Usage Data</strong> – pages visited, browser/device type, and general analytics.</li>
-            </ul>
-
-            <div class="hero-card" style="margin-top:16px;">
-              <div class="eyebrow">Do not send</div>
-              <p class="section-subtitle" style="margin:0;">
-                Please do not send sensitive data via the contact form (e.g., full card numbers, passwords, government IDs/SSNs).
-                NightShift is designed to avoid collecting payment card numbers via AI calls.
-              </p>
+          <div class="miniRow" style="margin-top:14px;">
+            <div class="ctaRow" style="margin:0;">
+              <a class="btn primary" href="/contact.html">Book a demo</a>
+              <a class="btn" href="#summary">Read policy</a>
             </div>
+            <div class="stamp"><b style="color:var(--text);">Last updated:</b> January 2026</div>
           </div>
+        </div>
+      </aside>
+    </section>
 
-          <!-- 2 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">2. How We Use Information</h3>
-            <p class="section-subtitle" style="margin-top:0;">We use collected information to:</p>
-            <ul style="margin:12px 0 0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+    <!-- SECTION: SUMMARY -->
+    <section class="section" id="summary" aria-label="Summary">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Summary</div>
+          <h2 class="h2">Key points</h2>
+          <p class="lead">
+            Here are the main takeaways. Details follow in the sections below.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn" href="#collect">What we collect</a>
+          <a class="btn" href="#rights">Your rights</a>
+        </div>
+      </div>
+
+      <div class="policyWrap">
+        <div class="policyCard">
+          <div class="policyPad">
+            <ul style="margin:0; padding-left:18px;">
+              <li>We do <b style="color:var(--text);">not</b> sell your data.</li>
+              <li>We use data to operate the Service and support your hotel/business.</li>
+              <li>NightShift is designed to <b style="color:var(--text);">avoid collecting guest payment card numbers</b> over calls.</li>
+              <li>Hotels control what gets configured, logged, and escalated.</li>
+              <li>You can request access, correction, or deletion where applicable.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="notice" style="margin-top:14px;">
+          <h3>Do not send sensitive data</h3>
+          <p>
+            Please do not send full card numbers, passwords, or government IDs/SSNs via the contact form.
+            NightShift is designed to avoid collecting card numbers via AI calls.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: POLICY DETAILS (cards in a grid like the rest of the site) -->
+    <section class="section" aria-label="Policy details">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Policy details</div>
+          <h2 class="h2">What we collect, how we use it, and sharing</h2>
+          <p class="lead">
+            We collect information necessary to operate NightShift and deliver services to hotels, motels, portfolios,
+            and other supported businesses.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn" href="/terms.html">Terms</a>
+          <a class="btn" href="/security.html">Security</a>
+        </div>
+      </div>
+
+      <div class="grid" style="align-items:stretch;">
+        <!-- 1 -->
+        <div class="policyCard" id="collect">
+          <div class="policyPad">
+            <h3>1) Information we collect</h3>
+            <p>
+              Depending on how you use the Service, we may collect:
+            </p>
+            <ul>
+              <li><b style="color:var(--text);">Account &amp; business information</b> — name, email, phone number, business name, role/title.</li>
+              <li><b style="color:var(--text);">Configuration data</b> — address, amenities, policies (pets, deposits, smoking), routing/escalation contacts.</li>
+              <li><b style="color:var(--text);">Call metadata</b> — caller number, time, duration, and high-level outcome tags.</li>
+              <li><b style="color:var(--text);">Call content</b> — transcripts/summaries/structured notes for logging and follow-up (based on configuration).</li>
+              <li><b style="color:var(--text);">Reservation details</b> — guest name, dates, nights, room type, guest count, notes (configured to avoid card numbers).</li>
+              <li><b style="color:var(--text);">Website usage data</b> — pages visited, device/browser, basic analytics.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="policyCard" id="use">
+          <div class="policyPad">
+            <h3>2) How we use information</h3>
+            <p>We use collected information to:</p>
+            <ul>
               <li>Operate and maintain the Service</li>
               <li>Answer, route, and summarize calls for your property</li>
-              <li>Send call summaries and notifications (SMS/email) based on your configuration</li>
+              <li>Send notifications (SMS/email) based on your configuration</li>
               <li>Provide customer support and troubleshoot issues</li>
               <li>Improve reliability and performance of configured workflows</li>
               <li>Monitor for abuse, fraud, and security risks</li>
             </ul>
-
-            <p class="section-subtitle" style="margin-top:10px;">
+            <p>
               We process information based on legitimate business needs to provide the Service, comply with law,
               and protect the security and integrity of NightShift.
             </p>
           </div>
+        </div>
 
-          <!-- 3 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">3. Payment Information</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              NightShift AI is designed to <strong>avoid collecting or storing guests’ credit/debit card numbers</strong>
-              through AI voice agents. If your workflow requires payments, we typically route payments through your
-              existing secure process (e.g., front desk, payment link, or your preferred method).
+        <!-- 3 -->
+        <div class="policyCard">
+          <div class="policyPad">
+            <h3>3) Payment information</h3>
+            <p>
+              NightShift AI is designed to <b style="color:var(--text);">avoid collecting or storing guests’ credit/debit card numbers</b>
+              through AI voice agents. If a workflow requires payments, we typically route payments through your existing secure process
+              (front desk, payment link, or your preferred method).
             </p>
-            <p class="section-subtitle" style="margin-top:10px;">
+            <p>
               NightShift subscription/setup billing (for customers) is handled through secure third-party processors.
             </p>
           </div>
+        </div>
 
-          <!-- 4 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">4. Call Recording, Transcription & Legal Notices</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              Call handling laws vary by jurisdiction. Depending on your configuration and local requirements,
-              calls may be recorded or transcribed for quality, logging, operational follow-up, and reliability.
+        <!-- 4 -->
+        <div class="policyCard">
+          <div class="policyPad">
+            <h3>4) Call recording, transcription &amp; notices</h3>
+            <p>
+              Call handling laws vary by jurisdiction. Depending on your configuration and local requirements, calls may be recorded or
+              transcribed for quality, logging, operational follow-up, and reliability.
             </p>
-            <p class="section-subtitle" style="margin-top:10px;">
-              Our hotel customers are responsible for providing required caller disclosures and obtaining any
-              necessary consent under applicable laws. We can support configuration choices that help align with
-              your requirements.
+            <p>
+              Hotel customers are responsible for providing required caller disclosures and obtaining any necessary consent under
+              applicable laws. We can support configuration choices that help align with your requirements.
             </p>
           </div>
+        </div>
 
-          <!-- 5 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">5. Cookies & Analytics</h3>
-            <p class="section-subtitle" style="margin-top:0;">
+        <!-- 5 -->
+        <div class="policyCard">
+          <div class="policyPad">
+            <h3>5) Cookies &amp; analytics</h3>
+            <p>
               Our website may use cookies or similar technologies for basic functionality and to understand site usage.
               We do not use cookies for behavioral advertising or cross-site tracking.
             </p>
-            <p class="section-subtitle" style="margin-top:10px;">
-              For details, see our <a href="/cookies.html" style="text-decoration:underline;">Cookie Policy</a>.
+            <p>
+              For details, see our <a href="/cookies.html">Cookie Policy</a>.
             </p>
           </div>
+        </div>
 
-          <!-- 6 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">6. Service Provider / Processor Role</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              For hotels and businesses using NightShift, we typically process caller/guest information <strong>on your behalf</strong>
+        <!-- 6 -->
+        <div class="policyCard">
+          <div class="policyPad">
+            <h3>6) Service provider / processor role</h3>
+            <p>
+              For hotels and businesses using NightShift, we typically process caller/guest information <b style="color:var(--text);">on your behalf</b>
               to provide the Service. In many cases:
             </p>
-            <ul style="margin:12px 0 0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+            <ul>
               <li>You control what’s configured (policies, routing, escalation, logging).</li>
               <li>We use caller/guest data only to provide and support the Service.</li>
               <li>We do not use caller/guest information for independent marketing.</li>
             </ul>
           </div>
+        </div>
 
-          <!-- 7 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">7. Data Sharing & Third Parties</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              We do <strong>not</strong> sell your data. We may share limited information with trusted providers to operate NightShift, such as:
+        <!-- 7 -->
+        <div class="policyCard" id="share">
+          <div class="policyPad">
+            <h3>7) Data sharing &amp; third parties</h3>
+            <p>
+              We do <b style="color:var(--text);">not</b> sell your data. We may share limited information with trusted providers to operate NightShift, such as:
             </p>
-            <ul style="margin:12px 0 0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
-              <li><strong>Infrastructure & Hosting</strong> – secure cloud hosting and storage providers</li>
-              <li><strong>Telephony Providers</strong> – call routing and phone infrastructure</li>
-              <li><strong>Messaging Providers</strong> – SMS/email notifications you enable</li>
-              <li><strong>Analytics</strong> – to understand website performance</li>
-              <li><strong>Integrations</strong> – PMS/CRM/tools you choose to connect</li>
-              <li><strong>Legal</strong> – when required to comply with law, valid process, or to protect rights and safety</li>
+            <ul>
+              <li><b style="color:var(--text);">Infrastructure &amp; hosting</b> — secure cloud hosting/storage providers</li>
+              <li><b style="color:var(--text);">Telephony</b> — call routing and phone infrastructure</li>
+              <li><b style="color:var(--text);">Messaging</b> — SMS/email notifications you enable</li>
+              <li><b style="color:var(--text);">Analytics</b> — understanding website performance</li>
+              <li><b style="color:var(--text);">Integrations</b> — PMS/CRM/tools you choose to connect</li>
+              <li><b style="color:var(--text);">Legal</b> — when required to comply with law or protect rights/safety</li>
             </ul>
           </div>
-
-          <!-- 8 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">8. Data Security</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              We use commercially reasonable measures designed to protect information, including access controls,
-              restricted internal access, and secure cloud infrastructure. No system is 100% secure, but we continuously
-              improve our security posture.
-            </p>
-            <p class="section-subtitle" style="margin-top:10px;">
-              For more detail, see our <a href="/security.html" style="text-decoration:underline;">Data Security page</a>.
-            </p>
-          </div>
-
-          <!-- 9 -->
-          <div class="feature-card">
-            <h3 style="margin:0 0 10px;">9. ADA Alignment & Safety</h3>
-            <p class="section-subtitle" style="margin-top:0;">
-              NightShift can be configured to use ADA-aware service animal handling patterns and to follow
-              safety escalation rules. Hotels control the exact policies, fees, and escalation contacts used.
-            </p>
-          </div>
-
         </div>
 
-        <!-- Remaining sections in a clean stacked card -->
-        <div style="margin-top:22px;">
-          <div class="hero-card">
-            <div class="eyebrow">More details</div>
-
-            <h3 style="margin:8px 0 10px;">10. Data Retention</h3>
-            <p class="section-subtitle" style="margin:0;">
-              We retain call logs, summaries, transcripts (if enabled), and configuration data as needed to provide the Service,
-              support your hotel/business, comply with legal obligations, and resolve disputes. Retention periods may vary by
-              customer configuration and operational needs.
+        <!-- 8 -->
+        <div class="policyCard" id="security">
+          <div class="policyPad">
+            <h3>8) Data security</h3>
+            <p>
+              We use commercially reasonable measures designed to protect information, including access controls, restricted internal access,
+              and secure cloud infrastructure. No system is 100% secure, but we continuously improve our security posture.
             </p>
-            <p class="section-subtitle" style="margin-top:10px;">
-              Upon request, we may delete or anonymize certain data, subject to legal, technical, and operational requirements.
-            </p>
-
-            <h3 style="margin:18px 0 10px;">11. International Transfers</h3>
-            <p class="section-subtitle" style="margin:0;">
-              If you access NightShift from outside the United States, your information may be processed and stored in the U.S.
-              or other locations where our service providers operate, subject to appropriate safeguards.
-            </p>
-
-            <h3 style="margin:18px 0 10px;">12. Your Rights</h3>
-            <p class="section-subtitle" style="margin:0;">
-              Depending on your location and applicable law, you may have rights to access, correct, delete, or request a copy of your data,
-              and to restrict or object to certain processing. To exercise these rights, contact <strong>support@nightshifthotels.com</strong>.
-            </p>
-
-            <h3 style="margin:18px 0 10px;">13. Children’s Privacy</h3>
-            <p class="section-subtitle" style="margin:0;">
-              NightShift AI is not directed to children under 13, and we do not knowingly collect personal data from minors.
-              If you believe a child has provided personal data, contact us so we can remove it.
-            </p>
-
-            <h3 style="margin:18px 0 10px;">14. Changes to This Policy</h3>
-            <p class="section-subtitle" style="margin:0;">
-              We may update this Privacy Policy from time to time to reflect changes in our Service or applicable laws.
-              When we do, we will update the “Last updated” date at the top of this page.
-            </p>
-
-            <h3 style="margin:18px 0 10px;">15. Contact Us</h3>
-            <p class="section-subtitle" style="margin:0;">
-              Questions about this Privacy Policy or your rights? Contact: <strong>support@nightshifthotels.com</strong>
+            <p>
+              For more detail, see our <a href="/security.html">Data Security page</a>.
             </p>
           </div>
         </div>
-      </section>
 
-      <!-- CTA -->
-      <section class="section">
-        <div class="eyebrow">Next step</div>
-        <h2 class="section-title">Want a quote tailored to your property?</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          Share your room count, brand (if any), and call volume — we’ll recommend the right setup and respond quickly.
+        <!-- 9 -->
+        <div class="policyCard">
+          <div class="policyPad">
+            <h3>9) ADA alignment &amp; safety</h3>
+            <p>
+              NightShift can be configured to use ADA-aware service animal handling patterns and to follow safety escalation rules.
+              Hotels control the exact policies, fees, and escalation contacts used.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- More details as a notice block (matches rest of site) -->
+      <div class="notice" style="margin-top:14px;">
+        <h3>More details</h3>
+        <p>
+          Additional topics: retention, international transfers, rights, children’s privacy, and policy changes.
+          Jump to <a href="#more" style="text-decoration:underline;">More details</a>.
         </p>
-        <div class="hero-cta-row" style="margin-top:18px;">
-          <a href="/contact.html" class="btn-primary">Get a Quote</a>
-          <a href="/product.html" class="btn-secondary">Explore Product →</a>
+      </div>
+    </section>
+
+    <!-- SECTION: MORE DETAILS (single heroCard style like index uses for emphasis) -->
+    <section class="section" id="more" aria-label="More details">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> More details</div>
+          <h2 class="h2">Retention, rights, and updates</h2>
+          <p class="lead">
+            These sections provide extra clarity for operators and guests, and explain how to contact us.
+          </p>
         </div>
-      </section>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn" href="#rights">Your rights</a>
+          <a class="btn primary" href="/contact.html">Contact</a>
+        </div>
+      </div>
 
-    </main>
+      <div class="heroCard" style="margin-top:18px;">
+        <div class="inner">
+          <div class="kicker">Details</div>
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
-  <div class="footer-inner">
+          <div class="cardTitle" style="margin-top:6px;">10) Data retention</div>
+          <p class="cardText">
+            We retain call logs, summaries, transcripts (if enabled), and configuration data as needed to provide the Service,
+            support your hotel/business, comply with legal obligations, and resolve disputes. Retention periods may vary by customer
+            configuration and operational needs.
+          </p>
+          <p class="cardText" style="margin-top:10px;">
+            Upon request, we may delete or anonymize certain data, subject to legal, technical, and operational requirements.
+          </p>
 
-    <!-- Left: copyright -->
-    <div>© 2026 NightShift AI</div>
+          <div class="cardTitle" style="margin-top:16px;">11) International transfers</div>
+          <p class="cardText">
+            If you access NightShift from outside the United States, your information may be processed and stored in the U.S.
+            or other locations where our service providers operate, subject to appropriate safeguards.
+          </p>
 
-    <!-- Middle: legal + contact -->
-    <div class="footer-links">
-      <a href="/privacy.html">Privacy</a>
-      <a href="/cookies.html">Cookies</a>
-      <a href="/security.html">Security</a>
-      <a href="/terms.html">Terms</a>
-      <a href="/contact.html">Contact</a>
-    </div>
+          <div class="cardTitle" id="rights" style="margin-top:16px;">12) Your rights</div>
+          <p class="cardText">
+            Depending on your location and applicable law, you may have rights to access, correct, delete, or request a copy of your data,
+            and to restrict or object to certain processing. To exercise these rights, contact <b style="color:var(--text);">support@nightshifthotels.com</b>.
+          </p>
 
-    <!-- Right: social icons -->
-    <div class="social-links">
+          <div class="cardTitle" style="margin-top:16px;">13) Children’s privacy</div>
+          <p class="cardText">
+            NightShift AI is not directed to children under 13, and we do not knowingly collect personal data from minors.
+            If you believe a child has provided personal data, contact us so we can remove it.
+          </p>
 
-      <!-- X -->
-      <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
-        <svg viewBox="0 0 24 24">
-          <path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/>
-        </svg>
-      </a>
+          <div class="cardTitle" style="margin-top:16px;">14) Changes to this policy</div>
+          <p class="cardText">
+            We may update this Privacy Policy from time to time to reflect changes in our Service or applicable laws.
+            When we do, we will update the “Last updated” date on this page.
+          </p>
 
-      <!-- Instagram -->
-      <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
-        <svg viewBox="0 0 24 24">
-          <path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/>
-        </svg>
-      </a>
+          <div class="cardTitle" style="margin-top:16px;">15) Contact us</div>
+          <p class="cardText">
+            Questions about this Privacy Policy or your rights? Contact: <b style="color:var(--text);">support@nightshifthotels.com</b>
+          </p>
 
-      <!-- Facebook -->
-      <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
-        <svg viewBox="0 0 24 24">
-          <path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/>
-        </svg>
-      </a>
+          <div class="ctaRow" style="margin-top:14px;">
+            <a class="btn primary" href="/contact.html">Book a demo</a>
+            <a class="btn" href="/security.html">Security</a>
+            <a class="btn" href="/terms.html">Terms</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    </div>
+    <!-- FINAL CTA (matches index style: notice inside section) -->
+    <section class="section" aria-label="Final call to action">
+      <div class="notice">
+        <h3>Want a quote tailored to your property?</h3>
+        <p>Share your room count, brand (if any), and call volume — we’ll recommend the right setup and respond quickly.</p>
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/product.html">Explore product</a>
+          <a class="btn" href="/packages.html">Compare packages</a>
+        </div>
+      </div>
+    </section>
 
-  </div>
-</footer>
+    <!-- FOOTER (MATCHES INDEX) -->
+    <footer class="footer" role="contentinfo">
+      <div class="footerInner">
+        <div>© 2026 NightShift AI</div>
 
+        <div class="footerLinks">
+          <a href="/privacy.html">Privacy</a>
+          <a href="/cookies.html">Cookies</a>
+          <a href="/security.html">Security</a>
+          <a href="/terms.html">Terms</a>
+          <a href="/contact.html">Contact</a>
+        </div>
 
-  </div>
+        <div class="social" aria-label="Social links">
+          <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
+          </a>
+
+          <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
+          </a>
+
+          <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // Mobile menu (matches index)
+    (function(){
+      var btn = document.getElementById("btnMenu");
+      var menu = document.getElementById("mobileMenu");
+      if(btn && menu){
+        btn.addEventListener("click", function(){
+          menu.classList.toggle("open");
+        });
+      }
+      document.addEventListener("click", function(e){
+        if(!menu || !btn) return;
+        if(e.target.closest("#btnMenu") || e.target.closest("#mobileMenu")) return;
+        menu.classList.remove("open");
+      });
+    })();
+
+    // Theme toggle (matches index/dashboard)
+    (function(){
+      function systemPrefersDark(){
+        try { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
+        catch(e){ return false; }
+      }
+      function resolveTheme(t){
+        if(t === "dark") return "dark";
+        if(t === "light") return "light";
+        return systemPrefersDark() ? "dark" : "light";
+      }
+      function applyTheme(t){
+        var resolved = resolveTheme(t);
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }
+      var btn = document.getElementById("btnTheme");
+      if(btn){
+        btn.addEventListener("click", function(){
+          var now = "system";
+          try{ now = localStorage.getItem("nsa_theme") || "system"; }catch(e){}
+          var next = resolveTheme(now) === "dark" ? "light" : "dark";
+          try{ localStorage.setItem("nsa_theme", next); }catch(e){}
+          applyTheme(next);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
