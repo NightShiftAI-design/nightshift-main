@@ -328,155 +328,137 @@
       </div>
     </section>
 
-    <!-- SECTION: PACKAGES / PRICING GRID -->
-    <section class="section" id="compare" aria-label="Compare packages">
-      <div class="sectionHead">
+   <!-- SECTION: PACKAGES / PRICING GRID -->
+<section class="section" id="compare" aria-label="Compare packages">
+  <div class="sectionHead">
+    <div>
+      <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Compare</div>
+      <h2 class="h2">Coverage levels</h2>
+      <p class="lead">
+        Pick the tier that matches your operation. Then we configure your routing rules, escalation paths,
+        reservation request handling, and staff notifications.
+      </p>
+    </div>
+    <div class="ctaRow" style="margin:0;">
+      <a class="btn primary" href="/contact.html">Book a demo</a>
+      <a class="btn" href="/faq.html">FAQ</a>
+    </div>
+  </div>
+
+  <!-- Row 1: Core + Pro -->
+  <div class="pricing">
+    <!-- CORE -->
+    <div class="price">
+      <div class="priceTop">
         <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Compare</div>
-          <h2 class="h2">Coverage levels</h2>
-          <p class="lead">
-            Start with the tier that matches your operation. Then we customize your routing rules, escalation paths,
-            reservation request handling, and staff notifications.
-          </p>
-        </div>
-        <div class="ctaRow" style="margin:0;">
-          <a class="btn primary" href="/contact.html">Book a demo</a>
-          <a class="btn" href="/faq.html">FAQ</a>
+          <div class="pill">Core</div>
+          <div class="priceName">Essential call coverage</div>
+          <p class="priceSub">Best for independent hotels &amp; motels.</p>
         </div>
       </div>
+      <div class="priceBody">
+        <ul class="bullets">
+          <li>Answers guest calls 24/7</li>
+          <li>Property FAQs (policies, fees, hours)</li>
+          <li>Weekly &amp; nightly rate logic</li>
+          <li>Pets + service animal workflows (policy-driven)</li>
+          <li>Emergency detection and escalation</li>
+          <li>SMS / email summaries to staff</li>
+        </ul>
 
-      <!-- Row 1 -->
-      <div class="pricing">
-        <!-- CORE -->
-        <div class="price">
-          <div class="priceTop">
-            <div>
-              <div class="pill">Core</div>
-              <div class="priceName">Essential call coverage</div>
-              <p class="priceSub">Best for independent hotels &amp; motels.</p>
-            </div>
-          </div>
-          <div class="priceBody">
-            <ul class="bullets">
-              <li>Answers guest calls 24/7</li>
-              <li>Property FAQs (policies, fees, hours)</li>
-              <li>Weekly &amp; nightly rate logic</li>
-              <li>Pets + service animal workflows (policy-driven)</li>
-              <li>Emergency detection and escalation</li>
-              <li>SMS / email summaries to staff</li>
-            </ul>
-
-            <div class="demoRow">
-              <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
-              <a class="btn primary" href="/contact.html">Get a quote</a>
-            </div>
-          </div>
+        <!-- Make Core feel full: 3 buttons (can all point to core.mp3 for now) -->
+        <div class="demoRow">
+          <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Greeting Example</button>
+          <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Rates &amp; Policies Example</button>
+          <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Escalation Example</button>
+          <a class="btn primary" href="/contact.html">Get a quote</a>
         </div>
 
-        <!-- PRO -->
-        <div class="price">
-          <div class="priceTop">
-            <div>
-              <div class="pill" style="background: rgba(66,211,146,.10); border-color: rgba(66,211,146,.22);">Pro</div>
-              <div class="priceName">Franchise-ready + structured intake</div>
-              <p class="priceSub">For branded properties needing tighter tone, cleaner routing, and reservation request workflows.</p>
-            </div>
-          </div>
-          <div class="priceBody">
-            <ul class="bullets">
-              <li>Everything in Core</li>
-              <li>Brand voice &amp; terminology alignment</li>
-              <li>Structured reservation request intake (staff confirmation)</li>
-              <li>Multi-language detection (responds in caller language)</li>
-              <li>Rule-based routing to GM or front desk</li>
-              <li>PCI-safe handling (no card numbers)</li>
-            </ul>
-
-            <div class="demoRow stack3">
-              <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_greeting_matilda.mp3" type="button">🔊 Greeting Example</button>
-              <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_reservation_confirmation.mp3" type="button">🔊 Booking Confirmation Example</button>
-              <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_emergency_matilda.mp3" type="button">🔊 Emergency Handling Example</button>
-              <a class="btn primary" href="/contact.html">Get a quote</a>
-            </div>
-
-            <p style="margin-top:10px; color:var(--muted); font-size:13px; line-height:1.6;">
-              Live workflow demos (dashboard + operations) are available in private demos for qualified properties.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Row 2 -->
-      <div class="pricing">
-        <!-- ELITE -->
-        <div class="price">
-          <div class="priceTop">
-            <div>
-              <div class="pill">Elite</div>
-              <div class="priceName">Portfolio-level virtual front desk</div>
-              <p class="priceSub">Built for ownership groups and management companies.</p>
-            </div>
-          </div>
-          <div class="priceBody">
-            <ul class="bullets">
-              <li>Everything in Pro</li>
-              <li>Multi-property routing and logic</li>
-              <li>Shared dashboards and roll-up reporting</li>
-              <li>Owner-level performance insights</li>
-              <li>White-glove setup and onboarding</li>
-              <li>Ongoing monitoring and optimization</li>
-            </ul>
-
-            <div class="demoRow">
-              <button class="btn demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
-              <button class="btn demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
-              <a class="btn primary" href="/contact.html">Portfolio quote</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- FLEXIBLE -->
-        <div class="price">
-          <div class="priceTop">
-            <div>
-              <div class="pill">Flexible</div>
-              <div class="priceName">Lower upfront, scalable deployment</div>
-              <p class="priceSub">Start lean and expand coverage as call volume grows.</p>
-            </div>
-          </div>
-          <div class="priceBody">
-            <ul class="bullets">
-              <li>Lower initial commitment</li>
-              <li>Updates and workflow improvements included</li>
-              <li>Scale with call volume</li>
-              <li>Great for phased rollouts</li>
-            </ul>
-
-            <div class="demoRow">
-              <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
-              <a class="btn primary" href="/contact.html">Request flexible quote</a>
-            </div>
-
-            <p style="margin-top:10px; color:var(--muted); font-size:13px; line-height:1.6;">
-              Flexible is priced based on call volume and coverage hours. We’ll recommend the best fit after a quick intake.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="notice">
-        <h3>Not sure which tier fits?</h3>
-        <p>
-          Tell us your room count, brand (if any), and estimated call volume. We’ll recommend the right package and outline
-          exactly how NightShift will operate for your property.
+        <p style="margin-top:10px; color:var(--muted); font-size:13px; line-height:1.6;">
+          Want more scenarios? We’ll show the full flow in a live demo.
         </p>
-        <div class="ctaRow">
-          <a class="btn primary" href="/contact.html">Book a demo</a>
-          <a class="btn" href="/faq.html">Read FAQ</a>
-          <a class="btn" href="tel:4237715523">Call now</a>
+      </div>
+    </div>
+
+    <!-- PRO -->
+    <div class="price">
+      <div class="priceTop">
+        <div>
+          <div class="pill" style="background: rgba(66,211,146,.10); border-color: rgba(66,211,146,.22);">Pro</div>
+          <div class="priceName">Franchise-ready + structured intake</div>
+          <p class="priceSub">For branded properties needing tighter tone, cleaner routing, and reservation request workflows.</p>
         </div>
       </div>
-    </section>
+      <div class="priceBody">
+        <ul class="bullets">
+          <li>Everything in Core</li>
+          <li>Brand voice &amp; terminology alignment</li>
+          <li>Structured reservation request intake (staff confirmation)</li>
+          <li>Multi-language detection (responds in caller language)</li>
+          <li>Rule-based routing to GM or front desk</li>
+          <li>PCI-safe handling (no card numbers)</li>
+        </ul>
+
+        <div class="demoRow">
+          <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_greeting_matilda.mp3" type="button">🔊 Greeting Example</button>
+          <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_reservation_confirmation.mp3" type="button">🔊 Booking Confirmation Example</button>
+          <button class="btn demo-audio" data-audio="/assets/demos/pro_demo_emergency_matilda.mp3" type="button">🔊 Emergency Handling Example</button>
+          <a class="btn primary" href="/contact.html">Get a quote</a>
+        </div>
+
+        <p style="margin-top:10px; color:var(--muted); font-size:13px; line-height:1.6;">
+          Advanced operations walkthroughs are available in private demos.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Elite (single wide card) -->
+  <div class="pricing">
+    <div class="price" style="grid-column: 1 / -1;">
+      <div class="priceTop">
+        <div>
+          <div class="pill">Elite</div>
+          <div class="priceName">Operations-grade virtual front desk</div>
+          <p class="priceSub">For owners and operators who want dashboards, monitoring, and continuous optimization.</p>
+        </div>
+      </div>
+      <div class="priceBody">
+        <ul class="bullets">
+          <li>Everything in Pro</li>
+          <li>Dashboard reporting and oversight</li>
+          <li>Advanced routing rules and monitoring</li>
+          <li>Owner-level insights (calls, issues, outcomes)</li>
+          <li>White-glove setup and onboarding</li>
+          <li>Ongoing tuning and optimization</li>
+        </ul>
+
+        <div class="demoRow">
+          <button class="btn demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
+          <button class="btn demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
+          <a class="btn primary" href="/contact.html">Get Elite quote</a>
+        </div>
+
+        <p style="margin-top:10px; color:var(--muted); font-size:13px; line-height:1.6;">
+          Multi-property support is included in Elite when needed — configured to your operation.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <h3>Not sure which tier fits?</h3>
+    <p>
+      Tell us your room count, brand (if any), and estimated call volume. We’ll recommend the right package and outline
+      exactly how NightShift will operate for your property.
+    </p>
+    <div class="ctaRow">
+      <a class="btn primary" href="/contact.html">Book a demo</a>
+      <a class="btn" href="/faq.html">Read FAQ</a>
+      <a class="btn" href="tel:4237715523">Call now</a>
+    </div>
+  </div>
+</section>
 
     <!-- SECTION: IMPLEMENTATION -->
     <section class="section" aria-label="Implementation">
