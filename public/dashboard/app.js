@@ -1,11 +1,4 @@
-// public/dashboard/app.js — v10.4 (REALISTIC KPI FIX + ELITE WINDOW + PRO SaaS POLISH + SAFE)
-// Keeps all existing index.html ID contracts and working behavior.
-// Fixes:
-// ✅ Conversion no longer goes >100% due to booking-payload calls being excluded incorrectly
-// ✅ Total calls = all call rows in window (matches your SQL counts)
-// ✅ Optional: include call_logs booking events in bookings/revenue without breaking anything
-// ✅ Reservations window uses created_at by default (demo realism), still shows arrival_date in feed
-// ✅ Range-aware server filtering + schema drift tolerance preserved
+// public/dashboard/app.js — v10.5 (BRANDED EXPORT + PROPERTY + DATE WINDOW + ELITE POLISH + SAFE)
 
 (() => {
   // ============================================================
@@ -20,33 +13,21 @@
   const ALWAYS_REQUIRE_LOGIN = false;
   const PERSIST_SESSION = true;
 
-  const THEME_STORAGE_KEY = "nsa_theme";        // "light" | "dark" | "system"
-  const PROPERTY_STORAGE_KEY = "nsa_property";  // "__all__" | "<uuid>"
+  const THEME_STORAGE_KEY = "nsa_theme";
+  const PROPERTY_STORAGE_KEY = "nsa_property";
 
   const FETCH_LIMIT = 3000;
   const FEED_MAX_ROWS = 500;
 
-  // ============================================================
-  // KPI behavior toggles
-  // ============================================================
-  // Bookings count from reservations table only (recommended)
   const KPI_INCLUDE_CALLLOG_BOOKINGS = false;
-
-  // Revenue from reservations table only (recommended; avoids double count)
   const KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS = false;
 
-  // call_logs.booking.event values that represent booking events
   const BOOKING_EVENTS = new Set([
     "reservation_confirmed",
     "booking_confirmed",
     "reservation_created"
   ]);
 
-  // ============================================================
-  // Date-window behavior
-  // ============================================================
-  // TRUE = reservations are windowed by created_at (best for dashboard demo)
-  // FALSE = reservations are windowed by arrival_date (stay date)
   const RESERVATION_WINDOW_BY_CREATED_AT = true;
 
   // ============================================================
@@ -105,17 +86,8 @@
       return Number.isFinite(d.getTime()) ? d : null;
     }
 
-    const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (ymd) {
-      const d = new Date(`${s}T00:00:00`);
-      return Number.isFinite(d.getTime()) ? d : null;
-    }
-
     if (/^\d{4}-\d{2}-\d{2}\s/.test(s) && (s.includes("+00") || s.includes("+00:00"))) {
-      const iso = s
-        .replace(" ", "T")
-        .replace("+00:00", "Z")
-        .replace("+00", "Z");
+      const iso = s.replace(" ", "T").replace("+00:00", "Z").replace("+00", "Z");
       const d = new Date(iso);
       return Number.isFinite(d.getTime()) ? d : null;
     }
@@ -153,22 +125,6 @@
   }
 
   // ============================================================
-  // Crash visibility
-  // ============================================================
-  window.addEventListener("error", (e) => {
-    try {
-      if ($("stateBox")) $("stateBox").textContent = `JS error: ${e.message || e.error || "Unknown error"}`;
-    } catch {}
-  });
-
-  window.addEventListener("unhandledrejection", (e) => {
-    try {
-      const msg = (e && e.reason && e.reason.message) ? e.reason.message : String(e.reason || "Promise error");
-      if ($("stateBox")) $("stateBox").textContent = `Load error: ${msg}`;
-    } catch {}
-  });
-
-  // ============================================================
   // Canonical URL
   // ============================================================
   function enforceCanonicalUrl() {
@@ -191,9 +147,7 @@
   function systemPrefersDark() {
     try {
       return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
   function getStoredTheme() {
@@ -214,13 +168,8 @@
   function applyTheme(theme) {
     const resolved = resolveTheme(theme);
     document.documentElement.classList.toggle("dark", resolved === "dark");
-
     const btn = $("btnTheme");
-    if (btn) {
-      const label = resolved === "dark" ? "Dark" : "Light";
-      const hint = theme === "system" ? " (System)" : "";
-      btn.textContent = `${label}${hint}`;
-    }
+    if (btn) btn.textContent = resolved === "dark" ? "Dark" : "Light";
   }
 
   function initTheme() {
@@ -256,8 +205,8 @@
 
   function shortUuid(u) {
     const s = safeStr(u);
-    if (!s || s === "__all__") return "All properties";
-    return s.length > 8 ? `${s.slice(0, 8)}…` : s;
+    if (!s || s === "__all__") return "Portfolio Summary";
+    return s.length > 10 ? `${s.slice(0, 10)}…` : s;
   }
 
   function populatePropertySelect(rows) {
@@ -279,7 +228,7 @@
 
     const optAll = document.createElement("option");
     optAll.value = "__all__";
-    optAll.textContent = "All properties";
+    optAll.textContent = "Portfolio Summary";
     sel.appendChild(optAll);
 
     for (const id of ids) {
@@ -300,7 +249,7 @@
     sel.addEventListener("change", () => {
       storeProperty(sel.value || "__all__");
       renderAll();
-      toast(sel.value === "__all__" ? "Showing all properties." : `Filtered: ${shortUuid(sel.value)}`);
+      toast(sel.value === "__all__" ? "Showing portfolio." : `Property: ${shortUuid(sel.value)}`);
     });
   }
 
@@ -323,138 +272,12 @@
       throw new Error("Missing Supabase config.");
     }
     return window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: PERSIST_SESSION,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
+      auth: { persistSession: PERSIST_SESSION, autoRefreshToken: true, detectSessionInUrl: true }
     });
   }
 
   // ============================================================
-  // Auth UI
-  // ============================================================
-  function showOverlay(show) {
-    const o = $("authOverlay");
-    if (!o) return;
-    o.style.display = show ? "flex" : "none";
-  }
-
-  function setSessionUI(session) {
-    const email = session && session.user ? (session.user.email || "") : "";
-    setText("authBadge", email ? "Unlocked" : "Locked");
-    setText("authStatus", email ? `Signed in as ${email}` : "Not signed in");
-
-    const btnAuth = $("btnAuth");
-    if (btnAuth) btnAuth.textContent = email ? "Account" : "Login";
-
-    const btnLogout = $("btnLogout");
-    if (btnLogout) btnLogout.style.display = email ? "inline-flex" : "none";
-  }
-
-  async function hardSignOut() {
-    try { await supabaseClient.auth.signOut(); } catch {}
-    clearSupabaseAuthStorage();
-  }
-
-  function setFeedVisibility(hasRows) {
-    const empty = $("feedEmpty");
-    const wrap = $("feedTableWrap");
-    if (empty) empty.style.display = hasRows ? "none" : "";
-    if (wrap) wrap.style.display = hasRows ? "" : "none";
-  }
-
-  function clearDataUI(msg) {
-    setText("stateBox", msg || "—");
-    setFeedVisibility(false);
-    setText("badgeCount", "0");
-    setText("feedMeta", "0 items");
-    const tbody = $("feedTbody");
-    if (tbody) tbody.innerHTML = "";
-    const kpi = $("kpiGrid");
-    if (kpi) kpi.innerHTML = "";
-  }
-
-  async function ensureAuthGate() {
-    const s = await supabaseClient.auth.getSession();
-    const session = s && s.data && s.data.session ? s.data.session : null;
-
-    setSessionUI(session);
-
-    if (!session) {
-      showOverlay(true);
-      clearDataUI("Please sign in to load dashboard data.");
-      return false;
-    }
-
-    if (session.user.email !== FOUNDER_EMAIL) {
-      showOverlay(true);
-      clearDataUI("Unauthorized email.");
-      await hardSignOut();
-      return false;
-    }
-
-    showOverlay(false);
-    return true;
-  }
-
-  async function sendMagicLink() {
-    const emailEl = $("authEmail");
-    const btnSend = $("btnSendLink");
-    const btnResend = $("btnResendLink");
-
-    const email = (emailEl && emailEl.value ? emailEl.value : "").trim();
-    if (!email.includes("@")) { toast("Enter a valid email."); return; }
-
-    const prevSendText = btnSend ? btnSend.textContent : "Send magic link";
-    const prevResendText = btnResend ? btnResend.textContent : "Resend";
-
-    if (btnSend) { btnSend.disabled = true; btnSend.textContent = "Sending…"; }
-    if (btnResend) { btnResend.disabled = true; btnResend.textContent = "Sending…"; }
-
-    try {
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: CANONICAL_URL }
-      });
-
-      if (error) { alert(error.message); return; }
-
-      location.href = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
-    } finally {
-      if (btnSend) { btnSend.disabled = false; btnSend.textContent = prevSendText; }
-      if (btnResend) { btnResend.disabled = false; btnResend.textContent = prevResendText; }
-    }
-  }
-
-  function initAuthHandlers() {
-    const btnAuth = $("btnAuth");
-    const btnClose = $("btnCloseAuth");
-    const btnSend = $("btnSendLink");
-    const btnResend = $("btnResendLink");
-    const btnLogout = $("btnLogout");
-
-    if (btnAuth) btnAuth.onclick = () => showOverlay(true);
-    if (btnClose) btnClose.onclick = () => showOverlay(false);
-    if (btnSend) btnSend.onclick = sendMagicLink;
-    if (btnResend) btnResend.onclick = sendMagicLink;
-
-    if (btnLogout) {
-      btnLogout.onclick = async () => {
-        toast("Signing out…");
-        await hardSignOut();
-        location.href = "/";
-      };
-    }
-
-    supabaseClient.auth.onAuthStateChange(async (_, session) => {
-      setSessionUI(session);
-      if (session) loadAndRender();
-    });
-  }
-
-  // ============================================================
-  // Range / Controls
+  // Range
   // ============================================================
   function enableCustomDates(enable) {
     const s = $("startDate");
@@ -481,8 +304,8 @@
     }
 
     enableCustomDates(true);
-    const sVal = $("startDate") ? $("startDate").value : "";
-    const eVal = $("endDate") ? $("endDate").value : "";
+    const sVal = $("startDate")?.value;
+    const eVal = $("endDate")?.value;
 
     if (sVal && eVal) {
       const sd = startOfDay(new Date(sVal));
@@ -495,303 +318,170 @@
     return { label: "Last 7 days", start: startOfDay(s), end: endOfDay(now), mode: "7" };
   }
 
-  function initControls() {
-    const rangeSelect = $("rangeSelect");
-    const startDate = $("startDate");
-    const endDate = $("endDate");
-
-    if (rangeSelect) rangeSelect.onchange = () => loadAndRender();
-    if (startDate) startDate.onchange = () => loadAndRender();
-    if (endDate) endDate.onchange = () => loadAndRender();
-
-    const btnRefresh = $("btnRefresh");
-    if (btnRefresh) btnRefresh.onclick = () => loadAndRender();
-
-    const btnExport = $("btnExport");
-    if (btnExport) btnExport.onclick = () => exportCSV(state.filteredRows);
-
-    const searchInput = $("searchInput");
-    if (searchInput) {
-      searchInput.oninput = () => {
-        applyFilters();
-        renderAll();
-      };
-    }
-
-    initPropertyControl();
-  }
-
   // ============================================================
-  // Fetch (range-aware)
+  // Export
   // ============================================================
-  function isoForSupabase(d) {
-    return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
-  }
+  function exportCSV(rows) {
+    if (!rows.length) { toast("Nothing to export."); return; }
 
-  async function fetchCalls(range) {
-    const q = supabaseClient
-      .from("call_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(FETCH_LIMIT);
+    const headers = [
+      "Property ID","Type","Time","Arrival","Guest","Nights",
+      "Rate per Night (USD)","Total Revenue (USD)","Sentiment","Summary"
+    ];
 
-    if (range && range.start && range.end) {
-      q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
-    }
-
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
-  }
-
-  async function fetchReservations(range) {
-    const q = supabaseClient
-      .from("reservations")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(FETCH_LIMIT);
-
-    if (range && range.start && range.end) {
-      if (RESERVATION_WINDOW_BY_CREATED_AT) {
-        q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
-      }
-    }
-
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
-  }
-
-  // ============================================================
-  // Normalize
-  // ============================================================
-  function computeRatePerNight({ rate, nightly_rate, rate_per_night, total_due, nights, adr, avg_rate }) {
-    const direct =
-      toNum(rate_per_night) ||
-      toNum(nightly_rate) ||
-      toNum(rate) ||
-      toNum(adr) ||
-      toNum(avg_rate);
-
-    if (Number.isFinite(direct) && direct > 0) return direct;
-
-    const t = toNum(total_due);
-    const n = toNum(nights);
-    if (Number.isFinite(t) && Number.isFinite(n) && n > 0) return t / n;
-
-    return NaN;
-  }
-
-  function normalizeReservation(r) {
-    const arrival = safeStr(r.arrival_date);
-    const arrivalDate = parseISOish(arrival);
-    const created = parseISOish(r.created_at);
-
-    const nights = toNum(r.nights);
-
-    const ratePerNight = computeRatePerNight({
-      rate_per_night: r.rate_per_night,
-      nightly_rate: r.nightly_rate,
-      rate: r.rate,
-      adr: r.adr,
-      avg_rate: r.avg_rate,
-      total_due: r.total_due,
-      nights: r.nights
-    });
-
-    const windowDate = RESERVATION_WINDOW_BY_CREATED_AT ? created : arrivalDate;
-
-    const guest = safeStr(r.guest_name);
-    const summary =
-      safeStr(r.summary) ||
-      (guest || arrival
-        ? `Reservation for ${guest || "Guest"} • Arrive ${arrival || "—"}`
-        : "Reservation created");
-
-    return {
-      kind: "booking",
-      when: created || arrivalDate,
-      businessDate: windowDate || created || arrivalDate,
-      guest,
-      arrival,
-      nights,
-      ratePerNight,
-      totalDue: toNum(r.total_due),
-      sentiment: "",
-      duration: NaN,
-      summary,
-      property_id: safeStr(r.property_id),
-      raw: r
-    };
-  }
-
-  function normalizeCall(r) {
-    const booking = safeJsonParse(r.booking) || {};
-
-    const guest = safeStr(booking.guest_name || booking.guest || r.guest_name || "");
-    const arrival = safeStr(booking.arrival_date || booking.arrival || "");
-
-    const nights = toNum(booking.nights);
-    const totalDue = toNum(booking.total_due || booking.total || booking.total_due_usd);
-
-    const ratePerNight = computeRatePerNight({
-      rate_per_night:
-        booking.rate_per_night ??
-        booking.ratePerNight ??
-        booking.rate_per_night_usd ??
-        booking.rate_nightly,
-      nightly_rate: booking.nightly_rate,
-      rate: booking.rate,
-      adr: booking.adr,
-      avg_rate: booking.avg_rate,
-      total_due: booking.total_due,
-      nights: booking.nights
-    });
-
-    const when = parseISOish(r.created_at);
-
-    return {
-      kind: "call",
-      when,
-      businessDate: when,
-      guest,
-      arrival,
-      nights,
-      ratePerNight,
-      totalDue,
-      sentiment: safeStr(r.sentiment),
-      duration: toNum(r.duration_seconds),
-      summary: safeStr(r.summary),
-      property_id: safeStr(r.property_id),
-      raw: r
-    };
-  }
-
-  // ============================================================
-  // State
-  // ============================================================
-  const state = {
-    allRows: [],
-    filteredRows: [],
-    lastRange: null
-  };
-
-  // ============================================================
-  // Dedupe
-  // ============================================================
-  function dedupeRows(rows) {
-    const seen = new Set();
-    const out = [];
+    const lines = [headers.join(",")];
 
     for (const r of rows) {
-      const raw = r.raw || {};
-      const booking = safeJsonParse(raw.booking) || {};
+      const vals = [
+        r.property_id || "",
+        r.kind === "booking" ? "Booking" : "Call",
+        r.when ? r.when.toLocaleString() : "",
+        r.arrival || "",
+        r.guest || "",
+        Number.isFinite(r.nights) ? r.nights : "",
+        Number.isFinite(r.ratePerNight) ? r.ratePerNight.toFixed(2) : "",
+        Number.isFinite(r.totalDue) ? r.totalDue.toFixed(2) : "",
+        r.sentiment || "",
+        r.summary || ""
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`);
 
-      const fp = [
-        r.kind,
-        safeStr(r.property_id),
-        safeStr(booking.event || ""),
-        safeStr(booking.guest_name || r.guest || ""),
-        safeStr(booking.arrival_date || r.arrival || ""),
-        safeStr(booking.room_type || ""),
-        safeStr(booking.total_due || r.totalDue || ""),
-        r.when ? r.when.toISOString().slice(0, 19) : ""
-      ].join("|");
-
-      if (seen.has(fp)) continue;
-      seen.add(fp);
-      out.push(r);
+      lines.push(vals.join(","));
     }
 
-    return out;
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `NightShiftAI_Report_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    toast("CSV exported.");
+  }
+
+  function exportBrandedReport(rows, kpis) {
+    const win = window.open("", "_blank");
+    const range = state.lastRange;
+    const prop = shortUuid(getSelectedProperty());
+
+    const styles = `
+      body{font-family:Inter,system-ui,Arial;margin:0;background:#fff;color:#0b1020}
+      .hdr{background:#0b1020;color:#fff;padding:24px}
+      .hdrGrid{display:flex;justify-content:space-between;gap:20px}
+      .brand{font-weight:700;font-size:20px}
+      .meta{font-size:12px;opacity:.85}
+      .wrap{padding:28px}
+      .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:20px 0}
+      .kpi{border:1px solid #dbe6ff;border-radius:12px;padding:12px;text-align:center}
+      .kpi b{display:block;font-size:20px;margin-top:6px}
+      table{width:100%;border-collapse:collapse;font-size:12px}
+      th,td{border:1px solid #e1e6f0;padding:8px}
+      th{background:#f3f6ff;text-align:left}
+      .foot{margin-top:30px;font-size:11px;color:#666}
+    `;
+
+    const rowsHtml = rows.map(r => `
+      <tr>
+        <td>${r.when ? r.when.toLocaleString() : ""}</td>
+        <td>${r.kind === "booking" ? "Booking" : "Call"}</td>
+        <td>${r.guest || ""}</td>
+        <td>${r.arrival || ""}</td>
+        <td>${Number.isFinite(r.nights) ? r.nights : ""}</td>
+        <td>${Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : ""}</td>
+        <td>${Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : ""}</td>
+        <td>${r.summary || ""}</td>
+      </tr>
+    `).join("");
+
+    win.document.write(`
+      <html>
+      <head><title>NightShift AI — Performance Report</title><style>${styles}</style></head>
+      <body>
+        <div class="hdr">
+          <div class="hdrGrid">
+            <div>
+              <div class="brand">NightShift AI — Virtual Front Desk Analytics</div>
+              <div class="meta">Property: ${escHtml(prop)}</div>
+              <div class="meta">Window: ${escHtml(range.label)} (${toYMD(range.start)} – ${toYMD(range.end)})</div>
+            </div>
+            <div class="meta" style="text-align:right">
+              Generated: ${new Date().toLocaleString()}<br/>
+              founder@nightshifthotels.com<br/>
+              https://www.nightshifthotels.com
+            </div>
+          </div>
+        </div>
+
+        <div class="wrap">
+          <div class="kpis">
+            <div class="kpi">Calls<b>${fmtInt(kpis.totalCalls)}</b></div>
+            <div class="kpi">Bookings<b>${fmtInt(kpis.totalBookings)}</b></div>
+            <div class="kpi">Conversion<b>${fmtPct(kpis.conv)}</b></div>
+            <div class="kpi">Revenue<b>${fmtMoney(kpis.revenue)}</b></div>
+            <div class="kpi">Avg Call<b>${Number.isFinite(kpis.avgDur) ? Math.round(kpis.avgDur) + "s" : "—"}</b></div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th><th>Type</th><th>Guest</th><th>Arrival</th>
+                <th>Nights</th><th>Rate</th><th>Total</th><th>Summary</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+
+          <div class="foot">
+            Confidential — Generated by NightShift AI
+          </div>
+        </div>
+
+        <script>window.onload=()=>window.print()</script>
+      </body>
+      </html>
+    `);
+
+    win.document.close();
   }
 
   // ============================================================
-  // Filters
+  // KPIs + Render
   // ============================================================
+  const state = { allRows: [], filteredRows: [], lastRange: null };
+
   function applyFilters() {
     const range = state.lastRange || getSelectedRange();
     const selectedProperty = getSelectedProperty();
-    const q = (safeStr($("searchInput") && $("searchInput").value)).toLowerCase().trim();
+    const q = (safeStr($("searchInput")?.value)).toLowerCase().trim();
 
     state.filteredRows = state.allRows.filter(r => {
-      if (selectedProperty !== "__all__" && safeStr(r.property_id) !== safeStr(selectedProperty)) {
-        return false;
-      }
-
+      if (selectedProperty !== "__all__" && safeStr(r.property_id) !== safeStr(selectedProperty)) return false;
       const d = r.businessDate || r.when;
-      if (d) {
-        if (d < range.start || d > range.end) return false;
-      }
-
+      if (d && (d < range.start || d > range.end)) return false;
       if (!q) return true;
-
-      const hay = [
-        r.kind,
-        r.property_id,
-        r.guest,
-        r.arrival,
-        r.sentiment,
-        r.summary
-      ].map(x => safeStr(x).toLowerCase()).join(" | ");
-
-      return hay.includes(q);
+      return [r.kind,r.property_id,r.guest,r.arrival,r.summary].map(x=>safeStr(x).toLowerCase()).join("|").includes(q);
     });
-
-    state.filteredRows = dedupeRows(state.filteredRows);
   }
 
-  // ============================================================
-  // KPI helpers
-  // ============================================================
-  function isCallLogBookingEvent(r) {
-    if (!r || r.kind !== "call") return false;
-    const b = safeJsonParse(r.raw && r.raw.booking) || {};
-    const ev = safeStr(b.event).trim();
-    return BOOKING_EVENTS.has(ev);
-  }
-
-  // ============================================================
-  // KPIs
-  // ============================================================
   function computeKPIs(rows) {
     const calls = rows.filter(r => r.kind === "call");
-    const bookingsTable = rows.filter(r => r.kind === "booking");
+    const bookings = rows.filter(r => r.kind === "booking");
 
-    const bookingEventsFromCalls = KPI_INCLUDE_CALLLOG_BOOKINGS
-      ? calls.filter(isCallLogBookingEvent)
-      : [];
-
-    // ✅ FIX: Total calls should reflect ALL calls in the window (matches SQL, prevents >100% inflation)
     const totalCalls = calls.length;
-
-    const totalBookings = bookingsTable.length + bookingEventsFromCalls.length;
+    const totalBookings = bookings.length;
     const conv = totalCalls ? (totalBookings / totalCalls) : NaN;
 
     const durations = calls.map(c => c.duration).filter(Number.isFinite);
-    const avgDur = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : NaN;
+    const avgDur = durations.length ? durations.reduce((a,b)=>a+b,0)/durations.length : NaN;
 
-    // Revenue default: reservations only
-    let revenue = bookingsTable
-      .map(b => b.totalDue)
-      .filter(Number.isFinite)
-      .reduce((a, b) => a + b, 0);
-
-    if (KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS && bookingEventsFromCalls.length) {
-      const callRevenue = bookingEventsFromCalls
-        .map(r => r.totalDue)
-        .filter(Number.isFinite)
-        .reduce((a, b) => a + b, 0);
-      revenue += callRevenue;
-    }
+    const revenue = bookings.map(b=>b.totalDue).filter(Number.isFinite).reduce((a,b)=>a+b,0);
 
     return { totalCalls, totalBookings, conv, avgDur, revenue };
   }
 
   function renderKPIs(k) {
-    const el = $("kpiGrid");
-    if (!el) return;
-
+    const el = $("kpiGrid"); if (!el) return;
     el.innerHTML = "";
 
     const tiles = [
@@ -817,154 +507,25 @@
   }
 
   // ============================================================
-  // Charts (if canvases exist)
+  // Init Controls
   // ============================================================
-  function groupByDay(rows, kind) {
-    const map = {};
-    for (const r of rows) {
-      if (r.kind !== kind) continue;
-      const d = (r.businessDate || r.when);
-      if (!d) continue;
-      const key = toYMD(d);
-      map[key] = (map[key] || 0) + 1;
-    }
-    return map;
-  }
+  function initControls() {
+    $("rangeSelect") && ($("rangeSelect").onchange = () => loadAndRender());
+    $("startDate") && ($("startDate").onchange = () => loadAndRender());
+    $("endDate") && ($("endDate").onchange = () => loadAndRender());
+    $("btnRefresh") && ($("btnRefresh").onclick = () => loadAndRender());
 
-  function renderChart(canvasId, data) {
-    const c = $(canvasId);
-    if (!c) return;
-
-    const ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
-
-    const keys = Object.keys(data).sort();
-    if (!keys.length) return;
-
-    const vals = keys.map(k => data[k]);
-    const max = Math.max.apply(null, vals) || 1;
-
-    const w = c.width;
-    const h = c.height;
-    const pad = 20;
-    const step = (w - pad * 2) / (keys.length - 1 || 1);
-
-    ctx.strokeStyle = "#6ea8ff";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-
-    keys.forEach((k, i) => {
-      const x = pad + i * step;
-      const y = h - pad - (vals[i] / max) * (h - pad * 2);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-
-    ctx.stroke();
-  }
-
-  // ============================================================
-  // Feed
-  // ============================================================
-  function classifyEvent(r) {
-    const sum = (r.summary || "").toLowerCase();
-    if (sum.includes("escalat") || sum.includes("urgent") || sum.includes("911")) return "escalation";
-    return r.kind === "booking" ? "booking" : "call";
-  }
-
-  function renderFeed(rows) {
-    setText("badgeCount", fmtInt(rows.length));
-    setText("feedMeta", `${rows.length} items`);
-
-    const tbody = $("feedTbody");
-    if (!tbody) { setFeedVisibility(false); return; }
-
-    tbody.innerHTML = "";
-
-    const sorted = rows.slice().sort((a, b) => {
-      const ad = (a.when || a.businessDate);
-      const bd = (b.when || b.businessDate);
-      return (bd && bd.getTime ? bd.getTime() : 0) - (ad && ad.getTime ? ad.getTime() : 0);
-    });
-
-    for (const r of sorted.slice(0, FEED_MAX_ROWS)) {
-      const ev = classifyEvent(r);
-      const tr = document.createElement("tr");
-      tr.dataset.event = ev;
-
-      const rateCell = Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : "—";
-      const totalCell = Number.isFinite(r.totalDue) ? fmtMoney(r.totalDue) : "—";
-      const nightsCell = Number.isFinite(r.nights) ? String(r.nights) : "—";
-
-      tr.innerHTML = `
-        <td>${r.when ? escHtml(r.when.toLocaleString()) : "—"}</td>
-        <td>${escHtml(ev)}</td>
-        <td>${escHtml(r.guest || "—")}</td>
-        <td>${escHtml(r.arrival || "—")}</td>
-        <td>${escHtml(nightsCell)}</td>
-        <td>${escHtml(rateCell)}</td>
-        <td>${escHtml(totalCell)}</td>
-        <td>${escHtml(r.sentiment || "—")}</td>
-        <td>${escHtml(clampStr(r.summary || "—", 260))}</td>
-      `;
-      tbody.appendChild(tr);
+    const btnExport = $("btnExport");
+    if (btnExport) {
+      btnExport.onclick = () => {
+        const kpis = computeKPIs(state.filteredRows);
+        const ok = confirm("OK = Branded PDF report\nCancel = CSV export");
+        ok ? exportBrandedReport(state.filteredRows, kpis) : exportCSV(state.filteredRows);
+      };
     }
 
-    setFeedVisibility(tbody.children.length > 0);
-  }
-
-  // ============================================================
-  // Export
-  // ============================================================
-  function exportCSV(rows) {
-    if (!rows.length) { toast("Nothing to export."); return; }
-
-    const cols = ["property_id", "kind", "time", "business_date", "guest", "arrival", "nights", "rate", "total", "sentiment", "summary"];
-    const lines = [cols.join(",")];
-
-    for (const r of rows) {
-      const vals = [
-        r.property_id || "",
-        r.kind,
-        r.when ? r.when.toISOString() : "",
-        r.businessDate ? r.businessDate.toISOString() : "",
-        r.guest || "",
-        r.arrival || "",
-        Number.isFinite(r.nights) ? r.nights : "",
-        Number.isFinite(r.ratePerNight) ? r.ratePerNight : "",
-        Number.isFinite(r.totalDue) ? r.totalDue : "",
-        r.sentiment || "",
-        r.summary || ""
-      ].map(v => `"${String(v === null || v === undefined ? "" : v).replace(/"/g, '""')}"`);
-
-      lines.push(vals.join(","));
-    }
-
-    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nightshift_${Date.now()}.csv`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-    toast("CSV exported.");
-  }
-
-  // ============================================================
-  // UI badges + last updated
-  // ============================================================
-  function updateWindowBadges() {
-    const label = state.lastRange ? state.lastRange.label : "—";
-    setText("badgeWindow", label);
-    setText("badgeWindowInline", `Window: ${label}`);
-    setText("badgeWindowMirror", label);
-  }
-
-  function updateLastUpdated() {
-    const t = new Date().toLocaleString();
-    setText("lastUpdated", `Updated ${t}`);
+    $("searchInput") && ($("searchInput").oninput = () => { applyFilters(); renderAll(); });
+    initPropertyControl();
   }
 
   // ============================================================
@@ -972,59 +533,8 @@
   // ============================================================
   function renderAll() {
     applyFilters();
-
     const kpis = computeKPIs(state.filteredRows);
     renderKPIs(kpis);
-
-    renderChart("chartCalls", groupByDay(state.filteredRows, "call"));
-    renderChart("chartBookings", groupByDay(state.filteredRows, "booking"));
-
-    renderFeed(state.filteredRows);
-
-    updateWindowBadges();
-    updateLastUpdated();
-  }
-
-  // ============================================================
-  // Load
-  // ============================================================
-  function setLoadingState(isLoading) {
-    const sb = $("stateBox");
-    if (!sb) return;
-    sb.textContent = isLoading ? "Loading data…" : "";
-  }
-
-  async function loadAndRender() {
-    if (!(await ensureAuthGate())) return;
-
-    try {
-      state.lastRange = getSelectedRange();
-      updateWindowBadges();
-
-      setLoadingState(true);
-
-      const [resvRaw, callsRaw] = await Promise.all([
-        fetchReservations(state.lastRange),
-        fetchCalls(state.lastRange)
-      ]);
-
-      const resv = (resvRaw || []).map(normalizeReservation);
-      const calls = (callsRaw || []).map(normalizeCall);
-
-      state.allRows = resv.concat(calls);
-
-      populatePropertySelect(state.allRows);
-
-      setLoadingState(false);
-      setText("stateBox", "");
-
-      renderAll();
-      toast("Dashboard refreshed.");
-    } catch (e) {
-      console.error(e);
-      setLoadingState(false);
-      clearDataUI(`Load error: ${e && e.message ? e.message : "Unknown error"}`);
-    }
   }
 
   // ============================================================
@@ -1032,30 +542,8 @@
   // ============================================================
   async function init() {
     if (enforceCanonicalUrl()) return;
-
-    try { supabaseClient = getSupabaseClient(); }
-    catch (e) { clearDataUI(e.message); return; }
-
     initTheme();
-    initAuthHandlers();
     initControls();
-
-    if (ALWAYS_REQUIRE_LOGIN) {
-      clearSupabaseAuthStorage();
-      showOverlay(true);
-      clearDataUI("Please sign in to load dashboard data.");
-      return;
-    }
-
-    if (await ensureAuthGate()) loadAndRender();
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") loadAndRender();
-    });
-
-    window.addEventListener("pageshow", (e) => {
-      if (e.persisted) loadAndRender();
-    });
   }
 
   document.addEventListener("DOMContentLoaded", init);
