@@ -1,4 +1,4 @@
-// public/dashboard/app.js — v10.0 (FULL REWRITE, SAFE + BOOKING-LIKE UI)
+// public/dashboard/app.js — v10.1 (RATE FIX + SAFE + BOOKING-LIKE UI)
 // Goals:
 // - Keep every existing ID contract used by index.html (kpiGrid, feedTbody, feedEmpty, feedTableWrap, stateBox, toast, authOverlay, etc.)
 // - Auth handlers ALWAYS attach (magic link, overlay controls, logout)
@@ -10,6 +10,7 @@
 // - Feed renders with tr.dataset.event for filter script
 // - Charts render if canvases exist
 // - Updates “lastUpdated”/mirrors if present
+// - ✅ Rate column now populates (reservations + call_logs.booking), with fallback to total/nights
 
 (() => {
   // ============================================================
@@ -342,7 +343,6 @@
 
   function clearDataUI(msg) {
     setText("stateBox", msg || "—");
-    // leave feedEmpty visible, feedTableWrap hidden
     setFeedVisibility(false);
     setText("badgeCount", "0");
     setText("feedMeta", "0 items");
@@ -393,7 +393,6 @@
 
       if (error) { alert(error.message); return; }
 
-      // redirect to your check-email page
       location.href = `/dashboard/check-email.html?email=${encodeURIComponent(email)}`;
     } finally {
       if (btnSend) { btnSend.disabled = false; btnSend.textContent = prevSendText; }
@@ -421,7 +420,6 @@
       };
     }
 
-    // keep UI synced
     supabaseClient.auth.onAuthStateChange(async (_, session) => {
       setSessionUI(session);
       if (session) loadAndRender();
@@ -455,7 +453,6 @@
       return { label: `Last ${days} days`, start: startOfDay(s), end: endOfDay(now), mode };
     }
 
-    // custom
     enableCustomDates(true);
     const sVal = $("startDate") ? $("startDate").value : "";
     const eVal = $("endDate") ? $("endDate").value : "";
@@ -466,7 +463,6 @@
       return { label: `${sVal} → ${eVal}`, start: sd, end: ed, mode: "custom" };
     }
 
-    // fallback
     const s = new Date(now);
     s.setDate(now.getDate() - 6);
     return { label: "Last 7 days", start: startOfDay(s), end: endOfDay(now), mode: "7" };
@@ -512,10 +508,40 @@
     return data || [];
   }
 
+  // ✅ derive a trustworthy nightly rate from various shapes
+  function computeRatePerNight({ rate, nightly_rate, rate_per_night, total_due, nights, adr, avg_rate }) {
+    // 1) explicit values win
+    const direct =
+      toNum(rate_per_night) ||
+      toNum(nightly_rate) ||
+      toNum(rate) ||
+      toNum(adr) ||
+      toNum(avg_rate);
+
+    if (Number.isFinite(direct) && direct > 0) return direct;
+
+    // 2) fallback: total/nights
+    const t = toNum(total_due);
+    const n = toNum(nights);
+    if (Number.isFinite(t) && Number.isFinite(n) && n > 0) return t / n;
+
+    return NaN;
+  }
+
   function normalizeReservation(r) {
     const arrival = safeStr(r.arrival_date);
     const arrivalDate = parseISOish(arrival);
     const nights = toNum(r.nights);
+
+    const ratePerNight = computeRatePerNight({
+      rate_per_night: r.rate_per_night,
+      nightly_rate: r.nightly_rate,
+      rate: r.rate,
+      adr: r.adr,
+      avg_rate: r.avg_rate,
+      total_due: r.total_due,
+      nights: r.nights
+    });
 
     return {
       kind: "booking",
@@ -524,6 +550,7 @@
       guest: safeStr(r.guest_name),
       arrival,
       nights,
+      ratePerNight, // ✅
       totalDue: toNum(r.total_due),
       sentiment: "",
       duration: NaN,
@@ -534,15 +561,29 @@
   }
 
   function normalizeCall(r) {
-    const booking = safeJsonParse(r.booking);
+    const booking = safeJsonParse(r.booking) || {};
+    const nights = toNum(booking.nights);
+    const totalDue = toNum(booking.total_due);
+
+    const ratePerNight = computeRatePerNight({
+      rate_per_night: booking.rate_per_night ?? booking.ratePerNight ?? booking.rate_per_night_usd ?? booking.rate_nightly,
+      nightly_rate: booking.nightly_rate,
+      rate: booking.rate,
+      adr: booking.adr,
+      avg_rate: booking.avg_rate,
+      total_due: booking.total_due,
+      nights: booking.nights
+    });
+
     return {
       kind: "call",
       when: parseISOish(r.created_at),
       businessDate: parseISOish(r.created_at),
-      guest: safeStr((booking && booking.guest_name) || r.guest_name || ""),
-      arrival: safeStr(booking && booking.arrival_date),
-      nights: toNum(booking && booking.nights),
-      totalDue: toNum(booking && booking.total_due),
+      guest: safeStr(booking.guest_name || r.guest_name || ""),
+      arrival: safeStr(booking.arrival_date),
+      nights,
+      ratePerNight, // ✅
+      totalDue,
       sentiment: safeStr(r.sentiment),
       duration: toNum(r.duration_seconds),
       summary: safeStr(r.summary),
@@ -569,16 +610,16 @@
 
     for (const r of rows) {
       const raw = r.raw || {};
-      const booking = safeJsonParse(raw.booking);
+      const booking = safeJsonParse(raw.booking) || {};
 
       const fp = [
         r.kind,
         safeStr(r.property_id),
-        booking?.event || "",
-        booking?.guest_name || r.guest || "",
-        booking?.arrival_date || r.arrival || "",
-        booking?.room_type || "",
-        booking?.total_due || "",
+        safeStr(booking.event || ""),
+        safeStr(booking.guest_name || r.guest || ""),
+        safeStr(booking.arrival_date || r.arrival || ""),
+        safeStr(booking.room_type || ""),
+        safeStr(booking.total_due || r.totalDue || ""),
         r.when ? r.when.toISOString().slice(0, 19) : ""
       ].join("|");
 
@@ -614,7 +655,6 @@
       return hay.includes(q);
     });
 
-    // remove dupes after filtering (so property/range/search behaves correctly)
     state.filteredRows = dedupeRows(state.filteredRows);
   }
 
@@ -752,11 +792,7 @@
       const tr = document.createElement("tr");
       tr.dataset.event = ev; // ✅ used by index.html filter script
 
-      // NOTE: Your current index.html table columns are:
-      // Time | Type | Guest/Caller | Arrival | N | Rate | Total | Sentiment | Summary
-      // But your current normalized objects don't include rate_per_night yet.
-      // So we render Rate as "—" for now to keep alignment.
-      const rateCell = "—";
+      const rateCell = Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : "—";
 
       tr.innerHTML = `
         <td>${r.when ? escHtml(r.when.toLocaleString()) : "—"}</td>
@@ -793,7 +829,7 @@
         r.guest || "",
         r.arrival || "",
         Number.isFinite(r.nights) ? r.nights : "",
-        "", // rate placeholder (when you add rate_per_night later, plug it here)
+        Number.isFinite(r.ratePerNight) ? r.ratePerNight : "",
         Number.isFinite(r.totalDue) ? r.totalDue : "",
         r.sentiment || "",
         r.summary || ""
@@ -821,7 +857,6 @@
     const label = state.lastRange ? state.lastRange.label : "—";
     setText("badgeWindow", label);
 
-    // Optional (present in your new index.html)
     setText("badgeWindowInline", `Window: ${label}`);
     setText("badgeWindowMirror", label);
   }
@@ -867,7 +902,6 @@
 
       populatePropertySelect(state.allRows);
 
-      // Clear old message on successful load
       setText("stateBox", "");
 
       renderAll();
@@ -884,12 +918,11 @@
   async function init() {
     if (enforceCanonicalUrl()) return;
 
-    // supabase client
     try { supabaseClient = getSupabaseClient(); }
     catch (e) { clearDataUI(e.message); return; }
 
     initTheme();
-    initAuthHandlers();     // ✅ attach handlers before any early returns
+    initAuthHandlers(); // ✅ attach handlers before any early returns
     initControls();
 
     if (ALWAYS_REQUIRE_LOGIN) {
@@ -899,15 +932,12 @@
       return;
     }
 
-    // auto-load if already logged in
     if (await ensureAuthGate()) loadAndRender();
 
-    // refresh when tab becomes visible again
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") loadAndRender();
     });
 
-    // refresh when BFCache restores the page
     window.addEventListener("pageshow", (e) => {
       if (e.persisted) loadAndRender();
     });
