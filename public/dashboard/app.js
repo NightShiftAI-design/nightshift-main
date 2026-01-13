@@ -936,7 +936,7 @@
   lines.push("NightShift AI — Performance Export");
   lines.push(`Property,${propLabel}`);
   lines.push(`Window,${range.label} (${toYMD(range.start)} to ${toYMD(range.end)})`);
-  lines.push(`Generated,${genAt}`);
+  lines.push(`Generated,"${genAt}"`);
   lines.push(`Contact,${FOUNDER_EMAIL}`);
   lines.push(`Website,https://www.nightshifthotels.com`);
   lines.push("");
@@ -948,7 +948,7 @@
   lines.push(`Total Calls,${kpis.totalCalls}`);
   lines.push(`Total Bookings,${kpis.totalBookings}`);
   lines.push(`Conversion Rate,${(kpis.conv * 100).toFixed(1)}%`);
-  lines.push(`Total Revenue,${Number.isFinite(kpis.revenue) ? kpis.revenue.toFixed(2) : ""}`);
+  lines.push(`Total Revenue,"$${Number.isFinite(kpis.revenue) ? kpis.revenue.toFixed(2) : "0.00"}"`);
   lines.push(`Avg Call Duration (sec),${Number.isFinite(kpis.avgDur) ? Math.round(kpis.avgDur) : ""}`);
   lines.push("");
 
@@ -981,11 +981,11 @@
       r.guest || "",
       r.arrival || "",
       Number.isFinite(r.nights) ? r.nights : "",
-      Number.isFinite(r.ratePerNight) ? r.ratePerNight.toFixed(2) : "",
-      Number.isFinite(r.totalDue) ? r.totalDue.toFixed(2) : "",
+      Number.isFinite(r.ratePerNight) ? `$${r.ratePerNight.toFixed(2)}` : "",
+      Number.isFinite(r.totalDue) ? `$${r.totalDue.toFixed(2)}` : "",
       r.sentiment || "",
       r.summary || "",
-      r.property_id || ""
+      r.property_id || propLabel
     ].map(csv).join(","));
   }
 
