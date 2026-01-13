@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Packages • NightShift AI Virtual Front Desk</title>
 
-  <meta name="description" content="Compare NightShift AI packages (Core, Pro, Elite). Virtual front desk coverage configured to your property’s policies, escalation rules, and after-hours workflows." />
+  <meta name="description" content="Compare NightShift AI packages (Core, Pro, Elite, Flexible). Virtual front desk coverage configured to your property policies, escalation rules, and after-hours workflows." />
   <meta name="robots" content="index,follow" />
   <meta name="color-scheme" content="dark light" />
 
@@ -36,219 +36,240 @@
   </script>
 
   <style>
-    /* Page-scoped polish ONLY (keeps global header styles consistent with other pages) */
-
-    /* Ensure pricing cards align nicely without changing your global typography */
-    .pricing-grid{
-      margin-top: 22px;
-      align-items: stretch;
-    }
-    .price-card{
+    /* Page-scoped only: doesn’t fight your design system */
+    .price .demoRow{
       display:flex;
-      flex-direction: column;
-      height: 100%;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
     }
-    .demo-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 14px;
-    }
-    .price-card .hero-cta-row{ margin-top: auto; }
+    .price .demoRow .btn{ padding: 10px 12px; }
 
-    /* Demo modal (only if site.css doesn't already define it) */
-    .demo-modal.hidden{ display:none; }
-    .demo-modal{
+    /* Demo modal (matches your design language) */
+    .demoModal.hidden{ display:none; }
+    .demoModal{
       position: fixed;
       inset: 0;
       z-index: 999;
     }
-    .demo-backdrop{
+    .demoBackdrop{
       position:absolute;
       inset:0;
       background: rgba(0,0,0,.72);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
     }
-    .demo-modal-content{
+    .demoPanel{
       position: relative;
-      width: min(920px, calc(100% - 28px));
-      margin: 60px auto;
+      width: min(920px, calc(100% - 36px));
+      margin: 70px auto;
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(2,6,23,.92);
-      box-shadow: 0 60px 140px rgba(0,0,0,.65);
-      padding: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 60px 160px rgba(0,0,0,.65);
       overflow: hidden;
     }
-    html:not(.dark) .demo-modal-content{
-      background: rgba(255,255,255,.96);
-      border-color: rgba(10,15,25,.12);
-      box-shadow: 0 60px 140px rgba(10,15,25,.18);
+    html:not(.dark) .demoPanel{
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 50px 130px rgba(10,15,25,.18);
     }
-    .demo-close{
-      position:absolute;
-      right: 12px; top: 12px;
-      width: 42px; height: 42px;
+    .demoTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .demoTop .kicker{ margin:0; }
+    .demoClose{
+      width: 42px;
+      height: 42px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(234,240,255,.90);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
       cursor:pointer;
       font-weight: 950;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    html:not(.dark) .demo-close{
-      border-color: rgba(10,15,25,.12);
-      background: rgba(10,15,25,.04);
-      color: rgba(10,15,25,.90);
+    .demoClose:hover{
+      transform: translateY(-1px);
+      background: var(--panel2);
+      border-color: rgba(110,168,255,.35);
     }
-    .demo-close:hover{ transform: translateY(-1px); }
+    .demoBody{ padding: 12px; }
     #demoVideo{
       width: 100%;
       border-radius: 16px;
+      border: 1px solid var(--border);
       background: #000;
-      border: 1px solid rgba(255,255,255,.10);
+      display:block;
     }
-    html:not(.dark) #demoVideo{ border-color: rgba(10,15,25,.10); }
-    .demo-fallback.hidden{ display:none; }
-    .demo-fallback{
-      margin: 14px 4px 2px;
-      color: rgba(234,240,255,.72);
+    .demoFallback{
+      margin: 10px 0 0;
+      color: var(--muted);
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.6;
+      display:none;
     }
-    html:not(.dark) .demo-fallback{ color: rgba(10,15,25,.62); }
+    .demoFallback.show{ display:block; }
   </style>
 </head>
 
 <body>
-  <div class="main-wrapper">
+  <div class="bgGrid" aria-hidden="true"></div>
 
-    <!-- NAVBAR -->
-    <nav class="site-nav">
-      <div class="nav-inner">
-        <a href="/index.html" class="nav-left" aria-label="NightShift AI Home">
-          <div class="nav-logo-circle">NS</div>
-          <div class="nav-brand-text">
-            <span>NightShift</span>
-            <span>AI Night Front Desk</span>
-          </div>
-        </a>
-
-        <div class="nav-links">
-          <a href="/product.html">Product</a>
-          <a href="/who-we-serve.html">Who We Serve</a>
-          <a href="/packages.html" class="nav-cta">Packages</a>
-          <a href="/faq.html">FAQ</a>
-          <a href="/about.html">About</a>
-          <a href="/dashboard/" class="nav-dashboard" rel="nofollow">Dashboard</a>
-          <a href="/contact.html" class="nav-cta">Get a Quote</a>
+  <!-- NAV (matches site.css) -->
+  <nav class="nav">
+    <div class="container navInner">
+      <a class="brand" href="/index.html" aria-label="NightShift AI Home">
+        <div class="mark">NS</div>
+        <div class="brandText">
+          <b>NightShift</b>
+          <span>AI Night Front Desk</span>
         </div>
+      </a>
+
+      <div class="navRight">
+        <div class="links" aria-label="Primary navigation">
+          <a class="navA" href="/product.html">Product</a>
+          <a class="navA" href="/who-we-serve.html">Who We Serve</a>
+          <a class="navA active" href="/packages.html">Packages</a>
+          <a class="navA" href="/faq.html">FAQ</a>
+          <a class="navA" href="/about.html">About</a>
+          <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
+        </div>
+
+        <a class="btn primary" href="/contact.html">Get a Quote</a>
+        <a class="btn" href="tel:4237715523">📞 Call</a>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <!-- PAGE CONTENT -->
-    <main class="page-container">
+  <!-- HEADER (matches product.html style = .wrap + .eyebrow + .h1 + .sub + .ctaRow) -->
+  <div class="wrap">
+    <div class="container">
+      <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Packages</div>
 
-      <!-- HERO / HEADER (MATCHES OTHER PAGES: eyebrow + title + subtitle) -->
-      <section class="section">
-        <div class="eyebrow">Packages</div>
-        <h1 class="section-title">Virtual Front Desk Coverage — Configured for Your Operation</h1>
-        <p class="section-subtitle" style="max-width:900px;">
-          NightShift AI is not a call center and not a generic AI bot.
-          We configure a virtual front desk trained on your property, policies, and escalation rules.
-          Packages reflect how much operational responsibility NightShift handles for your hotel.
+      <h1 class="h1">Virtual Front Desk Coverage — Configured for Your Operation</h1>
+
+      <p class="sub">
+        NightShift AI is not a call center and not a generic AI bot. We configure a virtual front desk trained on your
+        property, policies, and escalation rules. Packages reflect how much operational responsibility NightShift handles.
+      </p>
+
+      <div class="ctaRow">
+        <a class="btn primary" href="/contact.html">Get a Quote</a>
+        <a class="btn" href="/virtual-front-desk-vs-call-center.html">Why Not a Call Center →</a>
+        <a class="btn" href="/faq.html">Read FAQ →</a>
+      </div>
+
+      <div class="notice" style="margin-top:16px;">
+        <div class="kicker">Every package includes</div>
+        <h3>Real front desk workflows — not scripts</h3>
+        <p>
+          Property-specific answers, ADA-aware call handling, emergency escalation rules, and clean summaries routed to your team.
+          Configured, tested, and ready to go live fast.
         </p>
+      </div>
+    </div>
+  </div>
 
-        <div class="hero-cta-row" style="margin-top:18px;">
-          <a href="/contact.html" class="btn-primary">Get a Quote</a>
-          <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">Why Not a Call Center →</a>
-          <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
-        </div>
+  <!-- CONTENT -->
+  <main class="container">
 
-        <div class="feature-card notice" style="margin-top:22px;">
-          <div class="eyebrow">Every package includes</div>
-          <h3 style="margin:8px 0 10px;">Real front desk workflows — not scripts</h3>
-          <p class="section-subtitle" style="margin:0;">
-            Property-specific answers, ADA-aware call handling, emergency escalation rules,
-            and automated summaries routed to your team. Configured, tested, and ready to go live fast.
+    <!-- PRICING -->
+    <section class="section">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Coverage Levels</div>
+          <div class="h2">Choose how much of your overnight desk NightShift replaces</div>
+          <p class="lead">
+            Start with a package below. Then we customize how calls are handled, what gets escalated, how reservations are supported,
+            and who receives notifications.
           </p>
         </div>
-      </section>
+      </div>
 
-      <!-- TIERS -->
-      <section class="section">
-        <div class="eyebrow">Coverage Levels</div>
-        <h2 class="section-title">Choose how much of your overnight desk NightShift replaces</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          Start with a package below. Then we customize how calls are handled, what gets escalated,
-          how reservations are supported, and who receives notifications.
-        </p>
+      <!-- Row 1 -->
+      <div class="pricing">
+        <!-- CORE -->
+        <div class="price">
+          <div class="priceTop">
+            <div>
+              <div class="pill">Core</div>
+              <div class="priceName">Essential overnight call coverage</div>
+              <p class="priceSub">
+                Best for independent hotels & motels that want reliable after-hours handling without staffing overnight.
+              </p>
+            </div>
+          </div>
 
-        <div class="pricing-grid">
-
-          <!-- CORE -->
-          <div class="price-card">
-            <div class="eyebrow">Core</div>
-            <h3 style="margin:8px 0 10px;">Essential overnight call coverage</h3>
-            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
-              Best for independent hotels and motels that want reliable after-hours guest handling
-              without staffing the desk overnight.
-            </p>
-
-            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+          <div class="priceBody">
+            <ul class="bullets">
               <li>Answers guest calls 24/7</li>
               <li>Rates, availability, and property FAQs</li>
-              <li>Weekly and nightly rate logic</li>
+              <li>Weekly & nightly rate logic</li>
               <li>Pets + service animal workflows (policy-driven)</li>
               <li>Emergency detection and escalation</li>
               <li>SMS / email summaries to staff</li>
             </ul>
 
-            <div class="demo-actions">
-              <button class="btn-secondary demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
+            <div class="demoRow">
+              <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
+              <a class="btn primary" href="/contact.html">Get a Quote</a>
             </div>
+          </div>
+        </div>
 
-            <div class="hero-cta-row" style="margin-top:16px;">
-              <a href="/contact.html" class="price-cta">Get a Quote for Core</a>
+        <!-- PRO -->
+        <div class="price">
+          <div class="priceTop">
+            <div>
+              <div class="pill">Pro</div>
+              <div class="priceName">Brand-aligned front desk automation</div>
+              <p class="priceSub">
+                Best for franchise and higher-volume properties needing tighter scripting, structured flows, and consistency.
+              </p>
             </div>
           </div>
 
-          <!-- PRO -->
-          <div class="price-card price-card--outline">
-            <div class="eyebrow">Pro</div>
-            <h3 style="margin:8px 0 10px;">Brand-aligned front desk automation</h3>
-            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
-              Best for franchise and higher-volume properties needing tighter scripting,
-              structured flows, and compliance consistency.
-            </p>
-
-            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+          <div class="priceBody">
+            <ul class="bullets">
               <li>Everything in Core</li>
-              <li>Brand voice and terminology alignment</li>
+              <li>Brand voice & terminology alignment</li>
               <li>Advanced reservation support workflows</li>
               <li>Multi-language auto-detection</li>
               <li>Rule-based routing to GM or FD</li>
-              <li>Custom voice and tone controls</li>
+              <li>Custom voice & tone controls</li>
             </ul>
 
-            <div class="demo-actions">
-              <button class="btn-secondary demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
+            <div class="demoRow">
+              <button class="btn demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
+              <a class="btn primary" href="/contact.html">Get a Quote</a>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div class="hero-cta-row" style="margin-top:16px;">
-              <a href="/contact.html" class="price-cta">Get a Quote for Pro</a>
+      <!-- Row 2 -->
+      <div class="pricing">
+        <!-- ELITE -->
+        <div class="price">
+          <div class="priceTop">
+            <div>
+              <div class="pill">Elite</div>
+              <div class="priceName">Portfolio-level virtual front desk</div>
+              <p class="priceSub">
+                Built for ownership groups and management companies operating multiple properties.
+              </p>
             </div>
           </div>
 
-          <!-- ELITE -->
-          <div class="price-card">
-            <div class="eyebrow">Elite</div>
-            <h3 style="margin:8px 0 10px;">Portfolio-level virtual front desk</h3>
-            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
-              Built for ownership groups and management companies operating multiple properties.
-            </p>
-
-            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+          <div class="priceBody">
+            <ul class="bullets">
               <li>Everything in Pro</li>
               <li>Multi-property routing and logic</li>
               <li>Shared dashboards and roll-up reporting</li>
@@ -257,102 +278,119 @@
               <li>Ongoing monitoring and optimization</li>
             </ul>
 
-            <div class="demo-actions">
-              <button class="btn-secondary demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
-              <button class="btn-secondary demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
+            <div class="demoRow">
+              <button class="btn demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
+              <button class="btn demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
+              <a class="btn primary" href="/contact.html">Request Portfolio Quote</a>
             </div>
+          </div>
+        </div>
 
-            <div class="hero-cta-row" style="margin-top:16px;">
-              <a href="/contact.html" class="price-cta">Request Portfolio Quote</a>
+        <!-- FLEXIBLE -->
+        <div class="price">
+          <div class="priceTop">
+            <div>
+              <div class="pill">Flexible</div>
+              <div class="priceName">Lower upfront, scalable deployment</div>
+              <p class="priceSub">
+                Ideal for owners who want to start lean and expand coverage over time.
+              </p>
             </div>
           </div>
 
-          <!-- FLEX / MONTHLY -->
-          <div class="price-card price-card--outline">
-            <div class="eyebrow">Flexible</div>
-            <h3 style="margin:8px 0 10px;">Lower upfront, scalable deployment</h3>
-            <p style="margin:0 0 14px; color:rgba(234,240,255,.75);">
-              Ideal for new owners or properties that want to start lean and expand coverage over time.
-            </p>
-
-            <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
+          <div class="priceBody">
+            <ul class="bullets">
               <li>Lower initial commitment</li>
               <li>Updates and workflow improvements included</li>
               <li>Scale with call volume</li>
               <li>Great for phased rollouts</li>
             </ul>
 
-            <div class="demo-actions">
-              <button class="btn-secondary demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
-            </div>
-
-            <div class="hero-cta-row" style="margin-top:16px;">
-              <a href="/contact.html" class="price-cta">Request Flexible Quote</a>
+            <div class="demoRow">
+              <button class="btn demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
+              <a class="btn primary" href="/contact.html">Request Flexible Quote</a>
             </div>
           </div>
-
         </div>
-      </section>
+      </div>
 
-      <!-- PROCESS -->
-      <section class="section">
-        <div class="eyebrow">Implementation</div>
-        <h2 class="section-title">Fast quote. Real configuration.</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          We don’t sell a login. We build a working virtual front desk for your hotel.
-        </p>
+      <div class="trustStrip" aria-label="Trust highlights">
+        <span class="trustPill">✔ Property-specific answers</span>
+        <span class="trustPill">✔ ADA-aware workflows</span>
+        <span class="trustPill">✔ Emergency escalation</span>
+        <span class="trustPill">✔ Privacy-first setup</span>
+      </div>
+    </section>
 
-        <div class="feature-grid" style="margin-top:28px;">
-          <div class="feature-card">
+    <!-- IMPLEMENTATION -->
+    <section class="section">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Implementation</div>
+          <div class="h2">Fast quote. Real configuration.</div>
+          <p class="lead">We don’t sell a login. We build a working virtual front desk for your hotel.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="cardPad">
             <h3>1) Quick intake</h3>
             <p>Room count, call volume, brand rules, and what you want handled overnight.</p>
           </div>
-          <div class="feature-card">
+        </div>
+
+        <div class="card">
+          <div class="cardPad">
             <h3>2) Workflow build</h3>
             <p>We configure policies, escalation, booking support, and notifications.</p>
           </div>
-          <div class="feature-card">
+        </div>
+
+        <div class="card">
+          <div class="cardPad">
             <h3>3) Go live</h3>
             <p>Your existing phone line forwards to NightShift — no new phone system required.</p>
           </div>
         </div>
+      </div>
 
-        <div class="hero-card" style="margin-top:22px;">
-          <div class="eyebrow">What we’ll confirm</div>
-          <h3 style="margin:8px 0 10px;">Key operational rules</h3>
-          <ul style="margin:0; padding-left:18px; color:rgba(234,240,255,.78); line-height:1.75;">
-            <li>Property type (independent / franchise / portfolio)</li>
-            <li>Room count and estimated call volume</li>
-            <li>Pets, deposits, smoking, late check-ins, weekly rates</li>
-            <li>Who gets escalations (GM / FD / on-call maintenance)</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- FINAL CTA -->
-      <section class="section">
-        <div class="eyebrow">Get started</div>
-        <h2 class="section-title">Ready to replace overnight call handling?</h2>
-        <p class="section-subtitle" style="max-width:900px;">
-          Request a quote and we’ll recommend the right package, confirm your requirements,
-          and outline exactly how NightShift will operate for your property.
+      <div class="notice">
+        <div class="kicker">What we’ll confirm</div>
+        <h3>Key operational rules</h3>
+        <p>
+          Property type, room count, call volume, deposits, smoking rules, pets/service animals, late check-ins, weekly rates,
+          and who gets escalations (GM / front desk / on-call maintenance).
         </p>
+      </div>
+    </section>
 
-        <div class="hero-cta-row" style="margin-top:18px;">
-          <a href="/contact.html" class="btn-primary">Get a Quote Now</a>
-          <a href="tel:4237715523" class="btn-secondary">📞 Call Now</a>
-          <a href="/faq.html" class="btn-secondary">Read FAQ →</a>
+    <!-- FINAL CTA -->
+    <section class="section">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Get started</div>
+          <div class="h2">Ready to replace overnight call handling?</div>
+          <p class="lead">
+            Request a quote and we’ll recommend the right package, confirm your requirements, and outline exactly how NightShift
+            will operate for your property.
+          </p>
         </div>
-      </section>
+      </div>
 
-    </main>
+      <div class="ctaRow">
+        <a class="btn primary" href="/contact.html">Get a Quote Now</a>
+        <a class="btn" href="tel:4237715523">📞 Call Now</a>
+        <a class="btn" href="/faq.html">Read FAQ →</a>
+      </div>
+    </section>
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
-      <div class="footer-inner">
+    <!-- FOOTER (matches site.css) -->
+    <footer class="footer">
+      <div class="container footerInner">
         <div>© 2026 NightShift AI</div>
 
-        <div class="footer-links">
+        <div class="footerLinks">
           <a href="/privacy.html">Privacy</a>
           <a href="/cookies.html">Cookies</a>
           <a href="/security.html">Security</a>
@@ -360,7 +398,7 @@
           <a href="/contact.html">Contact</a>
         </div>
 
-        <div class="social-links">
+        <div class="social">
           <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
             <svg viewBox="0 0 24 24"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
           </a>
@@ -373,41 +411,43 @@
         </div>
       </div>
     </footer>
+  </main>
 
-  </div>
+  <!-- DEMO MODAL -->
+  <div id="demoModal" class="demoModal hidden" aria-hidden="true">
+    <div class="demoBackdrop" tabindex="-1"></div>
 
-  <!-- DEMO MODAL (one per page) -->
-  <div id="demoModal" class="demo-modal hidden" aria-hidden="true">
-    <div class="demo-backdrop" tabindex="-1"></div>
+    <div class="demoPanel" role="dialog" aria-modal="true" aria-label="Demo">
+      <div class="demoTop">
+        <div class="kicker">Dashboard demo</div>
+        <button class="demoClose" type="button" aria-label="Close demo">✕</button>
+      </div>
 
-    <div class="demo-modal-content" role="dialog" aria-modal="true" aria-label="Demo">
-      <button class="demo-close" type="button" aria-label="Close demo">✕</button>
-
-      <video id="demoVideo" controls playsinline>
-        Your browser does not support video playback.
-      </video>
-
-      <p class="demo-fallback hidden" id="demoFallback">Demo video coming soon.</p>
+      <div class="demoBody">
+        <video id="demoVideo" controls playsinline>
+          Your browser does not support video playback.
+        </video>
+        <p class="demoFallback" id="demoFallback">Demo video coming soon.</p>
+      </div>
     </div>
   </div>
 
-  <!-- AUDIO PLAYER (one per page) -->
+  <!-- AUDIO PLAYER -->
   <audio id="demoAudio"></audio>
 
-  <!-- DEMO SCRIPT -->
   <script>
-    const modal = document.getElementById("demoModal");
-    const video = document.getElementById("demoVideo");
-    const fallback = document.getElementById("demoFallback");
-    const audio = document.getElementById("demoAudio");
+    (function(){
+      const modal = document.getElementById("demoModal");
+      const video = document.getElementById("demoVideo");
+      const fallback = document.getElementById("demoFallback");
+      const audio = document.getElementById("demoAudio");
 
-    // Video buttons -> open modal
-    document.querySelectorAll(".demo-video").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const src = btn.dataset.video;
+      const closeBtn = document.querySelector(".demoClose");
+      const backdrop = document.querySelector(".demoBackdrop");
 
-        fallback.classList.add("hidden");
-        video.classList.remove("hidden");
+      function openModal(src){
+        fallback.classList.remove("show");
+        video.style.display = "block";
         video.onerror = null;
         video.onloadeddata = null;
 
@@ -419,45 +459,44 @@
         document.body.style.overflow = "hidden";
 
         video.onerror = () => {
-          video.classList.add("hidden");
-          fallback.classList.remove("hidden");
+          video.style.display = "none";
+          fallback.classList.add("show");
         };
-
         video.onloadeddata = () => {
-          video.classList.remove("hidden");
-          fallback.classList.add("hidden");
+          video.style.display = "block";
+          fallback.classList.remove("show");
           try { video.play(); } catch(e) {}
         };
+      }
+
+      function closeModal(){
+        modal.classList.add("hidden");
+        modal.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+        try { video.pause(); } catch(e) {}
+        video.src = "";
+      }
+
+      document.querySelectorAll(".demo-video").forEach(btn => {
+        btn.addEventListener("click", () => openModal(btn.dataset.video));
       });
-    });
 
-    // Audio buttons -> play
-    document.querySelectorAll(".demo-audio").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const src = btn.dataset.audio;
-        audio.src = src;
-        audio.load();
-        audio.play().catch(() => {});
+      document.querySelectorAll(".demo-audio").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const src = btn.dataset.audio;
+          audio.src = src;
+          audio.load();
+          audio.play().catch(() => {});
+        });
       });
-    });
 
-    // Close modal
-    const closeBtn = document.querySelector(".demo-close");
-    const backdrop = document.querySelector(".demo-backdrop");
-    if (closeBtn) closeBtn.addEventListener("click", closeModal);
-    if (backdrop) backdrop.addEventListener("click", closeModal);
+      if (closeBtn) closeBtn.addEventListener("click", closeModal);
+      if (backdrop) backdrop.addEventListener("click", closeModal);
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
-    });
-
-    function closeModal(){
-      modal.classList.add("hidden");
-      modal.setAttribute("aria-hidden","true");
-      document.body.style.overflow = "";
-      try { video.pause(); } catch(e) {}
-      video.src = "";
-    }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+      });
+    })();
   </script>
 </body>
 </html>
