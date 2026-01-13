@@ -916,42 +916,126 @@
   // ============================================================
   // Export
   // ============================================================
-  function exportCSV(rows) {
-    if (!rows.length) { toast("Nothing to export."); return; }
+ function exportCSV(rows) {
+  if (!rows.length) { toast("Nothing to export."); return; }
 
-    const cols = ["property_id", "kind", "time", "business_date", "guest", "arrival", "nights", "rate", "total", "sentiment", "summary"];
-    const lines = [cols.join(",")];
+  const range = state.lastRange || getSelectedRange();
+  const property = getSelectedProperty();
+  const propLabel = property === "__all__" ? "All Properties" : property;
 
-    for (const r of rows) {
-      const vals = [
-        r.property_id || "",
-        r.kind,
-        r.when ? r.when.toISOString() : "",
-        r.businessDate ? r.businessDate.toISOString() : "",
-        r.guest || "",
-        r.arrival || "",
-        Number.isFinite(r.nights) ? r.nights : "",
-        Number.isFinite(r.ratePerNight) ? r.ratePerNight : "",
-        Number.isFinite(r.totalDue) ? r.totalDue : "",
-        r.sentiment || "",
-        r.summary || ""
-      ].map(v => `"${String(v === null || v === undefined ? "" : v).replace(/"/g, '""')}"`);
+  const kpis = computeKPIs(rows);
 
-      lines.push(vals.join(","));
-    }
+  const now = new Date();
+  const genAt = now.toLocaleString();
 
-    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
+  const lines = [];
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nightshift_${Date.now()}.csv`;
-    a.click();
+  // =========================
+  // Report Header (Spectrum-style)
+  // =========================
+  lines.push("NightShift AI — Performance Export");
+  lines.push(`Property,${propLabel}`);
+  lines.push(`Window,${range.label} (${toYMD(range.start)} to ${toYMD(range.end)})`);
+  lines.push(`Generated,${genAt}`);
+  lines.push(`Contact,${FOUNDER_EMAIL}`);
+  lines.push(`Website,https://www.nightshifthotels.com`);
+  lines.push("");
 
-    URL.revokeObjectURL(url);
-    toast("CSV exported.");
+  // =========================
+  // KPI Summary
+  // =========================
+  lines.push("KPI Summary");
+  lines.push(`Total Calls,${kpis.totalCalls}`);
+  lines.push(`Total Bookings,${kpis.totalBookings}`);
+  lines.push(`Conversion Rate,${(kpis.conv * 100).toFixed(1)}%`);
+  lines.push(`Total Revenue,${Number.isFinite(kpis.revenue) ? kpis.revenue.toFixed(2) : ""}`);
+  lines.push(`Avg Call Duration (sec),${Number.isFinite(kpis.avgDur) ? Math.round(kpis.avgDur) : ""}`);
+  lines.push("");
+
+  // =========================
+  // Detailed Activity Table
+  // =========================
+  lines.push("Detailed Activity");
+  const headers = [
+    "Date/Time",
+    "Type",
+    "Guest",
+    "Arrival",
+    "Nights",
+    "Rate/Night",
+    "Total",
+    "Sentiment",
+    "Summary",
+    "Property"
+  ];
+  lines.push(headers.join(","));
+
+  function csv(v) {
+    return `"${String(v ?? "").replace(/"/g, '""')}"`;
   }
 
+  for (const r of rows) {
+    lines.push([
+      r.when ? r.when.toLocaleString() : "",
+      r.kind === "booking" ? "Booking" : "Call",
+      r.guest || "",
+      r.arrival || "",
+      Number.isFinite(r.nights) ? r.nights : "",
+      Number.isFinite(r.ratePerNight) ? r.ratePerNight.toFixed(2) : "",
+      Number.isFinite(r.totalDue) ? r.totalDue.toFixed(2) : "",
+      r.sentiment || "",
+      r.summary || "",
+      r.property_id || ""
+    ].map(csv).join(","));
+  }
+
+  lines.push("");
+
+  // =========================
+  // Daily Totals (Spectrum-style)
+  // =========================
+  const daily = {};
+
+  for (const r of rows) {
+    const d = (r.businessDate || r.when);
+    if (!d) continue;
+    const k = toYMD(d);
+    if (!daily[k]) daily[k] = { calls: 0, bookings: 0, revenue: 0 };
+
+    if (r.kind === "call") daily[k].calls++;
+    if (r.kind === "booking") {
+      daily[k].bookings++;
+      if (Number.isFinite(r.totalDue)) daily[k].revenue += r.totalDue;
+    }
+  }
+
+  lines.push("Daily Totals");
+  lines.push("Date,Calls,Bookings,Revenue");
+
+  Object.keys(daily).sort().forEach(d => {
+    const x = daily[d];
+    lines.push([
+      d,
+      x.calls,
+      x.bookings,
+      x.revenue.toFixed(2)
+    ].join(","));
+  });
+
+  // =========================
+  // Download
+  // =========================
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `NightShiftAI_Report_${toYMD(now)}.csv`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+  toast("Professional CSV exported.");
+}
   // ============================================================
   // UI badges + last updated
   // ============================================================
