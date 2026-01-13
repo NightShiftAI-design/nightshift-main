@@ -1,25 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Packages • NightShift AI Virtual Front Desk</title>
 
-  <meta name="description" content="Compare NightShift AI packages (Core, Pro, Elite, Flexible). Virtual front desk coverage configured to your property policies, escalation rules, and after-hours workflows." />
-  <meta name="robots" content="index,follow" />
-  <meta name="color-scheme" content="dark light" />
+  <title>Packages – NightShift AI Virtual Front Desk</title>
+  <meta name="description" content="Compare NightShift AI packages (Core, Pro, Elite, Flexible). Virtual front desk coverage configured for your property rules, ADA-aware workflows, and safe escalation." />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Packages • NightShift AI" />
-  <meta property="og:description" content="Virtual front desk coverage configured for your operation—policies, escalation, reservations, and reporting." />
+  <meta property="og:title" content="Packages – NightShift AI Virtual Front Desk" />
+  <meta property="og:description" content="Choose the right coverage level: Core, Pro, Elite, or Flexible. Property-trained workflows, ADA-aware handling, and clean escalation." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nightshifthotels.com/packages.html" />
 
-  <!-- FAVICONS (files in /public) -->
+  <!-- FAVICONS (files are in /public) -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <meta name="robots" content="index,follow" />
+  <meta name="color-scheme" content="dark light" />
 
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
 
@@ -35,17 +36,17 @@
     })();
   </script>
 
+  <!-- Page-only: demo modal + demo buttons layout (kept minimal; matches design system) -->
   <style>
-    /* Page-scoped only: doesn’t fight your design system */
-    .price .demoRow{
+    .demoRow{
       display:flex;
       gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 14px;
     }
-    .price .demoRow .btn{ padding: 10px 12px; }
 
-    /* Demo modal (matches your design language) */
+    /* Demo Modal */
     .demoModal.hidden{ display:none; }
     .demoModal{
       position: fixed;
@@ -79,7 +80,6 @@
       padding: 12px 12px;
       border-bottom: 1px solid var(--border);
     }
-    .demoTop .kicker{ margin:0; }
     .demoClose{
       width: 42px;
       height: 42px;
@@ -121,75 +121,210 @@
 <body>
   <div class="bgGrid" aria-hidden="true"></div>
 
-  <!-- NAV (matches site.css) -->
-  <nav class="nav">
-    <div class="container navInner">
-      <a class="brand" href="/index.html" aria-label="NightShift AI Home">
-        <div class="mark">NS</div>
-        <div class="brandText">
-          <b>NightShift</b>
-          <span>AI Night Front Desk</span>
-        </div>
-      </a>
-
-      <div class="navRight">
-        <div class="links" aria-label="Primary navigation">
-          <a class="navA" href="/product.html">Product</a>
-          <a class="navA" href="/who-we-serve.html">Who We Serve</a>
-          <a class="navA active" href="/packages.html">Packages</a>
-          <a class="navA" href="/faq.html">FAQ</a>
-          <a class="navA" href="/about.html">About</a>
-          <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
-        </div>
-
-        <a class="btn primary" href="/contact.html">Get a Quote</a>
-        <a class="btn" href="tel:4237715523">📞 Call</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- HEADER (matches product.html style = .wrap + .eyebrow + .h1 + .sub + .ctaRow) -->
-  <div class="wrap">
+  <!-- NAV (MATCHES INDEX) -->
+  <header class="nav" role="banner">
     <div class="container">
-      <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Packages</div>
+      <div class="navInner">
+        <a href="/" class="brand" aria-label="NightShift AI Home">
+          <div class="mark" aria-hidden="true">NS</div>
+          <div class="brandText">
+            <b>NightShift AI</b>
+            <span>AI Night Front Desk for Hotels</span>
+          </div>
+        </a>
 
-      <h1 class="h1">Virtual Front Desk Coverage — Configured for Your Operation</h1>
+        <div class="navRight">
+          <nav class="links" aria-label="Primary navigation">
+            <a class="navA" href="/product.html">Product</a>
+            <a class="navA" href="/who-we-serve.html">Who we serve</a>
+            <a class="navA active" href="/packages.html">Packages</a>
+            <a class="navA" href="/faq.html">FAQ</a>
+            <a class="navA" href="/about.html">About</a>
+            <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
+          </nav>
 
-      <p class="sub">
-        NightShift AI is not a call center and not a generic AI bot. We configure a virtual front desk trained on your
-        property, policies, and escalation rules. Packages reflect how much operational responsibility NightShift handles.
-      </p>
+          <button class="iconBtn hamburger" id="btnMenu" type="button" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"></path>
+            </svg>
+          </button>
 
-      <div class="ctaRow">
-        <a class="btn primary" href="/contact.html">Get a Quote</a>
-        <a class="btn" href="/virtual-front-desk-vs-call-center.html">Why Not a Call Center →</a>
-        <a class="btn" href="/faq.html">Read FAQ →</a>
+          <button class="iconBtn" id="btnTheme" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M12 2a9.9 9.9 0 0 0 0 20V2zm1 2.06A8 8 0 1 1 13 19.94V4.06z"></path>
+            </svg>
+          </button>
+
+          <!-- PRIMARY CTA (MATCHES INDEX) -->
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+        </div>
       </div>
 
-      <div class="notice" style="margin-top:16px;">
-        <div class="kicker">Every package includes</div>
-        <h3>Real front desk workflows — not scripts</h3>
-        <p>
-          Property-specific answers, ADA-aware call handling, emergency escalation rules, and clean summaries routed to your team.
-          Configured, tested, and ready to go live fast.
-        </p>
+      <!-- Mobile menu (MATCHES INDEX) -->
+      <div class="mobileMenu" id="mobileMenu">
+        <div class="mobileCard" role="navigation" aria-label="Mobile navigation">
+          <a href="/product.html">Product</a>
+          <a href="/who-we-serve.html">Who we serve</a>
+          <a href="/packages.html">Packages</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/about.html">About</a>
+          <a href="/dashboard/" rel="nofollow">Dashboard</a>
+          <a href="/contact.html">Book a demo</a>
+        </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- CONTENT -->
-  <main class="container">
+  <!-- HERO WRAP (MATCHES INDEX) -->
+  <main class="container heroWrap">
 
-    <!-- PRICING -->
-    <section class="section">
+    <!-- TRUST STRIP (MATCHES INDEX POSITION) -->
+    <div class="trustStrip" aria-label="Trust highlights">
+      <span class="trustPill">✔ Property-trained workflows</span>
+      <span class="trustPill">✔ ADA-aware handling</span>
+      <span class="trustPill">✔ Safe escalation routing</span>
+      <span class="trustPill">✔ Fast install (~10 minutes)</span>
+    </div>
+
+    <!-- HERO (MATCHES INDEX GRID) -->
+    <section class="hero" aria-label="Packages hero">
+      <div>
+        <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Packages • Coverage levels</div>
+
+        <h1 class="h1">
+          Choose the right<br/>
+          <span class="highlight">Virtual Front Desk</span> coverage.
+        </h1>
+
+        <p class="sub">
+          NightShift AI is configured for your property’s policies, ADA-aware call handling, and escalation rules.
+          Packages reflect how much operational responsibility NightShift handles overnight (and beyond).
+        </p>
+
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="#compare">Compare packages</a>
+          <a class="btn" href="/virtual-front-desk-vs-call-center.html">Why not a call center</a>
+        </div>
+
+        <div class="chips" aria-label="Highlights">
+          <span class="chip">✅ No missed calls</span>
+          <span class="chip">✅ Clean escalation</span>
+          <span class="chip">✅ Reservation intake summaries</span>
+          <span class="chip">✅ Brand-controlled experience</span>
+        </div>
+
+        <div class="notice" style="margin-top:16px;">
+          <h3>Every package includes front desk workflows — not scripts</h3>
+          <p>
+            Property-specific answers, policy-driven handling (pets, deposits, smoking, weekly rates),
+            emergency detection, and staff-ready summaries.
+          </p>
+        </div>
+      </div>
+
+      <aside class="heroCard" aria-label="How packages work">
+        <div class="inner">
+          <div class="kicker">How it works</div>
+          <div class="cardTitle">Calls → Answers → Escalation</div>
+          <p class="cardText">
+            NightShift answers fast, follows your rules, and escalates only when it should — with context.
+            You choose who gets routed, when, and for what call types.
+          </p>
+
+          <ul class="list" aria-label="Package pillars list">
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Configured for your property</b><br/>Policies, fees, hours, and operations</div>
+            </li>
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Professional guest experience</b><br/>Hospitality tone + multilingual support</div>
+            </li>
+            <li class="li">
+              <span class="tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+              </span>
+              <div><b style="color:var(--text); font-weight:950;">Control stays with you</b><br/>Routing rules + escalation contacts you set</div>
+            </li>
+          </ul>
+
+          <div class="ctaRow" style="margin-top:14px;">
+            <a class="btn primary" href="/contact.html">Book a demo</a>
+            <a class="btn" href="/faq.html">Read FAQ</a>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- SECTION: WHAT'S INCLUDED -->
+    <section class="section" aria-label="What’s included">
       <div class="sectionHead">
         <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Coverage Levels</div>
-          <div class="h2">Choose how much of your overnight desk NightShift replaces</div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Included</div>
+          <h2 class="h2">Baseline capabilities across packages</h2>
           <p class="lead">
-            Start with a package below. Then we customize how calls are handled, what gets escalated, how reservations are supported,
-            and who receives notifications.
+            Every deployment starts with your property details and workflows. Then we layer on automation, routing,
+            reservation support, and reporting based on your tier.
           </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/product.html">Product details</a>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><div class="cardPad">
+          <h3>Instant answering</h3>
+          <p>Answers calls quickly with a consistent, hospitality-trained experience.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Property-specific answers</h3>
+          <p>Configured with your rules: fees, deposits, hours, policies, and common questions.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>ADA-aware handling</h3>
+          <p>Workflows designed to reduce inconsistent handling for sensitive scenarios.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Reservation intake summaries</h3>
+          <p>Captures key details (dates, nights, guests, room type) and produces staff-ready summaries.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Emergency escalation</h3>
+          <p>Detects urgent scenarios and routes to your designated contacts by rule.</p>
+        </div></div>
+
+        <div class="card"><div class="cardPad">
+          <h3>Clean follow-up</h3>
+          <p>Clear summaries routed by email/SMS to keep overnight accountability tight.</p>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- SECTION: PACKAGES / PRICING GRID -->
+    <section class="section" id="compare" aria-label="Compare packages">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Compare</div>
+          <h2 class="h2">Coverage levels</h2>
+          <p class="lead">
+            Start with the tier that matches your operation. Then we customize your routing rules, escalation paths,
+            reservation handling, and staff notifications.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/faq.html">FAQ</a>
         </div>
       </div>
 
@@ -201,17 +336,14 @@
             <div>
               <div class="pill">Core</div>
               <div class="priceName">Essential overnight call coverage</div>
-              <p class="priceSub">
-                Best for independent hotels & motels that want reliable after-hours handling without staffing overnight.
-              </p>
+              <p class="priceSub">Best for independent hotels &amp; motels.</p>
             </div>
           </div>
-
           <div class="priceBody">
             <ul class="bullets">
               <li>Answers guest calls 24/7</li>
               <li>Rates, availability, and property FAQs</li>
-              <li>Weekly & nightly rate logic</li>
+              <li>Weekly &amp; nightly rate logic</li>
               <li>Pets + service animal workflows (policy-driven)</li>
               <li>Emergency detection and escalation</li>
               <li>SMS / email summaries to staff</li>
@@ -219,7 +351,7 @@
 
             <div class="demoRow">
               <button class="btn demo-audio" data-audio="/assets/demos/core.mp3" type="button">🔊 Hear Call Demo</button>
-              <a class="btn primary" href="/contact.html">Get a Quote</a>
+              <a class="btn primary" href="/contact.html">Get a quote</a>
             </div>
           </div>
         </div>
@@ -228,27 +360,24 @@
         <div class="price">
           <div class="priceTop">
             <div>
-              <div class="pill">Pro</div>
-              <div class="priceName">Brand-aligned front desk automation</div>
-              <p class="priceSub">
-                Best for franchise and higher-volume properties needing tighter scripting, structured flows, and consistency.
-              </p>
+              <div class="pill" style="background: rgba(66,211,146,.10); border-color: rgba(66,211,146,.22);">Pro</div>
+              <div class="priceName">Franchise-ready + higher volume</div>
+              <p class="priceSub">For branded properties needing tighter scripting and structured flows.</p>
             </div>
           </div>
-
           <div class="priceBody">
             <ul class="bullets">
               <li>Everything in Core</li>
-              <li>Brand voice & terminology alignment</li>
-              <li>Advanced reservation support workflows</li>
+              <li>Brand voice &amp; terminology alignment</li>
+              <li>Advanced reservation intake workflows</li>
               <li>Multi-language auto-detection</li>
               <li>Rule-based routing to GM or FD</li>
-              <li>Custom voice & tone controls</li>
+              <li>Custom voice and tone controls</li>
             </ul>
 
             <div class="demoRow">
               <button class="btn demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
-              <a class="btn primary" href="/contact.html">Get a Quote</a>
+              <a class="btn primary" href="/contact.html">Get a quote</a>
             </div>
           </div>
         </div>
@@ -262,12 +391,9 @@
             <div>
               <div class="pill">Elite</div>
               <div class="priceName">Portfolio-level virtual front desk</div>
-              <p class="priceSub">
-                Built for ownership groups and management companies operating multiple properties.
-              </p>
+              <p class="priceSub">Built for ownership groups and management companies.</p>
             </div>
           </div>
-
           <div class="priceBody">
             <ul class="bullets">
               <li>Everything in Pro</li>
@@ -281,7 +407,7 @@
             <div class="demoRow">
               <button class="btn demo-audio" data-audio="/assets/demos/elite.mp3" type="button">🔊 Hear Call Demo</button>
               <button class="btn demo-video" data-video="/assets/videos/elite.mp4" type="button">▶ Watch Dashboard Demo</button>
-              <a class="btn primary" href="/contact.html">Request Portfolio Quote</a>
+              <a class="btn primary" href="/contact.html">Portfolio quote</a>
             </div>
           </div>
         </div>
@@ -292,12 +418,9 @@
             <div>
               <div class="pill">Flexible</div>
               <div class="priceName">Lower upfront, scalable deployment</div>
-              <p class="priceSub">
-                Ideal for owners who want to start lean and expand coverage over time.
-              </p>
+              <p class="priceSub">Start lean and expand coverage as call volume grows.</p>
             </div>
           </div>
-
           <div class="priceBody">
             <ul class="bullets">
               <li>Lower initial commitment</li>
@@ -308,86 +431,81 @@
 
             <div class="demoRow">
               <button class="btn demo-audio" data-audio="/assets/demos/pro.mp3" type="button">🔊 Hear Call Demo</button>
-              <a class="btn primary" href="/contact.html">Request Flexible Quote</a>
+              <a class="btn primary" href="/contact.html">Request flexible quote</a>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="trustStrip" aria-label="Trust highlights">
-        <span class="trustPill">✔ Property-specific answers</span>
-        <span class="trustPill">✔ ADA-aware workflows</span>
-        <span class="trustPill">✔ Emergency escalation</span>
-        <span class="trustPill">✔ Privacy-first setup</span>
+      <div class="notice">
+        <h3>Not sure which tier fits?</h3>
+        <p>
+          Tell us your room count, brand (if any), and estimated call volume. We’ll recommend the right package and outline
+          exactly how NightShift will operate for your property.
+        </p>
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/faq.html">Read FAQ</a>
+          <a class="btn" href="tel:4237715523">Call now</a>
+        </div>
       </div>
     </section>
 
-    <!-- IMPLEMENTATION -->
-    <section class="section">
+    <!-- SECTION: IMPLEMENTATION (same style as index sections) -->
+    <section class="section" aria-label="Implementation">
       <div class="sectionHead">
         <div>
           <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Implementation</div>
-          <div class="h2">Fast quote. Real configuration.</div>
-          <p class="lead">We don’t sell a login. We build a working virtual front desk for your hotel.</p>
+          <h2 class="h2">Fast quote. Real configuration.</h2>
+          <p class="lead">
+            We don’t sell a login. We configure and test a working virtual front desk for your hotel — then you forward your line.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="/product.html">Product details</a>
         </div>
       </div>
 
       <div class="grid">
-        <div class="card">
-          <div class="cardPad">
-            <h3>1) Quick intake</h3>
-            <p>Room count, call volume, brand rules, and what you want handled overnight.</p>
-          </div>
-        </div>
+        <div class="card"><div class="cardPad">
+          <h3>1) Quick intake</h3>
+          <p>Room count, call volume, brand rules, and what you want handled overnight.</p>
+        </div></div>
 
-        <div class="card">
-          <div class="cardPad">
-            <h3>2) Workflow build</h3>
-            <p>We configure policies, escalation, booking support, and notifications.</p>
-          </div>
-        </div>
+        <div class="card"><div class="cardPad">
+          <h3>2) Workflow build</h3>
+          <p>Policies, escalation, booking support, and notification routing are configured and tested.</p>
+        </div></div>
 
-        <div class="card">
-          <div class="cardPad">
-            <h3>3) Go live</h3>
-            <p>Your existing phone line forwards to NightShift — no new phone system required.</p>
-          </div>
-        </div>
+        <div class="card"><div class="cardPad">
+          <h3>3) Go live</h3>
+          <p>Your existing phone forwards to NightShift — no new phone system required.</p>
+        </div></div>
       </div>
 
       <div class="notice">
-        <div class="kicker">What we’ll confirm</div>
-        <h3>Key operational rules</h3>
-        <p>
-          Property type, room count, call volume, deposits, smoking rules, pets/service animals, late check-ins, weekly rates,
-          and who gets escalations (GM / front desk / on-call maintenance).
-        </p>
+        <h3>Key operational rules we’ll confirm</h3>
+        <p>Pets, deposits, smoking, late check-ins, weekly rates, and who receives escalations (GM/FD/on-call).</p>
       </div>
     </section>
 
-    <!-- FINAL CTA -->
-    <section class="section">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Get started</div>
-          <div class="h2">Ready to replace overnight call handling?</div>
-          <p class="lead">
-            Request a quote and we’ll recommend the right package, confirm your requirements, and outline exactly how NightShift
-            will operate for your property.
-          </p>
+    <!-- FINAL CTA (matches index: a notice block in a section) -->
+    <section class="section" aria-label="Final call to action">
+      <div class="notice">
+        <h3>Ready to stop missing calls?</h3>
+        <p>We’ll recommend the right package and respond quickly with a rollout plan.</p>
+        <div class="ctaRow">
+          <a class="btn primary" href="/contact.html">Book a demo</a>
+          <a class="btn" href="tel:4237715523">Call now</a>
+          <a class="btn" href="/faq.html">FAQ</a>
         </div>
       </div>
-
-      <div class="ctaRow">
-        <a class="btn primary" href="/contact.html">Get a Quote Now</a>
-        <a class="btn" href="tel:4237715523">📞 Call Now</a>
-        <a class="btn" href="/faq.html">Read FAQ →</a>
-      </div>
     </section>
 
-    <!-- FOOTER (matches site.css) -->
-    <footer class="footer">
-      <div class="container footerInner">
+    <!-- FOOTER (MATCHES INDEX) -->
+    <footer class="footer" role="contentinfo">
+      <div class="footerInner">
         <div>© 2026 NightShift AI</div>
 
         <div class="footerLinks">
@@ -398,15 +516,15 @@
           <a href="/contact.html">Contact</a>
         </div>
 
-        <div class="social">
+        <div class="social" aria-label="Social links">
           <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
-            <svg viewBox="0 0 24 24"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
           </a>
           <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
-            <svg viewBox="0 0 24 24"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
           </a>
           <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
-            <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
           </a>
         </div>
       </div>
@@ -417,7 +535,7 @@
   <div id="demoModal" class="demoModal hidden" aria-hidden="true">
     <div class="demoBackdrop" tabindex="-1"></div>
 
-    <div class="demoPanel" role="dialog" aria-modal="true" aria-label="Demo">
+    <div class="demoPanel" role="dialog" aria-modal="true" aria-label="Demo video">
       <div class="demoTop">
         <div class="kicker">Dashboard demo</div>
         <button class="demoClose" type="button" aria-label="Close demo">✕</button>
@@ -436,14 +554,57 @@
   <audio id="demoAudio"></audio>
 
   <script>
+    // Mobile menu (same behavior as index)
     (function(){
-      const modal = document.getElementById("demoModal");
-      const video = document.getElementById("demoVideo");
-      const fallback = document.getElementById("demoFallback");
-      const audio = document.getElementById("demoAudio");
+      var btn = document.getElementById("btnMenu");
+      var menu = document.getElementById("mobileMenu");
+      if(btn && menu){
+        btn.addEventListener("click", function(){
+          menu.classList.toggle("open");
+        });
+      }
+      document.addEventListener("click", function(e){
+        if(!menu || !btn) return;
+        if(e.target.closest("#btnMenu") || e.target.closest("#mobileMenu")) return;
+        menu.classList.remove("open");
+      });
+    })();
 
-      const closeBtn = document.querySelector(".demoClose");
-      const backdrop = document.querySelector(".demoBackdrop");
+    // Theme toggle (same nsa_theme key as index/dashboard)
+    (function(){
+      function systemPrefersDark(){
+        try { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
+        catch(e){ return false; }
+      }
+      function resolveTheme(t){
+        if(t === "dark") return "dark";
+        if(t === "light") return "light";
+        return systemPrefersDark() ? "dark" : "light";
+      }
+      function applyTheme(t){
+        var resolved = resolveTheme(t);
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }
+      var btn = document.getElementById("btnTheme");
+      if(btn){
+        btn.addEventListener("click", function(){
+          var now = "system";
+          try{ now = localStorage.getItem("nsa_theme") || "system"; }catch(e){}
+          var next = resolveTheme(now) === "dark" ? "light" : "dark";
+          try{ localStorage.setItem("nsa_theme", next); }catch(e){}
+          applyTheme(next);
+        });
+      }
+    })();
+
+    // Demo logic (audio + video modal)
+    (function(){
+      var modal = document.getElementById("demoModal");
+      var video = document.getElementById("demoVideo");
+      var fallback = document.getElementById("demoFallback");
+      var audio = document.getElementById("demoAudio");
+      var closeBtn = document.querySelector(".demoClose");
+      var backdrop = document.querySelector(".demoBackdrop");
 
       function openModal(src){
         fallback.classList.remove("show");
@@ -458,11 +619,11 @@
         modal.setAttribute("aria-hidden","false");
         document.body.style.overflow = "hidden";
 
-        video.onerror = () => {
+        video.onerror = function(){
           video.style.display = "none";
           fallback.classList.add("show");
         };
-        video.onloadeddata = () => {
+        video.onloadeddata = function(){
           video.style.display = "block";
           fallback.classList.remove("show");
           try { video.play(); } catch(e) {}
@@ -477,24 +638,26 @@
         video.src = "";
       }
 
-      document.querySelectorAll(".demo-video").forEach(btn => {
-        btn.addEventListener("click", () => openModal(btn.dataset.video));
-      });
-
-      document.querySelectorAll(".demo-audio").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const src = btn.dataset.audio;
-          audio.src = src;
-          audio.load();
-          audio.play().catch(() => {});
+      document.querySelectorAll(".demo-video").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          openModal(btn.getAttribute("data-video"));
         });
       });
 
-      if (closeBtn) closeBtn.addEventListener("click", closeModal);
-      if (backdrop) backdrop.addEventListener("click", closeModal);
+      document.querySelectorAll(".demo-audio").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var src = btn.getAttribute("data-audio");
+          audio.src = src;
+          audio.load();
+          audio.play().catch(function(){});
+        });
+      });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+      if(closeBtn) closeBtn.addEventListener("click", closeModal);
+      if(backdrop) backdrop.addEventListener("click", closeModal);
+
+      document.addEventListener("keydown", function(e){
+        if(e.key === "Escape" && modal && !modal.classList.contains("hidden")) closeModal();
       });
     })();
   </script>
