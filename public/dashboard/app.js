@@ -1,4 +1,4 @@
-// public/dashboard/app.js — v10.1 (RATE FIX + SAFE + BOOKING-LIKE UI)
+// public/dashboard/app.js — v10.2 (ELITE KPI FIX + RATE FIX + SAFE + BOOKING-LIKE UI)
 // Goals:
 // - Keep every existing ID contract used by index.html (kpiGrid, feedTbody, feedEmpty, feedTableWrap, stateBox, toast, authOverlay, etc.)
 // - Auth handlers ALWAYS attach (magic link, overlay controls, logout)
@@ -10,7 +10,10 @@
 // - Feed renders with tr.dataset.event for filter script
 // - Charts render if canvases exist
 // - Updates “lastUpdated”/mirrors if present
-// - ✅ Rate column now populates (reservations + call_logs.booking), with fallback to total/nights
+// - ✅ Rate column populates (reservations + call_logs.booking), fallback total/nights
+// - ✅ KPI logic now supports “bookings” as reservations OR call_logs booking events (configurable)
+// - ✅ Conversion = bookings / calls (calls exclude booking rows)
+// - ✅ Revenue defaults to reservations only (avoids double count)
 
 (() => {
   // ============================================================
@@ -35,6 +38,24 @@
   // Data limits
   const FETCH_LIMIT = 3000;
   const FEED_MAX_ROWS = 500;
+
+  // ============================================================
+  // ✅ KPI behavior toggles
+  // ============================================================
+  // If true, “Bookings” includes call_logs events like reservation_confirmed.
+  // If false, “Bookings” uses reservations table only.
+  const KPI_INCLUDE_CALLLOG_BOOKINGS = false;
+
+  // If true, revenue also includes call_logs totals for booking events.
+  // Default false to avoid double counting (recommended for demo cleanliness).
+  const KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS = false;
+
+  // Which events in call_logs.booking.event count as a “booking”
+  const BOOKING_EVENTS = new Set([
+    "reservation_confirmed",
+    "booking_confirmed",
+    "reservation_created"
+  ]);
 
   // ============================================================
   // DOM Helpers
@@ -510,7 +531,6 @@
 
   // ✅ derive a trustworthy nightly rate from various shapes
   function computeRatePerNight({ rate, nightly_rate, rate_per_night, total_due, nights, adr, avg_rate }) {
-    // 1) explicit values win
     const direct =
       toNum(rate_per_night) ||
       toNum(nightly_rate) ||
@@ -520,7 +540,6 @@
 
     if (Number.isFinite(direct) && direct > 0) return direct;
 
-    // 2) fallback: total/nights
     const t = toNum(total_due);
     const n = toNum(nights);
     if (Number.isFinite(t) && Number.isFinite(n) && n > 0) return t / n;
@@ -550,7 +569,7 @@
       guest: safeStr(r.guest_name),
       arrival,
       nights,
-      ratePerNight, // ✅
+      ratePerNight,
       totalDue: toNum(r.total_due),
       sentiment: "",
       duration: NaN,
@@ -582,7 +601,7 @@
       guest: safeStr(booking.guest_name || r.guest_name || ""),
       arrival: safeStr(booking.arrival_date),
       nights,
-      ratePerNight, // ✅
+      ratePerNight,
       totalDue,
       sentiment: safeStr(r.sentiment),
       duration: toNum(r.duration_seconds),
@@ -659,23 +678,48 @@
   }
 
   // ============================================================
+  // ✅ KPI helpers
+  // ============================================================
+  function isCallLogBookingEvent(r) {
+    if (!r || r.kind !== "call") return false;
+    const b = safeJsonParse(r.raw && r.raw.booking) || {};
+    const ev = safeStr(b.event).trim();
+    return BOOKING_EVENTS.has(ev);
+  }
+
+  // ============================================================
   // KPIs (Bubbles)
   // ============================================================
   function computeKPIs(rows) {
+    // Calls are only call rows (never count reservations table rows as calls)
     const calls = rows.filter(r => r.kind === "call");
-    const bookings = rows.filter(r => r.kind === "booking");
+    const bookingsTable = rows.filter(r => r.kind === "booking");
+
+    const bookingEventsFromCalls = KPI_INCLUDE_CALLLOG_BOOKINGS
+      ? calls.filter(isCallLogBookingEvent)
+      : [];
 
     const totalCalls = calls.length;
-    const totalBookings = bookings.length;
+    const totalBookings = bookingsTable.length + bookingEventsFromCalls.length;
+
     const conv = totalCalls ? totalBookings / totalCalls : NaN;
 
     const durations = calls.map(c => c.duration).filter(Number.isFinite);
     const avgDur = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : NaN;
 
-    const revenue = bookings
+    // Revenue: safest by default is reservations table only (avoids double counting)
+    let revenue = bookingsTable
       .map(b => b.totalDue)
       .filter(Number.isFinite)
       .reduce((a, b) => a + b, 0);
+
+    if (KPI_REVENUE_INCLUDE_CALLLOG_BOOKINGS && bookingEventsFromCalls.length) {
+      const callRevenue = bookingEventsFromCalls
+        .map(r => r.totalDue)
+        .filter(Number.isFinite)
+        .reduce((a, b) => a + b, 0);
+      revenue += callRevenue;
+    }
 
     return { totalCalls, totalBookings, conv, avgDur, revenue };
   }
@@ -790,7 +834,7 @@
       const ev = classifyEvent(r);
 
       const tr = document.createElement("tr");
-      tr.dataset.event = ev; // ✅ used by index.html filter script
+      tr.dataset.event = ev;
 
       const rateCell = Number.isFinite(r.ratePerNight) ? fmtMoney(r.ratePerNight) : "—";
 
@@ -856,7 +900,6 @@
   function updateWindowBadges() {
     const label = state.lastRange ? state.lastRange.label : "—";
     setText("badgeWindow", label);
-
     setText("badgeWindowInline", `Window: ${label}`);
     setText("badgeWindowMirror", label);
   }
@@ -922,7 +965,7 @@
     catch (e) { clearDataUI(e.message); return; }
 
     initTheme();
-    initAuthHandlers(); // ✅ attach handlers before any early returns
+    initAuthHandlers();
     initControls();
 
     if (ALWAYS_REQUIRE_LOGIN) {
