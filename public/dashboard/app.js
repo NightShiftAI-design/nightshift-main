@@ -948,7 +948,11 @@
   lines.push(`Total Calls,${kpis.totalCalls}`);
   lines.push(`Total Bookings,${kpis.totalBookings}`);
   lines.push(`Conversion Rate,${(kpis.conv * 100).toFixed(1)}%`);
-  lines.push(`Total Revenue,"$${Number.isFinite(kpis.revenue) ? kpis.revenue.toFixed(2) : "0.00"}"`);
+  lines.push(
+  `Total Revenue,"$${Number.isFinite(kpis.revenue)
+    ? kpis.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : "0.00"}"`
+);
   lines.push(`Avg Call Duration (sec),${Number.isFinite(kpis.avgDur) ? Math.round(kpis.avgDur) : ""}`);
   lines.push("");
 
@@ -1015,11 +1019,11 @@
   Object.keys(daily).sort().forEach(d => {
     const x = daily[d];
     lines.push([
-      d,
-      x.calls,
-      x.bookings,
-      x.revenue.toFixed(2)
-    ].join(","));
+  d,
+  x.calls,
+  x.bookings,
+  `$${x.revenue.toFixed(2)}`
+].join(","));
   });
 
   // =========================
