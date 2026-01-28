@@ -14,6 +14,17 @@
 
   <meta name="robots" content="index,follow" />
   <meta name="color-scheme" content="dark light" />
+  <meta name="keywords" content="NightShift AI, hotel AI, front desk automation, hospitality SaaS" />
+  <meta property="og:title" content="Why NightShift AI — Consistent Hospitality Experience" />
+  <meta property="og:description" content="NightShift AI improves the guest experience by delivering consistent, professional service on every call, while giving staff time to excel in-person." />
+  <meta property="og:image" content="/assets/og-image.png" />
+  <meta property="og:url" content="https://nightshifthotels.com/why-nightshift.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Google Fonts for professional typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Theme: reads localStorage("nsa_theme") and applies html.dark -->
   <script>
@@ -38,12 +49,12 @@
 <body>
   <div class="bgGrid" aria-hidden="true"></div>
 
-  <!-- NAV (EXACT from index.html) -->
+  <!-- NAV (Enhanced with logo image) -->
   <header class="nav" role="banner">
     <div class="container">
       <div class="navInner">
         <a href="/" class="brand" aria-label="NightShift AI Home">
-          <div class="mark" aria-hidden="true">NS</div>
+          <img src="https://placehold.co/40x40/png?text=NS&font=roboto" alt="NightShift AI Logo" class="logo" style="margin-right: 10px;">
           <div class="brandText">
             <b>NightShift AI</b>
             <span>AI Night Front Desk for Hotels</span>
@@ -92,7 +103,7 @@
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- HERO (Added illustrative image) -->
   <main class="container heroWrap">
     <div class="trustStrip" aria-label="Trust highlights">
       <span class="trustPill"><i class="fa-solid fa-phone-volume"></i> Consistent call quality</span>
@@ -135,6 +146,7 @@
       </div>
 
       <aside class="heroCard" aria-label="What guests feel">
+        <img src="https://www.derbysoft.com/wp-content/uploads/2025/06/AI-Voice-Agent.jpg" alt="AI Voice Agent assisting in hotel hospitality" class="heroImage" style="width: 100%; border-radius: 8px; margin-bottom: 16px;">
         <div class="inner">
           <div class="kicker">What Guests Feel</div>
           <div class="cardTitle">Calm, clear, professional service — every time.</div>
@@ -178,7 +190,7 @@
       </aside>
     </section>
 
-    <!-- SECTION 1 -->
+    <!-- SECTION 1 (Added illustrative image) -->
     <section class="section" id="how-it-helps" aria-label="Independent operations">
       <div class="sectionHead">
         <div>
@@ -187,6 +199,8 @@
           <p class="lead">Independent hotels operate under very different conditions than large chains.</p>
         </div>
       </div>
+
+      <img src="https://www.derbysoft.com/wp-content/uploads/2024/09/Business-Travel.png" alt="Business travel and hotel operations" class="sectionImage" style="width: 100%; border-radius: 8px; margin-bottom: 24px;">
 
       <div class="grid">
         <div class="card"><div class="cardPad">
@@ -278,7 +292,7 @@
       </div>
     </section>
 
-    <!-- SECTION 4 -->
+    <!-- SECTION 4 (Added image) -->
     <section class="section" aria-label="Human strength">
       <div class="sectionHead">
         <div>
@@ -287,6 +301,8 @@
           <p class="lead">Great hospitality happens face-to-face.</p>
         </div>
       </div>
+
+      <img src="https://www.derbysoft.com/wp-content/uploads/2025/05/day-use-hotel.jpg" alt="Hotel room illustrating hospitality" class="sectionImage" style="width: 100%; border-radius: 8px; margin-bottom: 24px;">
 
       <div class="grid">
         <div class="card"><div class="cardPad">
@@ -404,7 +420,7 @@
       </div>
     </section>
 
-    <!-- FOOTER (EXACT from index.html) -->
+    <!-- FOOTER (Added newsletter signup for SaaS feel) -->
     <footer class="footer" role="contentinfo">
       <div class="footerInner">
         <div>© 2026 NightShift AI</div>
@@ -430,6 +446,15 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
           </a>
         </div>
+      </div>
+
+      <div class="newsletter" style="margin-top: 24px; text-align: center;">
+        <h4>Subscribe to Our Newsletter</h4>
+        <p>Stay updated with the latest in AI hospitality solutions.</p>
+        <form action="/subscribe" method="post" style="display: flex; justify-content: center; gap: 8px;">
+          <input type="email" name="email" placeholder="Your email address" required style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+          <button type="submit" class="btn primary">Subscribe</button>
+        </form>
       </div>
     </footer>
   </main>
