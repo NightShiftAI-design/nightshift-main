@@ -1,31 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Who We Serve | NightShift AI Virtual Front Desk</title>
   <meta name="description" content="NightShift AI is a hotel-trained virtual front desk for after-hours calls. Built for independent hotels, franchise properties, and ownership groups — with policy logic, ADA-aware flows, and safe escalation." />
-  <!-- Open Graph / SEO -->
+
+  <!-- Open Graph -->
   <meta property="og:title" content="Who We Serve | NightShift AI Virtual Front Desk" />
   <meta property="og:description" content="Built for hotel after-hours call handling. Independent hotels, franchise properties, and multi-hotel portfolios." />
-  <meta property="og:image" content="/assets/og-image.png" />
+  <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nightshifthotels.com/who-we-serve.html" />
-  <meta name="twitter:card" content="summary_large_image" />
+
   <meta name="robots" content="index,follow" />
   <meta name="color-scheme" content="dark light" />
+
   <!-- FAVICONS -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <!-- Site CSS -->
+
   <link rel="stylesheet" href="/assets/site.css?v=1000" />
-  <!-- Theme setup -->
+
+  <!-- Theme: reads localStorage("nsa_theme") and applies html.dark -->
   <script>
     (function(){
       try{
@@ -36,44 +35,171 @@
       }catch(e){}
     })();
   </script>
-  <!-- Compact page styles -->
+
+  <!-- Page-only styles (keeps site.css unchanged) -->
   <style>
-    .bgGrid { opacity: .25; }
-    html:not(.dark) .bgGrid { opacity: .08; }
-    .hero { padding: 60px 0 40px; gap: 40px; }
-    .section { padding: 60px 0; }
-    .sectionHead { margin-bottom: 32px; }
-    .segGrid { gap: 20px; margin-top: 24px; }
-    .segCard { border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
-    .segPad { padding: 20px; }
-    .kpiRow { gap: 16px; margin-top: 24px; }
-    .kpi { padding: 16px; border-radius: 12px; }
-    .notice { padding: 20px; border-radius: 12px; margin: 24px 0 0; }
-    .trustStrip { gap: 12px; flex-wrap: wrap; }
-    .ctaRow { gap: 12px; flex-wrap: wrap; }
-    @media (max-width: 1080px) {
-      .segCard, .kpi { grid-column: span 6; }
+    .bgGrid{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      opacity: .30;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(700px 520px at 50% 20%, rgba(0,0,0,1), transparent 72%);
+      z-index: 0;
     }
-    @media (max-width: 720px) {
-      .segCard, .kpi { grid-column: span 12; }
-      .hero { flex-direction: column; text-align: center; }
+    html:not(.dark) .bgGrid{
+      opacity: .12;
+      background-image:
+        linear-gradient(to right, rgba(10,15,25,.10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(10,15,25,.10) 1px, transparent 1px);
+    }
+    .stack{ position: relative; z-index: 1; }
+
+    /* Segment cards enhancements */
+    .segGrid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .segCard{
+      grid-column: span 4;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(620px 200px at 18% 0%, rgba(110,168,255,.12), transparent 60%),
+        rgba(255,255,255,.03);
+      box-shadow: 0 18px 60px rgba(0,0,0,.26);
+      overflow:hidden;
+    }
+    html:not(.dark) .segCard{
+      border-color: rgba(10,15,25,.10);
+      background:
+        radial-gradient(620px 200px at 18% 0%, rgba(110,168,255,.10), transparent 60%),
+        rgba(10,15,25,.02);
+      box-shadow: 0 18px 50px rgba(10,15,25,.12);
+    }
+    .segPad{ padding: 16px; }
+    .segTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 950;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: var(--text, rgba(255,255,255,.92));
+      white-space: nowrap;
+    }
+    html:not(.dark) .chip{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.03);
+      color: rgba(10,15,25,.92);
+    }
+    .chip.good{
+      border-color: rgba(66,211,146,.22);
+      background: rgba(66,211,146,.12);
+    }
+    .segTitle{
+      margin: 0;
+      font-weight: 980;
+      letter-spacing: -0.01em;
+      font-size: 18px;
+    }
+    .segSub{
+      margin: 8px 0 0;
+      color: var(--muted, rgba(255,255,255,.62));
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .bul{
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted2, rgba(255,255,255,.72));
+      line-height: 1.75;
+      font-size: 14px;
+    }
+    .bul li{ margin: 6px 0; }
+
+    .segActions{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    /* Mini KPI row */
+    .kpiRow{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .kpi{
+      grid-column: span 3;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      padding: 14px;
+      box-shadow: 0 12px 34px rgba(0,0,0,.18);
+    }
+    html:not(.dark) .kpi{
+      border-color: rgba(10,15,25,.10);
+      background: rgba(10,15,25,.02);
+      box-shadow: 0 12px 28px rgba(10,15,25,.10);
+    }
+    .kpi b{
+      display:block;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .kpi span{
+      color: var(--muted, rgba(255,255,255,.62));
+      font-size: 13px;
+      line-height: 1.55;
+      display:block;
+    }
+
+    @media (max-width: 1080px){
+      .segCard{ grid-column: span 6; }
+      .kpi{ grid-column: span 6; }
+    }
+    @media (max-width: 720px){
+      .segCard{ grid-column: span 12; }
+      .kpi{ grid-column: span 12; }
     }
   </style>
 </head>
+
 <body>
   <div class="bgGrid" aria-hidden="true"></div>
 
-  <!-- NAV -->
+  <!-- NAV (MATCHES INDEX) -->
   <header class="nav" role="banner">
     <div class="container">
       <div class="navInner">
         <a href="/" class="brand" aria-label="NightShift AI Home">
-          <img src="https://placehold.co/40x40/png?text=NS&font=roboto" alt="NightShift AI Logo" class="logo" style="margin-right:10px;">
+          <div class="mark" aria-hidden="true">NS</div>
           <div class="brandText">
             <b>NightShift AI</b>
             <span>AI Night Front Desk for Hotels</span>
           </div>
         </a>
+
         <div class="navRight">
           <nav class="links" aria-label="Primary navigation">
             <a class="navA" href="/product.html">Product</a>
@@ -81,154 +207,234 @@
             <a class="navA" href="/packages.html">Packages</a>
             <a class="navA" href="/faq.html">FAQ</a>
             <a class="navA" href="/about.html">About</a>
-            <a class="navA" href="/why-nightshift.html">Why NightShift</a>
             <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
+            <a class="navA" href="/why-nightshift.html">Why NightShift</a>
           </nav>
-          <button class="iconBtn hamburger" id="btnMenu" aria-label="Open menu">
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg>
+
+          <button class="iconBtn hamburger" id="btnMenu" type="button" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"></path>
+            </svg>
           </button>
-          <button class="iconBtn" id="btnTheme" aria-label="Toggle theme">
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2a9.9 9.9 0 0 0 0 20V2zm1 2.06A8 8 0 1 1 13 19.94V4.06z"/></svg>
+
+          <button class="iconBtn" id="btnTheme" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d="M12 2a9.9 9.9 0 0 0 0 20V2zm1 2.06A8 8 0 1 1 13 19.94V4.06z"></path>
+            </svg>
           </button>
-          <a class="btn primary" href="/contact.html">Book a demo</a>
+
+          <a class="btn primary" href="/contact.html">Get a quote</a>
         </div>
       </div>
+
+      <!-- Mobile menu -->
       <div class="mobileMenu" id="mobileMenu">
-        <div class="mobileCard">
+        <div class="mobileCard" role="navigation" aria-label="Mobile navigation">
           <a href="/product.html">Product</a>
           <a href="/who-we-serve.html">Who we serve</a>
           <a href="/packages.html">Packages</a>
           <a href="/faq.html">FAQ</a>
           <a href="/about.html">About</a>
-          <a href="/why-nightshift.html">Why NightShift</a>
           <a href="/dashboard/" rel="nofollow">Dashboard</a>
-          <a href="/contact.html">Book a demo</a>
+          <a href="/contact.html">Get a quote</a>
         </div>
       </div>
     </div>
   </header>
 
-  <main class="container heroWrap stack">
+  <main class="container heroWrap stack" style="padding-top: 10px;">
+    <!-- HERO -->
+    <section class="section" aria-label="Hero">
+      <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Who we serve</div>
 
-    <!-- HERO - Tighter & modern -->
-    <section class="hero" aria-label="Hero">
-      <div>
-        <div class="eyebrow"><span class="dot"></span> Who we serve</div>
-        <h1 class="h1">Built for real hotel after-hours support</h1>
-        <p class="sub" style="max-width:800px; margin:16px 0 24px;">
-          NightShift AI is your property-trained virtual front desk — not a generic call center.<br>
-          We set up your exact policies, workflows, and escalation paths so guests get accurate help overnight and your team finally gets to rest.
+      <h1 class="h1" style="margin-top:14px;">Built for hotel after-hours call handling</h1>
+
+      <p class="sub" style="max-width: 920px;">
+        NightShift AI is a virtual front desk trained on your property — not a reservation call center.
+        We configure your policies, workflows, and escalation rules so guests get real help overnight and your team stops being “on call.”
+      </p>
+
+      <div class="ctaRow" style="margin-top: 14px;">
+        <a class="btn primary" href="/contact.html">Get a quote</a>
+        <a class="btn" href="/virtual-front-desk-vs-call-center.html">Call center vs virtual front desk</a>
+        <a class="btn" href="/packages.html">See packages</a>
+      </div>
+
+      <div class="trustStrip" style="margin-top: 14px;">
+        <span class="trustPill">✔ Answers every call</span>
+        <span class="trustPill">✔ Policy-driven responses</span>
+        <span class="trustPill">✔ ADA-aware handling patterns</span>
+        <span class="trustPill">✔ Safe escalation routing</span>
+      </div>
+
+      <div class="kpiRow" aria-label="Outcomes">
+        <div class="kpi">
+          <b>Fewer missed calls</b>
+          <span>Capture bookings and prevent “no answer” damage after hours.</span>
+        </div>
+        <div class="kpi">
+          <b>Cleaner operations</b>
+          <span>Consistent policies and clearer handoffs to staff.</span>
+        </div>
+        <div class="kpi">
+          <b>Better guest experience</b>
+          <span>Real answers fast — not a voicemail loop.</span>
+        </div>
+        <div class="kpi">
+          <b>Less on-call pressure</b>
+          <span>Escalate only when it actually matters.</span>
+        </div>
+      </div>
+
+      <div class="notice" style="margin-top: 14px;">
+        <h3>Common outcomes</h3>
+        <p>
+          NightShift resolves routine front desk questions, prevents “call back later,” and escalates urgent issues —
+          using your hotel’s rules, not generic scripts.
         </p>
-        <div class="ctaRow">
-          <a class="btn primary" href="/contact.html">Book a demo</a>
-          <a class="btn" href="/virtual-front-desk-vs-call-center.html">Virtual vs Call Center</a>
-          <a class="btn" href="/packages.html">See packages</a>
-        </div>
-        <div class="trustStrip" style="margin:24px 0;">
-          <span class="trustPill"><i class="fa-solid fa-phone-volume"></i> Answers every call</span>
-          <span class="trustPill"><i class="fa-solid fa-shield-check"></i> Policy-driven answers</span>
-          <span class="trustPill"><i class="fa-solid fa-universal-access"></i> ADA-aware flows</span>
-          <span class="trustPill"><i class="fa-solid fa-triangle-exclamation"></i> Safe escalation</span>
-        </div>
       </div>
-      <aside class="heroCard" style="max-width:420px;">
-        <img src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80" alt="Abstract AI voice interface visualization" style="width:100%; border-radius:12px; margin-bottom:16px;">
-        <div class="inner">
-          <div class="kicker">Key Outcomes</div>
-          <h3>Fewer missed calls. Cleaner nights.</h3>
-          <ul class="list" style="margin:12px 0;">
-            <li><i class="fa-solid fa-check text-green-400"></i> Capture every booking opportunity</li>
-            <li><i class="fa-solid fa-check text-green-400"></i> Consistent policy handling</li>
-            <li><i class="fa-solid fa-check text-green-400"></i> Real answers — no voicemail loops</li>
-            <li><i class="fa-solid fa-check text-green-400"></i> Staff only interrupted for true emergencies</li>
-          </ul>
-          <a class="btn primary" href="/contact.html" style="margin-top:12px;">Book a demo</a>
-        </div>
-      </aside>
     </section>
 
-    <!-- SEGMENTS - More compact cards with varied images -->
+    <!-- SEGMENTS -->
     <section class="section" aria-label="Segments">
-      <div class="sectionHead" style="text-align:center;">
-        <h2 class="h2">Who gets the strongest results</h2>
-        <p class="lead" style="max-width:760px; margin:8px auto 0;">Tailored logic and rules for your exact operation — no phone system changes required.</p>
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Segments</div>
+          <h2 class="h2">Who gets the best results</h2>
+          <p class="lead" style="max-width: 920px;">
+            Each segment gets tailored scripting, policy logic, and escalation rules — without changing your phone system.
+          </p>
+        </div>
+        <div class="ctaRow" style="margin:0;">
+          <a class="btn" href="/contact.html">Talk to sales</a>
+        </div>
       </div>
+
       <div class="segGrid">
+        <!-- Independent -->
         <article class="segCard">
-          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800" alt="Independent boutique hotel exterior" style="width:100%; height:140px; object-fit:cover;">
           <div class="segPad">
-            <div class="chip good"><i class="fa-solid fa-house-user"></i> Independent hotels & motels</div>
-            <h3 class="segTitle" style="margin:12px 0 8px;">Perfect for owner-operators</h3>
+            <div class="segTop">
+              <div>
+                <div class="chip good">Independent hotels & motels</div>
+                <h3 class="segTitle">Perfect for family-owned operators</h3>
+              </div>
+              <div class="chip">Best fit: Core / Pro</div>
+            </div>
+
+            <p class="segSub">
+              Immediate relief at night: every call answered, common questions handled, and staff only contacted when necessary.
+            </p>
+
             <ul class="bul">
-              <li>Stop missing overnight bookings</li>
-              <li>Cut after-hours labor stress</li>
-              <li>Enforce deposits/pets/smoking rules consistently</li>
-              <li>Instant guest response improvement</li>
+              <li>Capture bookings you’re currently missing</li>
+              <li>Reduce overnight labor pressure</li>
+              <li>Handle deposits, smoking, pets, and weekly rates consistently</li>
+              <li>Improve guest response time instantly</li>
+              <li>Works alongside your current booking/payment process</li>
             </ul>
-            <div class="segActions" style="margin-top:16px;">
-              <a class="btn primary small" href="/contact.html">Get quote</a>
-              <a class="btn small" href="/product.html">Learn more</a>
+
+            <div class="segActions">
+              <a class="btn primary" href="/contact.html">Get quote (Independent)</a>
+              <a class="btn" href="/product.html">See product</a>
             </div>
           </div>
         </article>
 
+        <!-- Franchise -->
         <article class="segCard">
-          <img src="https://images.unsplash.com/photo-1578683015146-b8cb4b8c5641?auto=format&fit=crop&q=80&w=800" alt="Modern branded hotel lobby" style="width:100%; height:140px; object-fit:cover;">
           <div class="segPad">
-            <div class="chip good"><i class="fa-solid fa-crown"></i> Franchise & branded hotels</div>
-            <h3 class="segTitle" style="margin:12px 0 8px;">Brand-compliant & safe</h3>
+            <div class="segTop">
+              <div>
+                <div class="chip good">Franchise hotels</div>
+                <h3 class="segTitle">Brand-aligned and policy-driven</h3>
+              </div>
+              <div class="chip">Best fit: Pro</div>
+            </div>
+
+            <p class="segSub">
+              Structured workflows for branded environments: consistent language, clear policies, ADA-aware handling, and safe escalation.
+            </p>
+
             <ul class="bul">
-              <li>Consistent brand voice & tone</li>
-              <li>Accurate amenity & policy delivery</li>
-              <li>ADA service animal workflows</li>
-              <li>Controlled emergency routing</li>
+              <li>Brand-safe tone and consistent guest experience</li>
+              <li>Accurate handling for amenities, policies, and room types</li>
+              <li>ADA-aware service animal workflows and escalation</li>
+              <li>Emergency-safe routing rules you control</li>
+              <li>Cleaner handoff and summaries to staff</li>
             </ul>
-            <div class="segActions" style="margin-top:16px;">
-              <a class="btn primary small" href="/contact.html">Get quote</a>
-              <a class="btn small" href="/packages.html">See packages</a>
+
+            <div class="segActions">
+              <a class="btn primary" href="/contact.html">Get quote (Franchise)</a>
+              <a class="btn" href="/packages.html">See packages</a>
             </div>
           </div>
         </article>
 
+        <!-- Portfolio -->
         <article class="segCard">
-          <img src="https://images.unsplash.com/photo-1564507592333-c3f5e8a0a5d9?auto=format&fit=crop&q=80&w=800" alt="Multi-property hotel portfolio skyline" style="width:100%; height:140px; object-fit:cover;">
           <div class="segPad">
-            <div class="chip good"><i class="fa-solid fa-layer-group"></i> Ownership groups & management companies</div>
-            <h3 class="segTitle" style="margin:12px 0 8px;">Portfolio-wide consistency</h3>
+            <div class="segTop">
+              <div>
+                <div class="chip good">Ownership groups & management</div>
+                <h3 class="segTitle">Portfolio coverage with property-level rules</h3>
+              </div>
+              <div class="chip">Best fit: Elite</div>
+            </div>
+
+            <p class="segSub">
+              Standardize overnight call handling across your portfolio while preserving each property’s workflows.
+            </p>
+
             <ul class="bul">
-              <li>Property-specific routing & rules</li>
-              <li>Standardized escalation with overrides</li>
-              <li>Centralized call visibility & reporting</li>
-              <li>Dedicated onboarding support</li>
+              <li>Route calls by property with correct policies</li>
+              <li>Standardize escalation while allowing local overrides</li>
+              <li>Roll-up visibility and reporting (portfolio view)</li>
+              <li>Dedicated onboarding and optimization</li>
+              <li>Built for multi-property consistency</li>
             </ul>
-            <div class="segActions" style="margin-top:16px;">
-              <a class="btn primary small" href="/contact.html">Request demo</a>
-              <a class="btn small" href="/packages.html">Compare tiers</a>
+
+            <div class="segActions">
+              <a class="btn primary" href="/contact.html">Request portfolio demo</a>
+              <a class="btn" href="/packages.html">Compare tiers</a>
             </div>
           </div>
         </article>
       </div>
-      <div class="notice" style="text-align:center;">
+
+      <div class="notice" style="margin-top: 14px;">
         <h3>Bottom line</h3>
-        <p>If after-hours guest calls are part of your operation, NightShift fits — from single motels to multi-property portfolios.</p>
+        <p style="max-width: 920px;">
+          If you get guest calls after hours, NightShift fits. Whether you run one independent motel, a franchise property, or a growing portfolio —
+          NightShift answers every call, resolves routine issues, and escalates only when it matters.
+        </p>
       </div>
     </section>
 
-    <!-- FINAL CTA - Compact -->
-    <section class="section" style="padding:40px 0; text-align:center;">
-      <h2 class="h2">Ready for better nights?</h2>
-      <p style="margin:12px auto 24px; max-width:640px;">Tell us your room count, brand (if any), and rough call volume — we’ll send a tailored quote fast.</p>
-      <div class="ctaRow" style="justify-content:center;">
-        <a class="btn primary" href="/contact.html">Book a demo</a>
-        <a class="btn" href="tel:4237715523">Call now</a>
-        <a class="btn" href="/packages.html">View packages</a>
+    <!-- FINAL CTA -->
+    <section class="section" aria-label="Get started">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Get started</div>
+          <h2 class="h2">Want a fast quote?</h2>
+          <p class="lead" style="max-width: 920px;">
+            Share your room count, brand (if any), and estimated call volume. We’ll recommend the right setup and respond quickly.
+          </p>
+        </div>
+      </div>
+
+      <div class="ctaRow" style="margin-top: 12px;">
+        <a class="btn primary" href="/contact.html">Get a quote</a>
+        <a class="btn" href="tel:4237715523">📞 Call now</a>
+        <a class="btn" href="/faq.html">Read FAQ</a>
       </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="footer">
+    <!-- FOOTER (MATCHES INDEX) -->
+    <footer class="footer" role="contentinfo">
       <div class="footerInner">
         <div>© 2026 NightShift AI</div>
+
         <div class="footerLinks">
           <a href="/privacy.html">Privacy</a>
           <a href="/cookies.html">Cookies</a>
@@ -236,19 +442,64 @@
           <a href="/terms.html">Terms</a>
           <a href="/contact.html">Contact</a>
         </div>
-        <div class="social">
-          <a href="https://x.com/nightshiftai" target="_blank"><svg viewBox="0 0 24 24"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2z"/></svg></a>
-          <a href="https://www.instagram.com/nightshift.hotels" target="_blank"><svg viewBox="0 0 24 24"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10z"/></svg></a>
-          <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg></a>
+
+        <div class="social" aria-label="Social links">
+          <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
+          </a>
         </div>
       </div>
     </footer>
   </main>
 
   <script>
-    // Mobile menu & theme toggle (same as before)
-    (function(){ /* ... same mobile menu code ... */ })();
-    (function(){ /* ... same theme toggle code ... */ })();
+    // Mobile menu
+    (function(){
+      var btn = document.getElementById("btnMenu");
+      var menu = document.getElementById("mobileMenu");
+      if(btn && menu){
+        btn.addEventListener("click", function(){ menu.classList.toggle("open"); });
+      }
+      document.addEventListener("click", function(e){
+        if(!menu || !btn) return;
+        if(e.target.closest("#btnMenu") || e.target.closest("#mobileMenu")) return;
+        menu.classList.remove("open");
+      });
+    })();
+
+    // Theme toggle
+    (function(){
+      function systemPrefersDark(){
+        try { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
+        catch(e){ return false; }
+      }
+      function resolveTheme(t){
+        if(t === "dark") return "dark";
+        if(t === "light") return "light";
+        return systemPrefersDark() ? "dark" : "light";
+      }
+      function applyTheme(t){
+        var resolved = resolveTheme(t);
+        document.documentElement.classList.toggle("dark", resolved === "dark");
+      }
+      var btn = document.getElementById("btnTheme");
+      if(btn){
+        btn.addEventListener("click", function(){
+          var now = "system";
+          try{ now = localStorage.getItem("nsa_theme") || "system"; }catch(e){}
+          var next = resolveTheme(now) === "dark" ? "light" : "dark";
+          try{ localStorage.setItem("nsa_theme", next); }catch(e){}
+          applyTheme(next);
+        });
+      }
+    })();
   </script>
 </body>
 </html>
+
