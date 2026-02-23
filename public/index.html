@@ -834,10 +834,11 @@
     }
     /* ── CTA BLOCK ── */
     .cta-block {
-      margin: 0 0 100px;
+      margin: 0 auto 100px;
     }
     .cta-inner {
       position: relative;
+      width: 100%;
       border-radius: 24px;
       padding: 80px 60px;
       text-align: center;
@@ -1418,9 +1419,11 @@
       <!-- FINAL CTA -->
       <div class="cta-block container">
         <div class="cta-inner reveal">
-          <div class="page-badge" style="margin-bottom:24px;">
-            <span class="badge-dot"></span>
-            Ready when you are
+          <div style="display:flex;justify-content:center;width:100%;margin-bottom:24px;">
+            <div class="page-badge">
+              <span class="badge-dot"></span>
+              Ready when you are
+            </div>
           </div>
           <h2 class="cta-headline">Stop missing calls.<br/>Start tonight.</h2>
           <p class="cta-sub">Tell us your room count, brand, and call volume. We'll recommend the right setup and get back to you fast.</p>
