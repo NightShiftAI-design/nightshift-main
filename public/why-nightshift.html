@@ -1,498 +1,518 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Why NightShift AI — Consistent Hospitality Experience</title>
-  <meta name="description" content="NightShift AI improves the guest experience by delivering consistent, professional service on every call, while giving staff time to excel in-person." />
 
-  <!-- FAVICONS (files in /public) -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>Why NightShift AI — Consistent Hospitality, Every Call</title>
+  <meta name="description" content="NightShift AI improves the guest experience by delivering consistent, professional service on every call — while giving your staff the time to excel at in-person hospitality." />
+  <meta name="keywords" content="why NightShift AI, hotel consistency AI, hospitality virtual front desk, hotel after-hours experience, independent hotel service" />
+  <link rel="canonical" href="https://nightshifthotels.com/why-nightshift.html" />
 
-  <meta name="robots" content="index,follow" />
-  <meta name="color-scheme" content="dark light" />
-  <meta name="keywords" content="NightShift AI, hotel AI, front desk automation, hospitality SaaS" />
-  <meta property="og:title" content="Why NightShift AI — Consistent Hospitality Experience" />
-  <meta property="og:description" content="NightShift AI improves the guest experience by delivering consistent, professional service on every call, while giving staff time to excel in-person." />
-  <meta property="og:image" content="/assets/og-image.png" />
+  <meta property="og:title" content="Why NightShift AI — Consistent Hospitality, Every Call" />
+  <meta property="og:description" content="Consistent, professional service on every call — while giving your staff time to excel in-person." />
+  <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nightshifthotels.com/why-nightshift.html" />
+  <meta property="og:image" content="https://nightshifthotels.com/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@nightshiftai" />
 
-  <!-- Google Fonts for professional typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Theme: reads localStorage("nsa_theme") and applies html.dark -->
-  <script>
-    (function(){
-      try{
-        var t = localStorage.getItem("nsa_theme") || "system";
-        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        var resolved = (t === "dark") ? "dark" : (t === "light") ? "light" : (prefersDark ? "dark" : "light");
-        document.documentElement.classList.toggle("dark", resolved === "dark");
-      }catch(e){}
-    })();
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Why NightShift AI",
+    "description": "NightShift AI helps hotels deliver consistent, professional service on every call while freeing staff to focus on in-person hospitality.",
+    "url": "https://nightshifthotels.com/why-nightshift.html",
+    "isPartOf": { "@type": "WebSite", "url": "https://nightshifthotels.com" }
+  }
   </script>
 
-  <!-- Icons (Font Awesome) -->
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="robots" content="index,follow" />
 
-  <!-- Site CSS -->
-  <link rel="stylesheet" href="/assets/site.css?v=1000" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #06080f;
+      --surface: #0d1117;
+      --surface2: #131920;
+      --border: rgba(255,255,255,.08);
+      --border2: rgba(255,255,255,.13);
+      --text: #f0f4ff;
+      --text2: rgba(240,244,255,.65);
+      --text3: rgba(240,244,255,.42);
+      --accent: #4f8cff;
+      --accent2: #38e8a0;
+      --accent3: #ff6b35;
+      --r: 16px;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --max: 1120px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+    .bg-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; }
+    .bg-orb-1 { width: 700px; height: 500px; background: radial-gradient(ellipse, rgba(79,140,255,.2), transparent 70%); top: -80px; left: -120px; animation: drift1 20s ease-in-out infinite alternate; }
+    .bg-orb-2 { width: 550px; height: 450px; background: radial-gradient(ellipse, rgba(56,232,160,.12), transparent 70%); top: 30%; right: -100px; animation: drift2 24s ease-in-out infinite alternate; }
+    .bg-orb-3 { width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(79,140,255,.08), transparent 70%); bottom: 5%; left: 25%; animation: drift1 28s ease-in-out infinite alternate-reverse; }
+    @keyframes drift1 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(40px,60px) scale(1.08); } }
+    @keyframes drift2 { 0% { transform: translate(0,0) scale(1.05); } 100% { transform: translate(-50px,40px) scale(1); } }
+    .bg-noise { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .028; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E"); background-size: 128px 128px; }
+
+    .page { position: relative; z-index: 2; }
+    .container { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+
+    /* NAV */
+    .nav { position: sticky; top: 0; z-index: 100; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; border-bottom: 1px solid var(--border); background: rgba(6,8,15,.82); backdrop-filter: blur(20px) saturate(1.4); padding: 0 24px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, rgba(79,140,255,.9), rgba(56,232,160,.7)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 13px; color: #fff; flex-shrink: 0; }
+    .brand-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: -.02em; color: var(--text); }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
+    .nav-links a { display: block; padding: 7px 13px; font-size: 14px; color: var(--text2); text-decoration: none; border-radius: 8px; transition: color .15s, background .15s; white-space: nowrap; }
+    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .nav-links a.active { color: var(--accent); background: rgba(79,140,255,.10); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; text-decoration: none; transition: opacity .15s, transform .2s var(--ease), box-shadow .2s; }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 10px 32px rgba(79,140,255,.3); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 9px; background: rgba(255,255,255,.06); border: 1px solid var(--border2); color: var(--text); font-size: 14px; text-decoration: none; transition: background .15s, transform .2s var(--ease); }
+    .btn-secondary:hover { background: rgba(255,255,255,.10); transform: translateY(-1px); }
+    .btn-lg { padding: 13px 28px; font-size: 15px; font-weight: 500; border-radius: 10px; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text2); border-radius: 2px; }
+    @media (max-width: 860px) { .nav-links { display: none; } .hamburger { display: flex; } }
+    .mobile-menu { display: none; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .mobile-menu.open { display: block; }
+    .mobile-menu a { display: block; padding: 14px 24px; font-size: 15px; color: var(--text2); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .mobile-menu a:hover { color: var(--text); }
+    .mobile-menu a.active { color: var(--accent); }
+
+    /* HERO */
+    .page-hero { padding: 80px 0; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text3); margin-bottom: 32px; }
+    .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .15s; }
+    .breadcrumb a:hover { color: var(--text2); }
+    .page-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(79,140,255,.3); background: rgba(79,140,255,.08); font-size: 12px; font-weight: 500; color: rgba(180,210,255,.9); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 24px; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,.25); animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(79,140,255,.25); } 50% { box-shadow: 0 0 0 5px rgba(79,140,255,.08); } }
+
+    .hero-headline { font-family: var(--font-display); font-size: clamp(36px, 5.5vw, 62px); font-weight: 800; line-height: 1.04; letter-spacing: -.03em; margin-bottom: 20px; max-width: 820px; }
+    .hero-headline em { font-style: normal; background: linear-gradient(135deg, #6ea8ff 0%, #38e8a0 55%, #6ea8ff 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s linear infinite; }
+    @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+    .hero-sub { font-size: 17px; font-weight: 300; color: var(--text2); max-width: 600px; line-height: 1.7; margin-bottom: 32px; }
+    .hero-ctas { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+    .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 60px; border-bottom: 1px solid var(--border); }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border2); background: rgba(255,255,255,.04); font-size: 12px; color: var(--text2); }
+
+    /* SECTION SYSTEM */
+    .section { padding: 80px 0; border-top: 1px solid var(--border); }
+    .section-label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .section-label::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+    .section-heading { font-family: var(--font-display); font-size: clamp(24px, 3.5vw, 40px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 14px; }
+    .section-sub { font-size: 15px; color: var(--text2); max-width: 600px; line-height: 1.7; font-weight: 300; }
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 48px; }
+    .section-ctas { display: flex; gap: 10px; flex-wrap: wrap; flex-shrink: 0; }
+    .divider { height: 1px; background: var(--border); border: none; }
+
+    /* CARDS */
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 680px) { .cards-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) and (min-width: 681px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .feat-card { border-radius: var(--r); border: 1px solid var(--border); background: var(--surface); padding: 24px; transition: border-color .2s, transform .2s var(--ease); }
+    .feat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .feat-icon { font-size: 22px; margin-bottom: 14px; }
+    .feat-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .feat-body { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 300; }
+
+    /* CONTRAST CALLOUT */
+    .callout { border-radius: 20px; border: 1px solid rgba(79,140,255,.2); background: radial-gradient(ellipse at 40% 0%, rgba(79,140,255,.12), transparent 70%), var(--surface); padding: 36px; position: relative; overflow: hidden; margin-top: 20px; }
+    .callout::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(79,140,255,.6), rgba(56,232,160,.4), transparent); }
+    .callout-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
+    .callout-body { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 600px; margin-bottom: 24px; font-weight: 300; }
+    .callout-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* QUOTE CALLOUT — operator credibility */
+    .operator-quote {
+      border-radius: 20px;
+      border: 1px solid rgba(56,232,160,.18);
+      background: radial-gradient(ellipse at 30% 0%, rgba(56,232,160,.08), transparent 70%), var(--surface);
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .operator-quote::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(56,232,160,.5), transparent); }
+    .operator-quote-icon { font-size: 32px; margin-bottom: 16px; }
+    .operator-quote-text { font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -.02em; line-height: 1.4; margin-bottom: 12px; max-width: 640px; }
+    .operator-quote-sub { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.6; }
+
+    /* PARTNERSHIP SPLIT */
+    .partnership-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .partnership-grid { grid-template-columns: 1fr; } }
+    .partnership-card { border-radius: var(--r); border: 1px solid var(--border); background: var(--surface); padding: 28px; }
+    .partnership-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+    .label-ai { color: var(--accent); }
+    .label-human { color: var(--accent2); }
+    .partnership-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
+    .partnership-body { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 300; }
+    .partnership-items { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .partnership-items li { display: flex; gap: 9px; font-size: 13px; color: var(--text2); }
+    .partnership-items li::before { content: '✓'; font-weight: 600; flex-shrink: 0; }
+    .ai-check::before { color: var(--accent) !important; }
+    .human-check::before { color: var(--accent2) !important; }
+
+    /* CTA BLOCK */
+    .cta-section { padding: 0 0 100px; }
+    .cta-inner { position: relative; border-radius: 24px; padding: 72px 60px; text-align: center; border: 1px solid rgba(79,140,255,.25); background: radial-gradient(ellipse at 50% 0%, rgba(79,140,255,.14), transparent 70%), var(--surface); overflow: hidden; }
+    .cta-inner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(79,140,255,.7), rgba(56,232,160,.5), transparent); }
+    @media (max-width: 640px) { .cta-inner { padding: 48px 24px; } }
+    .cta-headline { font-family: var(--font-display); font-size: clamp(26px, 4vw, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; margin-bottom: 14px; }
+    .cta-sub { font-size: 15px; color: var(--text2); max-width: 440px; margin: 0 auto 32px; font-weight: 300; line-height: 1.7; }
+    .cta-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* FOOTER */
+    .footer { border-top: 1px solid var(--border); padding: 40px 0 32px; }
+    .footer-inner { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; }
+    @media (max-width: 760px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 440px) { .footer-inner { grid-template-columns: 1fr; } }
+    .footer-brand-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: -.02em; margin: 8px 0 6px; }
+    .footer-tagline { font-size: 12px; color: var(--text3); line-height: 1.55; max-width: 190px; }
+    .footer-social { display: flex; gap: 8px; margin-top: 16px; }
+    .footer-social a { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.03); display: flex; align-items: center; justify-content: center; color: var(--text3); text-decoration: none; transition: color .15s, border-color .15s; }
+    .footer-social a:hover { color: var(--text); border-color: var(--border2); }
+    .footer-social svg { width: 14px; height: 14px; fill: currentColor; }
+    .footer-col-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { font-size: 13px; color: var(--text2); text-decoration: none; transition: color .15s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .footer-bottom p { font-size: 12px; color: var(--text3); }
+    .footer-bottom-links { display: flex; gap: 20px; }
+    .footer-bottom-links a { font-size: 12px; color: var(--text3); text-decoration: none; transition: color .15s; }
+    .footer-bottom-links a:hover { color: var(--text2); }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .55s var(--ease), transform .55s var(--ease); }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .bg-orb, .badge-dot, .hero-headline em { animation: none; } }
+  </style>
+
 </head>
-
 <body>
-  <div class="bgGrid" aria-hidden="true"></div>
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+  </div>
+  <div class="bg-noise" aria-hidden="true"></div>
 
-  <!-- NAV (Enhanced with logo image) -->
-  <header class="nav" role="banner">
-    <div class="container">
-      <div class="navInner">
-        <a href="/" class="brand" aria-label="NightShift AI Home">
-          <img src="https://placehold.co/40x40/png?text=NS&font=roboto" alt="NightShift AI Logo" class="logo" style="margin-right: 10px;">
-          <div class="brandText">
-            <b>NightShift AI</b>
-            <span>AI Night Front Desk for Hotels</span>
+  <div class="page">
+    <header>
+      <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-inner">
+          <a href="/" class="brand" aria-label="NightShift AI Home">
+            <div class="brand-mark" aria-hidden="true">NS</div>
+            <span class="brand-name">NightShift AI</span>
+          </a>
+          <ul class="nav-links" role="list">
+            <li><a href="/product.html">Product</a></li>
+            <li><a href="/who-we-serve.html">Who we serve</a></li>
+            <li><a href="/packages.html">Packages</a></li>
+            <li><a href="/faq.html">FAQ</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/why-nightshift.html" class="active" aria-current="page">Why NightShift</a></li>
+          </ul>
+          <div class="nav-right">
+            <a href="/dashboard/" class="btn-secondary" style="font-size:13px;padding:7px 14px;" rel="nofollow">Dashboard</a>
+            <a href="/contact.html" class="btn-primary">
+              Book a demo
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <button class="hamburger" id="btnMenu" aria-label="Open menu" type="button"><span></span><span></span><span></span></button>
           </div>
-        </a>
-
-        <div class="navRight">
-          <nav class="links" aria-label="Primary navigation">
-            <a class="navA" href="/product.html">Product</a>
-            <a class="navA" href="/who-we-serve.html">Who we serve</a>
-            <a class="navA" href="/packages.html">Packages</a>
-            <a class="navA" href="/faq.html">FAQ</a>
-            <a class="navA" href="/about.html">About</a>
-            <a class="navA" href="/why-nightshift.html">Why NightShift</a>
-            <a class="navA subtle" href="/dashboard/" rel="nofollow">Dashboard</a>
-          </nav>
-
-          <button class="iconBtn hamburger" id="btnMenu" type="button" aria-label="Open menu">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"></path>
-            </svg>
-          </button>
-
-          <button class="iconBtn" id="btnTheme" type="button" aria-label="Toggle theme" title="Toggle theme">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path fill="currentColor" d="M12 2a9.9 9.9 0 0 0 0 20V2zm1 2.06A8 8 0 1 1 13 19.94V4.06z"></path>
-            </svg>
-          </button>
-
-          <a class="btn primary" href="/contact.html">Book a demo</a>
         </div>
-      </div>
-
-      <div class="mobileMenu" id="mobileMenu">
-        <div class="mobileCard" role="navigation" aria-label="Mobile navigation">
+        <div class="mobile-menu" id="mobileMenu">
           <a href="/product.html">Product</a>
           <a href="/who-we-serve.html">Who we serve</a>
           <a href="/packages.html">Packages</a>
           <a href="/faq.html">FAQ</a>
           <a href="/about.html">About</a>
-          <a href="/why-nightshift.html">Why NightShift</a>
+          <a href="/why-nightshift.html" class="active">Why NightShift</a>
           <a href="/dashboard/" rel="nofollow">Dashboard</a>
-          <a href="/contact.html">Book a demo</a>
+          <a href="/contact.html" style="color:var(--accent);">Book a demo →</a>
         </div>
-      </div>
-    </div>
-  </header>
+      </nav>
+    </header>
 
-  <!-- HERO (Added illustrative image) -->
-  <main class="container heroWrap">
-    <div class="trustStrip" aria-label="Trust highlights">
-      <span class="trustPill"><i class="fa-solid fa-phone-volume"></i> Consistent call quality</span>
-      <span class="trustPill"><i class="fa-solid fa-clipboard-check"></i> Policy-accurate handling</span>
-      <span class="trustPill"><i class="fa-solid fa-chart-line"></i> Visibility + performance data</span>
+```
+<main>
+  <!-- HERO -->
+  <section class="page-hero container" aria-label="Why NightShift hero">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span aria-hidden="true">›</span>
+      <span>Why NightShift</span>
+    </nav>
+
+    <div class="page-badge"><span class="badge-dot" aria-hidden="true"></span>Hospitality philosophy</div>
+
+    <h1 class="hero-headline">
+      Modern hospitality needs <em>consistency</em> — not just more staffing.
+    </h1>
+    <p class="hero-sub">NightShift AI improves the guest experience by delivering consistent, professional service on every call — while giving your staff the time and focus to excel at in-person hospitality.</p>
+
+    <div class="hero-ctas">
+      <a href="/contact.html" class="btn-primary btn-lg">
+        Book a demo
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#how-it-helps" class="btn-secondary btn-lg">See how it helps</a>
+      <a href="/packages.html" class="btn-secondary btn-lg">See packages</a>
     </div>
 
-    <section class="hero" aria-label="Hero">
+    <div class="hero-chips">
+      <span class="chip">✓ Same tone on every call</span>
+      <span class="chip">✓ Policy consistency</span>
+      <span class="chip">✓ Fewer staff conflicts</span>
+      <span class="chip">✓ Staff stays present</span>
+      <span class="chip">✓ Calm under pressure</span>
+    </div>
+  </section>
+
+  <!-- INDEPENDENT OPS -->
+  <section class="section container reveal" id="how-it-helps" aria-label="Independent hotel reality">
+    <div class="section-head">
       <div>
-        <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Hospitality Philosophy</div>
-
-        <h1 class="h1">
-          Modern Hospitality Needs <span class="highlight">Consistency</span> — Not Just More Staffing
-        </h1>
-
-        <p class="sub">
-          NightShift AI improves the guest experience by delivering consistent, professional service on every call,
-          while giving your staff the time and focus to excel at in-person hospitality.
-        </p>
-
-        <div class="ctaRow">
-          <a class="btn primary" href="#how-it-helps">See How NightShift Supports Your Front Desk <i class="fa-solid fa-arrow-right"></i></a>
-          <a class="btn" href="/contact.html">Book a demo</a>
-        </div>
-
-        <div class="chips" aria-label="Highlights">
-          <span class="chip">✅ Same tone on every call</span>
-          <span class="chip">✅ Policy consistency</span>
-          <span class="chip">✅ Fewer conflicts</span>
-          <span class="chip">✅ Staff stays present</span>
-        </div>
-
-        <div class="notice" style="margin-top:16px;">
-          <h3>Consistency is the invisible luxury</h3>
-          <p>
-            Guests feel it immediately — even if they can’t explain it. NightShift makes your phone experience predictable,
-            polished, and brand-safe across every shift.
-          </p>
-        </div>
+        <div class="section-label">Independent operations</div>
+        <h2 class="section-heading">The reality of running<br/>an independent hotel</h2>
+        <p class="section-sub">Independent hotels operate under very different conditions than large chains — without call centers, training programs, or corporate quality assurance.</p>
       </div>
+    </div>
 
-      <aside class="heroCard" aria-label="What guests feel">
-        <img src="https://www.derbysoft.com/wp-content/uploads/2025/06/AI-Voice-Agent.jpg" alt="AI Voice Agent assisting in hotel hospitality" class="heroImage" style="width: 100%; border-radius: 8px; margin-bottom: 16px;">
-        <div class="inner">
-          <div class="kicker">What Guests Feel</div>
-          <div class="cardTitle">Calm, clear, professional service — every time.</div>
-          <p class="cardText">
-            The guest experience becomes predictable and polished, even when your team is busy, understaffed,
-            or dealing with in-person issues.
-          </p>
+    <div class="cards-grid">
+      <div class="feat-card"><div class="feat-icon">🚫</div><h3 class="feat-title">No call center backup</h3><p class="feat-body">Most independents have no dedicated team to handle after-hours calls — it falls to whoever is on shift.</p></div>
+      <div class="feat-card"><div class="feat-icon">🎓</div><h3 class="feat-title">No corporate training</h3><p class="feat-body">Policies and service standards are often learned on the job — during real guest interactions, under pressure.</p></div>
+      <div class="feat-card"><div class="feat-icon">🌀</div><h3 class="feat-title">Constant interruptions</h3><p class="feat-body">Staff are juggling check-ins, walk-ins, maintenance issues, and nonstop phone calls — all at once.</p></div>
+    </div>
 
-          <ul class="list" aria-label="Guest experience benefits">
-            <li class="li">
-              <span class="tick" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-              </span>
-              Same tone & standard on every call
-            </li>
-            <li class="li">
-              <span class="tick" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-              </span>
-              Clear policy communication, fewer conflicts
-            </li>
-            <li class="li">
-              <span class="tick" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-              </span>
-              Faster answers for common questions
-            </li>
-            <li class="li">
-              <span class="tick" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-              </span>
-              Staff present for the guest in front of them
-            </li>
-          </ul>
-
-          <div class="ctaRow" style="margin-top:14px;">
-            <a class="btn primary" href="/contact.html">Book a demo</a>
-            <a class="btn" href="/packages.html">See packages</a>
-          </div>
-        </div>
-      </aside>
-    </section>
-
-    <!-- SECTION 1 (Added illustrative image) -->
-    <section class="section" id="how-it-helps" aria-label="Independent operations">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Independent Operations</div>
-          <h2 class="h2">The Reality of Independent Hotel Operations</h2>
-          <p class="lead">Independent hotels operate under very different conditions than large chains.</p>
-        </div>
+    <div class="callout reveal">
+      <h3 class="callout-title">This isn't a people problem — it's a system problem.</h3>
+      <p class="callout-body">Even great employees struggle when stretched thin. NightShift AI installs a consistent system so your staff can focus on in-person hospitality — the moments that actually drive reviews and repeat stays.</p>
+      <div class="callout-ctas">
+        <a href="/contact.html" class="btn-primary">Book a demo</a>
+        <a href="/product.html" class="btn-secondary">See the product</a>
       </div>
+    </div>
+  </section>
 
-      <img src="https://www.derbysoft.com/wp-content/uploads/2024/09/Business-Travel.png" alt="Business travel and hotel operations" class="sectionImage" style="width: 100%; border-radius: 8px; margin-bottom: 24px;">
-
-      <div class="grid">
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-building-circle-xmark"></i> No call centers</h3>
-          <p>Most independents don’t have dedicated teams to handle after-hours calls.</p>
-        </div></div>
-
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-graduation-cap"></i> No corporate training</h3>
-          <p>Policies and service standards are often learned on the job—during real guest interactions.</p>
-        </div></div>
-
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-people-arrows"></i> Constant interruptions</h3>
-          <p>Staff are juggling check-ins, walk-ins, issues, and nonstop phone calls.</p>
-        </div></div>
+  <!-- GUEST TRUST -->
+  <section class="section container reveal" aria-label="Consistency and guest trust">
+    <div class="section-head">
+      <div>
+        <div class="section-label">Guest trust</div>
+        <h2 class="section-heading">Consistency is what<br/>guests remember</h2>
+        <p class="section-sub">Guests don't just remember the room. They remember how they were treated — and consistency is the invisible luxury they can feel immediately.</p>
       </div>
+    </div>
 
-      <div class="notice">
-        <h3><i class="fa-solid fa-circle-info"></i> Even great employees struggle when stretched thin.</h3>
-        <p>
-          This isn’t a people problem — it’s a system problem. NightShift AI installs a consistent system so your staff
-          can focus on in-person hospitality.
-        </p>
+    <div class="cards-grid">
+      <div class="feat-card"><div class="feat-icon">🎯</div><h3 class="feat-title">Same tone, every call</h3><p class="feat-body">Every guest hears the same friendly, professional tone — regardless of staffing level, shift time, or how busy the desk is.</p></div>
+      <div class="feat-card"><div class="feat-icon">📜</div><h3 class="feat-title">Policies communicated clearly</h3><p class="feat-body">Fewer misunderstandings and fewer "but the last person said…" moments. Guests know what to expect.</p></div>
+      <div class="feat-card"><div class="feat-icon">🧘</div><h3 class="feat-title">Calm handling under pressure</h3><p class="feat-body">Sensitive situations are handled consistently and respectfully, every time — reducing conflict before it starts.</p></div>
+    </div>
+
+    <div class="operator-quote reveal">
+      <div class="operator-quote-icon">🔑</div>
+      <p class="operator-quote-text">"Consistency builds trust — and trust drives repeat business."</p>
+      <p class="operator-quote-sub">Unlike humans, NightShift never has bad days, never gets frustrated, and never forgets procedures. Guests feel that reliability immediately — even if they can't name it.</p>
+    </div>
+  </section>
+
+  <!-- PROTECTION -->
+  <section class="section container reveal" aria-label="Protecting guests and staff">
+    <div class="section-head">
+      <div>
+        <div class="section-label">Protection</div>
+        <h2 class="section-heading">Protecting both guests<br/>and your team</h2>
+        <p class="section-sub">Hospitality is emotional. Guests may be tired, stressed, or frustrated. Staff may be overwhelmed or undertrained. NightShift reduces the friction on both sides.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- SECTION 2 -->
-    <section class="section" aria-label="Guest trust">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Guest Trust</div>
-          <h2 class="h2">Consistency Is What Guests Remember</h2>
-          <p class="lead">Guests don’t just remember the room. They remember how they were treated.</p>
-        </div>
+    <div class="cards-grid">
+      <div class="feat-card"><div class="feat-icon">🔥</div><h3 class="feat-title">De-escalation by design</h3><p class="feat-body">NightShift acts as a calm, neutral first point of contact — absorbing tension before it reaches your staff.</p></div>
+      <div class="feat-card"><div class="feat-icon">⚖️</div><h3 class="feat-title">Policy consistency</h3><p class="feat-body">Fewer policy arguments. Fewer "but the last person said…" situations. The same rule, applied the same way, every time.</p></div>
+      <div class="feat-card"><div class="feat-icon">😌</div><h3 class="feat-title">Less emotional pressure</h3><p class="feat-body">Staff stay focused and professional because they're not absorbing constant phone stress from frustrated callers.</p></div>
+    </div>
+  </section>
+
+  <!-- HUMAN STRENGTH -->
+  <section class="section container reveal" aria-label="Human strengths">
+    <div class="section-head">
+      <div>
+        <div class="section-label">Human strength</div>
+        <h2 class="section-heading">Let humans do<br/>what humans do best</h2>
+        <p class="section-sub">Great hospitality happens face-to-face. When phones stop interrupting the moment, your staff can deliver the kind of service that earns reviews.</p>
       </div>
-
-      <div class="grid">
-        <div class="card"><div class="cardPad">
-          <h3>Same tone, every call</h3>
-          <p>Every guest hears the same friendly, professional tone — regardless of staffing or shift changes.</p>
-        </div></div>
-        <div class="card"><div class="cardPad">
-          <h3>Policies communicated clearly</h3>
-          <p>Fewer misunderstandings and fewer “but the last person said…” situations.</p>
-        </div></div>
-        <div class="card"><div class="cardPad">
-          <h3>Calm handling under pressure</h3>
-          <p>Sensitive situations are handled consistently and respectfully, reducing conflict.</p>
-        </div></div>
+      <div class="section-ctas">
+        <a href="/contact.html" class="btn-primary">Book a demo</a>
       </div>
+    </div>
 
-      <div class="notice">
-        <h3><i class="fa-solid fa-shield-heart"></i> Consistency builds trust — and trust drives repeat business.</h3>
-        <p>
-          Unlike humans, NightShift never has bad days, never gets frustrated, and never forgets procedures.
-          Guests feel that reliability immediately.
-        </p>
+    <div class="cards-grid">
+      <div class="feat-card"><div class="feat-icon">🤝</div><h3 class="feat-title">In-person service improves</h3><p class="feat-body">When phones stop interrupting, staff can stay fully present with the guest standing in front of them.</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><h3 class="feat-title">Response speed is faster</h3><p class="feat-body">Common questions are handled instantly by NightShift, freeing staff time for higher-value moments.</p></div>
+      <div class="feat-card"><div class="feat-icon">⭐</div><h3 class="feat-title">Guest perception rises</h3><p class="feat-body">Consistency feels premium — and it shows up in online reviews, ratings, and repeat stay rates.</p></div>
+    </div>
+
+    <div class="callout reveal">
+      <h3 class="callout-title">NightShift doesn't replace your team — it gives them room to perform.</h3>
+      <p class="callout-body">Your front desk can welcome guests properly, solve in-person problems more effectively, and deliver better service — because they're not constantly fielding routine phone calls.</p>
+      <div class="callout-ctas">
+        <a href="/who-we-serve.html" class="btn-primary">Who we serve</a>
+        <a href="/packages.html" class="btn-secondary">View packages</a>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- SECTION 3 -->
-    <section class="section" aria-label="Protection">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Protection</div>
-          <h2 class="h2">Protecting Both Guests and Your Team</h2>
-          <p class="lead">
-            Hospitality is emotional. Guests may be tired, stressed, or frustrated. Staff may be overwhelmed or undertrained.
-          </p>
-        </div>
+  <!-- ENTERPRISE STANDARD -->
+  <section class="section container reveal" aria-label="Enterprise-level service">
+    <div class="section-head">
+      <div>
+        <div class="section-label">Enterprise standard</div>
+        <h2 class="section-heading">Enterprise-level service for<br/>independent properties</h2>
+        <p class="section-sub">Large hotel brands invest heavily in standardized call handling, training programs, and QA. Independent properties rarely have access to those systems — until now.</p>
       </div>
+    </div>
 
-      <div class="grid">
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-fire-extinguisher"></i> De-escalation by design</h3>
-          <p>NightShift AI acts as a calm, neutral first point of contact that reduces conflict.</p>
-        </div></div>
+    <div class="cards-grid">
+      <div class="feat-card"><div class="feat-icon">📋</div><h3 class="feat-title">Standardized workflows</h3><p class="feat-body">Your phone experience becomes predictable, polished, and brand-safe — without hiring a quality assurance team.</p></div>
+      <div class="feat-card"><div class="feat-icon">✅</div><h3 class="feat-title">Policy-accurate answers</h3><p class="feat-body">Clear rules, consistent explanations, fewer misunderstandings — configured to your exact policies and rates.</p></div>
+      <div class="feat-card"><div class="feat-icon">📊</div><h3 class="feat-title">Visibility into operations</h3><p class="feat-body">See what guests are calling about, how calls are resolved, and where your operation can improve.</p></div>
+    </div>
 
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-scale-balanced"></i> Policy consistency</h3>
-          <p>Fewer policy arguments. Fewer “but the last person said…” situations.</p>
-        </div></div>
+    <div class="operator-quote reveal">
+      <div class="operator-quote-icon">🏅</div>
+      <p class="operator-quote-text">"The professionalism of large brands — without the franchise fees."</p>
+      <p class="operator-quote-sub">NightShift helps independents operate with a consistent guest experience while keeping full control over their policies, rates, and escalation rules — no rigid corporate overhead required.</p>
+    </div>
+  </section>
 
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-face-smile"></i> Less emotional pressure</h3>
-          <p>Staff stay focused and professional because they’re not absorbing constant phone stress.</p>
-        </div></div>
+  <!-- PARTNERSHIP -->
+  <section class="section container reveal" aria-label="Human and AI partnership">
+    <div class="section-head">
+      <div>
+        <div class="section-label">Human + AI</div>
+        <h2 class="section-heading">The future of hospitality<br/>is human + AI</h2>
+        <p class="section-sub">Not automation alone. A partnership — where AI handles repetitive communication and humans deliver the moments that actually create loyalty.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- SECTION 4 (Added image) -->
-    <section class="section" aria-label="Human strength">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Human Strength</div>
-          <h2 class="h2">Let Humans Do What Humans Do Best</h2>
-          <p class="lead">Great hospitality happens face-to-face.</p>
-        </div>
+    <div class="partnership-grid">
+      <div class="partnership-card">
+        <div class="partnership-label label-ai">AI handles</div>
+        <h3 class="partnership-title">Repetitive communication</h3>
+        <p class="partnership-body">Consistent, fast, policy-accurate responses every time — 24/7 with no bad days, no fatigue, and no drift from your rules.</p>
+        <ul class="partnership-items">
+          <li class="ai-check">Answering calls instantly (&lt;3 seconds)</li>
+          <li class="ai-check">Rates, policies, and FAQs</li>
+          <li class="ai-check">Reservation intake + summaries</li>
+          <li class="ai-check">ADA-aware routing and escalation</li>
+          <li class="ai-check">24/7 consistent coverage</li>
+        </ul>
       </div>
-
-      <img src="https://www.derbysoft.com/wp-content/uploads/2025/05/day-use-hotel.jpg" alt="Hotel room illustrating hospitality" class="sectionImage" style="width: 100%; border-radius: 8px; margin-bottom: 24px;">
-
-      <div class="grid">
-        <div class="card"><div class="cardPad">
-          <h3>In-person service improves</h3>
-          <p>When phones stop interrupting, staff can stay present with the guest in front of them.</p>
-        </div></div>
-        <div class="card"><div class="cardPad">
-          <h3>Response speed is faster</h3>
-          <p>Common questions are handled instantly, freeing staff time for higher-value moments.</p>
-        </div></div>
-        <div class="card"><div class="cardPad">
-          <h3>Guest perception rises</h3>
-          <p>Consistency feels premium — and shows up in reviews and repeat stays.</p>
-        </div></div>
+      <div class="partnership-card">
+        <div class="partnership-label label-human">Humans deliver</div>
+        <h3 class="partnership-title">Exceptional in-person moments</h3>
+        <p class="partnership-body">The moments that actually create loyalty, earn reviews, and drive repeat stays — only possible when staff aren't drowning in phone interruptions.</p>
+        <ul class="partnership-items">
+          <li class="human-check">Warm in-person guest welcome</li>
+          <li class="human-check">Complex problem-solving on-property</li>
+          <li class="human-check">Handling sensitive escalations with care</li>
+          <li class="human-check">Building relationships that drive loyalty</li>
+          <li class="human-check">Delivering moments worth reviewing</li>
+        </ul>
       </div>
+    </div>
+  </section>
 
-      <div class="notice">
-        <h3><i class="fa-solid fa-people-group"></i> NightShift doesn’t replace your team — it gives them room to perform.</h3>
-        <p>
-          Your front desk can welcome guests properly, solve problems more effectively, and deliver better service in person.
-        </p>
+  <!-- OPERATOR CREDIBILITY -->
+  <section class="section container reveal" aria-label="Operator credibility">
+    <div class="operator-quote" style="border-color: rgba(255,107,53,.18); background: radial-gradient(ellipse at 30% 0%, rgba(255,107,53,.07), transparent 70%), var(--surface);">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(255,107,53,.4), transparent);"></div>
+      <div class="operator-quote-icon">🔧</div>
+      <p class="operator-quote-text" style="max-width:720px;">"Built by an operator — not a boardroom."</p>
+      <p class="operator-quote-sub" style="max-width:580px;">NightShift AI was built from real hotel operations: missed calls, staffing gaps, policy conflicts, and the constant pressure of running a property 24/7. Operators build better tools — because they know what actually breaks at 2am.</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section container">
+    <div class="cta-inner reveal">
+      <div class="page-badge" style="margin-bottom:20px;"><span class="badge-dot"></span>Ready to upgrade your guest experience?</div>
+      <h2 class="cta-headline">Consistent service.<br/>Every call. Every night.</h2>
+      <p class="cta-sub">NightShift helps independent hotels deliver professional, policy-accurate service — while freeing staff for the moments that matter most.</p>
+      <div class="cta-btns">
+        <a href="/contact.html" class="btn-primary btn-lg">
+          Book a demo
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="/packages.html" class="btn-secondary btn-lg">See packages</a>
+        <a href="/faq.html" class="btn-secondary btn-lg">Read FAQ</a>
       </div>
-    </section>
+    </div>
+  </div>
+</main>
 
-    <!-- SECTION 5 -->
-    <section class="section" aria-label="Enterprise standard">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Enterprise Standard</div>
-          <h2 class="h2">Enterprise-Level Service for Independent Properties</h2>
-          <p class="lead">
-            Large hotel brands invest heavily in standardized call handling, training programs, and quality assurance.
-            Independent properties rarely have access to these systems.
-          </p>
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;"><div class="brand-mark" style="width:30px;height:30px;font-size:11px;">NS</div><span class="footer-brand-name">NightShift AI</span></div>
+        <p class="footer-tagline" style="margin-top:8px;">AI-powered virtual front desk for hotels. Every call answered, every night.</p>
+        <div class="footer-social">
+          <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg></a>
+          <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg></a>
+          <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg></a>
         </div>
       </div>
+      <div><div class="footer-col-title">Product</div><ul class="footer-links"><li><a href="/product.html">Product overview</a></li><li><a href="/who-we-serve.html">Who we serve</a></li><li><a href="/why-nightshift.html">Why NightShift</a></li><li><a href="/virtual-front-desk-vs-call-center.html">vs. Call centers</a></li></ul></div>
+      <div><div class="footer-col-title">Company</div><ul class="footer-links"><li><a href="/about.html">About</a></li><li><a href="/packages.html">Packages</a></li><li><a href="/faq.html">FAQ</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
+      <div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><a href="/privacy.html">Privacy</a></li><li><a href="/terms.html">Terms</a></li><li><a href="/cookies.html">Cookies</a></li><li><a href="/security.html">Security</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 NightShift AI. All rights reserved.</p>
+      <div class="footer-bottom-links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
+    </div>
+  </div>
+</footer>
+```
 
-      <div class="grid">
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-scroll"></i> Standardized scripts</h3>
-          <p>Your phone experience becomes predictable, polished, and brand-safe.</p>
-        </div></div>
-
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-circle-nodes"></i> Policy-accurate answers</h3>
-          <p>Clear rules, consistent explanations, fewer misunderstandings.</p>
-        </div></div>
-
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-chart-simple"></i> Performance data</h3>
-          <p>Visibility into calls, outcomes, and what guests are asking for.</p>
-        </div></div>
-      </div>
-
-      <div class="notice">
-        <h3><i class="fa-solid fa-circle-check"></i> Professionalism of large brands — without franchise fees.</h3>
-        <p>
-          NightShift AI helps independents operate with a consistent guest experience, without rigid corporate control.
-        </p>
-      </div>
-    </section>
-
-    <!-- SECTION 6 -->
-    <section class="section" aria-label="Human + AI">
-      <div class="sectionHead">
-        <div>
-          <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Human + AI</div>
-          <h2 class="h2">The Future of Hospitality Is Human + AI</h2>
-          <p class="lead">We believe the future of hospitality is not automation alone. It’s a partnership:</p>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-repeat"></i> AI handles repetitive communication</h3>
-          <p>Calls, questions, routing, consistent policy messaging.</p>
-        </div></div>
-
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-heart"></i> Humans deliver exceptional in-person experiences</h3>
-          <p>The moments that actually create loyalty and reviews.</p>
-        </div></div>
-
-        <div class="card"><div class="cardPad">
-          <h3><i class="fa-solid fa-eye"></i> Owners gain visibility into operations</h3>
-          <p>What’s happening, what’s working, and what needs improvement.</p>
-        </div></div>
-      </div>
-    </section>
-
-    <!-- OPERATOR CREDIBILITY -->
-    <section class="section" aria-label="Operator credibility">
-      <div class="notice">
-        <h3><i class="fa-solid fa-screwdriver-wrench"></i> Built by an operator — not a boardroom.</h3>
-        <p>
-          NightShift AI was built from real hotel operations: missed calls, staffing gaps, policy conflicts, and the constant pressure of running a property 24/7.
-          Operators build better tools.
-        </p>
-      </div>
-    </section>
-
-    <!-- FINAL CTA -->
-    <section class="section" id="cta" aria-label="Final call to action">
-      <div class="notice">
-        <h3>Ready to upgrade your guest experience?</h3>
-        <p>
-          NightShift AI helps independent hotels deliver consistent, professional service on every call —
-          while empowering staff to focus on what matters most: the guest in front of them.
-        </p>
-        <div class="ctaRow">
-          <a class="btn primary" href="/contact.html">Book a demo</a>
-          <a class="btn" href="/packages.html">See packages</a>
-          <a class="btn" href="/dashboard/" rel="nofollow">Open dashboard</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- FOOTER (Added newsletter signup for SaaS feel) -->
-    <footer class="footer" role="contentinfo">
-      <div class="footerInner">
-        <div>© 2026 NightShift AI</div>
-
-        <div class="footerLinks">
-          <a href="/privacy.html">Privacy</a>
-          <a href="/cookies.html">Cookies</a>
-          <a href="/security.html">Security</a>
-          <a href="/terms.html">Terms</a>
-          <a href="/contact.html">Contact</a>
-        </div>
-
-        <div class="social" aria-label="Social links">
-          <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="NightShift AI on X">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg>
-          </a>
-
-          <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="NightShift AI on Instagram">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg>
-          </a>
-
-          <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="NightShift AI on Facebook">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg>
-          </a>
-        </div>
-      </div>
-    </footer>
-  </main>
+  </div>
 
   <script>
-    // Mobile menu
-    (function(){
-      var btn = document.getElementById("btnMenu");
-      var menu = document.getElementById("mobileMenu");
-      if(btn && menu){
-        btn.addEventListener("click", function(){
-          menu.classList.toggle("open");
-        });
-      }
-      document.addEventListener("click", function(e){
-        if(!menu || !btn) return;
-        if(e.target.closest("#btnMenu") || e.target.closest("#mobileMenu")) return;
-        menu.classList.remove("open");
-      });
+    (function() {
+      var btn = document.getElementById('btnMenu'), menu = document.getElementById('mobileMenu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function() { var o = menu.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
+      document.addEventListener('click', function(e) { if (!e.target.closest('#btnMenu') && !e.target.closest('#mobileMenu')) { menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
     })();
-
-    // Theme toggle (uses same nsa_theme key as dashboard)
-    (function(){
-      function systemPrefersDark(){
-        try { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
-        catch(e){ return false; }
-      }
-      function resolveTheme(t){
-        if(t === "dark") return "dark";
-        if(t === "light") return "light";
-        return systemPrefersDark() ? "dark" : "light";
-      }
-      function applyTheme(t){
-        var resolved = resolveTheme(t);
-        document.documentElement.classList.toggle("dark", resolved === "dark");
-      }
-      var btn = document.getElementById("btnTheme");
-      if(btn){
-        btn.addEventListener("click", function(){
-          var now = "system";
-          try{ now = localStorage.getItem("nsa_theme") || "system"; }catch(e){}
-          var next = resolveTheme(now) === "dark" ? "light" : "dark";
-          try{ localStorage.setItem("nsa_theme", next); }catch(e){}
-          applyTheme(next);
-        });
-      }
+    (function() {
+      if (!window.IntersectionObserver) return;
+      var io = new IntersectionObserver(function(entries) { entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } }); }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+      document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
     })();
   </script>
+
 </body>
 </html>
