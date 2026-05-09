@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign in • NightShift AI</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="/dashboard/config.js"></script>
+  <script>
+    window.addEventListener('load', async () => {
+      try {
+        const cfg = window.NSA_CONFIG || {};
+        if (!cfg.SUPABASE_URL || !window.supabase) return;
+        const client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+        const { data: { session } } = await client.auth.getSession();
+        if (session) window.location.replace('/dashboard/');
+      } catch(e) {}
+    });
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      background: #080c14; color: rgba(255,255,255,.9);
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      width: min(420px, 100%);
+      background: #0e1420; border: 1px solid rgba(255,255,255,.09);
+      border-radius: 18px; padding: 32px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.6);
+    }
+    .brand { font-size: 13px; font-weight: 700; margin-bottom: 24px; color: rgba(255,255,255,.5); }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    p { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 24px; line-height: 1.6; }
+    label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .06em; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+    input {
+      width: 100%; padding: 10px 14px;
+      background: #131922; border: 1px solid rgba(255,255,255,.13);
+      border-radius: 10px; color: white; font-size: 14px;
+      outline: none; margin-bottom: 16px; transition: border-color .15s;
+    }
+    input:focus { border-color: #4f8fff; }
+    button {
+      width: 100%; padding: 11px; background: #4f8fff;
+      color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
+    }
+    button:hover { background: #6ea8ff; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .msg { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,.5); text-align: center; min-height: 20px; }
+    .back { display: block; margin-top: 20px; text-align: center;
+            font-size: 12px; color: rgba(255,255,255,.35); text-decoration: none; }
+    .back:hover { color: rgba(255,255,255,.6); }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">NightShift AI · Elite Workspace</div>
+  <h1>Sign in</h1>
+  <p>Enter your email to receive a one-time sign-in link.</p>
+  <label for="email">Email address</label>
+  <input type="email" id="email" placeholder="founder@nightshifthotels.com" autocomplete="email" />
+  <button id="btnSend" type="button">Send magic link</button>
+  <div class="msg" id="msg"></div>
+  <a class="back" href="/">← Back to NightShiftAI.com</a>
+</div>
+<script>
+(function(){
+  const btn = document.getElementById('btnSend');
+  const input = document.getElementById('email');
+  const msg = document.getElementById('msg');
+  async function send() {
+    const email = (input.value || '').trim();
+    if (!email.includes('@')) { msg.textContent = 'Enter a valid email.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.textContent = '';
+    try {
+      const cfg = window.NSA_CONFIG || {};
+      const client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      const { error } = await client.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: 'https://www.nightshifthotels.com/dashboard/' }
+      });
+      if (error) { msg.textContent = error.message; return; }
+      window.location.href = '/dashboard/check-email.html?email=' + encodeURIComponent(email);
+    } catch(e) {
+      msg.textContent = e.message || 'Something went wrong.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send magic link';
+    }
+  }
+  btn.addEventListener('click', send);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+})();
+</script>
+</body>
+</html>

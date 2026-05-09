@@ -17,7 +17,7 @@
   const CANONICAL_PATH = "/dashboard/";
   const CANONICAL_URL = `${CANONICAL_ORIGIN}${CANONICAL_PATH}`;
 
-  const ALWAYS_REQUIRE_LOGIN = false;
+  const ALWAYS_REQUIRE_LOGIN = true;
   const PERSIST_SESSION = true;
 
   const THEME_STORAGE_KEY = "nsa_theme";        // "light" | "dark" | "system"
