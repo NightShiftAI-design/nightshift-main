@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "nightshift-main.vercel.app" }],
+      "destination": "https://www.nightshifthotels.com/$1",
+      "permanent": true
+    }
+  ]
+}
