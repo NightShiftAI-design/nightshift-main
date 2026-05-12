@@ -316,7 +316,7 @@
 
         <div class="type-toggle" aria-label="Request type">
           <button type="button" class="type-btn active" id="btnSingle">Single property</button>
-          <button type="button" class="type-btn" id="btnPortfolio">Portfolio demo</button>
+          
         </div>
 
         <div class="form-body">
@@ -349,7 +349,6 @@
                   <option value="">Select one</option>
                   <option>Independent hotel / motel</option>
                   <option>Franchise hotel</option>
-                  <option>Ownership group / management company</option>
                   <option>Extended stay</option>
                   <option>Other</option>
                 </select>
@@ -457,8 +456,7 @@
           <ul class="checklist">
             <li>Independent hotels &amp; motels</li>
             <li>Franchise &amp; branded properties</li>
-            <li>Ownership groups + portfolios</li>
-          </ul>
+                      </ul>
         </div>
       </aside>
     </div>
@@ -524,20 +522,13 @@
     // Type toggle
     (function() {
       var btnSingle = document.getElementById('btnSingle');
-      var btnPortfolio = document.getElementById('btnPortfolio');
       var requestType = document.getElementById('request_type');
       var formTitle = document.getElementById('formTitle');
       var propCount = document.getElementById('property_count');
 
       function setMode(mode) {
-        if (mode === 'portfolio') {
-          btnPortfolio.classList.add('active'); btnSingle.classList.remove('active');
-          requestType.value = 'Portfolio demo';
-          formTitle.textContent = 'Request a portfolio demo';
-          propCount.placeholder = 'Required (e.g., 8)';
-          propCount.setAttribute('required', 'required');
-        } else {
-          btnSingle.classList.add('active'); btnPortfolio.classList.remove('active');
+        if (mode === 'single') {
+          btnSingle.classList.add('active');
           requestType.value = 'Single property';
           formTitle.textContent = 'Request a quote';
           propCount.placeholder = 'Optional (e.g., 5)';
@@ -546,7 +537,6 @@
       }
 
       btnSingle.addEventListener('click', function() { setMode('single'); });
-      btnPortfolio.addEventListener('click', function() { setMode('portfolio'); });
     })();
 
     // Formspree submit
