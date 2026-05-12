@@ -260,7 +260,7 @@
     return s.length > 8 ? `${s.slice(0, 8)}…` : s;
   }
 
-  function populatePropertySelect(rows) {
+  function populatePropertySelect(rows, propertyNames) {
     const sel = $("propertySelect");
     if (!sel) return;
 
@@ -285,7 +285,7 @@
     for (const id of ids) {
       const opt = document.createElement("option");
       opt.value = id;
-      opt.textContent = shortUuid(id);
+      opt.textContent = (propertyNames && propertyNames[id]) ? propertyNames[id] : shortUuid(id);
       sel.appendChild(opt);
     }
 
@@ -350,6 +350,17 @@
 
     const btnLogout = $("btnLogout");
     if (btnLogout) btnLogout.style.display = email ? "inline-flex" : "none";
+
+    // Welcome message — founder vs. hotel client
+    const welcomeEl = $("welcomeMsg");
+    if (welcomeEl && email) {
+      if (email === FOUNDER_EMAIL) {
+        welcomeEl.textContent = "Welcome, Ghanshyam";
+      } else {
+        // Will be updated after properties load
+        welcomeEl.textContent = "Welcome";
+      }
+    }
   }
 
   async function hardSignOut() {
@@ -526,6 +537,18 @@
   // ============================================================
   function isoForSupabase(d) {
     return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
+  }
+
+  async function fetchProperties() {
+    const { data, error } = await supabaseClient
+      .from("properties")
+      .select("id, name, tier");
+    if (error) return {};
+    const map = {};
+    for (const p of (data || [])) {
+      if (p.id) map[p.id] = p.name || shortUuid(p.id);
+    }
+    return map;
   }
 
   async function fetchCalls(range) {
@@ -1091,17 +1114,32 @@
 
       setLoadingState(true);
 
-      const [resvRaw, callsRaw] = await Promise.all([
+      const [resvRaw, callsRaw, propertyNames] = await Promise.all([
         fetchReservations(state.lastRange),
-        fetchCalls(state.lastRange)
+        fetchCalls(state.lastRange),
+        fetchProperties()
       ]);
+
+      state.propertyNames = propertyNames || {};
 
       const resv = (resvRaw || []).map(normalizeReservation);
       const calls = (callsRaw || []).map(normalizeCall);
 
       state.allRows = resv.concat(calls);
 
-      populatePropertySelect(state.allRows);
+      populatePropertySelect(state.allRows, state.propertyNames);
+
+      // Update welcome for hotel clients with their property name
+      const sess = await supabaseClient.auth.getSession();
+      const email = sess?.data?.session?.user?.email || "";
+      if (email && email !== FOUNDER_EMAIL) {
+        const welcomeEl = $("welcomeMsg");
+        if (welcomeEl) {
+          const ids = Object.keys(state.propertyNames);
+          const propName = ids.length === 1 ? state.propertyNames[ids[0]] : "your property";
+          welcomeEl.textContent = `Welcome, ${propName}`;
+        }
+      }
 
       setLoadingState(false);
       setText("stateBox", "");

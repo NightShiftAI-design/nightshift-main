@@ -1454,6 +1454,7 @@
     </button>
 
     <div class="topbar-title" id="topbarTitle">
+      <span id="welcomeMsg" style="font-size:var(--text-sm);font-weight:500;color:var(--text-secondary);display:block;letter-spacing:0;margin-bottom:2px;"></span>
       Overview
       <small id="topbarSub">Last 7 days • All properties</small>
     </div>
@@ -1608,11 +1609,9 @@
                     <i class="fa-solid fa-phone" style="font-size:10px;"></i> Calls
                     <span class="filter-tab-count" id="countCalls">0</span>
                   </button>
-                  <button class="filter-tab" type="button" data-filter="escalation" id="filterEscalations"
-                    aria-disabled="true" title="Coming soon"
-                    style="opacity:.5; cursor:not-allowed; pointer-events:none;">
+                  <button class="filter-tab" type="button" data-filter="escalation" id="filterEscalations">
                     <i class="fa-solid fa-shield-halved" style="font-size:10px;"></i> Escalations
-                    <span class="filter-tab-count" id="countEscalations">—</span>
+                    <span class="filter-tab-count" id="countEscalations">0</span>
                   </button>
                 </div>
                 <div style="display:flex; gap:var(--space-2); align-items:center;">
@@ -1672,7 +1671,7 @@
             <div class="card-body">
               <div class="alert alert-info mb-4">
                 <i class="fa-solid fa-circle-info"></i>
-                <div>Export provides a clean overnight record of calls, reservation intake, outcomes, and AI summaries for audits, portfolio reporting, or staff follow-up.</div>
+                <div>Export a CSV of all calls, reservation intakes, outcomes, and AI summaries for the selected date window. Includes KPI summary and daily totals.</div>
               </div>
               <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
                 <button class="btn btn-primary" type="button" id="btnExportMirror2">
@@ -1740,11 +1739,11 @@
             <div class="card-body">
               <div class="policy-row">
                 <div class="policy-label"><i class="fa-solid fa-bolt"></i> Escalation rules</div>
-                <label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label>
+                <label class="toggle"><input type="checkbox" checked id="toggleEscalation"><span class="toggle-slider"></span></label>
               </div>
               <div class="policy-row">
                 <div class="policy-label"><i class="fa-solid fa-language"></i> Multi-language</div>
-                <label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label>
+                <label class="toggle"><input type="checkbox" checked id="toggleMultilang"><span class="toggle-slider"></span></label>
               </div>
               <div class="policy-row">
                 <div class="policy-label"><i class="fa-solid fa-receipt"></i> Payment capture</div>
@@ -1888,6 +1887,20 @@
   // ── Default auth badge
   const authBadge = document.getElementById('authBadge');
   if(authBadge && !authBadge.textContent.trim()) authBadge.textContent = 'Not signed in';
+
+  // ── Property rules toggles — show toast on change
+  const toggleEsc = document.getElementById('toggleEscalation');
+  const toggleLang = document.getElementById('toggleMultilang');
+  function showToggleToast(name, checked) {
+    const el = document.getElementById('toast');
+    if(!el) return;
+    el.textContent = `${name} ${checked ? 'enabled' : 'disabled'} — contact NightShift AI to apply changes.`;
+    el.classList.add('show');
+    clearTimeout(showToggleToast._t);
+    showToggleToast._t = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+  if(toggleEsc) toggleEsc.addEventListener('change', () => showToggleToast('Escalation rules', toggleEsc.checked));
+  if(toggleLang) toggleLang.addEventListener('change', () => showToggleToast('Multi-language', toggleLang.checked));
 })();
 
 /* =============================================
@@ -2004,10 +2017,10 @@
     if(countAll){ countAll.textContent = String(c.total); }
     if(countBookings){ countBookings.textContent = String(c.booking); }
     if(countCalls){ countCalls.textContent = String(c.call); }
-    if(countEscalations){ countEscalations.textContent = '—'; }
+    if(countEscalations){ countEscalations.textContent = String(c.escalation); }
     if(mirrors.navCountCalls) mirrors.navCountCalls.textContent = String(c.total);
     if(feedMeta) feedMeta.textContent = c.total+' items';
-    if(escalationBadge) escalationBadge.textContent = 'Coming soon';
+    if(escalationBadge) escalationBadge.textContent = c.escalation > 0 ? String(c.escalation) + ' active' : 'None active';
     if(escalationsEmpty) escalationsEmpty.style.display = '';
   }
 
