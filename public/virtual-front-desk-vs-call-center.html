@@ -230,28 +230,7 @@
     .callout-body { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 620px; margin-bottom: 24px; font-weight: 300; }
     .callout-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    /* PORTFOLIO CARD */
-    .portfolio-card {
-      border-radius: 24px;
-      border: 1px solid rgba(56,232,160,.18);
-      background: radial-gradient(ellipse at 60% 0%, rgba(56,232,160,.08), transparent 70%), var(--surface);
-      padding: 48px;
-      position: relative;
-      overflow: hidden;
-    }
-    .portfolio-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(56,232,160,.6), transparent); }
-    @media (max-width: 640px) { .portfolio-card { padding: 32px 24px; } }
-    .portfolio-inner { display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: center; }
-    @media (max-width: 760px) { .portfolio-inner { grid-template-columns: 1fr; } }
-    .portfolio-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(56,232,160,.25); background: rgba(56,232,160,.08); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent2); margin-bottom: 16px; }
-    .portfolio-title { font-family: var(--font-display); font-size: clamp(22px, 3vw, 32px); font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 14px; }
-    .portfolio-body { font-size: 14px; color: var(--text2); line-height: 1.7; font-weight: 300; margin-bottom: 24px; }
-    .portfolio-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
-    .portfolio-aside { border-radius: 16px; border: 1px solid rgba(56,232,160,.15); background: rgba(56,232,160,.04); padding: 24px; }
-    .portfolio-aside-title { font-size: 13px; font-weight: 600; color: var(--accent2); margin-bottom: 14px; }
-    .portfolio-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .portfolio-list li { display: flex; gap: 9px; font-size: 13px; color: var(--text2); }
-    .portfolio-list li::before { content: '✓'; color: var(--accent2); font-weight: 600; flex-shrink: 0; }
+    
 
     /* CTA */
     .cta-section { padding: 0 0 100px; }
@@ -356,7 +335,7 @@
         Book a demo
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <a href="/contact.html?type=portfolio" class="btn-secondary btn-lg">Portfolio demo</a>
+      <a href="/contact.html" class="btn-secondary btn-lg">Book a demo</a>
       <a href="/packages.html" class="btn-secondary btn-lg">See packages</a>
     </div>
 
@@ -464,7 +443,7 @@
     <div class="cards-grid">
       <div class="feat-card"><div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><circle cx="12" cy="4" r="1"/><path d="M9 10l3-6 3 6"/><path d="M5 20l4-8h6l2 4"/><path d="M17 20H7"/></svg></div><h3 class="feat-title">Reduces ADA exposure</h3><p class="feat-body">Consistent, ADA-aligned questioning patterns reduce avoidable compliance risk and guest conflict — every call, every time.</p></div>
       <div class="feat-card"><div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h3 class="feat-title">Prevents missed escalation</h3><p class="feat-body">Urgent calls route to on-call staff using rules you define — by type, time, role, and property. No dead ends.</p></div>
-      <div class="feat-card"><div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></div><h3 class="feat-title">Eliminates inconsistent info</h3><p class="feat-body">Policies, fees, and instructions are delivered consistently across all shifts and all properties in your portfolio.</p></div>
+      <div class="feat-card"><div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></div><h3 class="feat-title">Eliminates inconsistent info</h3><p class="feat-body">Policies, fees, and instructions are delivered consistently across all shifts — every call, every time.</p></div>
     </div>
 
     <div class="callout reveal">
@@ -478,35 +457,7 @@
     </div>
   </section>
 
-  <!-- PORTFOLIO -->
-  <section class="section container reveal" aria-label="Portfolio operators">
-    <div class="portfolio-card">
-      <div class="portfolio-inner">
-        <div>
-          <div class="portfolio-tag">For portfolios</div>
-          <h2 class="portfolio-title">Managing multiple hotels?</h2>
-          <p class="portfolio-body">NightShift standardizes overnight call handling across properties while preserving each hotel's individual workflows. You get consistent policy delivery, cleaner escalation, and better accountability across the portfolio.</p>
-          <div class="portfolio-ctas">
-            <a href="/contact.html" class="btn-primary">
-              Request portfolio demo
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-            <a href="/packages.html" class="btn-secondary">Compare packages</a>
-          </div>
-        </div>
-        <div class="portfolio-aside">
-          <div class="portfolio-aside-title">What you get across properties</div>
-          <ul class="portfolio-list">
-            <li>Consistent policy delivery at every location</li>
-            <li>Per-property escalation rules and contacts</li>
-            <li>ADA-aware flows across all properties</li>
-            <li>Summaries and call logs per property</li>
-            <li>No new phone system required</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
+  
 
   <!-- CTA -->
   <div class="cta-section container">
