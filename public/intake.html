@@ -737,10 +737,11 @@ document.getElementById('intakeForm').addEventListener('submit', async function(
   try {
     var res = await fetch(ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(data)
     });
-    if (res.ok || res.status === 200) {
+    if (res.ok || res.status === 200 || res.type === 'opaque') {
       document.getElementById('intakeForm').style.display = 'none';
       document.getElementById('successScreen').classList.add('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
