@@ -199,6 +199,15 @@
             </div>
             <div class="form-grid">
               <div class="field full">
+                <label>NightShift AI plan <span class="req">*</span></label>
+                <select name="tier" required>
+                  <option value="">Select your plan</option>
+                  <option value="core">Core — $399/mo</option>
+                  <option value="pro">Pro — $699/mo</option>
+                  <option value="elite">Elite — $1,499/mo</option>
+                </select>
+              </div>
+              <div class="field full">
                 <label>Property name <span class="req">*</span></label>
                 <input name="property_name" required placeholder="e.g., Mountain Inn" />
               </div>
@@ -732,7 +741,7 @@ document.getElementById('intakeForm').addEventListener('submit', async function(
     }
   });
 
-  var ENDPOINT = 'https://hooks.zapier.com/hooks/catch/25632035/4yqaghe/';
+  var ENDPOINT = 'https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/provision-client';
 
   try {
     var res = await fetch(ENDPOINT, {
