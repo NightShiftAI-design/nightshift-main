@@ -1,637 +1,310 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Contact — Get a Quote · NightShift AI</title>
-  <meta name="description" content="Request a quote or book a demo. NightShift AI is a virtual front desk trained on your property — fast answers, policy-driven workflows, ADA-aware handling, and safe escalation." />
-  <meta name="keywords" content="NightShift AI contact, hotel virtual front desk quote, hotel AI demo, hotel after-hours software quote" />
+  <title>Contact — NightShift AI</title>
+  <meta name="description" content="Book a quick call or send us an email. We walk you through how NightShift AI works for your property and answer any questions." />
   <link rel="canonical" href="https://nightshifthotels.com/contact.html" />
-
-  <meta property="og:title" content="Contact — Get a Quote · NightShift AI" />
-  <meta property="og:description" content="Get a quote or book a demo. Fast setup, policy-driven workflows, safe escalation — built for hotel operations." />
+  <meta property="og:title" content="Contact — NightShift AI" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nightshifthotels.com/contact.html" />
-  <meta property="og:image" content="https://nightshifthotels.com/og-image.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@nightshiftai" />
-
+  <meta name="robots" content="index,follow" />
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <meta name="robots" content="index,follow" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-
   <style>
-    :root {
-      --bg: #06080f;
-      --surface: #0d1117;
-      --surface2: #131920;
-      --border: rgba(255,255,255,.08);
-      --border2: rgba(255,255,255,.13);
-      --text: #f0f4ff;
-      --text2: rgba(240,244,255,.65);
-      --text3: rgba(240,244,255,.42);
-      --accent: #4f8cff;
-      --accent2: #38e8a0;
-      --accent-err: #ff6b6b;
-      --r: 16px;
-      --font-display: 'Syne', sans-serif;
-      --font-body: 'DM Sans', sans-serif;
-      --max: 1120px;
-      --ease: cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-
-    .bg-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-    .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; }
-    .bg-orb-1 { width: 700px; height: 500px; background: radial-gradient(ellipse, rgba(79,140,255,.2), transparent 70%); top: -80px; left: -120px; animation: drift1 20s ease-in-out infinite alternate; }
-    .bg-orb-2 { width: 550px; height: 450px; background: radial-gradient(ellipse, rgba(56,232,160,.12), transparent 70%); top: 30%; right: -100px; animation: drift2 24s ease-in-out infinite alternate; }
-    .bg-orb-3 { width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(79,140,255,.08), transparent 70%); bottom: 5%; left: 25%; animation: drift1 28s ease-in-out infinite alternate-reverse; }
-    @keyframes drift1 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(40px,60px) scale(1.08); } }
-    @keyframes drift2 { 0% { transform: translate(0,0) scale(1.05); } 100% { transform: translate(-50px,40px) scale(1); } }
-    .bg-noise { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .028; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E"); background-size: 128px 128px; }
-
-    .page { position: relative; z-index: 2; }
-    .container { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
-
-    /* NAV */
-    .nav { position: sticky; top: 0; z-index: 100; }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; border-bottom: 1px solid var(--border); background: rgba(6,8,15,.82); backdrop-filter: blur(20px) saturate(1.4); padding: 0 24px; }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, rgba(79,140,255,.9), rgba(56,232,160,.7)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 13px; color: #fff; flex-shrink: 0; }
-    .brand-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: -.02em; color: var(--text); }
-    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
-    .nav-links a { display: block; padding: 7px 13px; font-size: 14px; color: var(--text2); text-decoration: none; border-radius: 8px; transition: color .15s, background .15s; white-space: nowrap; }
-    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,.06); }
-    .nav-links a.active { color: var(--accent); background: rgba(79,140,255,.10); }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .btn-primary { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; font-family: var(--font-body); transition: opacity .15s, transform .2s var(--ease), box-shadow .2s; }
-    .btn-primary:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 10px 32px rgba(79,140,255,.3); }
-    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-    .btn-secondary { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 9px; background: rgba(255,255,255,.06); border: 1px solid var(--border2); color: var(--text); font-size: 14px; text-decoration: none; transition: background .15s, transform .2s var(--ease); }
-    .btn-secondary:hover { background: rgba(255,255,255,.10); transform: translateY(-1px); }
-    .btn-lg { padding: 13px 28px; font-size: 15px; font-weight: 500; border-radius: 10px; }
-
-    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
-    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text2); border-radius: 2px; }
-    @media (max-width: 860px) { .nav-links { display: none; } .hamburger { display: flex; } }
-    .mobile-menu { display: none; background: var(--surface); border-bottom: 1px solid var(--border); }
-    .mobile-menu.open { display: block; }
-    .mobile-menu a { display: block; padding: 14px 24px; font-size: 15px; color: var(--text2); text-decoration: none; border-bottom: 1px solid var(--border); }
-    .mobile-menu a:hover { color: var(--text); }
-    .mobile-menu a.active { color: var(--accent); }
-
-    /* HERO */
-    .page-hero { padding: 80px 0 60px; border-bottom: 1px solid var(--border); }
-    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text3); margin-bottom: 32px; }
-    .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .15s; }
-    .breadcrumb a:hover { color: var(--text2); }
-    .page-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(79,140,255,.3); background: rgba(79,140,255,.08); font-size: 12px; font-weight: 500; color: rgba(180,210,255,.9); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 24px; }
-    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,.25); animation: pulse 2.4s ease-in-out infinite; }
-    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(79,140,255,.25); } 50% { box-shadow: 0 0 0 5px rgba(79,140,255,.08); } }
-    .hero-headline { font-family: var(--font-display); font-size: clamp(34px, 5vw, 56px); font-weight: 800; line-height: 1.04; letter-spacing: -.03em; margin-bottom: 16px; }
-    .hero-headline em { font-style: normal; background: linear-gradient(135deg, #6ea8ff 0%, #38e8a0 55%, #6ea8ff 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s linear infinite; }
-    @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-    .hero-sub { font-size: 16px; font-weight: 300; color: var(--text2); max-width: 520px; line-height: 1.7; margin-bottom: 28px; }
-    .hero-ctas { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
-    .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border2); background: rgba(255,255,255,.04); font-size: 12px; color: var(--text2); }
-
-    /* CONTACT LAYOUT */
-    .contact-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 48px 0 80px; align-items: start; }
-    @media (max-width: 900px) { .contact-layout { grid-template-columns: 1fr; } }
-
-    /* FORM CARD */
-    .form-card { border-radius: 20px; border: 1px solid var(--border); background: var(--surface); overflow: hidden; }
-    .form-top { padding: 28px 32px 20px; border-bottom: 1px solid var(--border); }
-    .form-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
-    .form-sub { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.6; }
-
-    /* TYPE TOGGLE */
-
-    /* FORM FIELDS */
-    .form-body { padding: 24px 32px 32px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
-    .full { grid-column: 1 / -1; }
-
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); }
-    .field input, .field textarea, .field select {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 9px;
-      border: 1px solid var(--border2);
-      background: var(--surface2);
-      color: var(--text);
-      font-family: var(--font-body);
-      font-size: 14px;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-      -webkit-appearance: none;
-    }
-    .field input::placeholder, .field textarea::placeholder { color: var(--text3); }
-    .field input:focus, .field textarea:focus, .field select:focus {
-      border-color: rgba(79,140,255,.5);
-      box-shadow: 0 0 0 3px rgba(79,140,255,.12);
-    }
-    .field select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(240,244,255,.42)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
-    .field select option { background: var(--surface2); }
-    .field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
-    .field-hint { font-size: 11px; color: var(--text3); line-height: 1.5; }
-    .form-section-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--text3);
-      padding: 20px 0 10px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 16px;
-      margin-top: 4px;
-    }
-    .form-section-label:first-of-type { padding-top: 0; }
-    .req { color: rgba(248,113,113,.8); font-weight: 600; }
-    .opt { font-weight: 400; color: var(--text3); font-size: 10px; letter-spacing: .03em; text-transform: none; }
-
-    .form-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
-    .form-note { font-size: 12px; color: var(--text3); line-height: 1.5; }
-
-    .form-status { margin-top: 14px; padding: 12px 16px; border-radius: 9px; font-size: 13px; display: none; }
-    .form-status.show { display: block; }
-    .form-status.ok { background: rgba(56,232,160,.08); border: 1px solid rgba(56,232,160,.2); color: var(--accent2); }
-    .form-status.err { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.2); color: var(--accent-err); }
-
-    /* HP field */
-    .hp { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
-
-    /* SIDEBAR */
-    .sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
-    @media (max-width: 900px) { .sidebar { position: static; } }
-
-    .info-card { border-radius: 18px; border: 1px solid var(--border); background: var(--surface); padding: 24px; }
-    .info-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
-    .info-sub { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.65; margin-bottom: 18px; }
-
-    .contact-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .contact-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
-    .contact-list .cl-label { color: var(--text3); font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; min-width: 60px; margin-top: 1px; }
-    .contact-list .cl-val { color: var(--text2); line-height: 1.5; }
-    .contact-list a { color: var(--accent); text-decoration: none; transition: opacity .15s; }
-    .contact-list a:hover { opacity: .8; }
-
-    .callout { border-radius: 14px; border: 1px solid rgba(79,140,255,.2); background: radial-gradient(ellipse at 50% 0%, rgba(79,140,255,.1), transparent 70%), var(--surface); padding: 18px; position: relative; overflow: hidden; }
-    .callout::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(79,140,255,.6), transparent); }
-    .callout-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-    .callout-body { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 300; }
-
-    .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .checklist li { display: flex; gap: 9px; font-size: 13px; color: var(--text2); }
-    .checklist li::before { content: '✓'; color: var(--accent2); font-weight: 600; flex-shrink: 0; }
-
-    /* CTA FOOTER */
-    .cta-section { padding: 0 0 100px; }
-    .cta-inner { position: relative; border-radius: 24px; padding: 60px 48px; text-align: center; border: 1px solid rgba(79,140,255,.25); background: radial-gradient(ellipse at 50% 0%, rgba(79,140,255,.14), transparent 70%), var(--surface); overflow: hidden; }
-    .cta-inner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(79,140,255,.7), rgba(56,232,160,.5), transparent); }
-    @media (max-width: 640px) { .cta-inner { padding: 40px 24px; } }
-    .cta-headline { font-family: var(--font-display); font-size: clamp(22px, 3.5vw, 36px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 12px; }
-    .cta-sub { font-size: 14px; color: var(--text2); max-width: 380px; margin: 0 auto 24px; font-weight: 300; line-height: 1.7; }
-    .cta-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-
-    /* FOOTER */
-    .footer { border-top: 1px solid var(--border); padding: 40px 0 32px; }
-    .footer-inner { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; }
-    @media (max-width: 760px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 440px) { .footer-inner { grid-template-columns: 1fr; } }
-    .footer-brand-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: -.02em; margin: 8px 0 6px; }
-    .footer-tagline { font-size: 12px; color: var(--text3); line-height: 1.55; max-width: 190px; }
-    .footer-social { display: flex; gap: 8px; margin-top: 16px; }
-    .footer-social a { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.03); display: flex; align-items: center; justify-content: center; color: var(--text3); text-decoration: none; transition: color .15s, border-color .15s; }
-    .footer-social a:hover { color: var(--text); border-color: var(--border2); }
-    .footer-social svg { width: 14px; height: 14px; fill: currentColor; }
-    .footer-col-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
-    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .footer-links a { font-size: 13px; color: var(--text2); text-decoration: none; transition: color .15s; }
-    .footer-links a:hover { color: var(--text); }
-    .footer-bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .footer-bottom p { font-size: 12px; color: var(--text3); }
-    .footer-bottom-links { display: flex; gap: 20px; }
-    .footer-bottom-links a { font-size: 12px; color: var(--text3); text-decoration: none; transition: color .15s; }
-    .footer-bottom-links a:hover { color: var(--text2); }
-
-    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .55s var(--ease), transform .55s var(--ease); }
-    .reveal.visible { opacity: 1; transform: none; }
-    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .bg-orb, .badge-dot, .hero-headline em { animation: none; } }
-    /*  Trust Strip  */
-    .trust-strip {
-      border-top: 1px solid rgba(255,255,255,.07);
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      background: rgba(255,255,255,.02);
-      padding: 14px 0;
-    }
-    .trust-strip-inner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      flex-wrap: wrap;
-    }
-    .trust-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 4px 20px;
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(255,255,255,.45);
-      letter-spacing: .01em;
-      white-space: nowrap;
-    }
-    .trust-item svg { opacity: .5; flex-shrink: 0; }
-    .trust-divider {
-      width: 1px;
-      height: 14px;
-      background: rgba(255,255,255,.1);
-      flex-shrink: 0;
-    }
-    @media (max-width: 680px) {
-      .trust-strip-inner { gap: 0; justify-content: flex-start; }
-      .trust-divider { display: none; }
-      .trust-item { padding: 4px 12px; }
-    }
+    :root{--bg:#06080f;--surface:#0d1117;--surface2:#131920;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.13);--text:#f0f4ff;--text2:rgba(240,244,255,.65);--text3:rgba(240,244,255,.42);--accent:#4f8cff;--accent2:#38e8a0;--font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--max:1120px;--ease:cubic-bezier(0.16,1,0.3,1);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+    .bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+    .bg-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;}
+    .bg-orb-1{width:700px;height:500px;background:radial-gradient(ellipse,rgba(79,140,255,.2),transparent 70%);top:-80px;left:-120px;animation:drift1 20s ease-in-out infinite alternate;}
+    .bg-orb-2{width:550px;height:450px;background:radial-gradient(ellipse,rgba(56,232,160,.12),transparent 70%);top:30%;right:-100px;animation:drift2 24s ease-in-out infinite alternate;}
+    @keyframes drift1{0%{transform:translate(0,0) scale(1);}100%{transform:translate(40px,60px) scale(1.08);}}
+    @keyframes drift2{0%{transform:translate(0,0) scale(1.05);}100%{transform:translate(-50px,40px) scale(1);}}
+    .page{position:relative;z-index:2;}
+    .container{width:min(var(--max),calc(100% - 40px));margin:0 auto;}
+    .nav{position:sticky;top:0;z-index:100;}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;border-bottom:1px solid var(--border);background:rgba(6,8,15,.82);backdrop-filter:blur(20px) saturate(1.4);padding:0 24px;}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .brand-name{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:-.02em;color:var(--text);}
+    .nav-links{display:flex;align-items:center;gap:4px;}
+    .nav-links a{font-size:13px;color:var(--text2);text-decoration:none;padding:6px 12px;border-radius:8px;transition:color .15s,background .15s;}
+    .nav-links a:hover{color:var(--text);background:rgba(255,255,255,.06);}
+    .nav-cta{background:var(--accent);color:#fff !important;border-radius:8px;}
+    @media(max-width:640px){.nav-links{display:none;}}
+    .hero{padding:80px 0 60px;text-align:center;}
+    .hero-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:999px;border:1px solid rgba(79,140,255,.3);background:rgba(79,140,255,.08);font-size:11px;font-weight:500;color:rgba(180,210,255,.9);letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(79,140,255,.25);animation:pulse 2.4s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(79,140,255,.25);}50%{box-shadow:0 0 0 5px rgba(79,140,255,.08);}}
+    .hero h1{font-family:var(--font-display);font-size:clamp(32px,5vw,54px);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin-bottom:16px;}
+    .hero p{font-size:17px;color:var(--text2);font-weight:300;max-width:520px;margin:0 auto 48px;line-height:1.7;}
+    .cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px;margin:0 auto 60px;}
+    @media(max-width:640px){.cta-grid{grid-template-columns:1fr;}}
+    .cta-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:36px 32px;transition:border-color .2s,transform .2s var(--ease);}
+    .cta-card:hover{border-color:rgba(79,140,255,.35);transform:translateY(-3px);}
+    .cta-card.primary{border-color:rgba(79,140,255,.3);background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(79,140,255,.03));}
+    .cta-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+    .cta-icon.blue{background:rgba(79,140,255,.15);}
+    .cta-icon.green{background:rgba(56,232,160,.12);}
+    .cta-icon svg{width:22px;height:22px;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;}
+    .cta-icon.blue svg{stroke:var(--accent);}
+    .cta-icon.green svg{stroke:var(--accent2);}
+    .cta-card h2{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;}
+    .cta-card p{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px;}
+    .cta-detail{display:flex;flex-direction:column;gap:6px;margin-bottom:24px;}
+    .cta-detail-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+    .cta-detail-item svg{width:14px;height:14px;fill:none;stroke:var(--text3);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:var(--accent);color:#fff;font-size:14px;font-weight:500;font-family:var(--font-body);text-decoration:none;transition:opacity .15s,transform .2s var(--ease),box-shadow .2s;}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 10px 32px rgba(79,140,255,.3);}
+    .btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:14px;font-weight:500;font-family:var(--font-body);text-decoration:none;transition:background .15s,border-color .15s,color .15s;}
+    .btn-secondary:hover{background:rgba(255,255,255,.06);color:var(--text);}
+    .pricing-strip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:800px;margin:0 auto 60px;}
+    .pricing-strip-head{margin-bottom:24px;}
+    .pricing-strip-head h3{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
+    .pricing-strip-head p{font-size:13px;color:var(--text3);}
+    .pricing-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+    @media(max-width:580px){.pricing-row{grid-template-columns:1fr;}}
+    .pricing-tier{text-align:center;padding:20px 16px;border-radius:12px;border:1px solid var(--border);}
+    .pricing-tier.featured{border-color:rgba(79,140,255,.35);background:rgba(79,140,255,.05);}
+    .pricing-tier-name{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+    .pricing-tier-amount{font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:-.03em;}
+    .pricing-tier-period{font-size:12px;color:var(--text3);margin-top:2px;}
+    .pricing-tier-setup{font-size:11px;color:var(--text3);margin-top:6px;}
+    .pricing-tier-setup strong{color:var(--text2);}
+    .pricing-strip-link{text-align:center;margin-top:16px;}
+    .pricing-strip-link a{color:var(--accent);font-size:13px;text-decoration:none;}
+    .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:800px;margin:0 auto 60px;}
+    @media(max-width:640px){.info-grid{grid-template-columns:1fr;}}
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;}
+    .info-card-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+    .info-card-value{font-size:14px;color:var(--text2);line-height:1.6;}
+    .info-card-value a{color:var(--accent);text-decoration:none;}
+    .inquiry-wrap{max-width:560px;margin:0 auto 80px;text-align:center;}
+    .inquiry-wrap h3{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px;}
+    .inquiry-wrap .sub{font-size:14px;color:var(--text2);margin-bottom:28px;}
+    .inq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;}
+    @media(max-width:500px){.inq-grid{grid-template-columns:1fr;}}
+    .full{grid-column:1/-1;}
+    .field{display:flex;flex-direction:column;gap:5px;}
+    .field label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);}
+    .field input,.field select,.field textarea{width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+    .field input::placeholder,.field textarea::placeholder{color:var(--text3);}
+    .field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(79,140,255,.5);box-shadow:0 0 0 3px rgba(79,140,255,.12);}
+    .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(240,244,255,.42)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+    .field select option{background:var(--surface2);}
+    .hp{display:none;}
+    .inq-actions{margin-top:20px;}
+    .btn-submit{display:inline-flex;align-items:center;gap:8px;padding:13px 32px;border-radius:10px;background:var(--accent2);border:none;color:#06080f;font-size:15px;font-weight:600;font-family:var(--font-body);cursor:pointer;transition:opacity .15s,transform .2s var(--ease);}
+    .btn-submit:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .form-status{margin-top:14px;font-size:13px;padding:10px 14px;border-radius:8px;display:none;}
+    .form-status.show{display:block;}
+    .form-status.ok{background:rgba(56,232,160,.1);color:var(--accent2);border:1px solid rgba(56,232,160,.2);}
+    .form-status.err{background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.2);}
+    .trust-strip{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);padding:14px 0;}
+    .trust-strip-inner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;}
+    .trust-item{display:flex;align-items:center;gap:7px;padding:4px 20px;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);white-space:nowrap;}
+    .trust-item svg{opacity:.5;flex-shrink:0;}
+    .trust-divider{width:1px;height:14px;background:rgba(255,255,255,.1);flex-shrink:0;}
+    @media(max-width:680px){.trust-divider{display:none;}.trust-item{padding:4px 12px;}}
+    .footer{border-top:1px solid var(--border);padding:48px 0 32px;}
+    .footer-inner{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+    @media(max-width:800px){.footer-inner{grid-template-columns:1fr 1fr;}}
+    @media(max-width:480px){.footer-inner{grid-template-columns:1fr;}}
+    .footer-brand-name{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:-.02em;}
+    .footer-tagline{font-size:13px;color:var(--text3);margin-top:8px;line-height:1.6;max-width:240px;}
+    .footer-social{display:flex;gap:14px;margin-top:16px;}
+    .footer-social a{color:var(--text3);transition:color .15s;}
+    .footer-social a:hover{color:var(--text);}
+    .footer-social svg{width:15px;height:15px;fill:currentColor;}
+    .footer-col-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+    .footer-links{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .footer-links a{font-size:13px;color:var(--text3);text-decoration:none;transition:color .15s;}
+    .footer-links a:hover{color:var(--text);}
+    .footer-bottom{margin-top:36px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .footer-bottom p{font-size:12px;color:var(--text3);}
+    .footer-bottom-links{display:flex;gap:20px;}
+    .footer-bottom-links a{font-size:12px;color:var(--text3);text-decoration:none;}
+    .footer-bottom-links a:hover{color:var(--text2);}
   </style>
-
 </head>
 <body>
-  <div class="bg-canvas" aria-hidden="true">
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
-    <div class="bg-orb bg-orb-3"></div>
-  </div>
-  <div class="bg-noise" aria-hidden="true"></div>
+<div class="bg-canvas" aria-hidden="true"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div></div>
+<div class="page">
+  <nav class="nav"><div class="nav-inner">
+    <a href="/" class="brand"><img src="/favicon-32x32.png" alt="" aria-hidden="true" width="28" height="28" style="border-radius:7px;display:block;flex-shrink:0;"><span class="brand-name">NightShift AI</span></a>
+    <div class="nav-links"><a href="/product.html">Product</a><a href="/packages.html">Packages</a><a href="/about.html">About</a><a href="/faq.html">FAQ</a><a href="/contact.html" class="nav-cta">Contact</a></div>
+  </div></nav>
 
-  <div class="page">
-    <header>
-      <nav class="nav" role="navigation" aria-label="Main navigation">
-        <div class="nav-inner">
-          <a href="/" class="brand" aria-label="NightShift AI Home">
-            <img src="/favicon-32x32.png" alt="" aria-hidden="true" width="28" height="28" style="border-radius:7px;display:block;flex-shrink:0;">
-            <span class="brand-name">NightShift AI</span>
-          </a>
-          <ul class="nav-links" role="list">
-            <li><a href="/product.html">Product</a></li>
-            <li><a href="/who-we-serve.html">Who we serve</a></li>
-            <li><a href="/packages.html">Packages</a></li>
-            <li><a href="/faq.html">FAQ</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/why-nightshift.html">Why NightShift</a></li>
-          </ul>
-          <div class="nav-right">
-            <a href="/dashboard/" class="btn-secondary" style="font-size:13px;padding:7px 14px;" rel="nofollow">Dashboard</a>
-            <a href="mailto:founder@nightshifthotels.com" class="btn-primary">Email us</a>
-            <button class="hamburger" id="btnMenu" aria-label="Open menu" type="button"><span></span><span></span><span></span></button>
+  <main>
+    <div class="container">
+
+      <section class="hero">
+        <div class="hero-tag"><span class="dot"></span> Response within 24 hours</div>
+        <h1>Let's talk about<br>your property</h1>
+        <p>Book a quick Zoom call or send us an email. We'll walk through how NightShift AI handles your calls, answer every question, and tell you exactly what to expect before you commit.</p>
+      </section>
+
+      <div class="cta-grid">
+        <div class="cta-card primary">
+          <div class="cta-icon blue"><svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14"/><rect x="1" y="6" width="14" height="12" rx="2"/></svg></div>
+          <h2>Book a Zoom call</h2>
+          <p>15–20 minutes. Live demo using your property's actual call scenarios, pricing walkthrough, and any questions you have.</p>
+          <div class="cta-detail">
+            <div class="cta-detail-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>15–20 minutes</div>
+            <div class="cta-detail-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>No commitment required</div>
+            <div class="cta-detail-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>See exactly how your calls get handled</div>
           </div>
-        </div>
-        <div class="mobile-menu" id="mobileMenu">
-          <a href="/product.html">Product</a>
-          <a href="/who-we-serve.html">Who we serve</a>
-          <a href="/packages.html">Packages</a>
-          <a href="/faq.html">FAQ</a>
-          <a href="/about.html">About</a>
-          <a href="/why-nightshift.html">Why NightShift</a>
-          <a href="/dashboard/" rel="nofollow">Dashboard</a>
-          <a href="/contact.html" class="active" style="color:var(--accent);">Contact →</a>
-        </div>
-      </nav>
-    </header>
-
-<main>
-  <!-- HERO -->
-  <section class="page-hero container" aria-label="Contact hero">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a>
-      <span aria-hidden="true">›</span>
-      <span>Contact</span>
-    </nav>
-
-    <div class="page-badge"><span class="badge-dot" aria-hidden="true"></span>Get a quote</div>
-
-    <h1 class="hero-headline">
-      A quote <em>tailored</em><br/>to your property.
-    </h1>
-    <p class="hero-sub">Tell us your room count, brand (if any), call volume, and what you want NightShift to handle. We'll recommend the right setup and respond fast.</p>
-
-    <div class="hero-ctas">
-      <a href="#quote" class="btn-primary btn-lg">
-        Request a quote
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-      <a href="mailto:founder@nightshifthotels.com" class="btn-secondary btn-lg">Email us</a>
-      <a href="/packages.html" class="btn-secondary btn-lg">Compare packages</a>
-    </div>
-
-    <div class="hero-chips">
-      <span class="chip">✓ Property-specific answers</span>
-      <span class="chip">✓ ADA-aware workflows</span>
-      <span class="chip">✓ Emergency escalation</span>
-      <span class="chip">✓ Privacy-minded setup</span>
-      <span class="chip">✓ ~10 min setup</span>
-    </div>
-  </section>
-
-  <!-- CONTACT LAYOUT -->
-  <div class="container" id="quote">
-    <div class="contact-layout">
-
-      <!-- FORM -->
-      <div class="form-card reveal" role="main" aria-label="Quote request form">
-
-        <div class="form-top">
-          <h2 class="form-title" id="formTitle">Request a quote</h2>
-          <p class="form-sub">We only use this information to respond and tailor your configuration — policies, routing, and escalation.</p>
+          <a href="https://us05web.zoom.us/j/9483006707?pwd=35ddpKxeo9rHWkSmaAxZkp5rvUYZDg.1" target="_blank" rel="noopener" class="btn-primary">Book a Zoom call <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
         </div>
 
-        <div class="form-body">
-          <form id="quoteForm" novalidate>
-            <!-- Honeypot -->
-            <div class="hp" aria-hidden="true"><label>Company<input name="company" type="text" autocomplete="off" tabindex="-1" /></label></div>
-            <input type="hidden" name="_subject" value="NightShift AI — New Contact Request" />
-            <input type="hidden" name="request_type" id="request_type" value="Single property" />
-
-            <!-- Section: Contact -->
-            <div class="form-section-label">Contact</div>
-            <div class="form-grid">
-              <div class="field">
-                <label for="name">Your name <span class="req">*</span></label>
-                <input id="name" name="name" required autocomplete="name" placeholder="First and last" />
-              </div>
-              <div class="field">
-                <label for="email">Email address <span class="req">*</span></label>
-                <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@yourhotel.com" />
-              </div>
-              <div class="field">
-                <label for="phone">Phone <span class="opt">(optional)</span></label>
-                <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 (000) 000-0000" />
-              </div>
-              <div class="field">
-                <label for="hotel">Hotel / Group name <span class="req">*</span></label>
-                <input id="hotel" name="hotel" required placeholder="e.g., Mountain View Inn" />
-              </div>
-            </div>
-
-            <!-- Section: Property -->
-            <div class="form-section-label">Property</div>
-            <div class="form-grid">
-              <div class="field">
-                <label for="property_type">Property type <span class="req">*</span></label>
-                <select id="property_type" name="property_type" required>
-                  <option value="">Select one</option>
-                  <option>Independent hotel / motel</option>
-                  <option>Franchise hotel</option>
-                  <option>Extended stay</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="brand">Brand affiliation</label>
-                <select id="brand" name="brand">
-                  <option value="">Independent / Not sure</option>
-                  <option>Best Western</option>
-                  <option>Choice Hotels</option>
-                  <option>Wyndham</option>
-                  <option>IHG</option>
-                  <option>Hilton</option>
-                  <option>Marriott</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="rooms">Rooms per property</label>
-                <input id="rooms" name="rooms" inputmode="numeric" placeholder="e.g., 62" />
-              </div>
-              <div class="field" id="propCountWrap">
-                <label for="property_count">Number of properties</label>
-                <input id="property_count" name="property_count" inputmode="numeric" placeholder="e.g., 1" />
-              </div>
-            </div>
-
-            <!-- Section: Operations -->
-            <div class="form-section-label">Operations</div>
-            <div class="form-grid">
-              <div class="field">
-                <label for="call_volume">Estimated call volume</label>
-                <select id="call_volume" name="call_volume">
-                  <option value="">Not sure</option>
-                  <option>0–10 calls/night</option>
-                  <option>10–25 calls/night</option>
-                  <option>25–50 calls/night</option>
-                  <option>50+ calls/night</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="current_setup">Current after-hours setup</label>
-                <select id="current_setup" name="current_setup">
-                  <option value="">Select one</option>
-                  <option>On-site night desk</option>
-                  <option>Calls forward to mobile / on-call staff</option>
-                  <option>Answering service / call center</option>
-                  <option>Voicemail / missed calls</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field full">
-                <label for="message">What do you want NightShift to handle? <span class="req">*</span></label>
-                <textarea id="message" name="message" required placeholder="Examples: late check-ins, rate quotes, deposits, pets + service animal flow, lockouts, noise complaints, directions, policies…"></textarea>
-                <span class="field-hint">Include your top 3 after-hours pain points for the fastest configuration.</span>
-              </div>
-              <div class="field full">
-                <label for="escalation">Escalation contacts <span class="opt">(optional)</span></label>
-                <textarea id="escalation" name="escalation" style="min-height:72px;" placeholder="Who should urgent calls route to? e.g. GM cell, on-call maintenance, owner direct"></textarea>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button id="submitBtn" type="submit" class="btn-primary btn-lg">
-                Send request
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              <a href="mailto:founder@nightshifthotels.com" class="btn-secondary">Or email us</a>
-            </div>
-            <p class="form-note" style="margin-top:10px;">Typical setup under 10 minutes after configuration. Fields marked <span class="req">*</span> are required.</p>
-
-            <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
-          </form>
+        <div class="cta-card">
+          <div class="cta-icon green"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <h2>Send an email</h2>
+          <p>Tell us your property name and what you're dealing with after hours. We'll reply with a tailored overview and pricing within 24 hours.</p>
+          <div class="cta-detail">
+            <div class="cta-detail-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Reply within 24 hours</div>
+            <div class="cta-detail-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Pricing + contract details included</div>
+            <div class="cta-detail-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Tailored to your property type</div>
+          </div>
+          <a href="mailto:founder@nightshifthotels.com" class="btn-secondary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>founder@nightshifthotels.com</a>
         </div>
       </div>
 
-      <!-- SIDEBAR -->
-      <aside class="sidebar reveal" aria-label="Direct contact and what to expect">
-        <div class="info-card">
-          <h2 class="info-title">Direct contact</h2>
-          <p class="info-sub">Reach us by email anytime — we respond fast.</p>
-          <ul class="contact-list">
-            <li><span class="cl-label">Sales</span><span class="cl-val"><a href="mailto:info@nightshifthotels.com">info@nightshifthotels.com</a></span></li>
-            <li><span class="cl-label">Support</span><span class="cl-val"><a href="mailto:support@nightshifthotels.com">support@nightshifthotels.com</a></span></li>
-            <li><span class="cl-label">Founder</span><span class="cl-val"><a href="mailto:founder@nightshifthotels.com">founder@nightshifthotels.com</a></span></li>
-            
-            <li><span class="cl-label">Hours</span><span class="cl-val">24/7</span></li>
-          </ul>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="/packages.html" class="btn-secondary" style="font-size:13px;padding:8px 14px;">See packages</a>
-            <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary" style="font-size:13px;padding:8px 14px;">vs. Call centers</a>
+      <div class="pricing-strip">
+        <div class="pricing-strip-head">
+          <h3>Transparent pricing — no surprises</h3>
+          <p>One-time setup fee + monthly subscription. Cancel with 30 days notice.</p>
+        </div>
+        <div class="pricing-row">
+          <div class="pricing-tier">
+            <div class="pricing-tier-name">Core</div>
+            <div class="pricing-tier-amount">$399</div>
+            <div class="pricing-tier-period">/month</div>
+            <div class="pricing-tier-setup">+ <strong>$249</strong> setup</div>
+          </div>
+          <div class="pricing-tier featured">
+            <div class="pricing-tier-name">Pro — Most popular</div>
+            <div class="pricing-tier-amount">$699</div>
+            <div class="pricing-tier-period">/month</div>
+            <div class="pricing-tier-setup">+ <strong>$449</strong> setup</div>
+          </div>
+          <div class="pricing-tier">
+            <div class="pricing-tier-name">Elite</div>
+            <div class="pricing-tier-amount">$1,499</div>
+            <div class="pricing-tier-period">/month</div>
+            <div class="pricing-tier-setup">+ <strong>$899</strong> setup</div>
           </div>
         </div>
-
-        <div class="callout">
-          <h3 class="callout-title">What we'll ask on the call</h3>
-          <p class="callout-body" style="margin-bottom:14px;">A small set of details lets us configure your system accurately.</p>
-          <ul class="checklist">
-            <li>Room count + call volume estimate</li>
-            <li>Rate quoting rules (nightly/weekly)</li>
-            <li>Policies: pets, smoking, deposits</li>
-            <li>Late check-in / lockout procedure</li>
-            <li>Escalation contacts by role + time</li>
-          </ul>
-        </div>
-
-        <div class="info-card">
-          <h3 class="info-title" style="font-size:15px;">Best for</h3>
-          <p class="info-sub">Hotels that want to replace after-hours call handling with a property-trained virtual front desk — while keeping staff in control for sensitive situations.</p>
-          <ul class="checklist">
-            <li>Independent hotels &amp; motels</li>
-            <li>Franchise &amp; branded properties</li>
-                      </ul>
-        </div>
-      </aside>
-    </div>
-  </div>
-
-  <!-- CTA -->
-  <div class="cta-section container">
-    <div class="cta-inner reveal">
-      <h2 class="cta-headline">Prefer to talk first?</h2>
-      <p class="cta-sub">Email us or book a 15-minute walkthrough of your property's exact call scenarios.</p>
-      <div class="cta-btns">
-        <a href="mailto:founder@nightshifthotels.com" class="btn-primary btn-lg">Email us directly →</a>
-        <a href="/faq.html" class="btn-secondary btn-lg">Read FAQ first</a>
+        <div class="pricing-strip-link"><a href="/packages.html">Compare what's included in each tier →</a></div>
       </div>
-    </div>
-  </div>
-</main>
 
-<footer class="footer" role="contentinfo">
-  <div class="container">
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-label">Email</div>
+          <div class="info-card-value"><a href="mailto:founder@nightshifthotels.com">founder@nightshifthotels.com</a></div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Response time</div>
+          <div class="info-card-value">Within 24 hours, usually same day</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Ready to start?</div>
+          <div class="info-card-value"><a href="/intake.html" style="color:var(--accent2);">Complete the client intake →</a></div>
+        </div>
+      </div>
+
+      <div class="inquiry-wrap">
+        <h3>Send a quick message</h3>
+        <p class="sub">Leave your details and we'll get back to you with everything you need to know.</p>
+        <form id="inquiryForm" novalidate>
+          <div class="hp" aria-hidden="true"><label>Skip<input name="company" type="text" autocomplete="off" tabindex="-1"></label></div>
+          <input type="hidden" name="form_type" value="contact_inquiry">
+          <div class="inq-grid">
+            <div class="field"><label>Your name</label><input name="name" required placeholder="First and last" autocomplete="name"></div>
+            <div class="field"><label>Email</label><input name="email" type="email" required placeholder="you@yourhotel.com" autocomplete="email"></div>
+            <div class="field"><label>Property name</label><input name="property" required placeholder="e.g., Mountain Inn"></div>
+            <div class="field"><label>Tier interest</label>
+              <select name="tier_interest">
+                <option value="">Not sure yet</option>
+                <option>Core — $399/mo + $249 setup</option>
+                <option>Pro — $699/mo + $449 setup</option>
+                <option>Elite — $1,499/mo + $899 setup</option>
+              </select>
+            </div>
+            <div class="field full"><label>Main after-hours challenge</label><textarea name="message" style="min-height:88px;" placeholder="e.g., missed calls after 10pm, no night staff, guests can't reach anyone for check-in help..."></textarea></div>
+          </div>
+          <div class="inq-actions">
+            <button type="submit" class="btn-submit" id="submitBtn">Send message <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg></button>
+          </div>
+          <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="trust-strip"><div class="container"><div class="trust-strip-inner">
+    <div class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>SSL Encrypted</span></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>No card data collected</span></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Call data retained 12 months</span></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>Guest data never sold</span></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Privacy-first design</span></div>
+  </div></div></div>
+
+  <footer class="footer"><div class="container">
     <div class="footer-inner">
       <div>
         <div style="display:flex;align-items:center;gap:10px;"><img src="/favicon-32x32.png" alt="" aria-hidden="true" width="26" height="26" style="border-radius:6px;display:block;flex-shrink:0;"><span class="footer-brand-name">NightShift AI</span></div>
-        <p class="footer-tagline" style="margin-top:8px;">AI-powered virtual front desk for hotels. Every call answered, every night.</p>
+        <p class="footer-tagline">AI-powered virtual front desk for hotels. Every call answered, every night.</p>
         <div class="footer-social">
           <a href="https://x.com/nightshiftai" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2H21l-6.535 7.47L22.5 22h-6.33l-4.96-6.48L5.6 22H2.84l7-8.01L1.5 2h6.5l4.48 5.91L18.244 2zm-1.11 18h1.76L7.04 4H5.18l11.95 16z"/></svg></a>
           <a href="https://www.instagram.com/nightshift.hotels" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-.9a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"/></svg></a>
           <a href="https://www.facebook.com/profile.php?id=61585954307222" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2V9.8c0-2 1.2-3.1 3-3.1.9 0 1.8.16 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25v1.5h2.3l-.37 2.9h-1.93v7A10 10 0 0022 12z"/></svg></a>
-              <a href="https://www.linkedin.com/company/nightshift-ai/" target="_blank" rel="noopener" aria-label="NightShift AI on LinkedIn">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-              </a>
+          <a href="https://www.linkedin.com/company/nightshift-ai/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
         </div>
       </div>
       <div><div class="footer-col-title">Product</div><ul class="footer-links"><li><a href="/product.html">Product overview</a></li><li><a href="/who-we-serve.html">Who we serve</a></li><li><a href="/why-nightshift.html">Why NightShift</a></li><li><a href="/virtual-front-desk-vs-call-center.html">vs. Call centers</a></li></ul></div>
       <div><div class="footer-col-title">Company</div><ul class="footer-links"><li><a href="/about.html">About</a></li><li><a href="/packages.html">Packages</a></li><li><a href="/faq.html">FAQ</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
-      <div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><a href="/privacy.html">Privacy</a></li><li><a href="/terms.html">Terms</a></li><li><a href="/cookies.html">Cookies</a></li><li><a href="/security.html">Security</a></li></ul></div>
+      <div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><a href="/privacy.html">Privacy</a></li><li><a href="/terms.html">Terms</a></li><li><a href="/msa.html">MSA</a></li><li><a href="/security.html">Security</a></li></ul></div>
     </div>
     <div class="footer-bottom">
-      <p>© 2026 NightShift AI. All rights reserved.</p>
-      <div class="footer-bottom-links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
+      <p>&#169; 2026 NightShift AI. All rights reserved.</p>
+      <div class="footer-bottom-links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/msa.html">MSA</a></div>
     </div>
-  </div>
-</footer>
-
-  </div>
-
-  <script>
-    // Nav
-    (function() {
-      var btn = document.getElementById('btnMenu'), menu = document.getElementById('mobileMenu');
-      if (!btn || !menu) return;
-      btn.addEventListener('click', function() { var o = menu.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
-      document.addEventListener('click', function(e) { if (!e.target.closest('#btnMenu') && !e.target.closest('#mobileMenu')) { menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
-    })();
-
-    // Scroll reveal
-    (function() {
-      if (!window.IntersectionObserver) return;
-      var io = new IntersectionObserver(function(entries) { entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } }); }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
-      document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
-    })();
-
-    // Type toggle
-    (function() {
-      var btnSingle = document.getElementById('btnSingle');
-      var requestType = document.getElementById('request_type');
-      var formTitle = document.getElementById('formTitle');
-      var propCount = document.getElementById('property_count');
-
-      function setMode(mode) {
-        if (mode === 'single') {
-          btnSingle.classList.add('active');
-          requestType.value = 'Single property';
-          formTitle.textContent = 'Request a quote';
-          propCount.placeholder = 'Optional (e.g., 5)';
-          propCount.removeAttribute('required');
-        }
-      }
-
-      btnSingle.addEventListener('click', function() { setMode('single'); });
-    })();
-
-    // Formspree submit
-    (function() {
-      var ENDPOINT = 'https://formspree.io/f/mbdlneev';
-      var form = document.getElementById('quoteForm');
-      var status = document.getElementById('formStatus');
-      var submitBtn = document.getElementById('submitBtn');
-
-      function setStatus(msg, type) {
-        status.textContent = msg;
-        status.className = 'form-status show ' + (type || '');
-      }
-
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        var hp = form.querySelector('input[name="company"]');
-        if (hp && hp.value) { window.location.href = '/thanks.html'; return; }
-
-        submitBtn.disabled = true;
-        setStatus('Sending…');
-
-        try {
-          var fd = new FormData(form);
-          var emailEl = document.getElementById('email');
-          if (emailEl && emailEl.value) fd.set('_replyto', emailEl.value);
-          fd.set('_subject', 'NightShift AI — New Contact Request (' + (document.getElementById('request_type').value) + ')');
-
-          var res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd });
-          if (res.ok) {
-            setStatus('Sent! Redirecting…', 'ok');
-            setTimeout(function() { window.location.href = '/thanks.html'; }, 700);
-          } else {
-            setStatus('Something went wrong. Please try again or call us directly.', 'err');
-          }
-        } catch(err) {
-          setStatus('Network error. Please try again or call us.', 'err');
-        } finally {
-          submitBtn.disabled = false;
-        }
-      });
-    })();
-  </script>
-
+  </div></footer>
+</div>
+<script>
+var ZAPIER = 'https://hooks.zapier.com/hooks/catch/25632035/4yqgvxn/';
+document.getElementById('inquiryForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('submitBtn');
+  var status = document.getElementById('formStatus');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  var fd = new FormData(this);
+  var data = {};
+  fd.forEach(function(v,k){ data[k]=v; });
+  try {
+    await fetch(ZAPIER, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)});
+    status.textContent = "Message sent — we\'ll be in touch within 24 hours.";
+    status.className = 'form-status show ok';
+    this.reset();
+  } catch(err) {
+    status.textContent = 'Something went wrong. Email founder@nightshifthotels.com directly.';
+    status.className = 'form-status show err';
+  }
+  btn.disabled = false; btn.textContent = 'Send message';
+});
+</script>
 </body>
 </html>
