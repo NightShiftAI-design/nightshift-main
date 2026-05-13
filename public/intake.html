@@ -970,10 +970,13 @@ async function handlePayment() {
     if (result.error) throw new Error(result.error.message);
 
     if (result.paymentIntent.status === 'succeeded') {
-      // Payment good — now provision the client
+      // Payment good — store Stripe IDs and provision the client
       formData.payment_intent_id = result.paymentIntent.id;
       formData.payment_status = 'paid';
       formData.setup_amount = pricing.setup;
+      formData.stripe_customer_id = piData.customer_id || '';
+      formData.stripe_subscription_id = piData.subscription_id || '';
+      formData.trial_end = piData.trial_end || '';
 
       var provRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/provision-client', {
         method: 'POST',
