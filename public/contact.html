@@ -116,10 +116,6 @@
     .form-sub { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.6; }
 
     /* TYPE TOGGLE */
-    .type-toggle { display: flex; gap: 8px; flex-wrap: wrap; padding: 20px 32px; border-bottom: 1px solid var(--border); }
-    .type-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border2); background: rgba(255,255,255,.03); color: var(--text2); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
-    .type-btn:hover { background: rgba(255,255,255,.07); color: var(--text); }
-    .type-btn.active { background: rgba(79,140,255,.12); border-color: rgba(79,140,255,.3); color: var(--accent); }
 
     /* FORM FIELDS */
     .form-body { padding: 24px 32px 32px; }
@@ -151,6 +147,20 @@
     .field select option { background: var(--surface2); }
     .field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
     .field-hint { font-size: 11px; color: var(--text3); line-height: 1.5; }
+    .form-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 20px 0 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+      margin-top: 4px;
+    }
+    .form-section-label:first-of-type { padding-top: 0; }
+    .req { color: rgba(248,113,113,.8); font-weight: 600; }
+    .opt { font-weight: 400; color: var(--text3); font-size: 10px; letter-spacing: .03em; text-transform: none; }
 
     .form-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
     .form-note { font-size: 12px; color: var(--text3); line-height: 1.5; }
@@ -343,14 +353,10 @@
 
       <!-- FORM -->
       <div class="form-card reveal" role="main" aria-label="Quote request form">
+
         <div class="form-top">
           <h2 class="form-title" id="formTitle">Request a quote</h2>
           <p class="form-sub">We only use this information to respond and tailor your configuration — policies, routing, and escalation.</p>
-        </div>
-
-        <div class="type-toggle" aria-label="Request type">
-          <button type="button" class="type-btn active" id="btnSingle">Single property</button>
-          
         </div>
 
         <div class="form-body">
@@ -360,49 +366,38 @@
             <input type="hidden" name="_subject" value="NightShift AI — New Contact Request" />
             <input type="hidden" name="request_type" id="request_type" value="Single property" />
 
+            <!-- Section: Contact -->
+            <div class="form-section-label">Contact</div>
             <div class="form-grid">
               <div class="field">
-                <label for="name">Your name</label>
+                <label for="name">Your name <span class="req">*</span></label>
                 <input id="name" name="name" required autocomplete="name" placeholder="First and last" />
               </div>
               <div class="field">
-                <label for="email">Email address</label>
+                <label for="email">Email address <span class="req">*</span></label>
                 <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@yourhotel.com" />
               </div>
               <div class="field">
-                <label for="phone">Phone (optional)</label>
-                <input id="phone" name="phone" autocomplete="tel" placeholder="your@email.com" />
+                <label for="phone">Phone <span class="opt">(optional)</span></label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 (000) 000-0000" />
               </div>
               <div class="field">
-                <label for="hotel">Hotel / Group name</label>
+                <label for="hotel">Hotel / Group name <span class="req">*</span></label>
                 <input id="hotel" name="hotel" required placeholder="e.g., Mountain View Inn" />
               </div>
+            </div>
+
+            <!-- Section: Property -->
+            <div class="form-section-label">Property</div>
+            <div class="form-grid">
               <div class="field">
-                <label for="property_type">Property type</label>
+                <label for="property_type">Property type <span class="req">*</span></label>
                 <select id="property_type" name="property_type" required>
                   <option value="">Select one</option>
                   <option>Independent hotel / motel</option>
                   <option>Franchise hotel</option>
                   <option>Extended stay</option>
                   <option>Other</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="rooms">Rooms per property</label>
-                <input id="rooms" name="rooms" inputmode="numeric" placeholder="e.g., 62" />
-              </div>
-              <div class="field" id="propCountWrap">
-                <label for="property_count">Number of properties</label>
-                <input id="property_count" name="property_count" inputmode="numeric" placeholder="Optional (e.g., 5)" />
-              </div>
-              <div class="field">
-                <label for="call_volume">Estimated call volume</label>
-                <select id="call_volume" name="call_volume">
-                  <option value="">Not sure</option>
-                  <option>0–10 calls/night</option>
-                  <option>10–25 calls/night</option>
-                  <option>25–50 calls/night</option>
-                  <option>50+ calls/night</option>
                 </select>
               </div>
               <div class="field">
@@ -419,6 +414,29 @@
                 </select>
               </div>
               <div class="field">
+                <label for="rooms">Rooms per property</label>
+                <input id="rooms" name="rooms" inputmode="numeric" placeholder="e.g., 62" />
+              </div>
+              <div class="field" id="propCountWrap">
+                <label for="property_count">Number of properties</label>
+                <input id="property_count" name="property_count" inputmode="numeric" placeholder="e.g., 1" />
+              </div>
+            </div>
+
+            <!-- Section: Operations -->
+            <div class="form-section-label">Operations</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="call_volume">Estimated call volume</label>
+                <select id="call_volume" name="call_volume">
+                  <option value="">Not sure</option>
+                  <option>0–10 calls/night</option>
+                  <option>10–25 calls/night</option>
+                  <option>25–50 calls/night</option>
+                  <option>50+ calls/night</option>
+                </select>
+              </div>
+              <div class="field">
                 <label for="current_setup">Current after-hours setup</label>
                 <select id="current_setup" name="current_setup">
                   <option value="">Select one</option>
@@ -430,13 +448,13 @@
                 </select>
               </div>
               <div class="field full">
-                <label for="message">What do you want NightShift to handle?</label>
-                <textarea id="message" name="message" required placeholder="Examples: late check-ins, rate quotes (nightly/weekly), deposits, pets + service animal flow, lockouts, noise complaints, directions/policies, escalation contacts…"></textarea>
-                <span class="field-hint">Tip: include your top 3 after-hours pain points.</span>
+                <label for="message">What do you want NightShift to handle? <span class="req">*</span></label>
+                <textarea id="message" name="message" required placeholder="Examples: late check-ins, rate quotes, deposits, pets + service animal flow, lockouts, noise complaints, directions, policies…"></textarea>
+                <span class="field-hint">Include your top 3 after-hours pain points for the fastest configuration.</span>
               </div>
               <div class="field full">
-                <label for="escalation">Escalation contacts (optional)</label>
-                <textarea id="escalation" name="escalation" style="min-height:80px;" placeholder="Who should urgent calls route to? (GM / front desk / on-call maintenance)"></textarea>
+                <label for="escalation">Escalation contacts <span class="opt">(optional)</span></label>
+                <textarea id="escalation" name="escalation" style="min-height:72px;" placeholder="Who should urgent calls route to? e.g. GM cell, on-call maintenance, owner direct"></textarea>
               </div>
             </div>
 
@@ -446,8 +464,8 @@
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <a href="mailto:founder@nightshifthotels.com" class="btn-secondary">Or email us</a>
-              <span class="form-note">Typical setup under ~10 minutes after configuration.</span>
             </div>
+            <p class="form-note" style="margin-top:10px;">Typical setup under 10 minutes after configuration. Fields marked <span class="req">*</span> are required.</p>
 
             <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
           </form>
