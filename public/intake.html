@@ -842,9 +842,19 @@ function goToPayment() {
       var chk = false;
       grp.forEach(function(r) { if (r.checked) chk = true; });
       if (!chk) { valid = false; }
+    } else if (el.type === 'checkbox') {
+      if (!el.checked) { valid = false; el.closest('label').style.outline = '1px solid #ff6b6b'; }
+      else { el.closest('label').style.outline = ''; }
     } else if (!el.value.trim()) { valid = false; el.style.borderColor = '#ff6b6b'; }
+    else { el.style.borderColor = ''; }
   });
-  if (!valid) return;
+  if (!valid) {
+    var status = document.getElementById('formStatus');
+    if (status) { status.textContent = 'Please complete all required fields and agree to the terms before continuing.'; status.className = 'form-status show err'; }
+    return;
+  }
+  var status = document.getElementById('formStatus');
+  if (status) { status.className = 'form-status'; }
 
   // Collect all form data
   var fd = new FormData(document.getElementById('intakeForm'));
