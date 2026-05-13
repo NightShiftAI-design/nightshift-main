@@ -285,7 +285,7 @@
   </div></footer>
 </div>
 <script>
-var ZAPIER = 'https://hooks.zapier.com/hooks/catch/25632035/4yqgvxn/';
+var CONTACT_ENDPOINT = 'https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/contact-inquiry';
 document.getElementById('inquiryForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   var btn = document.getElementById('submitBtn');
@@ -295,7 +295,7 @@ document.getElementById('inquiryForm').addEventListener('submit', async function
   var data = {};
   fd.forEach(function(v,k){ data[k]=v; });
   try {
-    await fetch(ZAPIER, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)});
+    await fetch(CONTACT_ENDPOINT, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     status.textContent = "Message sent — we\'ll be in touch within 24 hours.";
     status.className = 'form-status show ok';
     this.reset();

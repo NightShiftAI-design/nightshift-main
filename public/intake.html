@@ -664,13 +664,18 @@
               </div>
               <div style="border-top:1px solid var(--border);padding-top:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                  <span style="font-size:14px;color:var(--text2);">One-time setup fee (due today)</span>
-                  <span id="setupAmount" style="font-family:var(--font-display);font-size:20px;font-weight:700;">—</span>
+                  <span style="font-size:14px;color:var(--text2);">One-time setup fee</span>
+                  <span id="setupAmount" style="font-size:14px;color:var(--text2);">—</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <span style="font-size:13px;color:var(--text3);">Monthly subscription (starts on go-live)</span>
-                  <span id="monthlyAmount" style="font-size:13px;color:var(--text3);">—</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                  <span style="font-size:14px;color:var(--text2);">First month subscription</span>
+                  <span id="monthlyAmount" style="font-size:14px;color:var(--text2);">—</span>
                 </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:12px;">
+                  <span style="font-size:15px;font-weight:600;color:var(--text);">Total due today</span>
+                  <span id="totalAmount" style="font-family:var(--font-display);font-size:22px;font-weight:800;">—</span>
+                </div>
+                <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:right;">Then <span id="recurringAmount">—</span>/month starting next month</div>
               </div>
             </div>
 
@@ -839,9 +844,9 @@ var cardElement = null;
 var formData = {};
 
 var TIER_PRICING = {
-  'core':  { name: 'Core',  monthly: '$399/mo', setup: 249,  setupDisplay: '$249',  priceId: 'price_core_setup_249'  },
-  'pro':   { name: 'Pro',   monthly: '$699/mo', setup: 449,  setupDisplay: '$449',  priceId: 'price_pro_setup_449'   },
-  'elite': { name: 'Elite', monthly: '$1,499/mo', setup: 899, setupDisplay: '$899', priceId: 'price_elite_setup_899' },
+  'core':  { name: 'Core',  monthly: '$399/mo', monthlyRaw: 399, setup: 249,  setupDisplay: '$249'  },
+  'pro':   { name: 'Pro',   monthly: '$699/mo', monthlyRaw: 699, setup: 449,  setupDisplay: '$449'  },
+  'elite': { name: 'Elite', monthly: '$1,499/mo', monthlyRaw: 1499, setup: 899, setupDisplay: '$899' },
 };
 
 function goToPayment() {
@@ -896,17 +901,21 @@ function goToPayment() {
 }
 
 function initPaymentStep() {
-  // Show tier summary
   var tier = (formData.tier || 'core').toLowerCase();
   var pricing = TIER_PRICING[tier] || TIER_PRICING.core;
   var tn = document.getElementById('tierName');
   var td = document.getElementById('tierDetails');
   var sa = document.getElementById('setupAmount');
   var ma = document.getElementById('monthlyAmount');
+  var ta = document.getElementById('totalAmount');
+  var ra = document.getElementById('recurringAmount');
   if (tn) tn.textContent = 'NightShift AI ' + pricing.name;
-  if (td) td.textContent = pricing.monthly + ' after go-live · ' + pricing.setupDisplay + ' setup fee due today';
+  if (td) td.textContent = 'Setup + first month charged today. Recurring monthly billing starts next month.';
   if (sa) sa.textContent = pricing.setupDisplay;
   if (ma) ma.textContent = pricing.monthly;
+  var totalCents = pricing.setup + pricing.monthlyRaw;
+  if (ta) ta.textContent = '$' + (totalCents).toLocaleString();
+  if (ra) ra.textContent = pricing.monthly;
 
   // Mount card element
   if (!cardElement) {
