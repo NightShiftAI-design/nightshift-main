@@ -149,6 +149,7 @@
     .footer-inner a { font-size: 12px; color: var(--text3); text-decoration: none; }
     .footer-inner a:hover { color: var(--text2); }
   </style>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -183,6 +184,7 @@
           <div class="prog-step" data-step="5">5. Policies</div>
           <div class="prog-step" data-step="6">6. Local</div>
           <div class="prog-step" data-step="7">7. AI voice</div>
+          <div class="prog-step" data-step="8">8. Payment</div>
         </div>
       </div>
 
@@ -209,7 +211,7 @@
               </div>
               <div class="field full">
                 <label>Property name <span class="req">*</span></label>
-                <input name="property_name" required placeholder="e.g., Mountain Inn" />
+                <input name="property_name" required placeholder="e.g., Riverside Inn" />
               </div>
               <div class="field">
                 <label>Property type <span class="req">*</span></label>
@@ -224,19 +226,19 @@
               </div>
               <div class="field">
                 <label>Number of rooms <span class="req">*</span></label>
-                <input name="room_count" type="number" required placeholder="e.g., 62" />
+                <input name="room_count" type="number" required placeholder="e.g., 48" />
               </div>
               <div class="field full">
                 <label>Street address <span class="req">*</span></label>
-                <input name="address" required placeholder="e.g., 7875 Rhea County Highway" />
+                <input name="address" required placeholder="e.g., 1200 Main Street" />
               </div>
               <div class="field">
                 <label>City <span class="req">*</span></label>
-                <input name="city" required placeholder="e.g., Dayton" />
+                <input name="city" required placeholder="e.g., Nashville" />
               </div>
               <div class="field">
                 <label>State / ZIP <span class="req">*</span></label>
-                <input name="state_zip" required placeholder="e.g., TN 37321" />
+                <input name="state_zip" required placeholder="e.g., TN 37201" />
               </div>
               <div class="field">
                 <label>Property website <span class="opt">(optional)</span></label>
@@ -528,7 +530,7 @@
             <div class="form-grid">
               <div class="field">
                 <label>Nearest airport</label>
-                <input name="airport" placeholder="e.g., Chattanooga (CHA)" />
+                <input name="airport" placeholder="e.g., Nashville (BNA)" />
               </div>
               <div class="field">
                 <label>Miles from airport</label>
@@ -536,30 +538,30 @@
               </div>
               <div class="field full">
                 <label>Nearest interstate / highway</label>
-                <input name="highway" placeholder="e.g., I-75, exit 52" />
+                <input name="highway" placeholder="e.g., I-40, exit 210" />
               </div>
             </div>
             <hr class="form-divider">
             <div class="form-grid">
               <div class="field">
                 <label>Top nearby attraction 1</label>
-                <input name="attraction_1" placeholder="e.g., Tennessee Aquarium (20 min)" />
+                <input name="attraction_1" placeholder="e.g., State Capitol (15 min)" />
               </div>
               <div class="field">
                 <label>Top nearby attraction 2</label>
-                <input name="attraction_2" placeholder="e.g., Chickamauga Battlefield" />
+                <input name="attraction_2" placeholder="e.g., Local historic district" />
               </div>
               <div class="field">
                 <label>Top nearby attraction 3</label>
-                <input name="attraction_3" placeholder="e.g., Lookout Mountain" />
+                <input name="attraction_3" placeholder="e.g., Nearby state park" />
               </div>
               <div class="field">
                 <label>Recommended restaurant 1</label>
-                <input name="restaurant_1" placeholder="e.g., Shoney's — 5 min drive" />
+                <input name="restaurant_1" placeholder="e.g., Local diner — 5 min drive" />
               </div>
               <div class="field">
                 <label>Recommended restaurant 2</label>
-                <input name="restaurant_2" placeholder="e.g., Cracker Barrel — 3 min" />
+                <input name="restaurant_2" placeholder="e.g., Family restaurant — 3 min" />
               </div>
               <div class="field">
                 <label>Recommended restaurant 3</label>
@@ -590,7 +592,7 @@
             <div class="form-grid">
               <div class="field full">
                 <label>Preferred agent greeting <span class="req">*</span></label>
-                <input name="agent_greeting" required placeholder='e.g., "Thank you for calling Mountain Inn, this is Aria — how can I help you today?"' />
+                <input name="agent_greeting" required placeholder='e.g., "Thank you for calling Riverside Inn, this is Aria — how can I help you today?"' />
                 <span class="field-hint">Write it exactly as you want it spoken. Include your property name and the agent name.</span>
               </div>
               <div class="field">
@@ -624,9 +626,9 @@
             <div class="form-nav">
               <button type="button" class="btn-back" onclick="nextStep(6)">← Back</button>
               <span class="step-indicator">Step 7 of 7</span>
-              <button type="submit" class="btn-submit" id="submitBtn">
-                Submit intake
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              <button type="button" class="btn-next" onclick="goToPayment()">
+                Continue to payment
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
             <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
@@ -634,7 +636,56 @@
 
         </form>
 
+          <!-- SECTION 8: PAYMENT -->
+          <div class="form-section" id="sec8">
+            <div class="section-head">
+              <div class="section-num">Section 8 of 8</div>
+              <div class="section-title">Setup payment</div>
+              <div class="section-sub">A one-time setup fee is due now to begin configuration. Your monthly subscription starts on your go-live date.</div>
+            </div>
+
+            <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;margin-bottom:20px;">
+              <div id="tierSummary" style="margin-bottom:20px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Your selected plan</div>
+                <div id="tierName" style="font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:4px;">—</div>
+                <div id="tierDetails" style="font-size:13px;color:var(--text3);">—</div>
+              </div>
+              <div style="border-top:1px solid var(--border);padding-top:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span style="font-size:14px;color:var(--text2);">One-time setup fee (due today)</span>
+                  <span id="setupAmount" style="font-family:var(--font-display);font-size:20px;font-weight:700;">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:13px;color:var(--text3);">Monthly subscription (starts on go-live)</span>
+                  <span id="monthlyAmount" style="font-size:13px;color:var(--text3);">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin-bottom:20px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;">Card details</div>
+              <div id="card-element" style="padding:12px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;"></div>
+              <div id="card-errors" style="color:#ff6b6b;font-size:12px;margin-top:8px;min-height:18px;"></div>
+            </div>
+
+            <div style="font-size:12px;color:var(--text3);margin-bottom:20px;display:flex;align-items:flex-start;gap:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;opacity:.5;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Payments processed securely by Stripe. NightShift AI never stores your card details. Setup fee is non-refundable once your agent is configured.
+            </div>
+
+            <div class="form-nav">
+              <button type="button" class="btn-back" onclick="nextStep(7)">← Back</button>
+              <span class="step-indicator">Step 8 of 8</span>
+              <button type="button" class="btn-submit" id="payBtn" onclick="handlePayment()">
+                Pay setup fee &amp; submit
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </button>
+            </div>
+            <div id="payStatus" class="form-status" role="status" aria-live="polite"></div>
+          </div>
+
         <!-- SUCCESS -->
+
         <div class="success-screen" id="successScreen">
           <div class="success-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -685,6 +736,7 @@ function nextStep(step) {
     else if (i + 1 === step) s.className = 'prog-step active';
     else s.className = 'prog-step';
   });
+  if (step === 8) initPaymentStep();
   currentStep = step;
   document.getElementById('sec' + currentStep).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -766,6 +818,150 @@ document.getElementById('intakeForm').addEventListener('submit', async function(
     btn.disabled = false;
     btn.textContent = 'Submit intake';
   }
+
+// ── Stripe Payment ────────────────────────────────────────────────────────────
+var stripe = Stripe('pk_test_51TWiNq3rBO05OXdzasCo0ZUgh8Qpl0FznWFwdVHYWIse0A1QMsc2rW08908KZ6RgM9VxrluqNgMZsvvopjj07W1200Me5eBHp3');
+var elements = stripe.elements();
+var cardElement = null;
+var formData = {};
+
+var TIER_PRICING = {
+  'core':  { name: 'Core',  monthly: '$399/mo', setup: 249,  setupDisplay: '$249',  priceId: 'price_core_setup_249'  },
+  'pro':   { name: 'Pro',   monthly: '$699/mo', setup: 449,  setupDisplay: '$449',  priceId: 'price_pro_setup_449'   },
+  'elite': { name: 'Elite', monthly: '$1,499/mo', setup: 899, setupDisplay: '$899', priceId: 'price_elite_setup_899' },
+};
+
+function goToPayment() {
+  // Validate section 7 first
+  var sec = document.getElementById('sec7');
+  var required = sec.querySelectorAll('[required]');
+  var valid = true;
+  required.forEach(function(el) {
+    if (el.type === 'radio') {
+      var grp = sec.querySelectorAll('[name="' + el.name + '"]');
+      var chk = false;
+      grp.forEach(function(r) { if (r.checked) chk = true; });
+      if (!chk) { valid = false; }
+    } else if (!el.value.trim()) { valid = false; el.style.borderColor = '#ff6b6b'; }
+  });
+  if (!valid) return;
+
+  // Collect all form data
+  var fd = new FormData(document.getElementById('intakeForm'));
+  fd.forEach(function(v, k) {
+    if (formData[k]) {
+      formData[k] = Array.isArray(formData[k]) ? formData[k].concat(v) : [formData[k], v];
+    } else {
+      formData[k] = v;
+    }
+  });
+
+  nextStep(8);
+}
+
+function initPaymentStep() {
+  // Show tier summary
+  var tier = (formData.tier || 'core').toLowerCase();
+  var pricing = TIER_PRICING[tier] || TIER_PRICING.core;
+  var tn = document.getElementById('tierName');
+  var td = document.getElementById('tierDetails');
+  var sa = document.getElementById('setupAmount');
+  var ma = document.getElementById('monthlyAmount');
+  if (tn) tn.textContent = 'NightShift AI ' + pricing.name;
+  if (td) td.textContent = pricing.monthly + ' after go-live · ' + pricing.setupDisplay + ' setup fee due today';
+  if (sa) sa.textContent = pricing.setupDisplay;
+  if (ma) ma.textContent = pricing.monthly;
+
+  // Mount card element
+  if (!cardElement) {
+    cardElement = elements.create('card', {
+      style: {
+        base: {
+          color: '#f0f4ff',
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: '14px',
+          '::placeholder': { color: 'rgba(240,244,255,.42)' },
+          iconColor: '#4f8cff',
+        },
+        invalid: { color: '#ff6b6b', iconColor: '#ff6b6b' },
+      }
+    });
+    cardElement.mount('#card-element');
+    cardElement.on('change', function(e) {
+      var el = document.getElementById('card-errors');
+      if (el) el.textContent = e.error ? e.error.message : '';
+    });
+  }
+}
+
+async function handlePayment() {
+  var btn = document.getElementById('payBtn');
+  var status = document.getElementById('payStatus');
+  if (!cardElement) return;
+  btn.disabled = true;
+  btn.textContent = 'Processing…';
+
+  try {
+    var tier = (formData.tier || 'core').toLowerCase();
+    var pricing = TIER_PRICING[tier] || TIER_PRICING.core;
+
+    // Create PaymentIntent via Supabase edge function
+    var piRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tier: tier,
+        amount: pricing.setup * 100, // cents
+        property_name: formData.property_name || '',
+        contact_email: formData.contact_email || '',
+        contact_name: formData.contact_name || '',
+      })
+    });
+    var piData = await piRes.json();
+    if (!piData.client_secret) throw new Error('Payment setup failed');
+
+    // Confirm card payment
+    var result = await stripe.confirmCardPayment(piData.client_secret, {
+      payment_method: {
+        card: cardElement,
+        billing_details: {
+          name: formData.contact_name || '',
+          email: formData.contact_email || '',
+        }
+      }
+    });
+
+    if (result.error) throw new Error(result.error.message);
+
+    if (result.paymentIntent.status === 'succeeded') {
+      // Payment good — now provision the client
+      formData.payment_intent_id = result.paymentIntent.id;
+      formData.payment_status = 'paid';
+      formData.setup_amount = pricing.setup;
+
+      var provRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/provision-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      var provData = await provRes.json();
+
+      if (provData.ok) {
+        document.getElementById('intakeForm').style.display = 'none';
+        document.getElementById('successScreen').classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error('Agent setup failed — payment was taken. Email founder@nightshifthotels.com with reference: ' + result.paymentIntent.id);
+      }
+    }
+  } catch(err) {
+    status.textContent = err.message;
+    status.className = 'form-status show err';
+    btn.disabled = false;
+    btn.textContent = 'Pay setup fee & submit';
+  }
+}
+
 });
 </script>
 
