@@ -832,29 +832,42 @@ var TIER_PRICING = {
 };
 
 function goToPayment() {
-  // Validate section 7 first
   var sec = document.getElementById('sec7');
-  var required = sec.querySelectorAll('[required]');
   var valid = true;
-  required.forEach(function(el) {
+
+  // Check text/radio required fields
+  sec.querySelectorAll('[required]').forEach(function(el) {
+    if (el.type === 'checkbox') return; // handled separately
     if (el.type === 'radio') {
       var grp = sec.querySelectorAll('[name="' + el.name + '"]');
       var chk = false;
       grp.forEach(function(r) { if (r.checked) chk = true; });
-      if (!chk) { valid = false; }
-    } else if (el.type === 'checkbox') {
-      if (!el.checked) { valid = false; el.closest('label').style.outline = '1px solid #ff6b6b'; }
-      else { el.closest('label').style.outline = ''; }
-    } else if (!el.value.trim()) { valid = false; el.style.borderColor = '#ff6b6b'; }
-    else { el.style.borderColor = ''; }
+      if (!chk) valid = false;
+    } else if (!el.value.trim()) {
+      valid = false;
+      el.style.borderColor = '#ff6b6b';
+    } else {
+      el.style.borderColor = '';
+    }
   });
+
+  // Check legal agreement checkbox separately
+  var agree = document.getElementById('agreeTerms');
+  if (agree && !agree.checked) {
+    valid = false;
+    agree.closest('div').style.outline = '1px solid #ff6b6b';
+  } else if (agree) {
+    agree.closest('div').style.outline = '';
+  }
+
   if (!valid) {
-    var status = document.getElementById('formStatus');
-    if (status) { status.textContent = 'Please complete all required fields and agree to the terms before continuing.'; status.className = 'form-status show err'; }
+    var s = document.getElementById('formStatus');
+    if (s) { s.textContent = 'Please fill all required fields and check the legal agreement to continue.'; s.className = 'form-status show err'; }
     return;
   }
-  var status = document.getElementById('formStatus');
-  if (status) { status.className = 'form-status'; }
+
+  var s = document.getElementById('formStatus');
+  if (s) s.className = 'form-status';
 
   // Collect all form data
   var fd = new FormData(document.getElementById('intakeForm'));
