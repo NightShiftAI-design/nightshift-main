@@ -220,6 +220,43 @@
     .reveal { opacity: 0; transform: translateY(20px); transition: opacity .55s var(--ease), transform .55s var(--ease); }
     .reveal.visible { opacity: 1; transform: none; }
     @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .bg-orb, .badge-dot, .hero-headline em { animation: none; } }
+    /* ── Trust Strip ─────────────────────────────── */
+    .trust-strip {
+      border-top: 1px solid rgba(255,255,255,.07);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.02);
+      padding: 14px 0;
+    }
+    .trust-strip-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,.45);
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+    .trust-item svg { opacity: .5; flex-shrink: 0; }
+    .trust-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255,255,255,.1);
+      flex-shrink: 0;
+    }
+    @media (max-width: 680px) {
+      .trust-strip-inner { gap: 0; justify-content: flex-start; }
+      .trust-divider { display: none; }
+      .trust-item { padding: 4px 12px; }
+    }
   </style>
 
 </head>
