@@ -576,12 +576,19 @@ async function loadProperties() {
     pendingList.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg><p>No pending reviews</p></div>';
   } else {
     pendingList.innerHTML = pending.map(p => `
-      <div class="pending-item">
+      <div class="pending-item" id="pending-${p.id}">
         <div class="pending-item-name">${escHtml(p.name)}</div>
-        <div class="pending-item-meta">${(p.tier||'').toUpperCase()} · ${p.contact_email||'No email'} · Submitted ${timeAgo(p.provisioned_at)}</div>
+        <div class="pending-item-meta">${(p.tier||'').toUpperCase()} · ${p.contact_email||''} · ${p.contact_phone||''} · Submitted ${timeAgo(p.provisioned_at)}</div>
+        <div style="margin:10px 0 8px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;">Zapier Reservation Webhook URL <span style="color:var(--accent3)">(optional — or use auto-notify)</span></div>
+          <input id="zapier-${p.id}" type="text" placeholder="https://hooks.zapier.com/hooks/catch/... (leave blank to use auto email+SMS)" 
+            style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12px;font-family:var(--font-mono);outline:none;"
+            value="${escHtml(p.zapier_webhook_url||'')}">
+        </div>
         <div class="pending-item-actions">
-          ${p.approve_token ? `<button class="btn-sm primary" onclick="activateClient('${p.id}','${p.approve_token}')">Activate Agent</button>` : '<span style="font-size:11px;color:var(--text3)">Token used</span>'}
+          ${p.approve_token ? `<button class="btn-sm primary" onclick="activateClientWithZapier('${p.id}','${p.approve_token}')">✓ Activate Agent</button>` : '<span style="font-size:11px;color:var(--text3)">Already activated</span>'}
           <button class="btn-sm ghost" onclick="copyScript('${p.id}')">Copy script</button>
+          <button class="btn-sm ghost" onclick="testNotification('${p.id}')">Test notify</button>
         </div>
       </div>
     `).join('');
@@ -663,10 +670,64 @@ async function loadReservations() {
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
-async function activateClient(propertyId, token) {
-  const url = `${SUPABASE_URL}/functions/v1/activate-client?token=${token}`;
-  window.open(url, '_blank');
-  showToast('Activation page opened in new tab', 'success');
+async function activateClientWithZapier(propertyId, token) {
+  const zapierInput = document.getElementById('zapier-' + propertyId);
+  const zapierUrl = zapierInput ? zapierInput.value.trim() : '';
+
+  // Save zapier URL to property first if provided
+  if (zapierUrl) {
+    await sb.from('properties').update({ zapier_webhook_url: zapierUrl }).eq('id', propertyId);
+    showToast('Zapier URL saved', 'success');
+  }
+
+  // Activate via edge function
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/activate-client?token=${token}`, {
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    const data = await res.json();
+    if (data.ok !== false) {
+      showToast('✓ Agent activated! Magic link sent to client.', 'success');
+      setTimeout(() => loadProperties(), 1500);
+    } else {
+      showToast('Error: ' + (data.error || 'Unknown'), 'error');
+    }
+  } catch(e) {
+    // Fallback — open in new tab
+    window.open(`${SUPABASE_URL}/functions/v1/activate-client?token=${token}`, '_blank');
+    showToast('Activation opened in new tab', 'success');
+  }
+}
+
+async function testNotification(propertyId) {
+  const { data: prop } = await sb.from('properties').select('*').eq('id', propertyId).single();
+  if (!prop) { showToast('Property not found', 'error'); return; }
+  // Fire test notification
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/notify-reservation`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    body: JSON.stringify({
+      test: true,
+      property_id: propertyId,
+      property_name: prop.name,
+      contact_email: prop.contact_email,
+      transfer_phone: prop.transfer_phone,
+      zapier_webhook_url: prop.zapier_webhook_url,
+      guest_name: 'Test Guest',
+      arrival_date: '2026-06-15',
+      nights: 2,
+      room_type: 'King Standard',
+      guests: 2,
+      pets: 'none',
+      rate_per_night: 99,
+      total_due: 198,
+      event: 'reservation_confirmed'
+    })
+  });
+  const d = await res.json();
+  showToast(d.ok ? '✓ Test notification sent to ' + prop.contact_email : 'Error: ' + d.error, d.ok ? 'success' : 'error');
 }
 
 async function confirmRevoke(propertyId, name) {
