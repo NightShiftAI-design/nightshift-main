@@ -544,22 +544,59 @@ async function loadCallLog() {
   renderCallList(calls, 'callLogFull', true);
 }
 
+function callIntent(c) {
+  // Derive a plain-English reason for the call from tags + summary
+  const tags = Array.isArray(c.tags)?c.tags:(typeof c.tags==='string'?JSON.parse(c.tags||'[]'):[]);
+  const t = tags.map(x=>x.toLowerCase());
+  if(t.includes('emergency')||t.includes('911')) return {icon:'🚨',label:'Emergency call',color:'var(--red)'};
+  if(t.includes('reservation')&&(t.includes('confirmed')||t.includes('request'))) return {icon:'📋',label:'Reservation booked',color:'var(--accent2)'};
+  if(t.includes('reservation')&&t.includes('not_confirmed')) return {icon:'📋',label:'Reservation inquiry — not confirmed',color:'var(--accent3)'};
+  if(t.includes('complaint')) return {icon:'⚠️',label:'Guest complaint',color:'var(--red)'};
+  if(t.includes('billing')) return {icon:'💳',label:'Billing question',color:'var(--accent3)'};
+  if(t.includes('modify_existing')) return {icon:'✏️',label:'Modify existing reservation',color:'var(--accent3)'};
+  if(t.includes('transfer')) return {icon:'↗️',label:'Transferred to staff',color:'var(--purple)'};
+  if(t.includes('info')) return {icon:'ℹ️',label:'Guest information request',color:'var(--text2)'};
+  return {icon:'📞',label:'General inquiry',color:'var(--text2)'};
+}
+
+function fmtDuration(secs) {
+  if(!secs) return null;
+  const m=Math.floor(secs/60), s=secs%60;
+  return m>0?`${m}m ${s}s`:`${s}s`;
+}
+
 function renderCallList(calls, containerId, showTranscript=false) {
   const el = document.getElementById(containerId);
-  if(!calls||calls.length===0){ el.innerHTML='<div class="empty"><p>No calls yet</p></div>'; return; }
+  if(!calls||calls.length===0){ el.innerHTML='<div class="empty"><p>No calls yet this period</p></div>'; return; }
   el.innerHTML = '<div class="call-list">'+calls.map(c=>{
+    const intent = callIntent(c);
+    const dur = fmtDuration(c.duration_seconds);
     const tags = Array.isArray(c.tags)?c.tags:(typeof c.tags==='string'?JSON.parse(c.tags||'[]'):[]);
-    const transcript = showTranscript&&c.transcript?`<div style="margin-top:8px;padding:10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.6;max-height:100px;overflow-y:auto;">${esc(c.transcript.substring(0,300))}${c.transcript.length>300?'...':''}</div>`:'';
+    const isEscalated = c.escalated || tags.includes('transfer');
+    const transcript = showTranscript&&c.transcript?`<div style="margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.7;max-height:120px;overflow-y:auto;border:1px solid var(--border);">${esc(c.transcript.substring(0,400))}${c.transcript.length>400?'...':''}</div>`:'';
+    const escalationBadge = isEscalated ? `<span style="font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(167,139,250,.1);color:var(--purple);font-weight:600;">Escalated</span>` : '';
     return `<div class="call-item">
-      <div class="call-top">
-        <span class="call-time">${fmtDate(c.created_at)}</span>
-        <span class="sentiment-pill ${c.sentiment||'neutral'}">${c.sentiment||'neutral'}</span>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:15px;">${intent.icon}</span>
+          <span style="font-size:13px;font-weight:600;color:${intent.color};">${intent.label}</span>
+          ${escalationBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          ${dur?`<span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);">${dur}</span>`:''}
+          <span class="sentiment-pill ${c.sentiment||'neutral'}">${c.sentiment||'neutral'}</span>
+        </div>
       </div>
-      <div class="call-summary">${esc(c.summary||'Call completed')}</div>
-      ${tags.length?`<div class="call-tags">${tags.map(t=>`<span class="call-tag">${esc(t)}</span>`).join('')}</div>`:''}
+      <div style="font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:6px;">${esc(c.summary||'Call completed')}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          ${tags.map(t=>`<span class="call-tag">${esc(t)}</span>`).join('')}
+        </div>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text3);">${fmtDate(c.created_at)}</span>
+      </div>
       ${transcript}
     </div>`;
-  }).join('')+'</div>';
+  }).join('')+ '</div>';
 }
 
 // ── Reservations ──
