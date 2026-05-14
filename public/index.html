@@ -1042,6 +1042,47 @@
       .badge-dot { animation: none; }
       .hero-headline em { animation: none; }
     }
+
+    /* ── Mobile Overrides ─────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      /* Hero */
+      .hero { padding: 48px 0 32px; }
+      .hero-title { font-size: clamp(28px, 9vw, 42px) !important; letter-spacing: -.02em; }
+      .hero-sub { font-size: 15px !important; }
+      .hero-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+      .hero-actions a, .hero-actions button { text-align: center; justify-content: center; }
+      /* Nav */
+      .nav-inner { padding: 0 16px; }
+      .brand-name { font-size: 14px; }
+      /* Stats */
+      .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+      .stat-number { font-size: 28px !important; }
+      /* Demo */
+      .demo-body { grid-template-columns: 1fr !important; }
+      /* Comparison table */
+      .ns-table { font-size: 11px; }
+      .ns-head .ns-col, .ns-row .ns-col { padding: 8px 6px; }
+      .ns-head .ns-col:first-child, .ns-row .ns-col:first-child { min-width: 100px; font-size: 11px; }
+      /* Pricing */
+      .pricing-grid { grid-template-columns: 1fr !important; }
+      .pkg-card { padding: 24px 20px; }
+      /* Trust */
+      .trust-grid { grid-template-columns: 1fr !important; }
+      /* Section headings */
+      .section-title { font-size: clamp(22px, 7vw, 32px) !important; }
+      /* CTA section */
+      .cta-row { flex-direction: column; gap: 10px; }
+      /* Container */
+      .container { padding: 0 16px; }
+      /* Footer */
+      .footer-inner { grid-template-columns: 1fr !important; gap: 28px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .footer-bottom-links { flex-wrap: wrap; gap: 12px; }
+    }
+    @media (max-width: 360px) {
+      .hero-title { font-size: 26px !important; }
+      .stats-grid { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body>
@@ -1610,4 +1651,3 @@
   </script>
 </body>
 </html>
-redeploy

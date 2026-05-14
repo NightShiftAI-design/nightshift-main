@@ -61,7 +61,8 @@
 
     /* PROGRESS */
     .progress-bar { display: flex; gap: 0; margin: 40px 0 0; }
-    .prog-step { flex: 1; padding: 10px 0; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); border-bottom: 2px solid var(--border); cursor: pointer; transition: color .2s, border-color .2s; }
+    .prog-step { flex: 1; padding: 10px 4px; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text3); border-bottom: 2px solid var(--border); cursor: pointer; transition: color .2s, border-color .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @media(max-width:600px){ .prog-step { font-size: 9px; padding: 8px 2px; letter-spacing: 0; } }
     .prog-step.active { color: var(--accent); border-color: var(--accent); }
     .prog-step.done { color: var(--accent2); border-color: var(--accent2); }
 
@@ -129,6 +130,8 @@
     .step-indicator { font-size: 12px; color: var(--text3); }
 
     /* STATUS */
+    .req-note { font-size: 11px; color: var(--text3); margin-top: 10px; text-align: right; }
+    .req-note span { color: #ff6b6b; font-weight: 600; }
     .form-status { margin-top: 16px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
     .form-status.show { display: block; }
     .form-status.ok { background: rgba(56,232,160,.1); color: var(--accent2); border: 1px solid rgba(56,232,160,.2); }
@@ -643,6 +646,7 @@
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
+            <p class="req-note"><span>*</span> Required fields</p>
             <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
           </div>
 
