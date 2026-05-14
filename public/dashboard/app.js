@@ -582,6 +582,11 @@
       q.gte("created_at", isoForSupabase(range.start)).lte("created_at", isoForSupabase(range.end));
     }
 
+    // Filter by property if client (not all-properties view)
+    if (state.selectedProperty && state.selectedProperty !== "__all__") {
+      q.eq("property_id", state.selectedProperty);
+    }
+
     const { data, error } = await q;
     if (error) throw error;
     return data || [];
