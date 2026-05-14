@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NightShift AI — Dashboard</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/dashboard/config.js"></script>
+<style>
+  body{background:#080c14;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:-apple-system,sans-serif;color:#f0f4ff;}
+  .loader{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .loader img{width:40px;height:40px;border-radius:10px;}
+  .spin{width:18px;height:18px;border:2px solid rgba(79,140,255,.2);border-top-color:#4f8cff;border-radius:50%;animation:sp .7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .loader p{font-size:12px;color:rgba(240,244,255,.35);}
+</style>
+</head>
+<body>
+<div class="loader">
+  <img src="/favicon-32x32.png" alt="NightShift AI">
+  <div class="spin"></div>
+  <p>Loading your workspace...</p>
+</div>
+<script>
+const FOUNDER = 'founder@nightshifthotels.com';
+const sb = supabase.createClient(window.NSA_CONFIG.SUPABASE_URL, window.NSA_CONFIG.SUPABASE_ANON_KEY);
+
+async function route() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    window.location.href = '/dashboard/index.html';
+    return;
+  }
+  if (session.user.email === FOUNDER) {
+    window.location.href = '/dashboard/founder.html';
+  } else {
+    window.location.href = '/dashboard/index.html';
+  }
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) route();
+});
+
+route();
+</script>
+</body>
+</html>

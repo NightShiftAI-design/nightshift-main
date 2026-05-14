@@ -398,11 +398,31 @@
       return false;
     }
 
-    if (session.user.email !== FOUNDER_EMAIL) {
-      showOverlay(true);
-      clearDataUI("Unauthorized email.");
-      await hardSignOut();
+    // Redirect founder to their dedicated command center
+    if (session.user.email === FOUNDER_EMAIL) {
+      window.location.href = '/dashboard/founder.html';
       return false;
+    }
+
+    // Verify client has a linked property
+    const { data: hu } = await supabaseClient
+      .from('hotel_users')
+      .select('property_id, role, tier')
+      .eq('user_id', session.user.id)
+      .limit(1)
+      .single();
+
+    if (!hu) {
+      showOverlay(true);
+      clearDataUI("No property found for your account. Contact founder@nightshifthotels.com");
+      return false;
+    }
+
+    // Set client's property as selected automatically
+    if (hu && hu.property_id) {
+      state.selectedProperty = hu.property_id;
+      const sel = document.getElementById('propertySelect');
+      if (sel) sel.value = hu.property_id;
     }
 
     showOverlay(false);
