@@ -8,138 +8,192 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/dashboard/config.js"></script>
 <style>
-:root {
-  --bg:#05070d;--bg2:#090c14;--surface:#0d1118;--surface2:#111720;--surface3:#161d28;
-  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
-  --text:#eef2ff;--text2:rgba(238,242,255,.6);--text3:rgba(238,242,255,.35);
-  --accent:#4f8cff;--accent2:#38e8a0;--accent3:#f59e0b;--red:#f87171;--purple:#a78bfa;
-  --font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
-}
+:root{--bg:#05070d;--bg2:#090c14;--surface:#0d1118;--surface2:#111720;--surface3:#161d28;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);--text:#eef2ff;--text2:rgba(238,242,255,.6);--text3:rgba(238,242,255,.35);--accent:#4f8cff;--accent2:#38e8a0;--accent3:#f59e0b;--red:#f87171;--purple:#a78bfa;--font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;--r:12px;--r2:18px;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+/* Auth */
 #authGate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;}
 #authGate.hidden{display:none;}
 .auth-box{text-align:center;max-width:380px;padding:0 24px;}
-.auth-box img{width:48px;height:48px;border-radius:12px;margin:0 auto 20px;display:block;}
-.auth-box h2{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:8px;}
-.auth-box p{font-size:14px;color:var(--text2);margin-bottom:20px;}
-.auth-email{width:100%;padding:10px 14px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:10px;}
-.auth-email:focus{border-color:rgba(79,140,255,.5);}
-.auth-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;width:100%;justify-content:center;}
-.auth-btn:hover{opacity:.85;}
-.auth-note{font-size:12px;color:var(--text3);margin-top:10px;}
+.auth-logo{width:52px;height:52px;border-radius:14px;margin:0 auto 20px;display:block;}
+.auth-box h2{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;}
+.auth-box p{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6;}
+.auth-input{width:100%;padding:11px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:10px;transition:border-color .15s;}
+.auth-input:focus{border-color:rgba(79,140,255,.5);}
+.auth-input::placeholder{color:var(--text3);}
+.auth-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+.auth-btn:hover{opacity:.88;}
+.auth-note{font-size:12px;color:var(--text3);margin-top:10px;line-height:1.6;}
 
+/* Layout */
 .layout{display:flex;min-height:100vh;}
+
+/* Sidebar */
 .sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .sidebar-logo img{width:28px;height:28px;border-radius:7px;}
 .sidebar-brand{font-family:var(--font-display);font-size:14px;font-weight:700;}
 .sidebar-tag{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-top:1px;}
 .nav-section{padding:12px 10px 4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);}
-.nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;color:var(--text2);text-decoration:none;transition:all .15s;margin:1px 8px;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;color:var(--text2);text-decoration:none;transition:all .15s;margin:1px 8px;cursor:pointer;background:none;border:none;width:calc(100% - 16px);text-align:left;font-family:var(--font-body);}
 .nav-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
 .nav-link.active{background:rgba(79,140,255,.12);color:var(--accent);}
 .nav-link svg{width:15px;height:15px;flex-shrink:0;opacity:.7;}
 .nav-link.active svg{opacity:1;}
-.nav-link.locked{opacity:.4;pointer-events:none;}
-.tier-gate{display:inline-flex;align-items:center;gap:4px;font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(167,139,250,.12);color:var(--purple);font-weight:600;letter-spacing:.05em;margin-left:auto;}
+.nav-link.locked{opacity:.35;cursor:not-allowed;}
+.tier-pill{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:rgba(167,139,250,.12);color:var(--purple);margin-left:auto;}
 .sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border);}
-.prop-selector{padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;color:var(--text2);font-family:var(--font-body);font-size:12px;width:100%;margin-bottom:8px;cursor:pointer;}
-.signout-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;width:100%;background:none;border:1px solid var(--border);border-radius:8px;color:var(--text3);font-family:var(--font-body);font-size:12px;cursor:pointer;transition:all .15s;}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px;}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.signout-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;width:100%;background:none;border:1px solid var(--border);border-radius:8px;color:var(--text3);font-family:var(--font-body);font-size:12px;cursor:pointer;transition:all .15s;margin-top:6px;}
 .signout-btn:hover{color:var(--red);border-color:rgba(248,113,113,.3);}
 
+/* Main */
 .main{flex:1;overflow-x:hidden;}
-.page-header{padding:32px 36px 24px;border-bottom:1px solid var(--border);}
-.page-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.property-name{font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px;}
-.property-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.tier-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px;}
-.tier-badge.core{background:rgba(255,255,255,.08);color:var(--text2);}
-.tier-badge.pro{background:rgba(79,140,255,.15);color:var(--accent);}
-.tier-badge.elite{background:rgba(167,139,250,.15);color:var(--purple);}
-.status-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--accent2);}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 3px rgba(56,232,160,.2);animation:pg 2s infinite;}
-@keyframes pg{0%,100%{box-shadow:0 0 0 3px rgba(56,232,160,.2)}50%{box-shadow:0 0 0 5px rgba(56,232,160,.05)}}
 
+/* Hero */
+.hero-section{padding:40px 48px 28px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.hero-section::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:300px;background:radial-gradient(ellipse,rgba(79,140,255,.07),transparent 70%);pointer-events:none;}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 3px rgba(56,232,160,.2);animation:pg 2s infinite;}
+@keyframes pg{0%,100%{box-shadow:0 0 0 3px rgba(56,232,160,.2)}50%{box-shadow:0 0 0 5px rgba(56,232,160,.04)}}
+.hero-title{font-family:var(--font-display);font-size:clamp(28px,3.5vw,48px);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin-bottom:4px;}
+.hero-title span{background:linear-gradient(135deg,#6ea8ff,#38e8a0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero-sub{font-size:13px;color:var(--text3);font-weight:300;}
+
+/* KPI */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
-.kpi-card{background:var(--bg2);padding:20px 24px;}
-.kpi-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
-.kpi-value{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.03em;}
+.kpi-card{background:var(--bg2);padding:22px 26px;}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.kpi-value{font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:4px;}
 .kpi-value.green{color:var(--accent2);}
 .kpi-value.blue{color:var(--accent);}
-.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.kpi-value.amber{color:var(--accent3);}
+.kpi-sub{font-size:11px;color:var(--text3);}
 @media(max-width:800px){.kpi-row{grid-template-columns:1fr 1fr;}}
-@media(max-width:500px){.kpi-row{grid-template-columns:1fr;}}
+@media(max-width:480px){.kpi-row{grid-template-columns:1fr;}}
 
-.section{padding:24px 28px;border-bottom:1px solid var(--border);}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.section-title{font-family:var(--font-display);font-size:14px;font-weight:700;}
-.section-link{font-size:12px;color:var(--accent);text-decoration:none;padding:4px 8px;border-radius:6px;}
+/* Content */
+.content-grid{display:grid;grid-template-columns:1fr 320px;gap:0;}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr;}}
+
+/* Sections */
+.section{padding:24px 32px;border-bottom:1px solid var(--border);}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.section-title{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:-.01em;}
+.section-link{font-size:12px;color:var(--accent);text-decoration:none;padding:5px 10px;border-radius:7px;transition:background .15s;cursor:pointer;background:none;border:none;font-family:var(--font-body);}
 .section-link:hover{background:rgba(79,140,255,.1);}
 
-.call-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:12px;overflow:hidden;}
-.call-item{background:var(--surface);padding:14px 16px;cursor:pointer;transition:background .15s;}
+/* Call list */
+.call-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:var(--r2);overflow:hidden;}
+.call-item{background:var(--surface);padding:14px 16px;transition:background .15s;cursor:default;}
 .call-item:hover{background:var(--surface2);}
-.call-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.call-item-time{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
-.call-item-summary{font-size:13px;color:var(--text2);line-height:1.5;}
-.sentiment{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;}
-.sentiment.positive{background:rgba(56,232,160,.12);color:var(--accent2);}
-.sentiment.neutral{background:rgba(255,255,255,.06);color:var(--text3);}
-.sentiment.negative{background:rgba(248,113,113,.12);color:var(--red);}
+.call-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.call-time{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
+.sentiment-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;}
+.sentiment-pill.positive{background:rgba(56,232,160,.1);color:var(--accent2);}
+.sentiment-pill.neutral{background:rgba(255,255,255,.06);color:var(--text3);}
+.sentiment-pill.negative{background:rgba(248,113,113,.1);color:var(--red);}
+.call-summary{font-size:13px;color:var(--text2);line-height:1.5;}
+.call-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.call-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.05);color:var(--text3);}
 
-.billing-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:20px;}
-.billing-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
-.billing-row:last-child{border-bottom:none;}
-.billing-label{font-size:13px;color:var(--text2);}
-.billing-value{font-size:13px;font-weight:500;font-family:var(--font-mono);}
-.billing-value.highlight{color:var(--accent2);}
-.billing-value.warn{color:var(--accent3);}
+/* Reservation table */
+.res-table{width:100%;border-collapse:collapse;font-size:13px;}
+.res-table th{text-align:left;padding:9px 0;color:var(--text3);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.res-table td{padding:12px 0;border-bottom:1px solid var(--border);color:var(--text2);}
+.res-table tr:last-child td{border-bottom:none;}
+.res-amount{color:var(--accent2);font-family:var(--font-mono);}
 
-.empty-state{text-align:center;padding:40px;color:var(--text3);}
-.empty-state svg{width:28px;height:28px;margin:0 auto 10px;display:block;opacity:.3;}
-.empty-state p{font-size:13px;}
-.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sk 1.5s infinite;border-radius:6px;}
+/* Side panel */
+.side-panel{border-left:1px solid var(--border);}
+.side-section{padding:22px 20px;border-bottom:1px solid var(--border);}
+.side-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+
+/* Billing rows */
+.bill-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.bill-row:last-child{border-bottom:none;}
+.bill-label{font-size:13px;color:var(--text2);}
+.bill-value{font-size:13px;font-weight:500;font-family:var(--font-mono);}
+.bill-value.green{color:var(--accent2);}
+.bill-value.amber{color:var(--accent3);}
+
+/* Mini stats */
+.mini-stats{display:flex;flex-direction:column;gap:10px;}
+.mini-stat{display:flex;align-items:center;justify-content:space-between;}
+.mini-label{font-size:12px;color:var(--text2);}
+.mini-value{font-family:var(--font-mono);font-size:13px;font-weight:500;}
+
+/* Upgrade banner */
+.upgrade-banner{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(167,139,250,.06));border:1px solid rgba(79,140,255,.2);border-radius:var(--r2);padding:18px;text-align:center;}
+.upgrade-banner p{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;}
+.upgrade-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);text-decoration:none;}
+
+/* Empty state */
+.empty{text-align:center;padding:40px;color:var(--text3);}
+.empty svg{width:28px;height:28px;margin:0 auto 10px;display:block;opacity:.25;}
+.empty p{font-size:13px;}
+
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sk 1.5s infinite;border-radius:8px;}
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-.upgrade-banner{background:linear-gradient(135deg,rgba(79,140,255,.1),rgba(167,139,250,.08));border:1px solid rgba(79,140,255,.2);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.upgrade-text{font-size:13px;color:var(--text2);}
-.upgrade-text strong{color:var(--text);}
-.upgrade-btn{font-size:12px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:13px 18px;font-size:13px;color:var(--text);z-index:999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);}
+.toast.show{transform:translateY(0);opacity:1;}
 
+/* Mobile */
+#menuBtn{display:none;position:fixed;top:14px;left:14px;z-index:101;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;}
 @media(max-width:768px){
   .sidebar{position:fixed;left:-220px;top:0;bottom:0;z-index:100;transition:left .3s;}
   .sidebar.open{left:0;}
-  .page-header{padding:56px 20px 20px;}
-  .section{padding:18px;}
+  #menuBtn{display:flex;}
+  .hero-section{padding:56px 20px 20px;}
+  .section{padding:16px;}
+  .content-grid{grid-template-columns:1fr;}
+  .side-panel{border-left:none;}
 }
+
+/* Return link */
+.return-link{position:fixed;bottom:20px;right:20px;z-index:50;display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(13,17,24,.85);border:1px solid rgba(255,255,255,.1);border-radius:99px;font-size:12px;color:rgba(238,242,255,.45);text-decoration:none;backdrop-filter:blur(12px);transition:color .15s;}
+.return-link:hover{color:rgba(238,242,255,.85);}
 </style>
 </head>
 <body>
 
+<!-- Auth Gate -->
 <div id="authGate">
   <div class="auth-box">
-    <img src="/favicon-32x32.png" alt="NightShift AI">
-    <h2>Access your workspace</h2>
-    <p>Enter your email to receive a secure login link.</p>
-    <input type="email" class="auth-email" id="authEmail" placeholder="you@yourhotel.com" autocomplete="email">
-    <button class="auth-btn" onclick="sendMagicLink()">Send magic link</button>
+    <img src="/favicon-32x32.png" alt="NightShift AI" class="auth-logo">
+    <h2>Your workspace</h2>
+    <p>Enter your email address to receive a secure magic link.</p>
+    <input type="email" class="auth-input" id="authEmail" placeholder="you@yourhotel.com" autocomplete="email">
+    <button class="auth-btn" id="authSubmit" onclick="sendMagicLink()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Send magic link
+    </button>
     <p class="auth-note" id="authNote"></p>
   </div>
 </div>
 
-<button style="display:none;position:fixed;top:14px;left:14px;z-index:101;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;" id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+<!-- Mobile toggle -->
+<button id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 
 <div class="layout" id="appLayout" style="display:none;">
+
+  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="/favicon-32x32.png" alt="">
+      <img src="/favicon-32x32.png" alt="NightShift AI">
       <div>
         <div class="sidebar-brand">NightShift AI</div>
         <div class="sidebar-tag" id="sidebarTier">Dashboard</div>
@@ -147,29 +201,33 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
     </div>
 
     <div class="nav-section">My Property</div>
-    <a href="#overview" class="nav-link active" onclick="showSection('overview',this)">
+    <button class="nav-link active" id="navOverview" onclick="showSection('overview',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Overview
-    </a>
-    <a href="#calls" class="nav-link" id="navCalls" onclick="showSection('calls',this)">
+    </button>
+    <button class="nav-link" id="navCalls" onclick="showSection('calls',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
       Call Log
-    </a>
-    <a href="#reservations" class="nav-link" id="navReservations" onclick="showSection('reservations',this)">
+    </button>
+    <button class="nav-link" id="navReservations" onclick="showSection('reservations',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
       Reservations
-      <span class="tier-gate" id="resBadge" style="display:none;">Pro+</span>
-    </a>
-    <a href="#billing" class="nav-link" onclick="showSection('billing',this)">
+      <span class="tier-pill" id="resBadge" style="display:none;">Pro</span>
+    </button>
+    <button class="nav-link" id="navBilling" onclick="showSection('billing',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
       Billing
-    </a>
-    <a href="#account" class="nav-link" onclick="showSection('account',this)">
+    </button>
+    <button class="nav-link" id="navAccount" onclick="showSection('account',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Account
-    </a>
+    </button>
 
     <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-name" id="userName">Loading...</div>
+      </div>
       <button class="signout-btn" onclick="signOut()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign out
@@ -177,123 +235,148 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
     </div>
   </nav>
 
+  <!-- Main -->
   <main class="main">
 
-    <!-- Overview Section -->
-    <div id="section-overview">
-      <div class="page-header">
-        <div class="page-header-top">
-          <div>
-            <div class="property-name" id="propName">Loading...</div>
-            <div class="property-meta">
-              <span class="tier-badge" id="propTierBadge">—</span>
-              <span class="status-pill"><span class="live-dot"></span> Agent active</span>
-            </div>
-          </div>
-        </div>
+    <!-- OVERVIEW -->
+    <div id="sec-overview">
+      <div class="hero-section">
+        <div class="hero-eyebrow"><span class="live-dot"></span>Agent Active</div>
+        <h1 class="hero-title">Welcome back, <span id="heroName">—</span></h1>
+        <p class="hero-sub" id="heroSub">Loading your property dashboard...</p>
       </div>
 
       <div class="kpi-row">
         <div class="kpi-card">
           <div class="kpi-label">Calls This Month</div>
-          <div class="kpi-value blue" id="ovCalls">—</div>
-          <div class="kpi-sub">Inbound answered</div>
+          <div class="kpi-value blue" id="kpiCalls">—</div>
+          <div class="kpi-sub" id="kpiCallsSub">Loading</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Reservations</div>
-          <div class="kpi-value green" id="ovReservations">—</div>
+          <div class="kpi-value green" id="kpiRes">—</div>
           <div class="kpi-sub">This month</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Avg Sentiment</div>
-          <div class="kpi-value" id="ovSentiment">—</div>
-          <div class="kpi-sub">Guest satisfaction</div>
+          <div class="kpi-label">Guest Sentiment</div>
+          <div class="kpi-value" id="kpiSentiment">—</div>
+          <div class="kpi-sub">Positive calls</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Escalations</div>
-          <div class="kpi-value" id="ovEscalations">—</div>
+          <div class="kpi-value amber" id="kpiEscalations">—</div>
           <div class="kpi-sub">Transferred to staff</div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title">Recent Calls</div>
-          <a href="#calls" class="section-link" onclick="showSection('calls')">View all →</a>
+      <div class="content-grid">
+        <div>
+          <div class="section">
+            <div class="section-header">
+              <div class="section-title">Recent Calls</div>
+              <button class="section-link" onclick="showSection('calls',document.getElementById('navCalls'))">View all →</button>
+            </div>
+            <div id="ovRecentCalls">
+              <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
+              <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
+              <div class="skeleton" style="height:64px;"></div>
+            </div>
+          </div>
+          <div class="section" id="ovResSection" style="display:none;">
+            <div class="section-header">
+              <div class="section-title">Recent Reservations</div>
+              <button class="section-link" onclick="showSection('reservations',document.getElementById('navReservations'))">View all →</button>
+            </div>
+            <div id="ovRecentRes"></div>
+          </div>
         </div>
-        <div id="ovRecentCalls">
-          <div class="skeleton" style="height:60px;margin-bottom:4px;border-radius:8px;"></div>
-          <div class="skeleton" style="height:60px;margin-bottom:4px;border-radius:8px;"></div>
-          <div class="skeleton" style="height:60px;border-radius:8px;"></div>
-        </div>
-      </div>
 
-      <div class="section" id="eliteOnlySection" style="display:none;">
-        <div class="section-header">
-          <div class="section-title">Recent Reservations</div>
+        <div class="side-panel">
+          <div class="side-section">
+            <div class="side-title">This Month</div>
+            <div class="mini-stats" id="sideStats">
+              <div class="mini-stat"><span class="mini-label">Minutes used</span><span class="mini-value" id="statMins">—</span></div>
+              <div class="mini-stat"><span class="mini-label">Included minutes</span><span class="mini-value" id="statIncluded">—</span></div>
+              <div class="mini-stat"><span class="mini-label">Overage</span><span class="mini-value" id="statOverage">—</span></div>
+              <div class="mini-stat"><span class="mini-label">Positive calls</span><span class="mini-value" id="statPos">—</span></div>
+              <div class="mini-stat"><span class="mini-label">Avg call length</span><span class="mini-value" id="statAvg">—</span></div>
+            </div>
+          </div>
+          <div class="side-section">
+            <div class="side-title">Agent Status</div>
+            <div class="mini-stats">
+              <div class="mini-stat"><span class="mini-label">Status</span><span class="mini-value" style="color:var(--accent2);">Active</span></div>
+              <div class="mini-stat"><span class="mini-label">Plan</span><span class="mini-value" id="statPlan">—</span></div>
+              <div class="mini-stat"><span class="mini-label">Member since</span><span class="mini-value" id="statSince">—</span></div>
+            </div>
+          </div>
         </div>
-        <div id="ovRecentReservations"></div>
       </div>
     </div>
 
-    <!-- Call Log Section -->
-    <div id="section-calls" style="display:none;">
-      <div class="page-header">
-        <div class="property-name" style="font-size:22px;">Call Log</div>
-        <p style="font-size:13px;color:var(--text3);margin-top:4px;">All inbound calls handled by your AI agent</p>
+    <!-- CALL LOG -->
+    <div id="sec-calls" style="display:none;">
+      <div class="hero-section">
+        <div class="hero-eyebrow"><span class="live-dot"></span>Call History</div>
+        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Call Log</h1>
+        <p class="hero-sub">Every inbound call handled by your AI agent</p>
       </div>
       <div class="section">
         <div id="callLogFull">
-          <div class="skeleton" style="height:60px;margin-bottom:4px;border-radius:8px;"></div>
-          <div class="skeleton" style="height:60px;margin-bottom:4px;border-radius:8px;"></div>
-          <div class="skeleton" style="height:60px;border-radius:8px;"></div>
+          <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
+          <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
+          <div class="skeleton" style="height:64px;"></div>
         </div>
       </div>
     </div>
 
-    <!-- Reservations Section -->
-    <div id="section-reservations" style="display:none;">
-      <div class="page-header">
-        <div class="property-name" style="font-size:22px;">Reservations</div>
-        <p style="font-size:13px;color:var(--text3);margin-top:4px;">Bookings confirmed by your AI agent</p>
-      </div>
-      <div class="section" id="reservationsSection">
-        <div id="reservationsFull">
-          <div class="skeleton" style="height:60px;margin-bottom:4px;border-radius:8px;"></div>
-          <div class="skeleton" style="height:60px;border-radius:8px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Billing Section -->
-    <div id="section-billing" style="display:none;">
-      <div class="page-header">
-        <div class="property-name" style="font-size:22px;">Billing</div>
-        <p style="font-size:13px;color:var(--text3);margin-top:4px;">Your subscription and payment details</p>
+    <!-- RESERVATIONS -->
+    <div id="sec-reservations" style="display:none;">
+      <div class="hero-section">
+        <div class="hero-eyebrow"><span class="live-dot"></span>Booking Intake</div>
+        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Reservations</h1>
+        <p class="hero-sub">Reservation requests confirmed by your AI agent</p>
       </div>
       <div class="section">
-        <div class="billing-card" id="billingCard">
-          <div class="skeleton" style="height:200px;border-radius:10px;"></div>
+        <div id="resFull">
+          <div class="skeleton" style="height:44px;margin-bottom:4px;"></div>
+          <div class="skeleton" style="height:44px;"></div>
         </div>
       </div>
     </div>
 
-    <!-- Account Section -->
-    <div id="section-account" style="display:none;">
-      <div class="page-header">
-        <div class="property-name" style="font-size:22px;">Account</div>
-        <p style="font-size:13px;color:var(--text3);margin-top:4px;">Your property and contact details</p>
+    <!-- BILLING -->
+    <div id="sec-billing" style="display:none;">
+      <div class="hero-section">
+        <div class="hero-eyebrow"><span class="live-dot"></span>Subscription</div>
+        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Billing</h1>
+        <p class="hero-sub">Your plan, next payment, and usage</p>
       </div>
       <div class="section">
-        <div class="billing-card" id="accountCard">
-          <div class="skeleton" style="height:240px;border-radius:10px;"></div>
+        <div id="billingCard">
+          <div class="skeleton" style="height:240px;border-radius:12px;"></div>
         </div>
-        <div style="margin-top:20px;padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);">
-          <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Support</div>
-          <p style="font-size:13px;color:var(--text2);line-height:1.6;">Need help? Email your account manager directly at <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">founder@nightshifthotels.com</a>. We respond within 24 hours on all plans, faster on Pro and Elite.</p>
-          <div style="margin-top:12px;">
-            <a href="/msa.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;margin-right:16px;">Master Subscription Agreement →</a>
-            <a href="/terms.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;">Terms of Service →</a>
+      </div>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div id="sec-account" style="display:none;">
+      <div class="hero-section">
+        <div class="hero-eyebrow"><span class="live-dot"></span>Account</div>
+        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Account</h1>
+        <p class="hero-sub">Property details and support</p>
+      </div>
+      <div class="section">
+        <div id="accountCard">
+          <div class="skeleton" style="height:240px;border-radius:12px;"></div>
+        </div>
+        <div style="margin-top:20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Support</div>
+          <p style="font-size:13px;color:var(--text2);line-height:1.7;">Questions or issues? Email your account manager at <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">founder@nightshifthotels.com</a>. We respond within 24 hours on Core and within 4 hours on Pro.</p>
+          <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;">
+            <a href="/msa.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;">MSA →</a>
+            <a href="/terms.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;">Terms →</a>
+            <a href="/privacy.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;">Privacy →</a>
           </div>
         </div>
       </div>
@@ -302,311 +385,269 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
   </main>
 </div>
 
+<a href="/" class="return-link">
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  Main site
+</a>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const SUPABASE_URL = window.NSA_CONFIG.SUPABASE_URL;
-const SUPABASE_ANON_KEY = window.NSA_CONFIG.SUPABASE_ANON_KEY;
-const FOUNDER_EMAIL = 'founder@nightshifthotels.com';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SB_URL = window.NSA_CONFIG.SUPABASE_URL;
+const SB_KEY = window.NSA_CONFIG.SUPABASE_ANON_KEY;
+const FOUNDER = 'founder@nightshifthotels.com';
+const sb = supabase.createClient(SB_URL, SB_KEY);
 
 let currentProperty = null;
 let currentTier = 'core';
 let currentUser = null;
+const TIER_MRR = { core: 549, pro: 699 };
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// ── Helpers ──
+function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeAgo(d){ if(!d) return '—'; const diff=Date.now()-new Date(d).getTime(),m=Math.floor(diff/60000); if(m<1) return 'just now'; if(m<60) return m+'m ago'; const h=Math.floor(m/60); if(h<24) return h+'h ago'; return Math.floor(h/24)+'d ago'; }
+function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'; setTimeout(()=>t.className='toast',2800); }
+
+// ── Section nav ──
+function showSection(id, btn) {
+  document.querySelectorAll('[id^="sec-"]').forEach(el=>el.style.display='none');
+  document.getElementById('sec-'+id).style.display='block';
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='calls') loadCallLog();
+  if(id==='reservations') loadReservations();
+  if(id==='billing') loadBilling();
+  if(id==='account') loadAccount();
+}
+
+// ── Auth ──
 async function sendMagicLink() {
   const email = document.getElementById('authEmail').value.trim();
-  if (!email) { document.getElementById('authNote').textContent = 'Please enter your email.'; return; }
-  const btn = document.querySelector('.auth-btn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href }
-  });
-  if (error) {
+  if(!email){ document.getElementById('authNote').textContent='Please enter your email.'; return; }
+  const btn = document.getElementById('authSubmit');
+  btn.disabled=true; btn.textContent='Sending...';
+  const {error} = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.href }});
+  if(error){
     document.getElementById('authNote').textContent = error.message;
-    btn.disabled = false;
-    btn.textContent = 'Send magic link';
+    btn.disabled=false; btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Send magic link';
   } else {
-    document.getElementById('authNote').textContent = '✓ Check your email for a secure login link.';
-    btn.textContent = '✓ Link sent';
+    document.getElementById('authNote').textContent='✓ Check your email for a secure login link.';
+    btn.textContent='✓ Link sent';
   }
 }
 
-async function signOut() {
-  await sb.auth.signOut();
-  window.location.reload();
-}
+async function signOut(){ await sb.auth.signOut(); window.location.reload(); }
 
-function showSection(id, link) {
-  document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
-  const el = document.getElementById('section-' + id);
-  if (el) el.style.display = 'block';
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  if (link) link.classList.add('active');
-  // Lazy load section data
-  if (id === 'calls') loadCallLog();
-  if (id === 'reservations') loadReservations();
-  if (id === 'billing') loadBilling();
-  if (id === 'account') loadAccount();
-}
-
-// ── Init ─────────────────────────────────────────────────────────────────────
+// ── Init ──
 async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    document.getElementById('authGate').classList.remove('hidden');
-    if (window.innerWidth <= 768) document.getElementById('menuBtn').style.display = 'flex';
-    return;
-  }
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ document.getElementById('authGate').classList.remove('hidden'); return; }
 
   currentUser = session.user;
+  if(currentUser.email === FOUNDER){ window.location.href='/dashboard/founder.html'; return; }
 
-  // Founder redirect
-  if (currentUser.email === FOUNDER_EMAIL) {
-    window.location.href = '/dashboard/founder.html';
+  const { data:hu } = await sb.from('hotel_users').select('property_id,role,tier').eq('user_id',currentUser.id).limit(1).single();
+  if(!hu){
+    document.getElementById('authGate').innerHTML = '<div class="auth-box"><img src="/favicon-32x32.png" class="auth-logo"><h2>No property found</h2><p>Your account isn\'t linked to a property. Contact <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a></p></div>';
     return;
   }
 
-  // Get property for this user
-  const { data: hu } = await sb.from('hotel_users')
-    .select('property_id, role, tier')
-    .eq('user_id', currentUser.id)
-    .limit(1).single();
+  const { data:prop } = await sb.from('properties').select('*').eq('id',hu.property_id).single();
+  if(!prop){ return; }
 
-  if (!hu) {
-    document.getElementById('authGate').innerHTML = '<div class="auth-box"><img src="/favicon-32x32.png" alt=""><h2>No property found</h2><p>Your account isn\'t linked to a property yet. Contact <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a></p></div>';
-    return;
-  }
+  currentProperty = prop;
+  currentTier = prop.tier || 'core';
 
-  // Get property details
-  const { data: property } = await sb.from('properties')
-    .select('*')
-    .eq('id', hu.property_id)
-    .single();
-
-  if (!property) return;
-  currentProperty = property;
-  currentTier = property.tier || 'core';
-
-  // Show UI
+  // Show app
   document.getElementById('authGate').classList.add('hidden');
-  document.getElementById('appLayout').style.display = 'flex';
-  if (window.innerWidth <= 768) document.getElementById('menuBtn').style.display = 'flex';
+  document.getElementById('appLayout').style.display='flex';
 
-  // Set header
-  document.getElementById('propName').textContent = property.name;
-  const tierBadge = document.getElementById('propTierBadge');
-  tierBadge.textContent = currentTier.toUpperCase();
-  tierBadge.className = 'tier-badge ' + currentTier;
-  document.getElementById('sidebarTier').textContent = currentTier.charAt(0).toUpperCase() + currentTier.slice(1);
+  // Set sidebar
+  const tierLabel = currentTier.charAt(0).toUpperCase()+currentTier.slice(1);
+  document.getElementById('sidebarTier').textContent = tierLabel+' Plan';
+  const name = prop.contact_name || currentUser.email.split('@')[0];
+  document.getElementById('heroName').textContent = prop.name;
+  document.getElementById('heroSub').textContent = tierLabel+' plan · Agent active 24/7';
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('statPlan').textContent = tierLabel;
+  document.getElementById('statIncluded').textContent = (prop.included_minutes||1000).toLocaleString()+' min';
+  document.getElementById('statSince').textContent = prop.onboarded_at ? new Date(prop.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
 
-  // Tier-gate reservations for Core
-  if (currentTier === 'core') {
-    document.getElementById('resBadge').style.display = 'inline-flex';
+  // Core: lock reservations
+  if(currentTier==='core'){
+    document.getElementById('resBadge').style.display='none';
     document.getElementById('navReservations').classList.add('locked');
-    document.getElementById('navReservations').onclick = (e) => { e.preventDefault(); showUpgradeNotice(); };
+    document.getElementById('navReservations').onclick = ()=>showToast('Reservations dashboard available on Pro plan');
   }
-
-  // Elite gets reservations on overview
-  if (currentTier === 'elite') {
-    document.getElementById('eliteOnlySection').style.display = 'block';
+  // Pro: show reservations on overview
+  if(currentTier==='pro'){
+    document.getElementById('ovResSection').style.display='block';
   }
 
   await loadOverview();
 }
 
-function showUpgradeNotice() {
-  alert('Reservations are available on Pro and Elite plans. Contact founder@nightshifthotels.com to upgrade.');
-}
-
-// ── Overview ─────────────────────────────────────────────────────────────────
+// ── Overview ──
 async function loadOverview() {
-  const monthStart = new Date();
-  monthStart.setDate(1); monthStart.setHours(0,0,0,0);
-
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
   const [callsRes, resRes] = await Promise.all([
-    sb.from('call_logs').select('*').eq('property_id', currentProperty.id).gte('created_at', monthStart.toISOString()).limit(200),
-    sb.from('reservations').select('*').eq('property_id', currentProperty.id).gte('created_at', monthStart.toISOString()).limit(50)
+    sb.from('call_logs').select('*').eq('property_id',currentProperty.id).gte('created_at',monthStart.toISOString()).limit(200),
+    sb.from('reservations').select('*').eq('property_id',currentProperty.id).gte('created_at',monthStart.toISOString()).limit(50)
   ]);
 
-  const calls = callsRes.data || [];
-  const reservations = resRes.data || [];
+  const calls = callsRes.data||[];
+  const reservations = resRes.data||[];
 
-  document.getElementById('ovCalls').textContent = calls.length;
-  // Show minutes used
-  const totalSecs = calls.reduce((s,c) => s+(c.duration_seconds||0), 0);
-  const totalMins = Math.ceil(totalSecs/60);
-  const includedMins = currentTier === 'pro' ? 2000 : 1000;
-  const overageMins = Math.max(0, totalMins - includedMins);
-  const kpiCallsEl = document.getElementById('ovCalls');
-  if (kpiCallsEl) {
-    const sub = kpiCallsEl.parentElement.querySelector('.kpi-sub');
-    if (sub) sub.textContent = totalMins + ' min used · ' + (overageMins > 0 ? overageMins + ' min overage' : 'within limit');
-  }
-  document.getElementById('ovReservations').textContent = reservations.length;
-
-  const escalated = calls.filter(c => c.escalated).length;
-  document.getElementById('ovEscalations').textContent = escalated;
-
+  // KPIs
+  document.getElementById('kpiCalls').textContent = calls.length;
+  document.getElementById('kpiRes').textContent = reservations.length;
+  const escalated = calls.filter(c=>c.escalated).length;
+  document.getElementById('kpiEscalations').textContent = escalated;
   const pos = calls.filter(c=>c.sentiment==='positive').length;
-  const pct = calls.length > 0 ? Math.round((pos/calls.length)*100) : 0;
-  const sentEl = document.getElementById('ovSentiment');
-  sentEl.textContent = calls.length > 0 ? pct + '% pos' : '—';
-  sentEl.className = 'kpi-value ' + (pct >= 70 ? 'green' : '');
+  const pct = calls.length>0?Math.round((pos/calls.length)*100):0;
+  const sentEl = document.getElementById('kpiSentiment');
+  sentEl.textContent = calls.length>0 ? pct+'%' : '—';
+  sentEl.className = 'kpi-value '+(pct>=70?'green':'');
+
+  // Minutes
+  const totalSecs = calls.reduce((s,c)=>s+(c.duration_seconds||0),0);
+  const totalMins = Math.ceil(totalSecs/60);
+  const included = currentProperty.included_minutes||1000;
+  const overage = Math.max(0,totalMins-included);
+  document.getElementById('statMins').textContent = totalMins.toLocaleString()+' min';
+  document.getElementById('statOverage').textContent = overage>0?overage+' min':'None';
+  document.getElementById('statPos').textContent = pos+' / '+calls.length;
+  const avgSecs = calls.length>0?Math.round(totalSecs/calls.length):0;
+  document.getElementById('statAvg').textContent = avgSecs>0?(Math.floor(avgSecs/60)+'m '+avgSecs%60+'s'):'—';
+  document.getElementById('kpiCallsSub').textContent = totalMins+' min · '+(overage>0?overage+' overage':'within limit');
 
   // Recent calls
-  const recentCalls = calls.slice(0, 5);
-  const ovRC = document.getElementById('ovRecentCalls');
-  if (recentCalls.length === 0) {
-    ovRC.innerHTML = '<div class="empty-state"><p>No calls yet this month</p></div>';
-  } else {
-    ovRC.innerHTML = '<div class="call-list">' + recentCalls.map(c => callItemHTML(c)).join('') + '</div>';
-  }
+  renderCallList(calls.slice(0,5), 'ovRecentCalls');
 
-  // Elite: recent reservations on overview
-  if (currentTier === 'elite' && reservations.length > 0) {
-    document.getElementById('ovRecentReservations').innerHTML = reservationTableHTML(reservations.slice(0,5));
+  // Recent reservations (Pro)
+  if(currentTier==='pro' && reservations.length>0){
+    document.getElementById('ovRecentRes').innerHTML = renderResTable(reservations.slice(0,5));
+  } else if(currentTier==='pro'){
+    document.getElementById('ovRecentRes').innerHTML = '<div class="empty"><p>No reservations yet this month</p></div>';
   }
 }
 
-// ── Call Log ─────────────────────────────────────────────────────────────────
+// ── Call Log ──
 async function loadCallLog() {
-  const { data: calls } = await sb.from('call_logs')
-    .select('*')
-    .eq('property_id', currentProperty.id)
-    .order('created_at', { ascending: false })
-    .limit(100);
-
-  const el = document.getElementById('callLogFull');
-  if (!calls || calls.length === 0) {
-    el.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81"/></svg><p>No calls recorded yet</p></div>';
+  const { data:calls } = await sb.from('call_logs').select('*').eq('property_id',currentProperty.id).order('created_at',{ascending:false}).limit(100);
+  if(!calls||calls.length===0){
+    document.getElementById('callLogFull').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/></svg><p>No calls recorded yet</p></div>';
     return;
   }
-  el.innerHTML = '<div class="call-list">' + calls.map(c => callItemHTML(c, true)).join('') + '</div>';
+  renderCallList(calls, 'callLogFull', true);
 }
 
-function callItemHTML(c, showTranscript=false) {
-  const time = new Date(c.created_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  const sentiment = c.sentiment || 'neutral';
-  const transcript = showTranscript && c.transcript ? `<div style="margin-top:8px;padding:10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.6;max-height:120px;overflow-y:auto;">${escHtml(c.transcript.substring(0,400))}${c.transcript.length>400?'...':''}</div>` : '';
-  return `<div class="call-item">
-    <div class="call-item-top">
-      <span class="call-item-time">${time}</span>
-      <span class="sentiment ${sentiment}">${sentiment}</span>
-    </div>
-    <div class="call-item-summary">${escHtml(c.summary || 'Call completed')}</div>
-    ${transcript}
-  </div>`;
+function renderCallList(calls, containerId, showTranscript=false) {
+  const el = document.getElementById(containerId);
+  if(!calls||calls.length===0){ el.innerHTML='<div class="empty"><p>No calls yet</p></div>'; return; }
+  el.innerHTML = '<div class="call-list">'+calls.map(c=>{
+    const tags = Array.isArray(c.tags)?c.tags:(typeof c.tags==='string'?JSON.parse(c.tags||'[]'):[]);
+    const transcript = showTranscript&&c.transcript?`<div style="margin-top:8px;padding:10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.6;max-height:100px;overflow-y:auto;">${esc(c.transcript.substring(0,300))}${c.transcript.length>300?'...':''}</div>`:'';
+    return `<div class="call-item">
+      <div class="call-top">
+        <span class="call-time">${fmtDate(c.created_at)}</span>
+        <span class="sentiment-pill ${c.sentiment||'neutral'}">${c.sentiment||'neutral'}</span>
+      </div>
+      <div class="call-summary">${esc(c.summary||'Call completed')}</div>
+      ${tags.length?`<div class="call-tags">${tags.map(t=>`<span class="call-tag">${esc(t)}</span>`).join('')}</div>`:''}
+      ${transcript}
+    </div>`;
+  }).join('')+'</div>';
 }
 
-// ── Reservations ─────────────────────────────────────────────────────────────
+// ── Reservations ──
 async function loadReservations() {
-  if (currentTier === 'core') {
-    document.getElementById('reservationsFull').innerHTML = `
-      <div class="upgrade-banner">
-        <div class="upgrade-text"><strong>Reservations available on Pro & Elite</strong><br>Upgrade to see all bookings confirmed by your AI agent.</div>
-        <button class="upgrade-btn" onclick="window.open('mailto:founder@nightshifthotels.com?subject=Upgrade Request','_blank')">Contact to upgrade</button>
-      </div>`;
+  if(currentTier==='core'){
+    document.getElementById('resFull').innerHTML=`<div class="upgrade-banner"><p><strong>Reservations dashboard is available on Pro.</strong><br>Upgrade to see all bookings confirmed by your AI agent.</p><a href="mailto:founder@nightshifthotels.com?subject=Upgrade to Pro" class="upgrade-btn">Contact to upgrade →</a></div>`;
     return;
   }
-  const { data: reservations } = await sb.from('reservations')
-    .select('*').eq('property_id', currentProperty.id)
-    .order('created_at', { ascending: false }).limit(100);
-
-  const el = document.getElementById('reservationsFull');
-  if (!reservations || reservations.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p>No reservations yet</p></div>';
-    return;
-  }
-  el.innerHTML = reservationTableHTML(reservations);
+  const {data:reservations} = await sb.from('reservations').select('*').eq('property_id',currentProperty.id).order('created_at',{ascending:false}).limit(100);
+  const el = document.getElementById('resFull');
+  if(!reservations||reservations.length===0){ el.innerHTML='<div class="empty"><p>No reservations yet</p></div>'; return; }
+  el.innerHTML = renderResTable(reservations);
 }
 
-function reservationTableHTML(reservations) {
-  return `<table style="width:100%;border-collapse:collapse;font-size:13px;">
-    <thead><tr style="border-bottom:1px solid var(--border);">
-      <th style="text-align:left;padding:8px 0;color:var(--text3);font-size:10px;text-transform:uppercase;font-weight:700;letter-spacing:.05em;">Guest</th>
-      <th style="text-align:left;padding:8px 0;color:var(--text3);font-size:10px;text-transform:uppercase;font-weight:700;letter-spacing:.05em;">Arrival</th>
-      <th style="text-align:left;padding:8px 0;color:var(--text3);font-size:10px;text-transform:uppercase;font-weight:700;letter-spacing:.05em;">Room</th>
-      <th style="text-align:left;padding:8px 0;color:var(--text3);font-size:10px;text-transform:uppercase;font-weight:700;letter-spacing:.05em;">Nights</th>
-      <th style="text-align:right;padding:8px 0;color:var(--text3);font-size:10px;text-transform:uppercase;font-weight:700;letter-spacing:.05em;">Total</th>
-    </tr></thead>
-    <tbody>${reservations.map(r=>`
-      <tr style="border-bottom:1px solid var(--border);">
-        <td style="padding:11px 0 11px;color:var(--text2);">${escHtml(r.guest_name||'—')}</td>
-        <td style="padding:11px 0;color:var(--text2);font-family:var(--font-mono);font-size:12px;">${r.arrival_date||'—'}</td>
-        <td style="padding:11px 0;color:var(--text3);font-size:12px;">${escHtml(r.room_type||'—')}</td>
-        <td style="padding:11px 0;color:var(--text3);">${r.nights||'—'}</td>
-        <td style="padding:11px 0;text-align:right;color:var(--accent2);font-family:var(--font-mono);">$${(r.total_due||0).toFixed(0)}</td>
-      </tr>`).join('')}</tbody>
+function renderResTable(reservations) {
+  return `<table class="res-table">
+    <thead><tr><th>Guest</th><th>Arrival</th><th>Room</th><th>Nights</th><th style="text-align:right;">Total</th></tr></thead>
+    <tbody>${reservations.map(r=>`<tr>
+      <td>${esc(r.guest_name||'—')}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;">${r.arrival_date||'—'}</td>
+      <td style="color:var(--text3);font-size:12px;">${esc(r.room_type||'—')}</td>
+      <td style="color:var(--text3);">${r.nights||'—'}</td>
+      <td style="text-align:right;" class="res-amount">$${(r.total_due||0).toFixed(0)}</td>
+    </tr>`).join('')}</tbody>
   </table>`;
 }
 
-// ── Billing ───────────────────────────────────────────────────────────────────
+// ── Billing ──
 async function loadBilling() {
   const el = document.getElementById('billingCard');
   try {
-    const { data: { session } } = await sb.auth.getSession();
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/get-billing-info`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ property_id: currentProperty.id })
+    const {data:{session}} = await sb.auth.getSession();
+    const res = await fetch(SB_URL+'/functions/v1/get-billing-info',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({property_id:currentProperty.id})
     });
     const data = await res.json();
-    const b = data.billing || {};
-    const nextDate = b.next_payment_date ? new Date(b.next_payment_date).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : '—';
-    const trialEnd = b.trial_end ? new Date(b.trial_end).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : null;
-    const TIER_MRR = { core:399, pro:699, elite:1499 };
-    const monthly = TIER_MRR[currentTier] || 0;
-
-    el.innerHTML = `
-      <div class="billing-row"><span class="billing-label">Plan</span><span class="billing-value">${currentTier.toUpperCase()}</span></div>
-      <div class="billing-row"><span class="billing-label">Monthly subscription</span><span class="billing-value">$${monthly.toLocaleString()}/mo</span></div>
-      ${trialEnd ? `<div class="billing-row"><span class="billing-label">Trial ends</span><span class="billing-value warn">${trialEnd}</span></div>` : ''}
-      <div class="billing-row"><span class="billing-label">Next payment date</span><span class="billing-value highlight">${nextDate}</span></div>
-      <div class="billing-row"><span class="billing-label">Monthly subscription</span><span class="billing-value">$${monthly.toLocaleString()}</span></div>
-      <div class="billing-row"><span class="billing-label">Included minutes</span><span class="billing-value">${currentTier === 'pro' ? '2,000' : '1,000'} min/mo</span></div>
-      <div class="billing-row"><span class="billing-label">Overage rate</span><span class="billing-value">${currentTier === 'pro' ? '$0.18' : '$0.22'}/min (billed end of month)</span></div>
-      <div class="billing-row"><span class="billing-label">Status</span><span class="billing-value" style="color:var(--accent2)">${b.status === 'trialing' ? 'Trial active' : b.status || 'Active'}</span></div>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">
-        Billing questions? Email <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a>
-        <br>Setup fees are non-refundable. Monthly fees are charged in advance.
-      </div>`;
-  } catch(e) {
-    el.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:20px;text-align:center;">Unable to load billing info. <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">Contact support</a></div>`;
+    const b = data.billing||{};
+    const nextDate = b.next_payment_date?new Date(b.next_payment_date).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'—';
+    const trialEnd = b.trial_end?new Date(b.trial_end).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):null;
+    const monthly = TIER_MRR[currentTier]||0;
+    const included = currentProperty.included_minutes||1000;
+    const ovRate = currentProperty.overage_rate||0.22;
+    el.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface3);">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Current Plan</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.02em;">${currentTier.charAt(0).toUpperCase()+currentTier.slice(1)} — $${monthly.toLocaleString()}/mo</div>
+      </div>
+      <div style="padding:4px 0;">
+        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Monthly subscription</span><span class="bill-value">$${monthly.toLocaleString()}/mo</span></div>
+        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Included minutes</span><span class="bill-value">${included.toLocaleString()} min/mo</span></div>
+        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Overage rate</span><span class="bill-value">$${ovRate}/min</span></div>
+        ${trialEnd?`<div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Trial ends</span><span class="bill-value amber">${trialEnd}</span></div>`:''}
+        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Next payment date</span><span class="bill-value green">${nextDate}</span></div>
+        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Next payment amount</span><span class="bill-value">$${monthly.toLocaleString()}</span></div>
+        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Subscription status</span><span class="bill-value" style="color:var(--accent2);">${b.status==='trialing'?'Trial active':b.status||'Active'}</span></div>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Setup fees and monthly fees are non-refundable. Overage billed on the 1st of each month. Questions? <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">Contact us</a></div>
+    </div>`;
+  } catch(e){
+    el.innerHTML='<div class="empty"><p>Unable to load billing info. <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">Contact support</a></p></div>';
   }
 }
 
-// ── Account ───────────────────────────────────────────────────────────────────
+// ── Account ──
 async function loadAccount() {
-  const el = document.getElementById('accountCard');
   const p = currentProperty;
-  el.innerHTML = `
-    <div class="billing-row"><span class="billing-label">Property name</span><span class="billing-value">${escHtml(p.name)}</span></div>
-    <div class="billing-row"><span class="billing-label">Hotel ID</span><span class="billing-value" style="font-family:var(--font-mono);font-size:12px;">${escHtml(p.hotel_id)}</span></div>
-    <div class="billing-row"><span class="billing-label">Plan</span><span class="billing-value">${(p.tier||'').toUpperCase()}</span></div>
-    <div class="billing-row"><span class="billing-label">Contact email</span><span class="billing-value">${escHtml(p.contact_email||'—')}</span></div>
-    <div class="billing-row"><span class="billing-label">Agent ID</span><span class="billing-value" style="font-family:var(--font-mono);font-size:11px;">${escHtml(p.retell_agent_id||'—')}</span></div>
-    <div class="billing-row"><span class="billing-label">Property ID</span><span class="billing-value" style="font-family:var(--font-mono);font-size:11px;">${escHtml(p.id)}</span></div>
-    <div class="billing-row"><span class="billing-label">Member since</span><span class="billing-value">${p.onboarded_at ? new Date(p.onboarded_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : '—'}</span></div>`;
+  document.getElementById('accountCard').innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface3);">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Property</div>
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.02em;">${esc(p.name)}</div>
+    </div>
+    <div style="padding:4px 0;">
+      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Plan</span><span class="bill-value">${(p.tier||'').charAt(0).toUpperCase()+(p.tier||'').slice(1)}</span></div>
+      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Contact email</span><span class="bill-value">${esc(p.contact_email||'—')}</span></div>
+      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Address</span><span class="bill-value" style="font-size:12px;">${esc(p.address||'—')}</span></div>
+      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Agent ID</span><span class="bill-value" style="font-family:var(--font-mono);font-size:11px;">${esc(p.retell_agent_id||'—')}</span></div>
+      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Member since</span><span class="bill-value">${p.onboarded_at?new Date(p.onboarded_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'—'}</span></div>
+    </div>
+  </div>`;
 }
 
-function escHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+// ── Auth state ──
 sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) init();
+  if(event==='SIGNED_IN' && session) init();
 });
-
 init();
 </script>
-<div style="position:fixed;bottom:20px;right:20px;z-index:50;">
-  <a href="/" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(13,17,24,.85);border:1px solid rgba(255,255,255,.1);border-radius:99px;font-size:12px;color:rgba(238,242,255,.45);text-decoration:none;backdrop-filter:blur(12px);transition:color .15s;" onmouseover="this.style.color='rgba(238,242,255,.85)'" onmouseout="this.style.color='rgba(238,242,255,.45)'">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Main site
-  </a>
-</div>
 </body>
 </html>
