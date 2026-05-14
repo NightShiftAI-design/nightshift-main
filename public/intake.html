@@ -874,6 +874,37 @@ var TIER_PRICING = {
   'pro':  { name: 'Pro',  monthly: '$699/mo', monthlyRaw: 699, setup: 449, setupDisplay: '$449', minutes: 2000 },
 };
 
+
+  // Language add-on logic
+  function updateLangAddons() {
+    var tier = (document.querySelector('[name="tier"]') || {}).value || 'core';
+    var frenchNote = document.getElementById('french-note');
+    var frenchCheck = document.getElementById('lang-french');
+    var frenchWrap = document.getElementById('lang-french-wrap');
+    var totalEl = document.getElementById('langAddonTotal');
+    if (!totalEl) return;
+    // French is included in Pro
+    if (tier === 'pro') {
+      if (frenchNote) frenchNote.textContent = '(included in Pro)';
+      if (frenchCheck) { frenchCheck.checked = false; frenchCheck.disabled = true; }
+      if (frenchWrap) frenchWrap.style.opacity = '.5';
+    } else {
+      if (frenchNote) frenchNote.textContent = '+$29/mo';
+      if (frenchCheck) frenchCheck.disabled = false;
+      if (frenchWrap) frenchWrap.style.opacity = '1';
+    }
+    var checked = document.querySelectorAll('[name="extra_languages"]:checked:not(:disabled)');
+    var count = checked.length;
+    if (count === 0) { totalEl.textContent = ''; return; }
+    totalEl.textContent = count + ' language add-on' + (count>1?'s':'') + ' selected — +$' + (count*29) + '/mo added to your subscription';
+    totalEl.style.color = 'var(--accent2)';
+  }
+  document.querySelectorAll('[name="extra_languages"]').forEach(function(cb) {
+    cb.addEventListener('change', updateLangAddons);
+  });
+  document.querySelector('[name="tier"]') && document.querySelector('[name="tier"]').addEventListener('change', updateLangAddons);
+  updateLangAddons();
+
 function goToPayment() {
   var sec = document.getElementById('sec7');
   var valid = true;
@@ -1009,6 +1040,9 @@ async function handlePayment() {
       formData.payment_status = 'paid';
       formData.setup_amount = String(piData.setup_fee || pricing.setup);
       formData.stripe_customer_id = piData.customer_id || '';
+      // Collect language add-ons
+      var langChecked = document.querySelectorAll('[name="extra_languages"]:checked:not(:disabled)');
+      formData.extra_languages = Array.from(langChecked).map(function(cb){return cb.value;}).join(',');
       // Create monthly subscription using saved card (non-fatal if fails)
       try {
         var subRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/create-subscription', {
