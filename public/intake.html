@@ -709,10 +709,32 @@
 
         <div class="success-screen" id="successScreen">
           <div class="success-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h2>Intake submitted</h2>
-          <p>Thanks — we're building your AI agent now. You'll receive an email within 24 hours with your setup details, payment link, and next steps to go live.</p>
+          <h2>Payment received — you're in.</h2>
+          <p id="successMsg">Your agent is being configured now. Check your email for confirmation and setup details.</p>
+          <div id="successDetails" style="margin-top:32px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;">What happens next</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:22px;height:22px;border-radius:50%;background:rgba(79,140,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">1</span></div>
+                <div><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">Confirmation email sent</div><div style="font-size:12px;color:var(--text3);">Check the email address you provided — you'll receive a confirmation and intake summary within minutes.</div></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:22px;height:22px;border-radius:50%;background:rgba(79,140,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">2</span></div>
+                <div><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">Agent script review (24–48 hrs)</div><div style="font-size:12px;color:var(--text3);">We'll build your custom AI script and review it before activating — you'll receive a copy for your records.</div></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:22px;height:22px;border-radius:50%;background:rgba(79,140,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">3</span></div>
+                <div><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">Dashboard access</div><div style="font-size:12px;color:var(--text3);">Once your agent is live, you'll receive a magic link to log into your NightShift AI dashboard.</div></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:22px;height:22px;border-radius:50%;background:rgba(56,232,160,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="font-size:11px;font-weight:700;color:var(--accent2);">$</span></div>
+                <div><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">Billing details</div><div style="font-size:12px;color:var(--text3);" id="billingNote">Your next monthly charge will be processed automatically on the same date next month. A receipt will be sent to your email on file.</div></div>
+              </div>
+            </div>
+          </div>
+          <p style="margin-top:20px;font-size:13px;color:var(--text3);">Questions? Email <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">founder@nightshifthotels.com</a></p>
         </div>
 
       </div>
@@ -1007,9 +1029,20 @@ async function handlePayment() {
       var provData = await provRes.json();
 
       if (provData.ok) {
+        // Hide form, show success, scroll to success screen
         document.getElementById('intakeForm').style.display = 'none';
-        document.getElementById('successScreen').classList.add('show');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        var successEl = document.getElementById('successScreen');
+        successEl.classList.add('show');
+        // Update billing note with tier-specific next date
+        var nextDate = new Date();
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        var opts = { year: 'numeric', month: 'long', day: 'numeric' };
+        var nextDateStr = nextDate.toLocaleDateString('en-US', opts);
+        var billingEl = document.getElementById('billingNote');
+        if (billingEl) billingEl.textContent = 'Your next monthly charge of ' + pricing.monthly + ' will be processed automatically on ' + nextDateStr + '. A receipt will be sent to ' + (formData.contact_email || 'your email on file') + '.';
+        // Scroll to top of page so success is visible
+        successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
       } else {
         throw new Error('Agent setup failed — payment was taken. Email founder@nightshifthotels.com with reference: ' + result.paymentIntent.id);
       }
