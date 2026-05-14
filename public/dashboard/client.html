@@ -20,34 +20,37 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* Auth */
 #authGate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;}
 #authGate.hidden{display:none;}
-.auth-box{text-align:center;max-width:380px;padding:0 24px;}
+.auth-box{text-align:center;max-width:380px;padding:0 24px;width:100%;}
 .auth-logo{width:52px;height:52px;border-radius:14px;margin:0 auto 20px;display:block;}
 .auth-box h2{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;}
 .auth-box p{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6;}
-.auth-input{width:100%;padding:11px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:10px;transition:border-color .15s;}
+.auth-input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:10px;transition:border-color .15s;}
 .auth-input:focus{border-color:rgba(79,140,255,.5);}
 .auth-input::placeholder{color:var(--text3);}
-.auth-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+.auth-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;}
 .auth-btn:hover{opacity:.88;}
-.auth-note{font-size:12px;color:var(--text3);margin-top:10px;line-height:1.6;}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;}
+.auth-note{font-size:12px;color:var(--text3);margin-top:12px;line-height:1.7;}
+.auth-note.success{color:var(--accent2);}
+.auth-note.error{color:var(--red);}
 
 /* Layout */
 .layout{display:flex;min-height:100vh;}
 
 /* Sidebar */
-.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar{width:224px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .sidebar-logo img{width:28px;height:28px;border-radius:7px;}
 .sidebar-brand{font-family:var(--font-display);font-size:14px;font-weight:700;}
 .sidebar-tag{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-top:1px;}
-.nav-section{padding:12px 10px 4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);}
-.nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;color:var(--text2);text-decoration:none;transition:all .15s;margin:1px 8px;cursor:pointer;background:none;border:none;width:calc(100% - 16px);text-align:left;font-family:var(--font-body);}
-.nav-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
-.nav-link.active{background:rgba(79,140,255,.12);color:var(--accent);}
-.nav-link svg{width:15px;height:15px;flex-shrink:0;opacity:.7;}
-.nav-link.active svg{opacity:1;}
-.nav-link.locked{opacity:.35;cursor:not-allowed;}
-.tier-pill{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:rgba(167,139,250,.12);color:var(--purple);margin-left:auto;}
+.nav-sec{padding:14px 10px 4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;color:var(--text2);text-decoration:none;transition:all .15s;margin:1px 8px;cursor:pointer;background:none;border:none;width:calc(100% - 16px);text-align:left;font-family:var(--font-body);}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.nav-item.active{background:rgba(79,140,255,.12);color:var(--accent);}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.7;}
+.nav-item.active svg{opacity:1;}
+.nav-item .badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(79,140,255,.15);color:var(--accent);}
+.pro-badge{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:rgba(167,139,250,.12);color:var(--purple);margin-left:auto;}
 .sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border);}
 .user-row{display:flex;align-items:center;gap:10px;padding:8px;}
 .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
@@ -56,124 +59,144 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .signout-btn:hover{color:var(--red);border-color:rgba(248,113,113,.3);}
 
 /* Main */
-.main{flex:1;overflow-x:hidden;}
+.main{flex:1;overflow-x:hidden;min-width:0;}
 
 /* Hero */
-.hero-section{padding:40px 48px 28px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
-.hero-section::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:300px;background:radial-gradient(ellipse,rgba(79,140,255,.07),transparent 70%);pointer-events:none;}
-.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.hero{padding:36px 40px 28px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:350px;background:radial-gradient(ellipse,rgba(79,140,255,.07),transparent 70%);pointer-events:none;}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 3px rgba(56,232,160,.2);animation:pg 2s infinite;}
-@keyframes pg{0%,100%{box-shadow:0 0 0 3px rgba(56,232,160,.2)}50%{box-shadow:0 0 0 5px rgba(56,232,160,.04)}}
-.hero-title{font-family:var(--font-display);font-size:clamp(28px,3.5vw,48px);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin-bottom:4px;}
+@keyframes pg{0%,100%{box-shadow:0 0 0 3px rgba(56,232,160,.2)}50%{box-shadow:0 0 0 6px rgba(56,232,160,.04)}}
+.hero-title{font-family:var(--font-display);font-size:clamp(24px,3vw,42px);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin-bottom:4px;}
 .hero-title span{background:linear-gradient(135deg,#6ea8ff,#38e8a0);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .hero-sub{font-size:13px;color:var(--text3);font-weight:300;}
 
-/* KPI */
+/* KPI row */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
-.kpi-card{background:var(--bg2);padding:22px 26px;}
-.kpi-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
-.kpi-value{font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:4px;}
-.kpi-value.green{color:var(--accent2);}
-.kpi-value.blue{color:var(--accent);}
-.kpi-value.amber{color:var(--accent3);}
+.kpi{background:var(--bg2);padding:20px 24px;}
+.kpi-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.kpi-val{font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:4px;}
+.kpi-val.green{color:var(--accent2);}
+.kpi-val.blue{color:var(--accent);}
+.kpi-val.amber{color:var(--accent3);}
+.kpi-val.red{color:var(--red);}
 .kpi-sub{font-size:11px;color:var(--text3);}
 @media(max-width:800px){.kpi-row{grid-template-columns:1fr 1fr;}}
-@media(max-width:480px){.kpi-row{grid-template-columns:1fr;}}
 
-/* Content */
-.content-grid{display:grid;grid-template-columns:1fr 320px;gap:0;}
+/* Content grid */
+.content-grid{display:grid;grid-template-columns:1fr 300px;min-height:0;}
 @media(max-width:1100px){.content-grid{grid-template-columns:1fr;}}
 
-/* Sections */
-.section{padding:24px 32px;border-bottom:1px solid var(--border);}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.section-title{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:-.01em;}
-.section-link{font-size:12px;color:var(--accent);text-decoration:none;padding:5px 10px;border-radius:7px;transition:background .15s;cursor:pointer;background:none;border:none;font-family:var(--font-body);}
-.section-link:hover{background:rgba(79,140,255,.1);}
+/* Section */
+.sec{padding:22px 28px;border-bottom:1px solid var(--border);}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.sec-title{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:-.01em;}
+.sec-link{font-size:12px;color:var(--accent);text-decoration:none;padding:5px 10px;border-radius:7px;transition:background .15s;cursor:pointer;background:none;border:none;font-family:var(--font-body);}
+.sec-link:hover{background:rgba(79,140,255,.1);}
 
-/* Call list */
-.call-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:var(--r2);overflow:hidden;}
-.call-item{background:var(--surface);padding:14px 16px;transition:background .15s;cursor:default;}
-.call-item:hover{background:var(--surface2);}
-.call-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
-.call-time{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
+/* Chart */
+.chart-wrap{height:140px;position:relative;margin-bottom:4px;}
+canvas{display:block;}
+
+/* Call cards */
+.call-stack{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:var(--r2);overflow:hidden;}
+.call-card{background:var(--surface);padding:14px 16px;transition:background .15s;}
+.call-card:hover{background:var(--surface2);}
+.call-card-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.call-intent-icon{font-size:16px;line-height:1;flex-shrink:0;}
+.call-intent-label{font-size:13px;font-weight:600;flex:1;min-width:0;}
+.call-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.call-dur{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
 .sentiment-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;}
 .sentiment-pill.positive{background:rgba(56,232,160,.1);color:var(--accent2);}
 .sentiment-pill.neutral{background:rgba(255,255,255,.06);color:var(--text3);}
 .sentiment-pill.negative{background:rgba(248,113,113,.1);color:var(--red);}
-.call-summary{font-size:13px;color:var(--text2);line-height:1.5;}
-.call-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.call-summary{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:7px;}
+.call-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.call-tags{display:flex;gap:4px;flex-wrap:wrap;}
 .call-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.05);color:var(--text3);}
+.escalated-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:rgba(167,139,250,.1);color:var(--purple);}
+.call-time{font-family:var(--font-mono);font-size:10px;color:var(--text3);white-space:nowrap;}
 
-/* Reservation table */
+/* Reservations */
 .res-table{width:100%;border-collapse:collapse;font-size:13px;}
-.res-table th{text-align:left;padding:9px 0;color:var(--text3);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);}
-.res-table td{padding:12px 0;border-bottom:1px solid var(--border);color:var(--text2);}
+.res-table th{text-align:left;padding:8px 0;color:var(--text3);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.res-table td{padding:11px 0;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
 .res-table tr:last-child td{border-bottom:none;}
-.res-amount{color:var(--accent2);font-family:var(--font-mono);}
+.res-guest{font-weight:500;color:var(--text);font-size:13px;}
+.res-detail{font-size:11px;color:var(--text3);margin-top:2px;}
+.res-amount{color:var(--accent2);font-family:var(--font-mono);font-size:13px;font-weight:600;}
+.res-room{font-size:11px;color:var(--text3);}
 
 /* Side panel */
 .side-panel{border-left:1px solid var(--border);}
-.side-section{padding:22px 20px;border-bottom:1px solid var(--border);}
-.side-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+.side-sec{padding:20px;border-bottom:1px solid var(--border);}
+.side-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{font-size:12px;color:var(--text2);}
+.stat-value{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--text);}
+.stat-value.green{color:var(--accent2);}
+.stat-value.amber{color:var(--accent3);}
+.stat-value.red{color:var(--red);}
 
-/* Billing rows */
-.bill-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
-.bill-row:last-child{border-bottom:none;}
-.bill-label{font-size:13px;color:var(--text2);}
-.bill-value{font-size:13px;font-weight:500;font-family:var(--font-mono);}
-.bill-value.green{color:var(--accent2);}
-.bill-value.amber{color:var(--accent3);}
+/* Minutes bar */
+.mins-wrap{margin-top:10px;}
+.mins-track{height:6px;background:var(--surface3);border-radius:99px;overflow:hidden;margin:8px 0 4px;}
+.mins-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;transition:width .6s ease;}
+.mins-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-mono);}
 
-/* Mini stats */
-.mini-stats{display:flex;flex-direction:column;gap:10px;}
-.mini-stat{display:flex;align-items:center;justify-content:space-between;}
-.mini-label{font-size:12px;color:var(--text2);}
-.mini-value{font-family:var(--font-mono);font-size:13px;font-weight:500;}
+/* Billing card */
+.billing-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;}
+.billing-card-top{padding:16px 18px;border-bottom:1px solid var(--border);background:var(--surface3);}
+.billing-plan{font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:-.02em;}
+.billing-rows{padding:4px 0;}
+.billing-row{display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);}
+.billing-row:last-child{border-bottom:none;}
+.billing-label{font-size:12px;color:var(--text2);}
+.billing-val{font-family:var(--font-mono);font-size:12px;font-weight:500;}
+.billing-val.green{color:var(--accent2);}
+.billing-val.amber{color:var(--accent3);}
 
-/* Upgrade banner */
-.upgrade-banner{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(167,139,250,.06));border:1px solid rgba(79,140,255,.2);border-radius:var(--r2);padding:18px;text-align:center;}
-.upgrade-banner p{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;}
-.upgrade-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);text-decoration:none;}
+/* Upgrade */
+.upgrade-card{background:linear-gradient(135deg,rgba(79,140,255,.08),rgba(167,139,250,.06));border:1px solid rgba(79,140,255,.2);border-radius:var(--r2);padding:18px;text-align:center;}
+.upgrade-card p{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;}
+.upgrade-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:opacity .15s;}
+.upgrade-btn:hover{opacity:.88;}
 
-/* Empty state */
-.empty{text-align:center;padding:40px;color:var(--text3);}
-.empty svg{width:28px;height:28px;margin:0 auto 10px;display:block;opacity:.25;}
+/* Empty */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);}
 .empty p{font-size:13px;}
 
 /* Skeleton */
-.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sk 1.5s infinite;border-radius:8px;}
+.skel{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sk 1.5s infinite;border-radius:8px;}
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* Toast */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:13px 18px;font-size:13px;color:var(--text);z-index:999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 18px;font-size:13px;color:var(--text);z-index:999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);max-width:300px;}
 .toast.show{transform:translateY(0);opacity:1;}
 
 /* Mobile */
-#menuBtn{display:none;position:fixed;top:14px;left:14px;z-index:101;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;}
+#menuBtn{display:none;position:fixed;top:14px;left:14px;z-index:101;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--text2);}
 @media(max-width:768px){
-  .sidebar{position:fixed;left:-220px;top:0;bottom:0;z-index:100;transition:left .3s;}
+  .sidebar{position:fixed;left:-224px;top:0;bottom:0;z-index:100;transition:left .3s;}
   .sidebar.open{left:0;}
-  #menuBtn{display:flex;}
-  .hero-section{padding:56px 20px 20px;}
-  .section{padding:16px;}
+  #menuBtn{display:flex;align-items:center;justify-content:center;}
+  .hero{padding:52px 20px 20px;}
+  .sec{padding:16px 20px;}
   .content-grid{grid-template-columns:1fr;}
   .side-panel{border-left:none;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
 }
-
-/* Return link */
-.return-link{position:fixed;bottom:20px;right:20px;z-index:50;display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(13,17,24,.85);border:1px solid rgba(255,255,255,.1);border-radius:99px;font-size:12px;color:rgba(238,242,255,.45);text-decoration:none;backdrop-filter:blur(12px);transition:color .15s;}
-.return-link:hover{color:rgba(238,242,255,.85);}
 </style>
 </head>
 <body>
 
-<!-- Auth Gate -->
 <div id="authGate">
   <div class="auth-box">
     <img src="/favicon-32x32.png" alt="NightShift AI" class="auth-logo">
     <h2>Your workspace</h2>
-    <p>Enter your email address to receive a secure magic link.</p>
+    <p>Enter your email to receive a secure magic link — no password needed.</p>
     <input type="email" class="auth-input" id="authEmail" placeholder="you@yourhotel.com" autocomplete="email">
     <button class="auth-btn" id="authSubmit" onclick="sendMagicLink()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -183,46 +206,40 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
   </div>
 </div>
 
-<!-- Mobile toggle -->
 <button id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 
 <div class="layout" id="appLayout" style="display:none;">
-
-  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <img src="/favicon-32x32.png" alt="NightShift AI">
-      <div>
-        <div class="sidebar-brand">NightShift AI</div>
-        <div class="sidebar-tag" id="sidebarTier">Dashboard</div>
-      </div>
+      <div><div class="sidebar-brand">NightShift AI</div><div class="sidebar-tag" id="sidebarTier">Dashboard</div></div>
     </div>
-
-    <div class="nav-section">My Property</div>
-    <button class="nav-link active" id="navOverview" onclick="showSection('overview',this)">
+    <div class="nav-sec">Operations</div>
+    <button class="nav-item active" id="navOverview" onclick="showSec('overview',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Overview
     </button>
-    <button class="nav-link" id="navCalls" onclick="showSection('calls',this)">
+    <button class="nav-item" id="navCalls" onclick="showSec('calls',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
       Call Log
+      <span class="badge" id="navCallsBadge" style="display:none;"></span>
     </button>
-    <button class="nav-link" id="navReservations" onclick="showSection('reservations',this)">
+    <button class="nav-item" id="navRes" onclick="showSec('reservations',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
       Reservations
-      <span class="tier-pill" id="resBadge" style="display:none;">Pro</span>
+      <span class="pro-badge" id="resBadge" style="display:none;">Pro</span>
     </button>
-    <button class="nav-link" id="navBilling" onclick="showSection('billing',this)">
+    <div class="nav-sec">Account</div>
+    <button class="nav-item" id="navBilling" onclick="showSec('billing',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
       Billing
     </button>
-    <button class="nav-link" id="navAccount" onclick="showSection('account',this)">
+    <button class="nav-item" id="navAccount" onclick="showSec('account',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Account
     </button>
-
     <div class="sidebar-bottom">
       <div class="user-row">
         <div class="user-avatar" id="userAvatar">?</div>
@@ -235,80 +252,71 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
     </div>
   </nav>
 
-  <!-- Main -->
   <main class="main">
 
     <!-- OVERVIEW -->
     <div id="sec-overview">
-      <div class="hero-section">
-        <div class="hero-eyebrow"><span class="live-dot"></span>Agent Active</div>
-        <h1 class="hero-title">Welcome back, <span id="heroName">—</span></h1>
-        <p class="hero-sub" id="heroSub">Loading your property dashboard...</p>
+      <div class="hero">
+        <div class="hero-eye"><span class="live-dot"></span>Agent Active — 24/7</div>
+        <h1 class="hero-title">Welcome, <span id="heroName">—</span></h1>
+        <p class="hero-sub" id="heroSub">Loading your dashboard...</p>
       </div>
-
       <div class="kpi-row">
-        <div class="kpi-card">
-          <div class="kpi-label">Calls This Month</div>
-          <div class="kpi-value blue" id="kpiCalls">—</div>
-          <div class="kpi-sub" id="kpiCallsSub">Loading</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Reservations</div>
-          <div class="kpi-value green" id="kpiRes">—</div>
-          <div class="kpi-sub">This month</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Guest Sentiment</div>
-          <div class="kpi-value" id="kpiSentiment">—</div>
-          <div class="kpi-sub">Positive calls</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Escalations</div>
-          <div class="kpi-value amber" id="kpiEscalations">—</div>
-          <div class="kpi-sub">Transferred to staff</div>
-        </div>
+        <div class="kpi"><div class="kpi-lbl">Calls This Month</div><div class="kpi-val blue" id="kpiCalls">—</div><div class="kpi-sub" id="kpiCallsSub">—</div></div>
+        <div class="kpi"><div class="kpi-lbl">Reservations</div><div class="kpi-val green" id="kpiRes">—</div><div class="kpi-sub">Confirmed this month</div></div>
+        <div class="kpi"><div class="kpi-lbl">Revenue Captured</div><div class="kpi-val amber" id="kpiRevenue">—</div><div class="kpi-sub">From reservations</div></div>
+        <div class="kpi"><div class="kpi-lbl">Guest Sentiment</div><div class="kpi-val" id="kpiSentiment">—</div><div class="kpi-sub" id="kpiSentimentSub">of calls positive</div></div>
       </div>
-
       <div class="content-grid">
         <div>
-          <div class="section">
-            <div class="section-header">
-              <div class="section-title">Recent Calls</div>
-              <button class="section-link" onclick="showSection('calls',document.getElementById('navCalls'))">View all →</button>
-            </div>
-            <div id="ovRecentCalls">
-              <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
-              <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
-              <div class="skeleton" style="height:64px;"></div>
-            </div>
+          <!-- Call volume chart -->
+          <div class="sec">
+            <div class="sec-hdr"><div class="sec-title">Call Volume — Last 7 Days</div></div>
+            <div class="chart-wrap"><canvas id="callChart"></canvas></div>
           </div>
-          <div class="section" id="ovResSection" style="display:none;">
-            <div class="section-header">
-              <div class="section-title">Recent Reservations</div>
-              <button class="section-link" onclick="showSection('reservations',document.getElementById('navReservations'))">View all →</button>
+          <!-- Recent calls -->
+          <div class="sec">
+            <div class="sec-hdr">
+              <div class="sec-title">Recent Activity</div>
+              <button class="sec-link" onclick="showSec('calls',document.getElementById('navCalls'))">View all →</button>
+            </div>
+            <div id="ovRecentCalls"><div class="skel" style="height:72px;margin-bottom:2px;"></div><div class="skel" style="height:72px;margin-bottom:2px;"></div><div class="skel" style="height:72px;"></div></div>
+          </div>
+          <!-- Recent reservations (Pro) -->
+          <div class="sec" id="ovResSection" style="display:none;">
+            <div class="sec-hdr">
+              <div class="sec-title">Recent Reservations</div>
+              <button class="sec-link" onclick="showSec('reservations',document.getElementById('navRes'))">View all →</button>
             </div>
             <div id="ovRecentRes"></div>
           </div>
         </div>
-
         <div class="side-panel">
-          <div class="side-section">
-            <div class="side-title">This Month</div>
-            <div class="mini-stats" id="sideStats">
-              <div class="mini-stat"><span class="mini-label">Minutes used</span><span class="mini-value" id="statMins">—</span></div>
-              <div class="mini-stat"><span class="mini-label">Included minutes</span><span class="mini-value" id="statIncluded">—</span></div>
-              <div class="mini-stat"><span class="mini-label">Overage</span><span class="mini-value" id="statOverage">—</span></div>
-              <div class="mini-stat"><span class="mini-label">Positive calls</span><span class="mini-value" id="statPos">—</span></div>
-              <div class="mini-stat"><span class="mini-label">Avg call length</span><span class="mini-value" id="statAvg">—</span></div>
+          <!-- Minute usage -->
+          <div class="side-sec">
+            <div class="side-lbl">Minute Usage — This Month</div>
+            <div class="stat-row"><span class="stat-label">Minutes used</span><span class="stat-value" id="statMins">—</span></div>
+            <div class="stat-row"><span class="stat-label">Included</span><span class="stat-value" id="statIncluded">—</span></div>
+            <div class="stat-row"><span class="stat-label">Overage</span><span class="stat-value" id="statOverage">—</span></div>
+            <div class="mins-wrap">
+              <div class="mins-track"><div class="mins-fill" id="minsFill" style="width:0%;"></div></div>
+              <div class="mins-labels"><span id="minsUsedLabel">0 min</span><span id="minsLimitLabel">— min</span></div>
             </div>
           </div>
-          <div class="side-section">
-            <div class="side-title">Agent Status</div>
-            <div class="mini-stats">
-              <div class="mini-stat"><span class="mini-label">Status</span><span class="mini-value" style="color:var(--accent2);">Active</span></div>
-              <div class="mini-stat"><span class="mini-label">Plan</span><span class="mini-value" id="statPlan">—</span></div>
-              <div class="mini-stat"><span class="mini-label">Member since</span><span class="mini-value" id="statSince">—</span></div>
-            </div>
+          <!-- Call breakdown -->
+          <div class="side-sec">
+            <div class="side-lbl">Call Breakdown</div>
+            <div class="stat-row"><span class="stat-label">Reservations taken</span><span class="stat-value green" id="statResCount">—</span></div>
+            <div class="stat-row"><span class="stat-label">Info & inquiries</span><span class="stat-value" id="statInfoCount">—</span></div>
+            <div class="stat-row"><span class="stat-label">Escalated to staff</span><span class="stat-value amber" id="statEscCount">—</span></div>
+            <div class="stat-row"><span class="stat-label">Avg call length</span><span class="stat-value" id="statAvg">—</span></div>
+          </div>
+          <!-- Agent status -->
+          <div class="side-sec">
+            <div class="side-lbl">Agent Status</div>
+            <div class="stat-row"><span class="stat-label">Status</span><span class="stat-value green">Active</span></div>
+            <div class="stat-row"><span class="stat-label">Plan</span><span class="stat-value" id="statPlan">—</span></div>
+            <div class="stat-row"><span class="stat-label">Member since</span><span class="stat-value" id="statSince">—</span></div>
           </div>
         </div>
       </div>
@@ -316,63 +324,46 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 
     <!-- CALL LOG -->
     <div id="sec-calls" style="display:none;">
-      <div class="hero-section">
-        <div class="hero-eyebrow"><span class="live-dot"></span>Call History</div>
-        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Call Log</h1>
-        <p class="hero-sub">Every inbound call handled by your AI agent</p>
+      <div class="hero">
+        <div class="hero-eye"><span class="live-dot"></span>Call History</div>
+        <h1 class="hero-title" style="font-size:clamp(20px,2.5vw,32px);">Call Log</h1>
+        <p class="hero-sub">Every inbound call handled by your AI agent — with full summary and outcome</p>
       </div>
-      <div class="section">
-        <div id="callLogFull">
-          <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
-          <div class="skeleton" style="height:64px;margin-bottom:4px;"></div>
-          <div class="skeleton" style="height:64px;"></div>
-        </div>
-      </div>
+      <div class="sec"><div id="callLogFull"><div class="skel" style="height:72px;margin-bottom:2px;"></div><div class="skel" style="height:72px;"></div></div></div>
     </div>
 
     <!-- RESERVATIONS -->
     <div id="sec-reservations" style="display:none;">
-      <div class="hero-section">
-        <div class="hero-eyebrow"><span class="live-dot"></span>Booking Intake</div>
-        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Reservations</h1>
-        <p class="hero-sub">Reservation requests confirmed by your AI agent</p>
+      <div class="hero">
+        <div class="hero-eye"><span class="live-dot"></span>Booking Intake</div>
+        <h1 class="hero-title" style="font-size:clamp(20px,2.5vw,32px);">Reservations</h1>
+        <p class="hero-sub">All reservations confirmed by your AI agent</p>
       </div>
-      <div class="section">
-        <div id="resFull">
-          <div class="skeleton" style="height:44px;margin-bottom:4px;"></div>
-          <div class="skeleton" style="height:44px;"></div>
-        </div>
-      </div>
+      <div class="sec"><div id="resFull"><div class="skel" style="height:44px;margin-bottom:2px;"></div><div class="skel" style="height:44px;"></div></div></div>
     </div>
 
     <!-- BILLING -->
     <div id="sec-billing" style="display:none;">
-      <div class="hero-section">
-        <div class="hero-eyebrow"><span class="live-dot"></span>Subscription</div>
-        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Billing</h1>
-        <p class="hero-sub">Your plan, next payment, and usage</p>
+      <div class="hero">
+        <div class="hero-eye"><span class="live-dot"></span>Subscription</div>
+        <h1 class="hero-title" style="font-size:clamp(20px,2.5vw,32px);">Billing</h1>
+        <p class="hero-sub">Your plan details, next payment, and usage</p>
       </div>
-      <div class="section">
-        <div id="billingCard">
-          <div class="skeleton" style="height:240px;border-radius:12px;"></div>
-        </div>
-      </div>
+      <div class="sec"><div id="billingContent"><div class="skel" style="height:260px;border-radius:12px;"></div></div></div>
     </div>
 
     <!-- ACCOUNT -->
     <div id="sec-account" style="display:none;">
-      <div class="hero-section">
-        <div class="hero-eyebrow"><span class="live-dot"></span>Account</div>
-        <h1 class="hero-title" style="font-size:clamp(22px,3vw,36px);">Account</h1>
-        <p class="hero-sub">Property details and support</p>
+      <div class="hero">
+        <div class="hero-eye"><span class="live-dot"></span>Property</div>
+        <h1 class="hero-title" style="font-size:clamp(20px,2.5vw,32px);">Account</h1>
+        <p class="hero-sub">Your property details and support contact</p>
       </div>
-      <div class="section">
-        <div id="accountCard">
-          <div class="skeleton" style="height:240px;border-radius:12px;"></div>
-        </div>
-        <div style="margin-top:20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;">
+      <div class="sec">
+        <div id="accountContent"><div class="skel" style="height:200px;border-radius:12px;"></div></div>
+        <div style="margin-top:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;">
           <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Support</div>
-          <p style="font-size:13px;color:var(--text2);line-height:1.7;">Questions or issues? Email your account manager at <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">founder@nightshifthotels.com</a>. We respond within 24 hours on Core and within 4 hours on Pro.</p>
+          <p style="font-size:13px;color:var(--text2);line-height:1.7;">Questions or issues? Email us at <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">founder@nightshifthotels.com</a>. Core plan: 24hr response. Pro plan: 4hr response.</p>
           <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;">
             <a href="/msa.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;">MSA →</a>
             <a href="/terms.html" target="_blank" style="font-size:12px;color:var(--text3);text-decoration:none;">Terms →</a>
@@ -385,305 +376,331 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
   </main>
 </div>
 
-<a href="/" class="return-link">
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-  Main site
-</a>
-
 <div class="toast" id="toast"></div>
 
 <script>
 const SB_URL = window.NSA_CONFIG.SUPABASE_URL;
 const SB_KEY = window.NSA_CONFIG.SUPABASE_ANON_KEY;
 const FOUNDER = 'founder@nightshifthotels.com';
+const TIER_MRR = {core:549,pro:699};
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-let currentProperty = null;
-let currentTier = 'core';
-let currentUser = null;
-const TIER_MRR = { core: 549, pro: 699 };
+let prop = null, tier = 'core', user = null;
 
-// ── Helpers ──
-function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function timeAgo(d){ if(!d) return '—'; const diff=Date.now()-new Date(d).getTime(),m=Math.floor(diff/60000); if(m<1) return 'just now'; if(m<60) return m+'m ago'; const h=Math.floor(m/60); if(h<24) return h+'h ago'; return Math.floor(h/24)+'d ago'; }
-function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'; setTimeout(()=>t.className='toast',2800); }
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const esc = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+const fmtDate = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); };
+const fmtAgo = d => { if(!d) return '—'; const m=Math.floor((Date.now()-new Date(d))/60000); if(m<1) return 'just now'; if(m<60) return m+'m ago'; const h=Math.floor(m/60); if(h<24) return h+'h ago'; return Math.floor(h/24)+'d ago'; };
+const fmtDur = s => { if(!s) return null; const m=Math.floor(s/60); return m>0?`${m}m ${s%60}s`:`${s}s`; };
+const showToast = msg => { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'; setTimeout(()=>t.className='toast',2800); };
 
-// ── Section nav ──
-function showSection(id, btn) {
-  document.querySelectorAll('[id^="sec-"]').forEach(el=>el.style.display='none');
-  document.getElementById('sec-'+id).style.display='block';
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  if(id==='calls') loadCallLog();
-  if(id==='reservations') loadReservations();
-  if(id==='billing') loadBilling();
-  if(id==='account') loadAccount();
-}
-
-// ── Auth ──
-async function sendMagicLink() {
-  const email = document.getElementById('authEmail').value.trim();
-  if(!email){ document.getElementById('authNote').textContent='Please enter your email.'; return; }
-  const btn = document.getElementById('authSubmit');
-  btn.disabled=true; btn.textContent='Sending...';
-  const {error} = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.href }});
-  if(error){
-    document.getElementById('authNote').textContent = error.message;
-    btn.disabled=false; btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Send magic link';
-  } else {
-    document.getElementById('authNote').textContent='✓ Check your email for a secure login link.';
-    btn.textContent='✓ Link sent';
-  }
-}
-
-async function signOut(){ await sb.auth.signOut(); window.location.reload(); }
-
-// ── Init ──
-async function init() {
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session){ document.getElementById('authGate').classList.remove('hidden'); return; }
-
-  currentUser = session.user;
-  if(currentUser.email === FOUNDER){ window.location.href='/dashboard/founder.html'; return; }
-
-  const { data:hu } = await sb.from('hotel_users').select('property_id,role,tier').eq('user_id',currentUser.id).limit(1).single();
-  if(!hu){
-    document.getElementById('authGate').innerHTML = '<div class="auth-box"><img src="/favicon-32x32.png" class="auth-logo"><h2>No property found</h2><p>Your account isn\'t linked to a property. Contact <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a></p></div>';
-    return;
-  }
-
-  const { data:prop } = await sb.from('properties').select('*').eq('id',hu.property_id).single();
-  if(!prop){ return; }
-
-  currentProperty = prop;
-  currentTier = prop.tier || 'core';
-
-  // Show app
-  document.getElementById('authGate').classList.add('hidden');
-  document.getElementById('appLayout').style.display='flex';
-
-  // Set sidebar
-  const tierLabel = currentTier.charAt(0).toUpperCase()+currentTier.slice(1);
-  document.getElementById('sidebarTier').textContent = tierLabel+' Plan';
-  const name = prop.contact_name || currentUser.email.split('@')[0];
-  document.getElementById('heroName').textContent = prop.name;
-  document.getElementById('heroSub').textContent = tierLabel+' plan · Agent active 24/7';
-  document.getElementById('userName').textContent = name;
-  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-  document.getElementById('statPlan').textContent = tierLabel;
-  document.getElementById('statIncluded').textContent = (prop.included_minutes||1000).toLocaleString()+' min';
-  document.getElementById('statSince').textContent = prop.onboarded_at ? new Date(prop.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
-
-  // Core: lock reservations
-  if(currentTier==='core'){
-    document.getElementById('resBadge').style.display='none';
-    document.getElementById('navReservations').classList.add('locked');
-    document.getElementById('navReservations').onclick = ()=>showToast('Reservations dashboard available on Pro plan');
-  }
-  // Pro: show reservations on overview
-  if(currentTier==='pro'){
-    document.getElementById('ovResSection').style.display='block';
-  }
-
-  await loadOverview();
-}
-
-// ── Overview ──
-async function loadOverview() {
-  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
-  const [callsRes, resRes] = await Promise.all([
-    sb.from('call_logs').select('*').eq('property_id',currentProperty.id).gte('created_at',monthStart.toISOString()).limit(200),
-    sb.from('reservations').select('*').eq('property_id',currentProperty.id).gte('created_at',monthStart.toISOString()).limit(50)
-  ]);
-
-  const calls = callsRes.data||[];
-  const reservations = resRes.data||[];
-
-  // KPIs
-  document.getElementById('kpiCalls').textContent = calls.length;
-  document.getElementById('kpiRes').textContent = reservations.length;
-  const escalated = calls.filter(c=>c.escalated).length;
-  document.getElementById('kpiEscalations').textContent = escalated;
-  const pos = calls.filter(c=>c.sentiment==='positive').length;
-  const pct = calls.length>0?Math.round((pos/calls.length)*100):0;
-  const sentEl = document.getElementById('kpiSentiment');
-  sentEl.textContent = calls.length>0 ? pct+'%' : '—';
-  sentEl.className = 'kpi-value '+(pct>=70?'green':'');
-
-  // Minutes
-  const totalSecs = calls.reduce((s,c)=>s+(c.duration_seconds||0),0);
-  const totalMins = Math.ceil(totalSecs/60);
-  const included = currentProperty.included_minutes||1000;
-  const overage = Math.max(0,totalMins-included);
-  document.getElementById('statMins').textContent = totalMins.toLocaleString()+' min';
-  document.getElementById('statOverage').textContent = overage>0?overage+' min':'None';
-  document.getElementById('statPos').textContent = pos+' / '+calls.length;
-  const avgSecs = calls.length>0?Math.round(totalSecs/calls.length):0;
-  document.getElementById('statAvg').textContent = avgSecs>0?(Math.floor(avgSecs/60)+'m '+avgSecs%60+'s'):'—';
-  document.getElementById('kpiCallsSub').textContent = totalMins+' min · '+(overage>0?overage+' overage':'within limit');
-
-  // Recent calls
-  renderCallList(calls.slice(0,5), 'ovRecentCalls');
-
-  // Recent reservations (Pro)
-  if(currentTier==='pro' && reservations.length>0){
-    document.getElementById('ovRecentRes').innerHTML = renderResTable(reservations.slice(0,5));
-  } else if(currentTier==='pro'){
-    document.getElementById('ovRecentRes').innerHTML = '<div class="empty"><p>No reservations yet this month</p></div>';
-  }
-}
-
-// ── Call Log ──
-async function loadCallLog() {
-  const { data:calls } = await sb.from('call_logs').select('*').eq('property_id',currentProperty.id).order('created_at',{ascending:false}).limit(100);
-  if(!calls||calls.length===0){
-    document.getElementById('callLogFull').innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/></svg><p>No calls recorded yet</p></div>';
-    return;
-  }
-  renderCallList(calls, 'callLogFull', true);
-}
-
+// ── Intent ───────────────────────────────────────────────────────────────────
 function callIntent(c) {
-  // Derive a plain-English reason for the call from tags + summary
-  const tags = Array.isArray(c.tags)?c.tags:(typeof c.tags==='string'?JSON.parse(c.tags||'[]'):[]);
-  const t = tags.map(x=>x.toLowerCase());
+  const t=(Array.isArray(c.tags)?c.tags:[]).map(x=>String(x).toLowerCase());
   if(t.includes('emergency')||t.includes('911')) return {icon:'🚨',label:'Emergency call',color:'var(--red)'};
-  if(t.includes('reservation')&&(t.includes('confirmed')||t.includes('request'))) return {icon:'📋',label:'Reservation booked',color:'var(--accent2)'};
-  if(t.includes('reservation')&&t.includes('not_confirmed')) return {icon:'📋',label:'Reservation inquiry — not confirmed',color:'var(--accent3)'};
+  if(t.includes('reservation')&&(t.includes('confirmed')||t.includes('request'))) return {icon:'📋',label:'Reservation confirmed',color:'var(--accent2)'};
+  if(t.includes('not_confirmed')) return {icon:'📋',label:'Reservation inquiry — not confirmed',color:'var(--accent3)'};
   if(t.includes('complaint')) return {icon:'⚠️',label:'Guest complaint',color:'var(--red)'};
   if(t.includes('billing')) return {icon:'💳',label:'Billing question',color:'var(--accent3)'};
-  if(t.includes('modify_existing')) return {icon:'✏️',label:'Modify existing reservation',color:'var(--accent3)'};
+  if(t.includes('modify_existing')) return {icon:'✏️',label:'Reservation modification request',color:'var(--accent3)'};
   if(t.includes('transfer')) return {icon:'↗️',label:'Transferred to staff',color:'var(--purple)'};
   if(t.includes('info')) return {icon:'ℹ️',label:'Guest information request',color:'var(--text2)'};
   return {icon:'📞',label:'General inquiry',color:'var(--text2)'};
 }
 
-function fmtDuration(secs) {
-  if(!secs) return null;
-  const m=Math.floor(secs/60), s=secs%60;
-  return m>0?`${m}m ${s}s`:`${s}s`;
+// ── Sections ─────────────────────────────────────────────────────────────────
+function showSec(id, btn) {
+  document.querySelectorAll('[id^="sec-"]').forEach(el=>el.style.display='none');
+  document.getElementById('sec-'+id).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(l=>l.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='calls') loadCalls();
+  if(id==='reservations') loadReservations();
+  if(id==='billing') loadBilling();
+  if(id==='account') loadAccount();
 }
 
-function renderCallList(calls, containerId, showTranscript=false) {
-  const el = document.getElementById(containerId);
-  if(!calls||calls.length===0){ el.innerHTML='<div class="empty"><p>No calls yet this period</p></div>'; return; }
-  el.innerHTML = '<div class="call-list">'+calls.map(c=>{
-    const intent = callIntent(c);
-    const dur = fmtDuration(c.duration_seconds);
-    const tags = Array.isArray(c.tags)?c.tags:(typeof c.tags==='string'?JSON.parse(c.tags||'[]'):[]);
-    const isEscalated = c.escalated || tags.includes('transfer');
-    const transcript = showTranscript&&c.transcript?`<div style="margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.7;max-height:120px;overflow-y:auto;border:1px solid var(--border);">${esc(c.transcript.substring(0,400))}${c.transcript.length>400?'...':''}</div>`:'';
-    const escalationBadge = isEscalated ? `<span style="font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(167,139,250,.1);color:var(--purple);font-weight:600;">Escalated</span>` : '';
-    return `<div class="call-item">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:15px;">${intent.icon}</span>
-          <span style="font-size:13px;font-weight:600;color:${intent.color};">${intent.label}</span>
-          ${escalationBadge}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-          ${dur?`<span style="font-family:var(--font-mono);font-size:11px;color:var(--text3);">${dur}</span>`:''}
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function sendMagicLink() {
+  const email = document.getElementById('authEmail').value.trim();
+  const note = document.getElementById('authNote');
+  const btn = document.getElementById('authSubmit');
+  if(!email || !email.includes('@')) { note.textContent='Please enter a valid email.'; note.className='auth-note error'; return; }
+  btn.disabled=true; btn.textContent='Sending...';
+  const {error} = await sb.auth.signInWithOtp({email, options:{emailRedirectTo: window.location.origin+'/dashboard/'}});
+  if(error){ note.textContent=error.message; note.className='auth-note error'; btn.disabled=false; btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Send magic link'; }
+  else { note.textContent='✓ Check your email — a secure link is on its way.'; note.className='auth-note success'; btn.textContent='Link sent ✓'; }
+}
+
+async function signOut() { await sb.auth.signOut(); window.location.reload(); }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session) { document.getElementById('authGate').classList.remove('hidden'); return; }
+  user = session.user;
+  if(user.email===FOUNDER) { window.location.href='/dashboard/founder.html'; return; }
+
+  const {data:hu} = await sb.from('hotel_users').select('property_id,role,tier').eq('user_id',user.id).limit(1).single();
+  if(!hu) { document.getElementById('authGate').innerHTML='<div class="auth-box"><img src="/favicon-32x32.png" class="auth-logo"><h2>No property found</h2><p>Your account isn\'t linked to a property. Contact <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a></p></div>'; return; }
+
+  const {data:p} = await sb.from('properties').select('*').eq('id',hu.property_id).single();
+  if(!p) return;
+
+  prop = p; tier = p.tier||'core';
+  document.getElementById('authGate').classList.add('hidden');
+  document.getElementById('appLayout').style.display='flex';
+
+  const tierLabel = tier.charAt(0).toUpperCase()+tier.slice(1);
+  document.getElementById('sidebarTier').textContent = tierLabel+' Plan';
+  document.getElementById('heroName').textContent = p.name;
+  document.getElementById('heroSub').textContent = p.address || (tierLabel+' plan · Agent active 24/7');
+  const name = p.contact_name || user.email.split('@')[0];
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('statPlan').textContent = tierLabel;
+  document.getElementById('statIncluded').textContent = (p.included_minutes||1000).toLocaleString()+' min';
+  document.getElementById('statSince').textContent = p.onboarded_at ? new Date(p.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
+  document.getElementById('minsLimitLabel').textContent = (p.included_minutes||1000).toLocaleString()+' min';
+
+  if(tier==='pro') {
+    document.getElementById('resBadge').style.display='none';
+    document.getElementById('ovResSection').style.display='block';
+  }
+  if(tier==='core') {
+    document.getElementById('resBadge').style.display='inline-block';
+  }
+
+  await loadOverview();
+}
+
+// ── Overview ─────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+  const [cr, rr] = await Promise.all([
+    sb.from('call_logs').select('*').eq('property_id',prop.id).gte('created_at',monthStart.toISOString()).limit(300),
+    sb.from('reservations').select('*').eq('property_id',prop.id).gte('created_at',monthStart.toISOString()).limit(100)
+  ]);
+  const calls = cr.data||[], reservations = rr.data||[];
+
+  // KPIs
+  document.getElementById('kpiCalls').textContent = calls.length;
+  const totalSecs = calls.reduce((s,c)=>s+(c.duration_seconds||0),0);
+  const totalMins = Math.ceil(totalSecs/60);
+  const included = prop.included_minutes||1000;
+  const ovMins = Math.max(0,totalMins-included);
+  document.getElementById('kpiCallsSub').textContent = totalMins>0 ? totalMins+' min used' : 'No calls yet';
+
+  const resCount = reservations.length;
+  document.getElementById('kpiRes').textContent = resCount;
+  const revenue = reservations.reduce((s,r)=>s+(Number(r.total_due)||0),0);
+  document.getElementById('kpiRevenue').textContent = revenue>0 ? '$'+revenue.toLocaleString() : '$0';
+
+  const pos = calls.filter(c=>c.sentiment==='positive').length;
+  const pct = calls.length>0 ? Math.round((pos/calls.length)*100) : 0;
+  const sentEl = document.getElementById('kpiSentiment');
+  sentEl.textContent = calls.length>0 ? pct+'%' : '—';
+  sentEl.className = 'kpi-val '+(pct>=70?'green':pct>=50?'amber':'red');
+
+  // Nav badge
+  if(calls.length>0){ const b=document.getElementById('navCallsBadge'); b.textContent=calls.length; b.style.display='inline-block'; }
+
+  // Side stats
+  document.getElementById('statMins').textContent = totalMins.toLocaleString()+' min';
+  document.getElementById('statOverage').textContent = ovMins>0 ? ovMins+' min (est. $'+((ovMins*(prop.overage_rate||0.22)).toFixed(2))+')' : 'None';
+  if(ovMins>0) document.getElementById('statOverage').closest('.stat-row').querySelector('.stat-value').className='stat-value amber';
+
+  const pct2 = Math.min(100, included>0 ? Math.round((totalMins/included)*100) : 0);
+  document.getElementById('minsFill').style.width = pct2+'%';
+  document.getElementById('minsUsedLabel').textContent = totalMins.toLocaleString()+' min';
+
+  const tags = calls.flatMap(c=>Array.isArray(c.tags)?c.tags:[]);
+  document.getElementById('statResCount').textContent = tags.filter(t=>t==='confirmed'||t==='request').length;
+  document.getElementById('statInfoCount').textContent = tags.filter(t=>t==='info'||t==='not_confirmed').length;
+  document.getElementById('statEscCount').textContent = calls.filter(c=>c.escalated).length;
+
+  const avgSecs = calls.length>0 ? Math.round(totalSecs/calls.length) : 0;
+  document.getElementById('statAvg').textContent = avgSecs>0 ? fmtDur(avgSecs)||'—' : '—';
+
+  // Chart - last 7 days
+  drawCallChart(calls);
+
+  // Recent calls (last 5)
+  renderCalls(calls.slice(0,5), 'ovRecentCalls');
+
+  // Recent reservations (Pro, last 5)
+  if(tier==='pro' && reservations.length>0) renderResTable(reservations.slice(0,5), 'ovRecentRes');
+  else if(tier==='pro') document.getElementById('ovRecentRes').innerHTML='<div class="empty"><p>No reservations yet this month</p></div>';
+}
+
+// ── Chart ────────────────────────────────────────────────────────────────────
+function drawCallChart(calls) {
+  const canvas = document.getElementById('callChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const wrap = canvas.parentElement;
+  canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight;
+
+  // Build last 7 days data
+  const days = Array.from({length:7},(_,i)=>{const d=new Date(); d.setDate(d.getDate()-6+i); return d;});
+  const counts = days.map(d=>{
+    const ds=d.toDateString();
+    return calls.filter(c=>new Date(c.created_at).toDateString()===ds).length;
+  });
+  const maxVal = Math.max(...counts,1);
+  const labels = days.map(d=>d.toLocaleDateString('en-US',{weekday:'short'}));
+
+  const W=canvas.width, H=canvas.height, pad=30, barW=(W-pad*2-10)/(counts.length), barGap=8;
+  ctx.clearRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(f=>{ const y=H-pad-f*(H-pad*1.5); ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); });
+
+  // Bars
+  counts.forEach((v,i)=>{
+    const x=pad+i*barW+barGap/2, bw=barW-barGap;
+    const bh=maxVal>0?(v/maxVal)*(H-pad*1.5):0;
+    const y=H-pad-bh;
+    const hasCall=v>0;
+    const grad=ctx.createLinearGradient(0,y,0,H-pad);
+    grad.addColorStop(0,hasCall?'rgba(79,140,255,.8)':'rgba(79,140,255,.15)');
+    grad.addColorStop(1,hasCall?'rgba(79,140,255,.3)':'rgba(79,140,255,.05)');
+    ctx.fillStyle=grad;
+    ctx.beginPath(); ctx.roundRect(x,y,bw,bh,4); ctx.fill();
+    if(v>0){
+      ctx.fillStyle='rgba(238,242,255,.8)'; ctx.font='bold 11px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(v,x+bw/2,y-5);
+    }
+    ctx.fillStyle='rgba(238,242,255,.35)'; ctx.font='11px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(labels[i],x+bw/2,H-8);
+  });
+}
+
+// ── Render calls ─────────────────────────────────────────────────────────────
+function renderCalls(calls, containerId) {
+  const el=document.getElementById(containerId);
+  if(!calls||!calls.length){ el.innerHTML='<div class="empty"><p>No calls yet</p></div>'; return; }
+  el.innerHTML='<div class="call-stack">'+calls.map(c=>{
+    const intent=callIntent(c);
+    const dur=fmtDur(c.duration_seconds);
+    const tags=Array.isArray(c.tags)?c.tags:[];
+    const isEsc=c.escalated||tags.includes('transfer');
+    const booking = c.booking && typeof c.booking==='object' ? c.booking : null;
+    // Booking detail pill for confirmed reservations
+    const bookingDetail = booking && booking.guest_name ? 
+      `<div style="margin-top:8px;padding:8px 12px;background:rgba(56,232,160,.06);border:1px solid rgba(56,232,160,.15);border-radius:8px;font-size:12px;color:var(--accent2);display:flex;gap:12px;flex-wrap:wrap;">
+        <span>👤 ${esc(booking.guest_name)}</span>
+        <span>📅 ${esc(booking.arrival_date||'')}</span>
+        ${booking.nights?`<span>🌙 ${booking.nights} night${booking.nights>1?'s':''}</span>`:''}
+        ${booking.room_type?`<span>🛏️ ${esc(booking.room_type)}</span>`:''}
+        ${booking.total_due?`<span style="font-weight:700;">$${Number(booking.total_due).toFixed(0)}</span>`:''}
+      </div>` : '';
+    return `<div class="call-card">
+      <div class="call-card-top">
+        <span class="call-intent-icon">${intent.icon}</span>
+        <span class="call-intent-label" style="color:${intent.color};">${intent.label}</span>
+        <div class="call-right">
+          ${dur?`<span class="call-dur">${dur}</span>`:''}
           <span class="sentiment-pill ${c.sentiment||'neutral'}">${c.sentiment||'neutral'}</span>
+          ${isEsc?`<span class="escalated-badge">↗ Escalated</span>`:''}
         </div>
       </div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:6px;">${esc(c.summary||'Call completed')}</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;gap:4px;flex-wrap:wrap;">
-          ${tags.map(t=>`<span class="call-tag">${esc(t)}</span>`).join('')}
-        </div>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text3);">${fmtDate(c.created_at)}</span>
+      <div class="call-summary">${esc(c.summary||'Call completed')}</div>
+      ${bookingDetail}
+      <div class="call-footer">
+        <div class="call-tags">${tags.filter(t=>!['transfer','confirmed','request'].includes(t)).map(t=>`<span class="call-tag">${esc(t)}</span>`).join('')}</div>
+        <span class="call-time">${fmtAgo(c.created_at)}</span>
       </div>
-      ${transcript}
     </div>`;
-  }).join('')+ '</div>';
+  }).join('')+'</div>';
 }
 
-// ── Reservations ──
+// ── Load full call log ────────────────────────────────────────────────────────
+async function loadCalls() {
+  const el=document.getElementById('callLogFull');
+  const {data:calls} = await sb.from('call_logs').select('*').eq('property_id',prop.id).order('created_at',{ascending:false}).limit(100);
+  if(!calls||!calls.length){ el.innerHTML='<div class="empty"><p>No calls recorded yet</p></div>'; return; }
+  renderCalls(calls,'callLogFull');
+}
+
+// ── Reservations ──────────────────────────────────────────────────────────────
 async function loadReservations() {
-  if(currentTier==='core'){
-    document.getElementById('resFull').innerHTML=`<div class="upgrade-banner"><p><strong>Reservations dashboard is available on Pro.</strong><br>Upgrade to see all bookings confirmed by your AI agent.</p><a href="mailto:founder@nightshifthotels.com?subject=Upgrade to Pro" class="upgrade-btn">Contact to upgrade →</a></div>`;
+  const el=document.getElementById('resFull');
+  if(tier==='core'){
+    el.innerHTML=`<div class="upgrade-card"><p><strong>Reservations dashboard available on Pro.</strong><br>Upgrade to see all bookings confirmed by your agent with guest details, dates, and totals.</p><a href="mailto:founder@nightshifthotels.com?subject=Upgrade to Pro" class="upgrade-btn">Contact to upgrade →</a></div>`;
     return;
   }
-  const {data:reservations} = await sb.from('reservations').select('*').eq('property_id',currentProperty.id).order('created_at',{ascending:false}).limit(100);
-  const el = document.getElementById('resFull');
-  if(!reservations||reservations.length===0){ el.innerHTML='<div class="empty"><p>No reservations yet</p></div>'; return; }
-  el.innerHTML = renderResTable(reservations);
+  const {data:res} = await sb.from('reservations').select('*').eq('property_id',prop.id).order('created_at',{ascending:false}).limit(100);
+  if(!res||!res.length){ el.innerHTML='<div class="empty"><p>No reservations yet</p></div>'; return; }
+  renderResTable(res,'resFull');
 }
 
-function renderResTable(reservations) {
-  return `<table class="res-table">
-    <thead><tr><th>Guest</th><th>Arrival</th><th>Room</th><th>Nights</th><th style="text-align:right;">Total</th></tr></thead>
-    <tbody>${reservations.map(r=>`<tr>
-      <td>${esc(r.guest_name||'—')}</td>
+function renderResTable(res, containerId) {
+  const el=document.getElementById(containerId);
+  el.innerHTML=`<table class="res-table">
+    <thead><tr><th>Guest</th><th>Arrival</th><th>Room</th><th>Nts</th><th style="text-align:right;">Total</th></tr></thead>
+    <tbody>${res.map(r=>`<tr>
+      <td><div class="res-guest">${esc(r.guest_name||'—')}</div>${r.notes?`<div class="res-detail">${esc(r.notes)}</div>`:''}</td>
       <td style="font-family:var(--font-mono);font-size:12px;">${r.arrival_date||'—'}</td>
-      <td style="color:var(--text3);font-size:12px;">${esc(r.room_type||'—')}</td>
+      <td class="res-room">${esc(r.room_type||'—')}</td>
       <td style="color:var(--text3);">${r.nights||'—'}</td>
-      <td style="text-align:right;" class="res-amount">$${(r.total_due||0).toFixed(0)}</td>
+      <td style="text-align:right;" class="res-amount">$${Number(r.total_due||0).toFixed(0)}</td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
 
-// ── Billing ──
+// ── Billing ───────────────────────────────────────────────────────────────────
 async function loadBilling() {
-  const el = document.getElementById('billingCard');
+  const el=document.getElementById('billingContent');
+  const monthly=TIER_MRR[tier]||549;
+  const included=prop.included_minutes||1000;
+  const ovRate=prop.overage_rate||0.22;
+  let nextDate='—', status='Active';
   try {
     const {data:{session}} = await sb.auth.getSession();
-    const res = await fetch(SB_URL+'/functions/v1/get-billing-info',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({property_id:currentProperty.id})
-    });
-    const data = await res.json();
-    const b = data.billing||{};
-    const nextDate = b.next_payment_date?new Date(b.next_payment_date).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'—';
-    const trialEnd = b.trial_end?new Date(b.trial_end).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):null;
-    const monthly = TIER_MRR[currentTier]||0;
-    const included = currentProperty.included_minutes||1000;
-    const ovRate = currentProperty.overage_rate||0.22;
-    el.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;">
-      <div style="padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface3);">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Current Plan</div>
-        <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.02em;">${currentTier.charAt(0).toUpperCase()+currentTier.slice(1)} — $${monthly.toLocaleString()}/mo</div>
-      </div>
-      <div style="padding:4px 0;">
-        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Monthly subscription</span><span class="bill-value">$${monthly.toLocaleString()}/mo</span></div>
-        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Included minutes</span><span class="bill-value">${included.toLocaleString()} min/mo</span></div>
-        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Overage rate</span><span class="bill-value">$${ovRate}/min</span></div>
-        ${trialEnd?`<div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Trial ends</span><span class="bill-value amber">${trialEnd}</span></div>`:''}
-        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Next payment date</span><span class="bill-value green">${nextDate}</span></div>
-        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Next payment amount</span><span class="bill-value">$${monthly.toLocaleString()}</span></div>
-        <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Subscription status</span><span class="bill-value" style="color:var(--accent2);">${b.status==='trialing'?'Trial active':b.status||'Active'}</span></div>
-      </div>
-      <div style="padding:14px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Setup fees and monthly fees are non-refundable. Overage billed on the 1st of each month. Questions? <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">Contact us</a></div>
-    </div>`;
-  } catch(e){
-    el.innerHTML='<div class="empty"><p>Unable to load billing info. <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">Contact support</a></p></div>';
-  }
+    const res = await fetch(SB_URL+'/functions/v1/get-billing-info',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({property_id:prop.id})});
+    const d = await res.json();
+    if(d.billing?.next_payment_date) nextDate=new Date(d.billing.next_payment_date).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    if(d.billing?.status) status=d.billing.status==='trialing'?'Trial active':d.billing.status;
+  } catch(e){}
+  el.innerHTML=`<div class="billing-card">
+    <div class="billing-card-top">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Current Plan</div>
+      <div class="billing-plan">${tier.charAt(0).toUpperCase()+tier.slice(1)} — $${monthly.toLocaleString()}/mo</div>
+    </div>
+    <div class="billing-rows">
+      <div class="billing-row"><span class="billing-label">Monthly subscription</span><span class="billing-val">$${monthly.toLocaleString()}/mo</span></div>
+      <div class="billing-row"><span class="billing-label">Included minutes</span><span class="billing-val">${included.toLocaleString()} min/mo</span></div>
+      <div class="billing-row"><span class="billing-label">Overage rate</span><span class="billing-val">$${ovRate}/min</span></div>
+      <div class="billing-row"><span class="billing-label">Overage billed</span><span class="billing-val">1st of each month</span></div>
+      <div class="billing-row"><span class="billing-label">Next payment date</span><span class="billing-val green">${nextDate}</span></div>
+      <div class="billing-row"><span class="billing-label">Subscription status</span><span class="billing-val green">${status}</span></div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);">Setup fees and monthly fees are non-refundable. Questions? <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">Contact us</a></div>
+  </div>`;
 }
 
-// ── Account ──
+// ── Account ───────────────────────────────────────────────────────────────────
 async function loadAccount() {
-  const p = currentProperty;
-  document.getElementById('accountCard').innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;">
-    <div style="padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface3);">
+  const el=document.getElementById('accountContent');
+  el.innerHTML=`<div class="billing-card">
+    <div class="billing-card-top">
       <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Property</div>
-      <div style="font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.02em;">${esc(p.name)}</div>
+      <div class="billing-plan">${esc(prop.name||'—')}</div>
     </div>
-    <div style="padding:4px 0;">
-      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Plan</span><span class="bill-value">${(p.tier||'').charAt(0).toUpperCase()+(p.tier||'').slice(1)}</span></div>
-      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Contact email</span><span class="bill-value">${esc(p.contact_email||'—')}</span></div>
-      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Address</span><span class="bill-value" style="font-size:12px;">${esc(p.address||'—')}</span></div>
-      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Agent ID</span><span class="bill-value" style="font-family:var(--font-mono);font-size:11px;">${esc(p.retell_agent_id||'—')}</span></div>
-      <div class="bill-row" style="padding-left:20px;padding-right:20px;"><span class="bill-label">Member since</span><span class="bill-value">${p.onboarded_at?new Date(p.onboarded_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'—'}</span></div>
+    <div class="billing-rows">
+      <div class="billing-row"><span class="billing-label">Address</span><span class="billing-val" style="font-size:11px;text-align:right;">${esc(prop.address||'—')}</span></div>
+      <div class="billing-row"><span class="billing-label">Plan</span><span class="billing-val">${(tier||'').charAt(0).toUpperCase()+(tier||'').slice(1)}</span></div>
+      <div class="billing-row"><span class="billing-label">Contact email</span><span class="billing-val" style="font-size:11px;">${esc(prop.contact_email||'—')}</span></div>
+      <div class="billing-row"><span class="billing-label">Agent ID</span><span class="billing-val" style="font-family:var(--font-mono);font-size:10px;">${esc(prop.retell_agent_id||'—')}</span></div>
+      <div class="billing-row"><span class="billing-label">Member since</span><span class="billing-val">${prop.onboarded_at?new Date(prop.onboarded_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'—'}</span></div>
     </div>
   </div>`;
 }
 
-// ── Auth state ──
-sb.auth.onAuthStateChange((event, session) => {
-  if(event==='SIGNED_IN' && session) init();
-});
+// ── Auth state ────────────────────────────────────────────────────────────────
+sb.auth.onAuthStateChange((event,session)=>{ if(event==='SIGNED_IN'&&session) init(); });
 init();
 </script>
 </body>
