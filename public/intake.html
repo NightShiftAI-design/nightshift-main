@@ -986,10 +986,18 @@ async function handlePayment() {
       // Payment good — store Stripe IDs and provision the client
       formData.payment_intent_id = result.paymentIntent.id;
       formData.payment_status = 'paid';
-      formData.setup_amount = pricing.setup;
+      formData.setup_amount = String(piData.setup_fee || pricing.setup);
       formData.stripe_customer_id = piData.customer_id || '';
-      formData.stripe_subscription_id = piData.subscription_id || '';
-      formData.trial_end = piData.trial_end || '';
+      // Create monthly subscription using saved card (non-fatal if fails)
+      try {
+        var subRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/create-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_id: piData.customer_id, payment_intent_id: result.paymentIntent.id, tier: tier, property_name: formData.property_name || '', contact_email: formData.contact_email || '' })
+        });
+        var subData = await subRes.json();
+        formData.stripe_subscription_id = subData.subscription_id || '';
+      } catch(subErr) { console.warn('Subscription non-fatal:', subErr); }
 
       var provRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/provision-client', {
         method: 'POST',
