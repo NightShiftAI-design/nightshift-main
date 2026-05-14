@@ -434,6 +434,16 @@ async function loadOverview() {
   const reservations = resRes.data || [];
 
   document.getElementById('ovCalls').textContent = calls.length;
+  // Show minutes used
+  const totalSecs = calls.reduce((s,c) => s+(c.duration_seconds||0), 0);
+  const totalMins = Math.ceil(totalSecs/60);
+  const includedMins = currentTier === 'pro' ? 2000 : 1000;
+  const overageMins = Math.max(0, totalMins - includedMins);
+  const kpiCallsEl = document.getElementById('ovCalls');
+  if (kpiCallsEl) {
+    const sub = kpiCallsEl.parentElement.querySelector('.kpi-sub');
+    if (sub) sub.textContent = totalMins + ' min used · ' + (overageMins > 0 ? overageMins + ' min overage' : 'within limit');
+  }
   document.getElementById('ovReservations').textContent = reservations.length;
 
   const escalated = calls.filter(c => c.escalated).length;
@@ -554,7 +564,9 @@ async function loadBilling() {
       <div class="billing-row"><span class="billing-label">Monthly subscription</span><span class="billing-value">$${monthly.toLocaleString()}/mo</span></div>
       ${trialEnd ? `<div class="billing-row"><span class="billing-label">Trial ends</span><span class="billing-value warn">${trialEnd}</span></div>` : ''}
       <div class="billing-row"><span class="billing-label">Next payment date</span><span class="billing-value highlight">${nextDate}</span></div>
-      <div class="billing-row"><span class="billing-label">Next payment amount</span><span class="billing-value">$${monthly.toLocaleString()}</span></div>
+      <div class="billing-row"><span class="billing-label">Monthly subscription</span><span class="billing-value">$${monthly.toLocaleString()}</span></div>
+      <div class="billing-row"><span class="billing-label">Included minutes</span><span class="billing-value">${currentTier === 'pro' ? '2,000' : '1,000'} min/mo</span></div>
+      <div class="billing-row"><span class="billing-label">Overage rate</span><span class="billing-value">${currentTier === 'pro' ? '$0.18' : '$0.22'}/min (billed end of month)</span></div>
       <div class="billing-row"><span class="billing-label">Status</span><span class="billing-value" style="color:var(--accent2)">${b.status === 'trialing' ? 'Trial active' : b.status || 'Active'}</span></div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">
         Billing questions? Email <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a>
@@ -590,5 +602,11 @@ sb.auth.onAuthStateChange((event, session) => {
 
 init();
 </script>
+<div style="position:fixed;bottom:20px;right:20px;z-index:50;">
+  <a href="/" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(13,17,24,.85);border:1px solid rgba(255,255,255,.1);border-radius:99px;font-size:12px;color:rgba(238,242,255,.45);text-decoration:none;backdrop-filter:blur(12px);transition:color .15s;" onmouseover="this.style.color='rgba(238,242,255,.85)'" onmouseout="this.style.color='rgba(238,242,255,.45)'">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Main site
+  </a>
+</div>
 </body>
 </html>

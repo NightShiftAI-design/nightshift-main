@@ -207,7 +207,7 @@
                 <label>NightShift AI plan <span class="req">*</span></label>
                 <select name="tier" required>
                   <option value="">Select your plan</option>
-                  <option value="core">Core — $399/mo + $249 setup</option>
+                  <option value="core">Core — $549/mo + $249 setup</option>
                   <option value="pro">Pro — $699/mo + $449 setup</option>
                   <option value="elite">Elite — $1,499/mo + $899 setup</option>
                 </select>
@@ -870,9 +870,8 @@ var cardElement = null;
 var formData = {};
 
 var TIER_PRICING = {
-  'core':  { name: 'Core',  monthly: '$399/mo', monthlyRaw: 399, setup: 249,  setupDisplay: '$249'  },
-  'pro':   { name: 'Pro',   monthly: '$699/mo', monthlyRaw: 699, setup: 449,  setupDisplay: '$449'  },
-  'elite': { name: 'Elite', monthly: '$1,499/mo', monthlyRaw: 1499, setup: 899, setupDisplay: '$899' },
+  'core': { name: 'Core', monthly: '$549/mo', monthlyRaw: 549, setup: 299, setupDisplay: '$299', minutes: 1000 },
+  'pro':  { name: 'Pro',  monthly: '$699/mo', monthlyRaw: 699, setup: 449, setupDisplay: '$449', minutes: 2000 },
 };
 
 function goToPayment() {
@@ -1039,7 +1038,7 @@ async function handlePayment() {
         var opts = { year: 'numeric', month: 'long', day: 'numeric' };
         var nextDateStr = nextDate.toLocaleDateString('en-US', opts);
         var billingEl = document.getElementById('billingNote');
-        if (billingEl) billingEl.textContent = 'Your next monthly charge of ' + pricing.monthly + ' will be processed automatically on ' + nextDateStr + '. A receipt will be sent to ' + (formData.contact_email || 'your email on file') + '.';
+        if (billingEl) billingEl.textContent = 'Your next monthly charge of ' + pricing.monthly + ' will be processed automatically on ' + nextDateStr + '. Includes ' + (pricing.minutes||1000).toLocaleString() + ' minutes/mo. Overages billed at the end of each month. Receipt sent to ' + (formData.contact_email || 'your email on file') + '.';
         // Scroll to top of page so success is visible
         successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setTimeout(function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
