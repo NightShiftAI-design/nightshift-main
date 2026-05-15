@@ -404,6 +404,10 @@
       return false;
     }
 
+    // All non-founder clients go to client.html (new dashboard)
+    window.location.href = '/dashboard/client.html';
+    return false;
+
     // Verify client has a linked property
     const { data: hu } = await supabaseClient
       .from('hotel_users')

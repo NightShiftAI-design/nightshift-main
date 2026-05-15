@@ -200,7 +200,20 @@
     .reveal{opacity:0;transform:translateY(18px);transition:opacity .5s var(--ease),transform .5s var(--ease);}
     .reveal.visible{opacity:1;transform:none;}
     @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}}
-  </style>
+  
+    @media(max-width:480px){
+      .container{width:calc(100% - 32px);}
+      .nav-inner{padding:0 16px;}
+      .pricing-hero h1{font-size:clamp(28px,9vw,48px);}
+      .plans-grid{gap:10px;}
+      .plan-top{padding:20px;}
+      .plan-price-block{padding:16px 20px;}
+      .plan-features{padding:16px 20px;}
+      .plan-cta{padding:16px 20px;}
+      .wage-card{padding:28px 20px;}
+      .comp-table{overflow-x:auto;}
+      .comp-row div,.comp-head div{padding:10px 14px;font-size:12px;}
+    }</style>
 </head>
 <body>
 
@@ -253,8 +266,8 @@
       <div class="plan">
         <div class="plan-top">
           <div class="plan-tags"><span class="ptag ptag-core">Core</span></div>
-          <div class="plan-name">Night Desk</div>
-          <p class="plan-pitch">Built for independent motels and small hotels that need reliable after-hours coverage without the overhead.</p>
+          <div class="plan-name">Night Coverage</div>
+          <p class="plan-pitch">After-hours coverage from 8pm to 8am. Every overnight call answered — so you stop losing bookings to voicemail while you sleep.</p>
         </div>
         <div class="plan-price-block">
           <div class="price-row">
@@ -263,10 +276,10 @@
           </div>
           <p class="price-setup">+ <strong>$299</strong> one-time setup &nbsp;·&nbsp; <strong>$848</strong> due today</p>
           <div class="mins-bar">
-            <span class="mins-label">Included minutes</span>
+            <span class="mins-label">Included minutes (night hours)</span>
             <span class="mins-val">1,000 min/mo</span>
           </div>
-          <p class="overage-note">≈ 33 min/day &nbsp;·&nbsp; $0.22/min overage, auto-billed monthly</p>
+          <p class="overage-note">≈ 33 min/night &nbsp;·&nbsp; $0.22/min overage · bulk add-ons available</p>
         </div>
         <div class="plan-features">
           <p class="feat-label">What's included</p>
@@ -293,8 +306,8 @@
       <div class="plan featured">
         <div class="plan-top">
           <div class="plan-tags"><span class="ptag ptag-pro">Pro</span><span class="ptag ptag-pop">Most popular</span></div>
-          <div class="plan-name">Full Desk</div>
-          <p class="plan-pitch">For higher-volume properties that want the full picture — deeper analytics, multilingual coverage, and priority support.</p>
+          <div class="plan-name">Extended Night</div>
+          <p class="plan-pitch">Night coverage with 2× the minutes — built for busier properties, higher call volumes, or longer overnight windows.</p>
         </div>
         <div class="plan-price-block">
           <div class="price-row">
@@ -303,10 +316,10 @@
           </div>
           <p class="price-setup">+ <strong>$449</strong> one-time setup &nbsp;·&nbsp; <strong>$1,148</strong> due today</p>
           <div class="mins-bar">
-            <span class="mins-label">Included minutes</span>
+            <span class="mins-label">Included minutes (night hours)</span>
             <span class="mins-val">2,000 min/mo</span>
           </div>
-          <p class="overage-note">≈ 66 min/day &nbsp;·&nbsp; $0.18/min overage, auto-billed monthly</p>
+          <p class="overage-note">≈ 66 min/night &nbsp;·&nbsp; $0.18/min overage · bulk add-ons available</p>
         </div>
         <div class="plan-features">
           <p class="feat-label">Everything in Core, plus</p>
@@ -462,6 +475,27 @@
         <summary class="faq-q">Can I cancel anytime?<span class="faq-chevron"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
         <p class="faq-a">Yes. Cancel with 7 days written notice before your next billing date and no further charges will apply. Setup fees and monthly fees are non-refundable. No long-term contracts required.</p>
       </details>
+    </div>
+  </section>
+
+  <!-- Bulk minutes + 24/7 -->
+  <section class="sec container reveal">
+    <div class="sec-eyebrow">Need more?</div>
+    <div class="sec-title">Bulk minutes &amp; 24/7 coverage</div>
+    <p class="sec-sub">Running 24 hours or expecting higher volume? Add minutes in bulk or ask about our 24/7 plan.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;">
+        <div style="font-size:20px;margin-bottom:10px;">📦</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Bulk Minute Add-ons</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:12px;">Add 500 or 1,000 minutes to any plan at a discounted rate. Ideal for peak seasons, holiday weekends, or busy months.</p>
+        <div style="font-size:13px;color:var(--accent2);font-weight:600;">500 min — +$79/mo &nbsp;·&nbsp; 1,000 min — +$139/mo</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;">
+        <div style="font-size:20px;margin-bottom:10px;">☀️</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">24/7 Coverage Plan</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:12px;">Need your agent answering calls around the clock? Ask about our 24/7 plan with unlimited daytime and overnight coverage.</p>
+        <a href="/contact.html" style="font-size:13px;color:var(--accent);font-weight:600;text-decoration:none;">Contact us for pricing →</a>
+      </div>
     </div>
   </section>
 

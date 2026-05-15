@@ -306,7 +306,7 @@
     }
     .hero-headline {
       font-family: var(--font-display);
-      font-size: clamp(42px, 7vw, 76px);
+      font-size: clamp(32px, 7vw, 76px);
       font-weight: 800;
       line-height: 1.0;
       letter-spacing: -.03em;
@@ -327,7 +327,7 @@
       100% { background-position: 200% center; }
     }
     .hero-sub {
-      font-size: 18px;
+      font-size: clamp(15px, 4vw, 18px);
       font-weight: 300;
       color: var(--text2);
       max-width: 580px;
@@ -1063,6 +1063,54 @@
       .hero-headline { font-size: 30px; }
       .brand-name { font-size: 14px; }
       .hero-ctas { flex-direction: column; }
+    }
+
+    /* ── MOBILE FIXES ── */
+    @media (max-width: 480px) {
+      .container { width: calc(100% - 32px); }
+      
+      /* Hero */
+      .hero { padding: 56px 0 40px; }
+      .hero-headline { font-size: clamp(30px, 9vw, 48px); letter-spacing: -.025em; }
+      .hero-sub { font-size: 15px; padding: 0 4px; }
+      .hero-ctas { flex-direction: column; align-items: center; gap: 10px; }
+      .btn-primary, .btn-secondary { width: 100%; max-width: 320px; justify-content: center; padding: 14px 20px; font-size: 14px; }
+      .hero-badge { font-size: 11px; }
+      
+      /* Proof bar */
+      .proof-scroll { gap: 12px; padding: 16px 0; }
+      .proof-item { font-size: 12px; gap: 6px; }
+      
+      /* Stats */
+      .stat-value { font-size: clamp(32px, 10vw, 48px); }
+      
+      /* Section titles */
+      section h2, .section-headline { font-size: clamp(24px, 7vw, 40px) !important; }
+      
+      /* Bento grid */
+      .bento-grid { gap: 10px; }
+      .bento-card { padding: 20px; }
+      
+      /* Pricing */
+      .pricing-grid { gap: 12px; }
+      .pricing-card { padding: 24px 20px; }
+      .price-amount { font-size: 44px; }
+      
+      /* CTA section */
+      .cta-inner { padding: 40px 20px; }
+      .cta-headline { font-size: clamp(26px, 8vw, 40px); }
+      
+      /* Footer */
+      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+      .footer { padding: 32px 0 24px; }
+      
+      /* Nav */
+      .nav-inner { padding: 0 16px; }
+    }
+    
+    @media (max-width: 380px) {
+      .hero-headline { font-size: 28px; }
+      .btn-primary, .btn-secondary { padding: 13px 16px; font-size: 13px; }
     }
   </style>
 </head>
