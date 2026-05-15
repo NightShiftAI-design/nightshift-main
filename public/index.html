@@ -315,6 +315,9 @@
       overflow: visible;
       word-break: break-word;
     }
+
+    .mob-br { display: none; }
+    @media(max-width:520px) { .mob-br { display: block; } }
     .hero-headline em {
       font-style: normal;
       background: linear-gradient(135deg, #6ea8ff 0%, #38e8a0 55%, #6ea8ff 100%);
@@ -323,8 +326,6 @@
       background-clip: text;
       color: transparent;
       animation: shimmer 5s linear infinite;
-      display: inline;
-      padding-right: 4px;
     }
     @keyframes shimmer {
       0% { background-position: 0% center; }
@@ -446,12 +447,12 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
-    @media (max-width: 700px) { .demo-body { grid-template-columns: 1fr; } .demo-left { border-right: none; border-bottom: 1px solid var(--border); padding: 24px 20px; } .demo-right { padding: 24px 20px; } }
+    @media (max-width: 700px) { .demo-body { grid-template-columns: 1fr; } .demo-left { border-right: none; border-bottom: 1px solid var(--border); padding: 24px 20px; } .demo-right { padding: 20px; overflow: hidden; } .stat-grid { gap: 8px; } .stat-box { padding: 14px 12px; } }
     .demo-left {
       padding: 36px;
       border-right: 1px solid var(--border);
     }
-    .demo-right { padding: 36px; }
+    .demo-right { padding: 36px; overflow: hidden; min-width: 0; }
     .demo-label {
       font-size: 11px;
       font-weight: 500;
@@ -505,14 +506,17 @@
     .stat-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
       overflow: hidden;
+      width: 100%;
     }
     .stat-box {
-      padding: 20px;
+      padding: 16px;
       border-radius: 12px;
       border: 1px solid var(--border);
       background: var(--surface3);
+      overflow: hidden;
+      min-width: 0;
     }
     .stat-value {
       font-family: var(--font-display);
@@ -1045,14 +1049,17 @@
       .reveal { opacity: 1; transform: none; transition: none; }
       .bg-orb { animation: none; }
       .badge-dot { animation: none; }
-      .hero-headline em { animation: none; }
+  
+    .mob-br { display: none; }
+    @media(max-width:520px) { .mob-br { display: block; } }
+    .hero-headline em { animation: none; }
     }
 
 
     /* ── Mobile fixes (surgical) ─────────────────────────── */
     @media (max-width: 600px) {
       .hero { padding: 60px 0 48px; }
-      .hero-headline { font-size: clamp(32px, 10vw, 52px); letter-spacing: -.02em; }
+      .hero-headline { font-size: clamp(28px, 9vw, 52px); letter-spacing: -.025em; }
       .hero-sub { font-size: 16px; margin-bottom: 28px; }
       .hero-ctas { gap: 10px; }
       .hero-ctas a, .hero-ctas button { width: 100%; justify-content: center; }
@@ -1065,7 +1072,7 @@
       .footer-bottom-links { flex-wrap: wrap; gap: 12px; }
     }
     @media (max-width: 400px) {
-      .hero-headline { font-size: 30px; }
+      .hero-headline { font-size: 26px; letter-spacing: -.02em; }
       .brand-name { font-size: 14px; }
       .hero-ctas { flex-direction: column; }
     }
@@ -1076,7 +1083,7 @@
       
       /* Hero */
       .hero { padding: 56px 0 40px; }
-      .hero-headline { font-size: clamp(30px, 9vw, 48px); letter-spacing: -.025em; }
+      .hero-headline { font-size: clamp(26px, 8.5vw, 48px); letter-spacing: -.02em; }
       .hero-sub { font-size: 15px; padding: 0 4px; }
       .hero-ctas { flex-direction: column; align-items: center; gap: 10px; }
       .hero-ctas .btn-primary, .hero-ctas .btn-secondary { width: 100%; max-width: 320px; justify-content: center; padding: 14px 20px; font-size: 14px; }
@@ -1114,7 +1121,7 @@
     }
     
     @media (max-width: 380px) {
-      .hero-headline { font-size: 28px; }
+      .hero-headline { font-size: 24px; letter-spacing: -.015em; }
       .btn-primary, .btn-secondary { padding: 13px 16px; font-size: 13px; }
     }
   </style>
@@ -1174,7 +1181,7 @@
           AI-Powered Night Front Desk
         </div>
         <h1 class="hero-headline">
-          Every guest call answered.<br/><em>Every night. Automatically.</em>
+          Every guest call answered.<br><em>Every night.<br class="mob-br"> Automatically.</em>
         </h1>
         <p class="hero-sub">
           NightShift AI is the virtual front desk trained on your property. Not a generic call center — your hotel's rules, policies, and voice, on autopilot.
