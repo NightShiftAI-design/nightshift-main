@@ -308,10 +308,12 @@
       font-family: var(--font-display);
       font-size: clamp(32px, 7vw, 76px);
       font-weight: 800;
-      line-height: 1.0;
+      line-height: 1.05;
       letter-spacing: -.03em;
       max-width: 880px;
       margin: 0 auto 24px;
+      overflow: visible;
+      word-break: break-word;
     }
     .hero-headline em {
       font-style: normal;
@@ -321,6 +323,8 @@
       background-clip: text;
       color: transparent;
       animation: shimmer 5s linear infinite;
+      display: inline;
+      padding-right: 4px;
     }
     @keyframes shimmer {
       0% { background-position: 0% center; }
@@ -442,7 +446,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
-    @media (max-width: 700px) { .demo-body { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .demo-body { grid-template-columns: 1fr; } .demo-left { border-right: none; border-bottom: 1px solid var(--border); padding: 24px 20px; } .demo-right { padding: 24px 20px; } }
     .demo-left {
       padding: 36px;
       border-right: 1px solid var(--border);
@@ -501,7 +505,8 @@
     .stat-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
+      overflow: hidden;
     }
     .stat-box {
       padding: 20px;
@@ -511,7 +516,7 @@
     }
     .stat-value {
       font-family: var(--font-display);
-      font-size: 32px;
+      font-size: clamp(24px, 6vw, 32px);
       font-weight: 800;
       letter-spacing: -.03em;
       line-height: 1;
@@ -708,7 +713,7 @@
       margin-top: 56px;
       align-items: start;
     }
-    @media (max-width: 860px) { .pricing-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) { .pricing-grid { grid-template-columns: 1fr !important; } }
     .price-card {
       border-radius: 18px;
       border: 1px solid var(--border);
@@ -1074,7 +1079,7 @@
       .hero-headline { font-size: clamp(30px, 9vw, 48px); letter-spacing: -.025em; }
       .hero-sub { font-size: 15px; padding: 0 4px; }
       .hero-ctas { flex-direction: column; align-items: center; gap: 10px; }
-      .btn-primary, .btn-secondary { width: 100%; max-width: 320px; justify-content: center; padding: 14px 20px; font-size: 14px; }
+      .hero-ctas .btn-primary, .hero-ctas .btn-secondary { width: 100%; max-width: 320px; justify-content: center; padding: 14px 20px; font-size: 14px; }
       .hero-badge { font-size: 11px; }
       
       /* Proof bar */
@@ -1517,11 +1522,11 @@
             <p class="trust-body">Straightforward terms so hotel owners and managers always know what to expect. No surprises.</p>
           </div>
         </div>
-        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-          <a href="/privacy.html" class="btn-secondary">Privacy policy</a>
-          <a href="/security.html" class="btn-secondary">Security</a>
-          <a href="/terms.html" class="btn-secondary">Terms</a>
-          <a href="/cookies.html" class="btn-secondary">Cookies</a>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+          <a href="/privacy.html" class="btn-secondary" style="flex:0 0 auto;width:calc(50% - 5px);max-width:180px;justify-content:center;text-align:center;">Privacy policy</a>
+          <a href="/security.html" class="btn-secondary" style="flex:0 0 auto;width:calc(50% - 5px);max-width:180px;justify-content:center;text-align:center;">Security</a>
+          <a href="/terms.html" class="btn-secondary" style="flex:0 0 auto;width:calc(50% - 5px);max-width:180px;justify-content:center;text-align:center;">Terms</a>
+          <a href="/cookies.html" class="btn-secondary" style="flex:0 0 auto;width:calc(50% - 5px);max-width:180px;justify-content:center;text-align:center;">Cookies</a>
         </div>
         <p style="margin-top:16px; font-size:13px; color:var(--text3); line-height:1.6;">
           <strong style="color:var(--text2);">Important:</strong> NightShift does not provide medical or legal advice. In emergencies, callers can be instructed to dial 911, and escalation routes can notify your staff based on your preferred procedures.
