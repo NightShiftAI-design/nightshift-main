@@ -207,9 +207,8 @@
                 <label>NightShift AI plan <span class="req">*</span></label>
                 <select name="tier" required>
                   <option value="">Select your plan</option>
-                  <option value="core">Core — $549/mo + $249 setup</option>
-                  <option value="pro">Pro — $699/mo + $449 setup</option>
-                  <option value="elite">Elite — $1,499/mo + $899 setup</option>
+                  <option value="core">Night Coverage — $549/mo + $299 setup (1,000 min/mo)</option>
+                  <option value="pro">Extended Night — $699/mo + $449 setup (2,000 min/mo)</option>
                 </select>
               </div>
               <div class="field full">
@@ -870,8 +869,14 @@ var cardElement = null;
 var formData = {};
 
 var TIER_PRICING = {
-  'core': { name: 'Core', monthly: '$549/mo', monthlyRaw: 549, setup: 299, setupDisplay: '$299', minutes: 1000 },
-  'pro':  { name: 'Pro',  monthly: '$699/mo', monthlyRaw: 699, setup: 449, setupDisplay: '$449', minutes: 2000 },
+  'core': { name: 'Night Coverage', monthly: '$549/mo', monthlyRaw: 549, setup: 299, setupDisplay: '$299', minutes: 1000 },
+  'pro':  { name: 'Extended Night', monthly: '$699/mo', monthlyRaw: 699, setup: 449, setupDisplay: '$449', minutes: 2000 },
+};
+
+var MINUTE_ADDONS = {
+  'none':     { label: 'No add-on',        extra: 0,    priceMonthly: 0,   priceId: null },
+  'addon_500':  { label: '+500 min/mo',    extra: 500,  priceMonthly: 79,  priceId: 'price_1TXBHpKNNp3HQbJErH33bN4T' },
+  'addon_1000': { label: '+1,000 min/mo',  extra: 1000, priceMonthly: 139, priceId: 'price_1TXBHzKNNp3HQbJEHF7mWhDv' },
 };
 
 
@@ -904,6 +909,28 @@ var TIER_PRICING = {
   });
   document.querySelector('[name="tier"]') && document.querySelector('[name="tier"]').addEventListener('change', updateLangAddons);
   updateLangAddons();
+
+  // Minute add-on logic
+  function updateAddonSummary() {
+    var tier = (document.querySelector('[name="tier"]') || {}).value || 'core';
+    var addonVal = (document.getElementById('minuteAddon') || {}).value || 'none';
+    var pricing = TIER_PRICING[tier] || TIER_PRICING.core;
+    var addon = MINUTE_ADDONS[addonVal] || MINUTE_ADDONS.none;
+    var el = document.getElementById('addonSummary');
+    if (!el) return;
+    if (addon.extra === 0) {
+      el.textContent = 'Total included minutes: ' + (pricing.minutes).toLocaleString() + '/mo';
+      el.style.color = 'var(--text3)';
+    } else {
+      var total = pricing.minutes + addon.extra;
+      el.textContent = 'Total included: ' + total.toLocaleString() + ' min/mo · +$' + addon.priceMonthly + '/mo added to subscription';
+      el.style.color = 'var(--accent2)';
+    }
+  }
+  var addonEl = document.getElementById('minuteAddon');
+  if (addonEl) addonEl.addEventListener('change', updateAddonSummary);
+  document.querySelector('[name="tier"]') && document.querySelector('[name="tier"]').addEventListener('change', function() { updateLangAddons(); updateAddonSummary(); });
+  updateAddonSummary();
 
 function goToPayment() {
   var sec = document.getElementById('sec7');
@@ -1043,6 +1070,14 @@ async function handlePayment() {
       // Collect language add-ons
       var langChecked = document.querySelectorAll('[name="extra_languages"]:checked:not(:disabled)');
       formData.extra_languages = Array.from(langChecked).map(function(cb){return cb.value;}).join(',');
+      // Collect minute add-on
+      var addonSel = document.getElementById('minuteAddon');
+      var addonKey = addonSel ? addonSel.value : 'none';
+      var addonData = MINUTE_ADDONS[addonKey] || MINUTE_ADDONS.none;
+      formData.minute_addon = addonKey;
+      formData.minute_addon_extra = addonData.extra;
+      formData.minute_addon_price_id = addonData.priceId;
+      formData.minute_addon_monthly = addonData.priceMonthly;
       // Create monthly subscription using saved card (non-fatal if fails)
       try {
         var subRes = await fetch('https://sbzdnzouoyxmawuhdvdi.supabase.co/functions/v1/create-subscription', {
@@ -1072,7 +1107,13 @@ async function handlePayment() {
         var opts = { year: 'numeric', month: 'long', day: 'numeric' };
         var nextDateStr = nextDate.toLocaleDateString('en-US', opts);
         var billingEl = document.getElementById('billingNote');
-        if (billingEl) billingEl.textContent = 'Your next monthly charge of ' + pricing.monthly + ' will be processed automatically on ' + nextDateStr + '. Includes ' + (pricing.minutes||1000).toLocaleString() + ' minutes/mo. Overages billed at the end of each month. Receipt sent to ' + (formData.contact_email || 'your email on file') + '.';
+        if (billingEl) {
+        var totalMonthly = pricing.monthlyRaw + (formData.minute_addon_monthly||0);
+        var langMonthly = (formData.extra_languages||'').split(',').filter(Boolean).length * 29;
+        var totalMonthlyAll = totalMonthly + langMonthly;
+        var totalMins = (pricing.minutes||1000) + (formData.minute_addon_extra||0);
+        billingEl.textContent = 'Your next monthly charge of $' + totalMonthlyAll + ' will be processed automatically on ' + nextDateStr + '. Includes ' + totalMins.toLocaleString() + ' min/mo. Overages billed end of month at $' + (pricing.monthlyRaw===549?'0.22':'0.18') + '/min. Receipt sent to ' + (formData.contact_email || 'your email on file') + '.';
+      }
         // Scroll to top of page so success is visible
         successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setTimeout(function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
