@@ -306,6 +306,46 @@
               </div>
             </div>
             <div class="field" id="routingHoursField" style="display:none;margin-top:12px;"><label>Routing hours</label><input name="routing_hours" placeholder="e.g., 10pm – 6am EST" /></div>
+    <hr class="form-divider">
+    <div style="margin-bottom:16px;">
+      <div class="section-num" style="margin-bottom:4px;">Operating hours</div>
+      <div class="section-sub">When should the AI agent be active? Outside these hours, callers are connected directly to your front desk.</div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Agent start time <span class="req">*</span></label>
+        <select name="night_hours_start" required>
+          <option value="8:00 PM">8:00 PM</option>
+          <option value="9:00 PM">9:00 PM</option>
+          <option value="10:00 PM" selected>10:00 PM (recommended)</option>
+          <option value="11:00 PM">11:00 PM</option>
+          <option value="12:00 AM">12:00 AM (midnight)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Agent end time <span class="req">*</span></label>
+        <select name="night_hours_end" required>
+          <option value="6:00 AM">6:00 AM</option>
+          <option value="7:00 AM">7:00 AM</option>
+          <option value="8:00 AM" selected>8:00 AM (recommended)</option>
+          <option value="9:00 AM">9:00 AM</option>
+          <option value="10:00 AM">10:00 AM</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Property timezone <span class="req">*</span></label>
+        <select name="property_timezone" required>
+          <option value="America/New_York">Eastern (ET)</option>
+          <option value="America/Chicago" selected>Central (CT)</option>
+          <option value="America/Denver">Mountain (MT)</option>
+          <option value="America/Los_Angeles">Pacific (PT)</option>
+          <option value="America/Phoenix">Arizona (no DST)</option>
+          <option value="America/Anchorage">Alaska (AKT)</option>
+          <option value="Pacific/Honolulu">Hawaii (HT)</option>
+        </select>
+        <span class="field-hint">Used to enforce your agent's active hours correctly.</span>
+      </div>
+    </div>
             <div class="form-nav">
               <button type="button" class="btn-back" onclick="nextStep(1)">← Back</button>
               <span class="step-indicator">Step 2 of 7</span>
@@ -909,7 +949,6 @@ async function handlePayment() {
             '. Receipt sent to '+(formData.contact_email||'your email on file')+'.';
         }
         successEl.scrollIntoView({behavior:'smooth',block:'start'});
-        setTimeout(function(){window.scrollTo({top:0,behavior:'smooth'});},100);
       } else {
         throw new Error('Agent setup failed — your payment was taken. Email founder@nightshifthotels.com with reference: '+result.paymentIntent.id);
       }
