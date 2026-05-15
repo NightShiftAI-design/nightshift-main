@@ -1,3 +1,11 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "nightshifthotels.com" }],
+      "destination": "https://www.nightshifthotels.com/:path*",
+      "permanent": true
+    }
+  ]
 }
