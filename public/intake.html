@@ -212,6 +212,15 @@
                 </select>
               </div>
               <div class="field full">
+                <label>Minute add-on <span style="color:var(--text3);font-weight:400;font-size:12px;">optional</span></label>
+                <select name="minute_addon" id="minuteAddon">
+                  <option value="none">No add-on — use plan minutes only</option>
+                  <option value="addon_500">+ 500 min/mo &nbsp;— $79/mo extra</option>
+                  <option value="addon_1000">+ 1,000 min/mo — $139/mo extra</option>
+                </select>
+                <span class="field-hint" id="addonSummary">Your included minutes based on your plan selection above.</span>
+              </div>
+              <div class="field full">
                 <label>Property name <span class="req">*</span></label>
                 <input name="property_name" required placeholder="e.g., Riverside Inn" />
               </div>
