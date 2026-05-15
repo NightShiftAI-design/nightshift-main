@@ -221,6 +221,28 @@
                 <span class="field-hint" id="addonSummary">Your included minutes based on your plan selection above.</span>
               </div>
               <div class="field full">
+                <label>Language add-ons <span style="color:var(--text3);font-weight:400;font-size:12px;">+$29/mo each</span></label>
+                <p style="font-size:12px;color:var(--text3);margin:4px 0 10px;">Night Coverage includes English, Spanish &amp; Hindi. Extended Night also includes French. Add more languages below — your agent detects and switches automatically.</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;" id="lang-french-wrap">
+                    <input type="checkbox" name="extra_languages" value="french" id="lang-french"> French <span id="french-note" style="font-size:10px;color:var(--accent2);margin-left:4px;"></span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">
+                    <input type="checkbox" name="extra_languages" value="portuguese"> Portuguese
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">
+                    <input type="checkbox" name="extra_languages" value="mandarin"> Mandarin
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">
+                    <input type="checkbox" name="extra_languages" value="korean"> Korean
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">
+                    <input type="checkbox" name="extra_languages" value="arabic"> Arabic
+                  </label>
+                </div>
+                <div id="langAddonTotal" style="margin-top:8px;font-size:12px;color:var(--text3);"></div>
+              </div>
+              <div class="field full">
                 <label>Property name <span class="req">*</span></label>
                 <input name="property_name" required placeholder="e.g., Riverside Inn" />
               </div>
