@@ -188,6 +188,161 @@ canvas{display:block;}
   .side-panel{border-left:none;}
   .kpi-row{grid-template-columns:1fr 1fr;}
 }
+
+/* ── Phase 3: Property switcher ── */
+.prop-switcher-wrap{padding:10px 10px 0;position:relative;}
+.prop-trigger{width:100%;display:flex;align-items:center;gap:9px;padding:9px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;cursor:pointer;color:var(--text);text-align:left;font-family:var(--font-body);transition:border-color .15s;}
+.prop-trigger:hover{border-color:rgba(79,140,255,.4);}
+.prop-avatar{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.prop-trigger-info{flex:1;min-width:0;}
+.prop-trigger-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prop-trigger-sub{font-size:10px;color:var(--text3);margin-top:1px;}
+.prop-trigger-chevs{display:flex;flex-direction:column;gap:1px;opacity:.5;}
+.prop-dropdown{position:absolute;top:calc(100% + 4px);left:10px;right:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.4);padding:6px;z-index:200;display:none;}
+.prop-dropdown.open{display:block;}
+.prop-dd-header{padding:6px 6px 8px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:4px;}
+.prop-dd-item{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:8px;cursor:pointer;transition:background .12s;}
+.prop-dd-item:hover{background:rgba(255,255,255,.05);}
+.prop-dd-item.active{background:rgba(79,140,255,.10);}
+.prop-dd-name{font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prop-dd-meta{font-size:10px;color:var(--text3);margin-top:1px;}
+.prop-dd-check{width:14px;height:14px;color:var(--accent);flex-shrink:0;}
+.prop-dd-divider{height:1px;background:var(--border);margin:6px 0;}
+.prop-dd-add{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:8px;cursor:pointer;color:var(--accent);transition:background .12s;}
+.prop-dd-add:hover{background:rgba(79,140,255,.08);}
+.prop-dd-add-icon{width:22px;height:22px;border-radius:5px;border:1px dashed rgba(79,140,255,.45);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.prop-dd-add-label{font-size:12px;font-weight:600;}
+.prop-dd-add-sub{font-size:10px;color:var(--text3);margin-top:1px;font-weight:400;}
+
+/* Status pills */
+.pill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.pill.active{background:rgba(56,232,160,.12);color:var(--accent2);}
+.pill.pro{background:rgba(167,139,250,.15);color:var(--purple);}
+.pill.core{background:rgba(255,255,255,.08);color:var(--text2);}
+.pill.trial{background:rgba(245,158,11,.12);color:var(--accent3);}
+.pill.pending{background:rgba(79,140,255,.12);color:var(--accent);}
+.pill.failed{background:rgba(248,113,113,.12);color:var(--red);}
+
+/* Failed payment banner */
+.failed-banner{display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(248,113,113,.08);border-bottom:1px solid rgba(248,113,113,.2);font-size:13px;}
+.failed-banner-text{flex:1;color:var(--text2);}
+.failed-banner-text strong{color:var(--red);}
+.failed-banner-btn{padding:7px 14px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;}
+
+/* Provisioning banner */
+.prov-banner{display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(79,140,255,.06);border-bottom:1px solid rgba(79,140,255,.15);font-size:13px;}
+.prov-spin{width:16px;height:16px;border:2px solid rgba(79,140,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .9s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prov-banner-text{flex:1;color:var(--text2);}
+.prov-banner-text strong{color:var(--accent);}
+
+/* Multi-billing table */
+.billing-table{width:100%;border-collapse:collapse;}
+.billing-table th{text-align:left;padding:9px 12px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);background:var(--surface2);}
+.billing-table td{padding:13px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.billing-table tr:last-child td{border-bottom:none;}
+.billing-table tr:hover td{background:rgba(255,255,255,.02);}
+.btable-prop{display:flex;align-items:center;gap:10px;}
+.btable-name{font-weight:600;font-size:13px;}
+.btable-city{font-size:11px;color:var(--text3);margin-top:1px;}
+.usage-bar-wrap{min-width:100px;}
+.usage-bar-track{height:4px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-top:4px;}
+.usage-bar-fill{height:100%;border-radius:99px;transition:width .6s ease;}
+.usage-bar-fill.ok{background:var(--accent2);}
+.usage-bar-fill.warn{background:var(--accent3);}
+.usage-bar-fill.over{background:var(--red);}
+
+/* Add Property Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:18px;width:100%;max-width:660px;box-shadow:0 30px 80px rgba(0,0,0,.7);overflow:hidden;display:flex;flex-direction:column;max-height:90vh;}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.modal-eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:5px;}
+.modal-title{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.02em;}
+.modal-sub{font-size:12px;color:var(--text3);margin-top:3px;}
+.modal-close{width:30px;height:30px;border-radius:8px;background:none;border:1px solid var(--border);cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.modal-close:hover{color:var(--text);border-color:var(--border2);}
+.modal-body{padding:20px 22px;overflow-y:auto;flex:1;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-step-count{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+
+/* Stepper */
+.stepper{display:flex;align-items:center;gap:0;margin-bottom:20px;}
+.step-node{display:flex;align-items:center;gap:8px;}
+.step-circle{width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--font-mono);flex-shrink:0;transition:all .2s;}
+.step-circle.done{background:var(--accent2);color:#06140c;}
+.step-circle.active{background:rgba(79,140,255,.15);border:1.5px solid var(--accent);color:var(--accent);}
+.step-circle.idle{background:var(--surface2);border:1px solid var(--border2);color:var(--text3);}
+.step-label{font-size:11px;font-weight:500;white-space:nowrap;}
+.step-label.active{color:var(--text);font-weight:700;}
+.step-label.done{color:var(--text2);}
+.step-label.idle{color:var(--text3);}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 10px;min-width:12px;}
+.step-line.done{background:var(--accent2);}
+
+/* Form fields */
+.field-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;}
+.field-input{width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .15s;}
+.field-input:focus{border-color:rgba(79,140,255,.5);}
+.field-input::placeholder{color:var(--text3);}
+.field-row{display:grid;gap:12px;margin-bottom:14px;}
+.field-row.col2{grid-template-columns:1fr 1fr;}
+.field-row.col3{grid-template-columns:2fr 1fr 1fr;}
+.field-hint{margin-top:8px;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:11.5px;color:var(--text2);display:flex;gap:7px;align-items:flex-start;}
+
+/* Plan cards */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.plan-card{text-align:left;cursor:pointer;font-family:var(--font-body);padding:16px;border-radius:13px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);position:relative;transition:all .15s;}
+.plan-card.selected-core{border:1.5px solid var(--accent);background:rgba(79,140,255,.06);}
+.plan-card.selected-pro{border:1.5px solid var(--purple);background:rgba(167,139,250,.06);}
+.plan-card-rec{position:absolute;top:-9px;right:14px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:var(--purple);color:#fff;}
+.plan-name{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.02em;text-transform:capitalize;}
+.plan-mins{font-size:11px;color:var(--text3);margin-top:2px;}
+.plan-price{font-family:var(--font-display);font-size:28px;font-weight:900;letter-spacing:-.04em;margin:10px 0;}
+.plan-price span{font-size:12px;color:var(--text3);font-family:var(--font-body);font-weight:400;margin-left:3px;}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.plan-features li{font-size:12px;color:var(--text2);display:flex;gap:7px;align-items:flex-start;}
+.plan-check{width:13px;height:13px;flex-shrink:0;margin-top:1px;}
+
+/* Addon grid */
+.addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.addon-btn{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;font-family:var(--font-body);border:1px solid var(--border2);background:var(--surface2);color:var(--text);text-align:left;transition:all .15s;}
+.addon-btn.selected{border:1.5px solid var(--accent);background:rgba(79,140,255,.08);}
+.addon-flag{font-size:20px;line-height:1;}
+.addon-name{font-size:13px;font-weight:600;}
+.addon-price{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.addon-pop{font-size:9px;color:var(--accent2);font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.addon-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;transition:all .15s;}
+.addon-check.checked{background:var(--accent);border-color:var(--accent);}
+
+/* Order summary */
+.order-summary{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.order-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;}
+.order-label{color:var(--text2);}
+.order-val{font-family:var(--font-mono);color:var(--text);}
+.order-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;border-top:1px solid var(--border);margin-top:6px;}
+.order-total-label{font-size:13px;color:var(--text2);}
+.order-total-val{font-family:var(--font-display);font-size:26px;font-weight:900;letter-spacing:-.03em;}
+
+/* Provisioning timeline */
+.prov-timeline{display:flex;flex-direction:column;gap:8px;}
+.prov-stage{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;}
+.prov-stage-icon{width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.prov-stage-icon.done{background:rgba(56,232,160,.15);color:var(--accent2);}
+.prov-stage-icon.active{background:rgba(79,140,255,.15);color:var(--accent);}
+.prov-stage-icon.idle{background:var(--surface3);color:var(--text3);}
+.prov-stage-label{font-size:12.5px;flex:1;}
+.prov-stage-label.done{color:var(--text);}
+.prov-stage-label.active{color:var(--text);}
+.prov-stage-label.idle{color:var(--text3);}
+
+/* Btn overrides for modal */
+.btn-primary{padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:opacity .15s;white-space:nowrap;}
+.btn-primary:hover{opacity:.88;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+.btn-ghost-sm{padding:8px 14px;background:none;border:1px solid var(--border2);color:var(--text2);border-radius:9px;font-size:13px;cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.btn-ghost-sm:hover{border-color:var(--border);color:var(--text);}
+.btn-ghost-sm:disabled{opacity:.4;cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -212,9 +367,12 @@ canvas{display:block;}
 
 <div class="layout" id="appLayout" style="display:none;">
   <nav class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <img src="/favicon-32x32.png" alt="NightShift AI">
-      <div><div class="sidebar-brand">NightShift AI</div><div class="sidebar-tag" id="sidebarTier">Dashboard</div></div>
+    <!-- Brand / switcher — rendered by JS based on properties.length -->
+    <div id="sidebarTop">
+      <div class="sidebar-logo">
+        <img src="/favicon-32x32.png" alt="NightShift AI">
+        <div><div class="sidebar-brand">NightShift AI</div><div class="sidebar-tag" id="sidebarTier">Dashboard</div></div>
+      </div>
     </div>
     <div class="nav-sec">Operations</div>
     <button class="nav-item active" id="navOverview" onclick="showSec('overview',this)">
@@ -376,13 +534,11 @@ canvas{display:block;}
   </main>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
 const SB_URL = window.NSA_CONFIG.SUPABASE_URL;
 const SB_KEY = window.NSA_CONFIG.SUPABASE_ANON_KEY;
 const FOUNDER = 'founder@nightshifthotels.com';
-const TIER_MRR = {core:549,pro:699};
+const TIER_MRR = {core:549,pro:699,elite:999};
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // ── Phase 1: multi-property state ────────────────────────────────────────────
@@ -448,7 +604,7 @@ const esc = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 const fmtDate = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); };
 const fmtAgo = d => { if(!d) return '—'; const m=Math.floor((Date.now()-new Date(d))/60000); if(m<1) return 'just now'; if(m<60) return m+'m ago'; const h=Math.floor(m/60); if(h<24) return h+'h ago'; return Math.floor(h/24)+'d ago'; };
 const fmtDur = s => { if(!s) return null; const m=Math.floor(s/60); return m>0?`${m}m ${s%60}s`:`${s}s`; };
-const showToast = msg => { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'; setTimeout(()=>t.className='toast',2800); };
+const showToast = (msg, type='') => { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(type?' '+type:''); setTimeout(()=>t.className='toast',2800); };
 
 // ── Intent ───────────────────────────────────────────────────────────────────
 function callIntent(c) {
@@ -530,6 +686,8 @@ async function init() {
   document.getElementById('authGate').classList.add('hidden');
   document.getElementById('appLayout').style.display='flex';
 
+  renderSidebarTop();
+  renderStatusBanner();
   applyPropertyToHeader();
 
   await loadOverview();
@@ -760,9 +918,538 @@ async function loadAccount() {
   </div>`;
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE 3 — Multi-property switcher + Add Property modal
+// ══════════════════════════════════════════════════════════════════════════════
+
+const ADDONS_LIST = [
+  { code:'es', flag:'🇪🇸', name:'Spanish',    price:79 },
+  { code:'fr', flag:'🇫🇷', name:'French',     price:79 },
+  { code:'zh', flag:'🇨🇳', name:'Mandarin',   price:99 },
+  { code:'de', flag:'🇩🇪', name:'German',     price:79 },
+  { code:'pt', flag:'🇵🇹', name:'Portuguese', price:79 },
+  { code:'ja', flag:'🇯🇵', name:'Japanese',   price:99 },
+];
+
+// Avatar color based on name
+function propColor(name='') {
+  const colors=['#4f8cff','#38e8a0','#a78bfa','#f59e0b','#f87171','#06b6d4'];
+  let h=0; for(let c of name) h=(h+c.charCodeAt(0))%colors.length;
+  return colors[h];
+}
+
+// ── Sidebar top: logo (single) or switcher (multi) ───────────────────────────
+function renderSidebarTop() {
+  const el = document.getElementById('sidebarTop');
+  if (properties.length <= 1) {
+    // Existing single-property look — unchanged
+    el.innerHTML = `<div class="sidebar-logo">
+      <img src="/favicon-32x32.png" alt="NightShift AI">
+      <div><div class="sidebar-brand">NightShift AI</div><div class="sidebar-tag" id="sidebarTier">${(tier||'').toUpperCase() || 'Dashboard'}</div></div>
+    </div>`;
+    return;
+  }
+  const p = getActiveProperty();
+  const col = propColor(p?.name);
+  el.innerHTML = `
+    <div style="padding:14px 14px 10px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);">
+      <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#4f8cff,#a78bfa);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:900;color:#fff;flex-shrink:0;">N</div>
+      <div style="font-family:var(--font-display);font-size:13px;font-weight:700;">NightShift AI</div>
+    </div>
+    <div class="prop-switcher-wrap">
+      <button class="prop-trigger" onclick="toggleSwitcher(event)">
+        <div class="prop-avatar" style="background:${col}">${(p?.name||'?')[0].toUpperCase()}</div>
+        <div class="prop-trigger-info">
+          <div class="prop-trigger-name">${esc(p?.name||'—')}</div>
+          <div class="prop-trigger-sub">${(p?.tier||'').toUpperCase()} · ${properties.length} properties</div>
+        </div>
+        <div class="prop-trigger-chevs">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </button>
+      <div class="prop-dropdown" id="propDropdown">
+        <div class="prop-dd-header">Your Properties · ${properties.length}</div>
+        ${properties.map(pp => {
+          const isActive = pp.id === activeId;
+          const c = propColor(pp.name);
+          const statusLabel = pp.status === 'provisioning' ? 'Provisioning…' : pp.status === 'past_due' ? 'Payment failed' : 'Active';
+          return `<div class="prop-dd-item ${isActive?'active':''}" onclick="switchProperty('${pp.id}')">
+            <div class="prop-avatar" style="background:${c};width:22px;height:22px;border-radius:5px;font-size:10px;">${pp.name[0].toUpperCase()}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="prop-dd-name">${esc(pp.name)}</div>
+              <div class="prop-dd-meta">${esc(pp.address?.split(',')[1]?.trim()||'')} · ${(pp.tier||'').toUpperCase()}</div>
+            </div>
+            ${pp.status==='past_due'?'<span class="pill failed" style="font-size:8px;">!</span>':''}
+            ${pp.status==='provisioning'?'<span class="pill pending" style="font-size:8px;">…</span>':''}
+            ${isActive?`<svg class="prop-dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+          </div>`;
+        }).join('')}
+        <div class="prop-dd-divider"></div>
+        <div class="prop-dd-add" onclick="openAddPropModal()">
+          <div class="prop-dd-add-icon">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div>
+            <div class="prop-dd-add-label">Add another property</div>
+            <div class="prop-dd-add-sub">New AI agent live in ~5 min</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleSwitcher(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('propDropdown');
+  if(dd) dd.classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+  const dd = document.getElementById('propDropdown');
+  if(dd) dd.classList.remove('open');
+});
+
+async function switchProperty(id) {
+  if(id === activeId) { document.getElementById('propDropdown')?.classList.remove('open'); return; }
+  activeId = id;
+  // Persist default
+  try { await sb.from('hotel_users').update({default_property_id:id}).eq('user_id',user.id); } catch(_){}
+  renderSidebarTop();
+  applyPropertyToHeader();
+  renderStatusBanner();
+  // Reload current section
+  const active = document.querySelector('.nav-item.active')?.id||'';
+  if(active.includes('Calls')) await loadCalls();
+  else if(active.includes('Res')) await loadReservations();
+  else if(active.includes('Billing')) await loadBilling();
+  else if(active.includes('Account')) await loadAccount();
+  else await loadOverview();
+}
+
+// ── Status banners (failed payment / provisioning) ────────────────────────────
+function renderStatusBanner() {
+  const p = getActiveProperty();
+  let el = document.getElementById('statusBanner');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'statusBanner';
+    const main = document.querySelector('.main');
+    if(main) main.prepend(el);
+  }
+  if(!p || p.status === 'active') { el.innerHTML=''; return; }
+  if(p.status === 'past_due') {
+    el.innerHTML = `<div class="failed-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="failed-banner-text"><strong>Payment failed</strong> — your agent is still active but access will be paused soon. Update your payment method to continue.</div>
+      <button class="failed-banner-btn" onclick="showSec('billing',document.getElementById('navBilling'))">Update payment →</button>
+    </div>`;
+  } else if(p.status === 'provisioning') {
+    el.innerHTML = `<div class="prov-banner">
+      <div class="prov-spin"></div>
+      <div class="prov-banner-text"><strong>${esc(p.name)}</strong> is being set up — your AI agent will be live in a few minutes.</div>
+    </div>`;
+  } else { el.innerHTML=''; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE 3 — Add Property Modal (multi-step)
+// ══════════════════════════════════════════════════════════════════════════════
+
+const MODAL_STEPS = [
+  { key:'details',  title:'Property details',   sub:'Basics about the new property' },
+  { key:'plan',     title:'Choose a plan',       sub:'Core or Pro — change anytime' },
+  { key:'addons',   title:'Language add-ons',    sub:'Optional — included languages: English, Spanish, Hindi' },
+  { key:'review',   title:'Review order',        sub:'Confirm details, then continue to Stripe' },
+  { key:'provision',title:'Setting up…',         sub:'Your AI agent is being provisioned' },
+  { key:'done',     title:'You\'re live',        sub:'New property added to your dashboard' },
+];
+
+let modalStep = 0;
+let modalData = { name:'', addr:'', city:'', state:'', rooms:'', type:'Motel', plan:'pro', addons:[] };
+
+function openAddPropModal() {
+  document.getElementById('propDropdown')?.classList.remove('open');
+  modalStep = 0;
+  modalData = { name:'', addr:'', city:'', state:'', rooms:'', type:'Motel', plan:'pro', addons:[] };
+  document.getElementById('addPropModal').classList.remove('hidden');
+  renderModal();
+}
+
+function closeAddPropModal() {
+  if(modalStep >= 4) return; // don't close during provisioning
+  document.getElementById('addPropModal').classList.add('hidden');
+}
+
+function renderModal() {
+  const cur = MODAL_STEPS[modalStep];
+  document.getElementById('modalEyebrow').textContent = modalStep === 0 ? 'New property' : modalStep >= 4 ? 'Setup' : 'Setup · step '+(modalStep+1)+' of 4';
+  document.getElementById('modalTitle').textContent = cur.title;
+  document.getElementById('modalSub').textContent = cur.sub;
+
+  // Stepper (steps 0-3 only)
+  const stepperEl = document.getElementById('modalStepper');
+  if(modalStep <= 3) {
+    stepperEl.style.display='flex';
+    const labels = ['Details','Plan','Add-ons','Review'];
+    stepperEl.innerHTML = labels.map((l,i) => {
+      const done = modalStep>i, active = modalStep===i;
+      return `<div class="step-node">
+        <div class="step-circle ${done?'done':active?'active':'idle'}">${done?`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`:i+1}</div>
+        <span class="step-label ${done?'done':active?'active':'idle'}">${l}</span>
+      </div>${i<labels.length-1?`<div class="step-line ${done?'done':''}"></div>`:''}`;
+    }).join('');
+  } else {
+    stepperEl.style.display='none';
+  }
+
+  // Body
+  const body = document.getElementById('modalStepContent');
+  if(modalStep===0) body.innerHTML = stepDetails();
+  else if(modalStep===1) body.innerHTML = stepPlan();
+  else if(modalStep===2) body.innerHTML = stepAddons();
+  else if(modalStep===3) body.innerHTML = stepReview();
+  else if(modalStep===4) body.innerHTML = stepProvision();
+  else if(modalStep===5) body.innerHTML = stepDone();
+
+  // Re-attach addon toggles
+  if(modalStep===2) {
+    document.querySelectorAll('.addon-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = btn.dataset.code;
+        if(modalData.addons.includes(code)) modalData.addons = modalData.addons.filter(c=>c!==code);
+        else modalData.addons.push(code);
+        renderModal();
+      });
+    });
+  }
+
+  // Footer
+  const footer = document.getElementById('modalFooter');
+  if(modalStep<=3) {
+    const base = modalData.plan==='pro'?699:549;
+    const addCost = modalData.addons.reduce((s,c)=>s+(ADDONS_LIST.find(a=>a.code===c)?.price||0),0);
+    const total = base+addCost;
+    footer.innerHTML = `
+      <span class="modal-step-count">${modalStep+1} / 4</span>
+      <div style="display:flex;gap:10px;align-items:center;">
+        ${modalStep>0?`<button class="btn-ghost-sm" onclick="modalStep--;renderModal()">← Back</button>`:''}
+        <button class="btn-primary" id="modalNext" onclick="modalNext()">
+          ${modalStep===3?`Continue to Stripe · $${total}/mo →`:'Continue →'}
+        </button>
+      </div>`;
+  } else {
+    footer.innerHTML='';
+  }
+}
+
+function stepDetails() {
+  return `<div class="field-row"><div>
+    <label class="field-label">Property name</label>
+    <input class="field-input" id="f_name" placeholder="Mountain Inn" value="${esc(modalData.name)}" oninput="modalData.name=this.value">
+  </div></div>
+  <div class="field-row col2">
+    <div>
+      <label class="field-label">Street address</label>
+      <input class="field-input" id="f_addr" placeholder="123 Main St" value="${esc(modalData.addr)}" oninput="modalData.addr=this.value">
+    </div>
+    <div>
+      <label class="field-label">Rooms</label>
+      <input class="field-input" id="f_rooms" type="number" placeholder="40" value="${esc(modalData.rooms)}" oninput="modalData.rooms=this.value">
+    </div>
+  </div>
+  <div class="field-row col2">
+    <div>
+      <label class="field-label">City</label>
+      <input class="field-input" id="f_city" placeholder="Dayton" value="${esc(modalData.city)}" oninput="modalData.city=this.value">
+    </div>
+    <div>
+      <label class="field-label">State</label>
+      <input class="field-input" id="f_state" placeholder="TN" value="${esc(modalData.state)}" oninput="modalData.state=this.value">
+    </div>
+  </div>
+  <div class="field-row">
+    <div>
+      <label class="field-label">Property type</label>
+      <select class="field-input" id="f_type" onchange="modalData.type=this.value">
+        ${['Motel','Boutique hotel','Inn / B&B','Vacation rental','Lodge / Resort'].map(t=>`<option ${modalData.type===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+  </div>
+  <div class="field-hint">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg>
+    Phone number is provisioned automatically. You'll forward your existing line after setup.
+  </div>`;
+}
+
+function stepPlan() {
+  const mkFeats = (tier) => tier==='pro'
+    ? ['1,800 inbound minutes/mo','Reservations dashboard','Priority support · 4hr SLA','Overage $0.18/min','Multi-language support']
+    : ['1,000 inbound minutes/mo','Call summaries + sentiment','Live call log','Email support · 24hr SLA','Overage $0.22/min'];
+  const checkSvg = `<svg class="plan-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  return `<div class="plan-grid">
+    ${['core','pro'].map(t=>`
+    <button class="plan-card ${modalData.plan===t?'selected-'+t:''}" onclick="modalData.plan='${t}';renderModal()">
+      ${t==='pro'?'<div class="plan-card-rec">Recommended</div>':''}
+      <div class="plan-name">${t.charAt(0).toUpperCase()+t.slice(1)}</div>
+      <div class="plan-mins">${t==='pro'?'1,800':'1,000'} min/mo included</div>
+      <div class="plan-price">$${t==='pro'?699:549}<span>/mo</span></div>
+      <ul class="plan-features">${mkFeats(t).map(f=>`<li>${checkSvg}<span>${f}</span></li>`).join('')}</ul>
+    </button>`).join('')}
+  </div>`;
+}
+
+function stepAddons() {
+  return `<div class="addon-grid">
+    ${ADDONS_LIST.map(a=>{
+      const sel = modalData.addons.includes(a.code);
+      return `<button class="addon-btn ${sel?'selected':''}" data-code="${a.code}">
+        <div class="addon-flag">${a.flag}</div>
+        <div><div class="addon-name">${a.name}</div><div class="addon-price">+$${a.price}/mo</div></div>
+        <div class="addon-check ${sel?'checked':''}">
+          ${sel?`<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+        </div>
+      </button>`;
+    }).join('')}
+  </div>
+  <div class="field-hint" style="margin-top:12px;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    English, Spanish, and Hindi are included on all plans. Add-ons are separately trained voice agents.
+  </div>`;
+}
+
+function stepReview() {
+  const base = modalData.plan==='pro'?699:549;
+  const addCost = modalData.addons.reduce((s,c)=>s+(ADDONS_LIST.find(a=>a.code===c)?.price||0),0);
+  const total = base+addCost;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Property</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${esc(modalData.name||'—')}</div>
+      <div style="font-size:12px;color:var(--text3);">${esc(modalData.addr)}, ${esc(modalData.city)}, ${esc(modalData.state)}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px;">${esc(modalData.type)} · ${esc(modalData.rooms)} rooms</div>
+      <div style="margin-top:12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Languages</div>
+      <div style="font-size:12px;color:var(--text2);">English, Spanish, Hindi (included)${modalData.addons.length?', '+modalData.addons.map(c=>ADDONS_LIST.find(a=>a.code===c)?.name).join(', '):''}</div>
+    </div>
+    <div class="order-summary">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Order summary</div>
+      <div class="order-row"><span class="order-label">${modalData.plan==='pro'?'Pro':'Core'} plan</span><span class="order-val">$${base}/mo</span></div>
+      ${modalData.addons.map(c=>{const a=ADDONS_LIST.find(x=>x.code===c);return`<div class="order-row"><span class="order-label">${a.flag} ${a.name}</span><span class="order-val">+$${a.price}/mo</span></div>`;}).join('')}
+      <div class="order-row"><span class="order-label">Setup fee</span><span class="order-val" style="text-decoration:line-through;color:var(--text3);">$499</span><span class="order-val" style="color:var(--accent2);margin-left:6px;">$0</span></div>
+      <div class="order-total">
+        <span class="order-total-label">Total / month</span>
+        <span class="order-total-val">$${total}</span>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px;">Renews monthly. Cancel anytime.</div>
+    </div>
+  </div>
+  <div style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text2);">
+    <span>🔒</span> Clicking "Continue to Stripe" will open a secure Stripe checkout. You'll return here automatically when payment is complete.
+  </div>`;
+}
+
+function stepProvision() {
+  const stages = [
+    { label:'Payment confirmed', state:'done' },
+    { label:'Property created in your workspace', state:'done' },
+    { label:'Training AI agent on your property', state:'active' },
+    { label:'Activating call routing', state:'idle' },
+    { label:'Final checks', state:'idle' },
+  ];
+  return `<div style="text-align:center;margin-bottom:20px;">
+    <div style="position:relative;width:56px;height:56px;margin:0 auto 12px;">
+      <div style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--border2);"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);border-right-color:transparent;border-bottom-color:transparent;animation:spin 1.2s linear infinite;"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accent);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+    </div>
+    <div style="font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:-.02em;">Spinning up your agent</div>
+    <div style="font-size:12px;color:var(--text3);margin-top:4px;">Takes about 90 seconds — keep this window open.</div>
+  </div>
+  <div class="prov-timeline">
+    ${stages.map((s,i)=>`<div class="prov-stage">
+      <div class="prov-stage-icon ${s.state}">
+        ${s.state==='done'?`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`:s.state==='active'?`<span style="animation:pg 1.4s infinite">●</span>`:i+1}
+      </div>
+      <span class="prov-stage-label ${s.state}">${s.label}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+function stepDone() {
+  return `<div style="text-align:center;padding:16px 8px;">
+    <div style="position:relative;width:72px;height:72px;margin:0 auto 16px;">
+      <div style="position:absolute;inset:-8px;border-radius:50%;background:radial-gradient(circle,rgba(56,232,160,.28),transparent 70%);"></div>
+      <div style="position:relative;width:72px;height:72px;border-radius:50%;background:rgba(56,232,160,.14);border:2px solid var(--accent2);display:flex;align-items:center;justify-content:center;color:var(--accent2);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div>
+    <div style="font-family:var(--font-display);font-size:24px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px;">${esc(modalData.name)} is live</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;max-width:380px;margin:0 auto;">Your new AI front desk is ready. Forward your property's phone number to the assigned number to start routing live calls.</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+      <button class="btn-primary" onclick="closeAddPropModal();window.location.reload();">Open ${esc(modalData.name)} →</button>
+    </div>
+  </div>`;
+}
+
+async function modalNext() {
+  const btn = document.getElementById('modalNext');
+  if(btn) btn.disabled=true;
+
+  if(modalStep===0) {
+    if(!modalData.name.trim()||!modalData.addr.trim()||!modalData.city.trim()) {
+      showToast('Please fill in property name, address, and city','error');
+      if(btn) btn.disabled=false;
+      return;
+    }
+    modalStep++;
+  } else if(modalStep===1||modalStep===2) {
+    modalStep++;
+  } else if(modalStep===3) {
+    // Go to provisioning step, then call edge function
+    modalStep=4;
+    renderModal();
+    await doProvision();
+    return;
+  }
+  renderModal();
+}
+
+async function doProvision() {
+  try {
+    const {data:{session}} = await sb.auth.getSession();
+    const payload = {
+      property_name: modalData.name,
+      address: modalData.addr,
+      city: modalData.city,
+      state_zip: modalData.state,
+      tier: modalData.plan,
+      extra_languages: modalData.addons.join(','),
+      contact_email: user.email,
+      contact_name: user.email.split('@')[0],
+    };
+    const res = await fetch(`${SB_URL}/functions/v1/provision-client`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if(d.ok) {
+      // Reload properties list
+      const {data:newProps} = await sb.from('properties').select('*').in('id',[...(properties.map(p=>p.id)),d.property_id]);
+      if(newProps) properties = newProps;
+      modalStep=5;
+      renderModal();
+    } else {
+      showToast('Provisioning failed: '+(d.error||'Unknown error'),'error');
+      modalStep=3;
+      renderModal();
+    }
+  } catch(e) {
+    showToast('Error: '+String(e),'error');
+    modalStep=3;
+    renderModal();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE 3 — Multi-property billing table (replaces single card when >1 prop)
+// ══════════════════════════════════════════════════════════════════════════════
+
+const _origLoadBilling = loadBilling;
+async function loadBilling() {
+  if(properties.length <= 1) { await _origLoadBilling(); return; }
+  const el = document.getElementById('billingContent');
+  const active = properties.filter(p=>p.status!=='cancelled');
+  const totalMRR = active.reduce((s,p)=>s+(TIER_MRR[p.tier]||0),0);
+
+  el.innerHTML = `
+    <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.02em;">All subscriptions</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px;">Manage plans and usage across ${active.length} propert${active.length===1?'y':'ies'}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--font-display);font-size:24px;font-weight:900;color:var(--accent2);">$${totalMRR.toLocaleString()}<span style="font-size:13px;color:var(--text3);font-family:var(--font-body);font-weight:400;">/mo</span></div>
+        <div style="font-size:11px;color:var(--text3);">total monthly</div>
+      </div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);">
+      <table class="billing-table" style="width:100%;">
+        <thead><tr>
+          <th>Property</th><th>Plan</th><th>Usage</th><th>Status</th><th style="text-align:right;">Amount</th>
+        </tr></thead>
+        <tbody>
+          ${active.map(p=>{
+            const price=TIER_MRR[p.tier]||0;
+            const included=p.included_minutes||1000;
+            const usedMins=0; // TODO: pull from call_logs aggregate
+            const pct=Math.min(100,Math.round((usedMins/included)*100));
+            const fillClass=pct>90?'over':pct>70?'warn':'ok';
+            const statusLabel=p.status==='past_due'?'Payment failed':p.status==='provisioning'?'Provisioning':p.status==='trial'?'Trial':'Active';
+            const statusClass=p.status==='past_due'?'failed':p.status==='provisioning'?'pending':p.status==='trial'?'trial':'active';
+            const isActive=p.id===activeId;
+            return `<tr style="${isActive?'background:rgba(79,140,255,.04);':''}" onclick="switchProperty('${p.id}')" style="cursor:pointer;">
+              <td><div class="btable-prop">
+                <div class="prop-avatar" style="background:${propColor(p.name)};width:28px;height:28px;border-radius:7px;font-size:12px;">${p.name[0].toUpperCase()}</div>
+                <div><div class="btable-name">${esc(p.name)}</div><div class="btable-city">${esc(p.address?.split(',')[1]?.trim()||'')}</div></div>
+              </div></td>
+              <td><span class="pill ${p.tier||'core'}">${(p.tier||'core').toUpperCase()}</span></td>
+              <td><div class="usage-bar-wrap">
+                <div style="font-size:11px;color:var(--text2);font-family:var(--font-mono);">${usedMins} / ${included.toLocaleString()} min</div>
+                <div class="usage-bar-track"><div class="usage-bar-fill ${fillClass}" style="width:${pct}%"></div></div>
+              </div></td>
+              <td><span class="pill ${statusClass}">${statusLabel}</span></td>
+              <td style="text-align:right;font-family:var(--font-mono);font-weight:600;color:${p.status==='past_due'?'var(--red)':'var(--text)'};">
+                ${p.status==='provisioning'||p.status==='trial'?'$0':'$'+price}
+                <div style="font-size:10px;color:var(--text3);font-weight:400;">${p.status==='provisioning'||p.status==='trial'?'after setup':'/mo'}</div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text3);">Click any row to switch to that property. Questions? <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent);">Contact us</a></div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE 4 — Toast helper (shared)
+// ══════════════════════════════════════════════════════════════════════════════
+// showToast is defined earlier in the file
+
+// ── Hook into init() to render switcher + status banner after load ─────────────
+const _origInit = init;
+// We patch the tail of init via onAuthStateChange since init is already defined above.
+// Instead, we call renderSidebarTop + renderStatusBanner from within setActiveProperty
+// and from a post-init hook below.
+
 // ── Auth state ────────────────────────────────────────────────────────────────
 sb.auth.onAuthStateChange((event,session)=>{ if(event==='SIGNED_IN'&&session) init(); });
 init();
 </script>
+<!-- Add Property Modal -->
+<div class="modal-overlay hidden" id="addPropModal" onclick="if(event.target===this)closeAddPropModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-eyebrow" id="modalEyebrow">New property</div>
+        <div class="modal-title" id="modalTitle">Property details</div>
+        <div class="modal-sub" id="modalSub">Basics about the new property</div>
+      </div>
+      <button class="modal-close" onclick="closeAddPropModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="stepper" id="modalStepper"></div>
+      <div id="modalStepContent"></div>
+    </div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 </body>
 </html>
