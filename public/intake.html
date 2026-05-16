@@ -920,7 +920,9 @@ async function handlePayment() {
           body:JSON.stringify({customer_id:piData.customer_id,
             payment_intent_id:result.paymentIntent.id,tier,
             property_name:formData.property_name||'',
-            contact_email:formData.contact_email||''})
+            contact_email:formData.contact_email||'',
+            lang_count:String(piData.lang_count||0),
+            minute_addon:addonKey})
         });
         var subData=await subRes.json();
         formData.stripe_subscription_id=subData.subscription_id||'';
