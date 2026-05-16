@@ -673,8 +673,10 @@ var stripe, elements, cardElement;
 
 // ── Init Stripe lazily when payment step loads ─────────────────────────────
 function initStripe() {
-  if (stripe) return;
-  stripe = Stripe(STRIPE_PK);
+  if (!stripe) {
+    stripe = Stripe(STRIPE_PK);
+  }
+  // Always recreate elements and remount — handles test mode override and re-navigation
   elements = stripe.elements();
   cardElement = elements.create('card', {
     style: {
@@ -683,6 +685,7 @@ function initStripe() {
       invalid: { color:'#ff6b6b', iconColor:'#ff6b6b' }
     }
   });
+  document.getElementById('card-element').innerHTML = '';
   cardElement.mount('#card-element');
   cardElement.on('change', function(e) {
     var el = document.getElementById('card-errors');
