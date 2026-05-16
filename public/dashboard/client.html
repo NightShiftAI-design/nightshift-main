@@ -385,7 +385,63 @@ const FOUNDER = 'founder@nightshifthotels.com';
 const TIER_MRR = {core:549,pro:699};
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-let prop = null, tier = 'core', user = null;
+// ── Phase 1: multi-property state ────────────────────────────────────────────
+// `properties` holds every property the signed-in user owns. `activeId` points
+// at the one currently rendered in the dashboard. All existing code below reads
+// from the `prop` / `tier` getters defined immediately after, so this change is
+// invisible to the rest of the file — single-property users see no difference.
+let user = null;
+let properties = [];
+let activeId = null;
+
+function getActiveProperty() {
+  return properties.find(p => p.id === activeId) || null;
+}
+
+// Backwards-compat: every existing reference to `prop` and `tier` continues to
+// work. These are intentionally on window so unqualified reads in this script
+// resolve through the global scope chain (there is no local binding shadowing).
+Object.defineProperty(window, 'prop', { configurable: true, get: () => getActiveProperty() });
+Object.defineProperty(window, 'tier', { configurable: true, get: () => (getActiveProperty()?.tier || 'core') });
+
+// Called from Phase 3 UI (sidebar switcher). Persists the default and re-paints
+// whichever section is visible. Safe to leave here before any UI ships — it is
+// a no-op if `id` doesn't match an owned property and is never called yet.
+async function setActiveProperty(id) {
+  if (!properties.find(p => p.id === id)) return;
+  activeId = id;
+  try {
+    await sb.from('hotel_users').update({ default_property_id: id }).eq('user_id', user.id);
+  } catch (_) { /* default_property_id is an optional convenience; ignore errors */ }
+  applyPropertyToHeader();
+  await loadOverview();
+  const visible = document.querySelector('[id^="sec-"]:not([style*="none"])')?.id;
+  if (visible === 'sec-calls')        await loadCalls();
+  if (visible === 'sec-reservations') await loadReservations();
+  if (visible === 'sec-billing')      await loadBilling();
+  if (visible === 'sec-account')      await loadAccount();
+}
+
+// Pulled out of init() so setActiveProperty() can re-apply on switch. The body
+// of this function is verbatim the header block that previously lived inline
+// inside init() — same DOM writes, same value sources.
+function applyPropertyToHeader() {
+  const p = getActiveProperty();
+  if (!p) return;
+  const tierLabel = (p.tier||'core').charAt(0).toUpperCase()+(p.tier||'core').slice(1);
+  document.getElementById('sidebarTier').textContent = tierLabel+' Plan';
+  document.getElementById('heroName').textContent = p.name;
+  document.getElementById('heroSub').textContent = p.address || (tierLabel+' plan · Agent active 24/7');
+  const name = p.contact_name || user.email.split('@')[0];
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('statPlan').textContent = tierLabel;
+  document.getElementById('statIncluded').textContent = (p.included_minutes||1000).toLocaleString()+' min';
+  document.getElementById('statSince').textContent = p.onboarded_at ? new Date(p.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
+  document.getElementById('minsLimitLabel').textContent = (p.included_minutes||1000).toLocaleString()+' min';
+  document.getElementById('resBadge').style.display    = (p.tier==='core') ? 'inline-block' : 'none';
+  document.getElementById('ovResSection').style.display = (p.tier==='pro')  ? 'block' : 'none';
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const esc = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
@@ -441,35 +497,40 @@ async function init() {
   user = session.user;
   if(user.email===FOUNDER) { window.location.href='/dashboard/founder.html'; return; }
 
-  const {data:hu} = await sb.from('hotel_users').select('property_id,role,tier').eq('user_id',user.id).limit(1).single();
-  if(!hu) { document.getElementById('authGate').innerHTML='<div class="auth-box"><img src="/favicon-32x32.png" class="auth-logo"><h2>No property found</h2><p>Your account isn\'t linked to a property. Contact <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a></p></div>'; return; }
+  // Load every property this user is linked to. Existing single-property users
+  // get an array of length 1 — same data, just wrapped.
+  const {data:huRows, error:huErr} = await sb.from('hotel_users')
+    .select('property_id, role, tier, default_property_id')
+    .eq('user_id', user.id);
 
-  const {data:p} = await sb.from('properties').select('*').eq('id',hu.property_id).single();
-  if(!p) return;
+  if (huErr || !huRows || huRows.length === 0) {
+    document.getElementById('authGate').innerHTML='<div class="auth-box"><img src="/favicon-32x32.png" class="auth-logo"><h2>No property found</h2><p>Your account isn\'t linked to a property. Contact <a href="mailto:founder@nightshifthotels.com" style="color:var(--accent)">founder@nightshifthotels.com</a></p></div>';
+    return;
+  }
 
-  prop = p; tier = p.tier||'core';
+  const propertyIds = huRows.map(h => h.property_id).filter(Boolean);
+  const {data:ps, error:psErr} = await sb.from('properties')
+    .select('*')
+    .in('id', propertyIds);
+
+  if (psErr || !ps || ps.length === 0) {
+    // Same fallback as before: hotel_users link exists but property record is
+    // missing. Keep the previous no-op (return without rendering the app).
+    return;
+  }
+
+  properties = ps;
+
+  // Pick the active property — last-viewed default if it's still owned, else
+  // first. This is the only place that selects the "current" property in
+  // Phase 1; the sidebar switcher in Phase 3 will call setActiveProperty().
+  const defaultId = huRows[0]?.default_property_id;
+  activeId = (defaultId && properties.find(p => p.id === defaultId)) ? defaultId : properties[0].id;
+
   document.getElementById('authGate').classList.add('hidden');
   document.getElementById('appLayout').style.display='flex';
 
-  const tierLabel = tier.charAt(0).toUpperCase()+tier.slice(1);
-  document.getElementById('sidebarTier').textContent = tierLabel+' Plan';
-  document.getElementById('heroName').textContent = p.name;
-  document.getElementById('heroSub').textContent = p.address || (tierLabel+' plan · Agent active 24/7');
-  const name = p.contact_name || user.email.split('@')[0];
-  document.getElementById('userName').textContent = name;
-  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-  document.getElementById('statPlan').textContent = tierLabel;
-  document.getElementById('statIncluded').textContent = (p.included_minutes||1000).toLocaleString()+' min';
-  document.getElementById('statSince').textContent = p.onboarded_at ? new Date(p.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
-  document.getElementById('minsLimitLabel').textContent = (p.included_minutes||1000).toLocaleString()+' min';
-
-  if(tier==='pro') {
-    document.getElementById('resBadge').style.display='none';
-    document.getElementById('ovResSection').style.display='block';
-  }
-  if(tier==='core') {
-    document.getElementById('resBadge').style.display='inline-block';
-  }
+  applyPropertyToHeader();
 
   await loadOverview();
 }
