@@ -931,7 +931,15 @@ async function handlePayment() {
         formData.stripe_subscription_id=subData.subscription_id||'';
       } catch(e){console.warn('Subscription non-fatal:',e);}
 
-      // Provision client
+      // Provision client — ensure phone is always present and normalized
+      if (!formData.emergency_phone) {
+        formData.emergency_phone = formData.contact_phone || formData.frontdesk_phone || '';
+      }
+      // Normalize to E.164 if needed
+      if (formData.emergency_phone && !formData.emergency_phone.startsWith('+')) {
+        var digits = formData.emergency_phone.replace(/\D/g,'');
+        formData.emergency_phone = digits.length === 10 ? '+1'+digits : '+'+digits;
+      }
       var provRes=await fetch(SB+'/provision-client',{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify(formData)
