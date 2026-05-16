@@ -380,6 +380,15 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
           </div>
         </div>
 
+        <!-- Failed Provisioning Jobs -->
+        <div class="section" id="failedJobsSection" style="display:none;">
+          <div class="section-header">
+            <div class="section-title">🔴 Failed Provisioning</div>
+            <span style="font-size:11px;color:var(--red);">Payment taken — agent not created</span>
+          </div>
+          <div id="failedJobsList"></div>
+        </div>
+
         <!-- Recent Reservations -->
         <div class="section">
           <div class="section-header">
@@ -508,6 +517,7 @@ async function init() {
     loadProperties(),
     loadCallStats(),
     loadReservations(),
+    loadFailedJobs(),
   ]);
 }
 
@@ -612,6 +622,57 @@ async function loadProperties() {
   }
 }
 
+// ── Load Failed Provisioning Jobs ─────────────────────────────────────────────
+async function loadFailedJobs() {
+  const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  const { data: jobs } = await sb
+    .from('provisioning_jobs')
+    .select('*')
+    .or(`status.eq.failed,and(status.eq.pending,created_at.lt.${tenMinsAgo})`)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const section = document.getElementById('failedJobsSection');
+  const list = document.getElementById('failedJobsList');
+  if (!jobs || jobs.length === 0) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  list.innerHTML = jobs.map(j => {
+    const draft = j.payload?.property_draft || {};
+    const isStuck = j.status === 'pending';
+    return `<div class="pending-item" style="border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.04);">
+      <div class="pending-item-name">${escHtml(draft.name || 'Unknown property')}</div>
+      <div class="pending-item-meta" style="color:var(--red);">
+        ${isStuck ? '⚠️ Stuck pending' : '❌ Failed'} · ${j.payload?.plan?.toUpperCase() || '—'} · ${timeAgo(j.created_at)}
+      </div>
+      ${j.error ? `<div style="font-size:11px;color:var(--text3);margin:6px 0;font-family:var(--font-mono);">${escHtml(j.error.substring(0,120))}</div>` : ''}
+      <div class="pending-item-actions">
+        <button class="btn-sm ghost" onclick="retryJob('${j.id}')">↻ Retry provision</button>
+        <span style="font-size:10px;color:var(--text3);margin-left:8px;">Session: ${escHtml(j.stripe_session_id?.substring(0,20))}…</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function retryJob(jobId) {
+  const { data: job } = await sb.from('provisioning_jobs').select('*').eq('id', jobId).single();
+  if (!job) { showToast('Job not found', 'error'); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/provision-client`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    body: JSON.stringify({ ...job.payload?.property_draft, tier: job.payload?.plan, extra_languages: (job.payload?.addons||[]).join(',') })
+  });
+  const d = await res.json();
+  if (d.ok) {
+    await sb.from('provisioning_jobs').update({ status: 'succeeded', property_id: d.property_id }).eq('id', jobId);
+    showToast('✓ Retry succeeded — agent created', 'success');
+    setTimeout(() => { loadProperties(); loadFailedJobs(); }, 1500);
+  } else {
+    showToast('Retry failed: ' + (d.error || 'Unknown'), 'error');
+  }
+}
+
 // ── Load Call Stats ───────────────────────────────────────────────────────────
 async function loadCallStats() {
   const now = new Date();
@@ -623,7 +684,7 @@ async function loadCallStats() {
     .gte('created_at', monthStart.toISOString())
     .limit(200);
 
-  const total = count || 0;
+  const total = count ?? (calls?.length || 0);
   document.getElementById('kpiCalls').textContent = total.toLocaleString();
   document.getElementById('kpiCallsDelta').textContent = 'This billing period';
   document.getElementById('statCalls').textContent = total.toLocaleString();
