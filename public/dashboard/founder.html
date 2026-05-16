@@ -485,12 +485,8 @@ async function init() {
   const { data: { session } } = await sb.auth.getSession();
 
   if (!session) {
-    // Check for magic link in URL
-    const { data: { session: newSession } } = await sb.auth.getSession();
-    if (!newSession) {
-      document.getElementById('authGate').classList.remove('hidden');
-      return;
-    }
+    document.getElementById('authGate').classList.remove('hidden');
+    return;
   }
 
   // Verify this is the founder
@@ -520,10 +516,30 @@ async function loadProperties() {
     .select('*')
     .order('onboarded_at', { ascending: false });
 
-  if (error || !properties) return;
+  // Always clear skeletons first
+  const grid = document.getElementById('propertiesGrid');
+  const pendingList = document.getElementById('pendingList');
 
-  const active = properties.filter(p => p.is_active && p.status === 'active');
-  const pending = properties.filter(p => !p.is_active || p.status === 'pending_review');
+  if (error) {
+    console.error('Properties load error:', error);
+    // Set KPIs to zero so they don't stay as "—"
+    document.getElementById('kpiMRR').textContent = '$0';
+    document.getElementById('kpiMRRDelta').textContent = error.message || 'Could not load';
+    document.getElementById('kpiClients').textContent = '0';
+    document.getElementById('kpiClientsDelta').textContent = 'Query error — check RLS';
+    document.getElementById('kpiPending').textContent = '0';
+    document.getElementById('statMRR').textContent = '$0/mo';
+    document.getElementById('statARR').textContent = '$0/yr';
+    document.getElementById('statClients').textContent = '0';
+    document.getElementById('statTierBreakdown').textContent = '0 / 0 / 0';
+    grid.innerHTML = `<div class="empty-state"><p style="color:var(--red)">RLS error — run as service_role or check policy</p></div>`;
+    pendingList.innerHTML = '<div class="empty-state"><p>—</p></div>';
+    return;
+  }
+
+  const safeProperties = properties || [];
+  const active = safeProperties.filter(p => p.is_active && p.status === 'active');
+  const pending = safeProperties.filter(p => !p.is_active || p.status === 'pending_review');
 
   // KPI
   const mrr = active.reduce((sum, p) => sum + (TIER_MRR[p.tier] || 0), 0);
@@ -571,11 +587,11 @@ async function loadProperties() {
   }
 
   // Render pending
-  const pendingList = document.getElementById('pendingList');
+  const pendingListEl = document.getElementById('pendingList');
   if (pending.length === 0) {
-    pendingList.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg><p>No pending reviews</p></div>';
+    pendingListEl.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg><p>No pending reviews</p></div>';
   } else {
-    pendingList.innerHTML = pending.map(p => `
+    pendingListEl.innerHTML = pending.map(p => `
       <div class="pending-item" id="pending-${p.id}">
         <div class="pending-item-name">${escHtml(p.name)}</div>
         <div class="pending-item-meta">${(p.tier||'').toUpperCase()} · ${p.contact_email||''} · ${p.contact_phone||''} · Submitted ${timeAgo(p.provisioned_at)}</div>
@@ -773,11 +789,6 @@ sb.auth.onAuthStateChange((event, session) => {
 
 init();
 </script>
-<div style="position:fixed;bottom:20px;right:20px;z-index:50;">
-  <a href="/" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(13,17,24,.85);border:1px solid rgba(255,255,255,.1);border-radius:99px;font-size:12px;color:rgba(238,242,255,.45);text-decoration:none;backdrop-filter:blur(12px);transition:color .15s;" onmouseover="this.style.color='rgba(238,242,255,.85)'" onmouseout="this.style.color='rgba(238,242,255,.45)'">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Main site
-  </a>
-</div>
+
 </body>
 </html>
