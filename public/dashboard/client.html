@@ -52,10 +52,6 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .nav-item .badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;background:rgba(79,140,255,.15);color:var(--accent);}
 .pro-badge{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:rgba(167,139,250,.12);color:var(--purple);margin-left:auto;}
 .sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border);}
-.prop-switch-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);background:none;border:none;cursor:pointer;font-family:var(--font-body);width:100%;text-align:left;transition:all .15s;}
-.prop-switch-btn:hover{background:rgba(255,255,255,.05);color:var(--text);}
-.prop-switch-btn.active{background:rgba(79,140,255,.12);color:var(--accent);}
-.prop-switch-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;}
 .user-row{display:flex;align-items:center;gap:10px;padding:8px;}
 .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
 .user-name{font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -219,12 +215,6 @@ canvas{display:block;}
     <div class="sidebar-logo">
       <img src="/favicon-32x32.png" alt="NightShift AI">
       <div><div class="sidebar-brand">NightShift AI</div><div class="sidebar-tag" id="sidebarTier">Dashboard</div></div>
-    </div>
-
-    <!-- Property switcher — hidden until Phase 1 confirms >1 property -->
-    <div id="propertySwitcher" style="display:none; padding:8px 10px; border-bottom:1px solid var(--border);">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:4px 6px 6px;">Property</div>
-      <div id="propertyList" style="display:flex;flex-direction:column;gap:2px;"></div>
     </div>
     <div class="nav-sec">Operations</div>
     <button class="nav-item active" id="navOverview" onclick="showSec('overview',this)">
@@ -414,29 +404,10 @@ function getActiveProperty() {
 Object.defineProperty(window, 'prop', { configurable: true, get: () => getActiveProperty() });
 Object.defineProperty(window, 'tier', { configurable: true, get: () => (getActiveProperty()?.tier || 'core') });
 
-function renderPropertySwitcher() {
-  if (properties.length <= 1) return; // single property — no switcher needed
-  const switcher = document.getElementById('propertySwitcher');
-  const list = document.getElementById('propertyList');
-  switcher.style.display = 'block';
-  list.innerHTML = properties.map(p => `
-    <button class="prop-switch-btn ${p.id === activeId ? 'active' : ''}"
-      onclick="setActiveProperty('${p.id}')">
-      <span class="prop-switch-dot"></span>
-      ${esc(p.name)}
-    </button>
-  `).join('');
-}
-
-// Re-render switcher active state when property changes
-const _origSetActive = setActiveProperty;
+// Called from Phase 3 UI (sidebar switcher). Persists the default and re-paints
+// whichever section is visible. Safe to leave here before any UI ships — it is
+// a no-op if `id` doesn't match an owned property and is never called yet.
 async function setActiveProperty(id) {
-  await _origSetActive(id);
-  // Update switcher highlight
-  document.querySelectorAll('.prop-switch-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.trim() === (properties.find(p=>p.id===id)?.name||''));
-  });
-}
   if (!properties.find(p => p.id === id)) return;
   activeId = id;
   try {
@@ -559,7 +530,6 @@ async function init() {
   document.getElementById('authGate').classList.add('hidden');
   document.getElementById('appLayout').style.display='flex';
 
-  renderPropertySwitcher();
   applyPropertyToHeader();
 
   await loadOverview();
