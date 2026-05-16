@@ -9,8 +9,8 @@
 //   invoice.payment_succeeded    → clears past_due back to active
 //
 // Required env vars:
-//   STRIPE_WEBHOOK_SECRET_TEST   — whsec_... from Stripe test webhook endpoint
-//   STRIPE_SECRET_KEY_TEST       — sk_test_...
+//   STRIPE_WEBHOOK_SECRET   — whsec_... from Stripe test webhook endpoint
+//   STRIPE_SECRET_KEY       — sk_test_...
 //   PROJECT_URL                  — https://sbzdnzouoyxmawuhdvdi.supabase.co
 //   SERVICE_ROLE_KEY             — your Supabase service role key
 //   RETELL_API_KEY               — for provision-client passthrough
@@ -19,8 +19,8 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL      = Deno.env.get('PROJECT_URL') ?? 'https://sbzdnzouoyxmawuhdvdi.supabase.co';
 const SERVICE_ROLE_KEY  = Deno.env.get('SERVICE_ROLE_KEY') ?? '';
-const WEBHOOK_SECRET    = Deno.env.get('STRIPE_WEBHOOK_SECRET_TEST') ?? '';
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY_TEST') ?? '';
+const WEBHOOK_SECRET    = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? '';
+const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
 const PROVISION_URL     = `${SUPABASE_URL}/functions/v1/provision-client`;
 
 const CORS = { 'Access-Control-Allow-Origin': '*' };
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
       return new Response('Invalid signature', { status: 400, headers: CORS });
     }
   } else {
-    console.warn('STRIPE_WEBHOOK_SECRET_TEST not set — skipping signature verification');
+    console.warn('STRIPE_WEBHOOK_SECRET not set — skipping signature verification');
   }
 
   let event: Record<string, unknown>;
