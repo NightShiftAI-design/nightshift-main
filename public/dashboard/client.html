@@ -585,18 +585,20 @@ function applyPropertyToHeader() {
   const p = getActiveProperty();
   if (!p) return;
   const tierLabel = (p.tier||'core').charAt(0).toUpperCase()+(p.tier||'core').slice(1);
-  document.getElementById('sidebarTier').textContent = tierLabel+' Plan';
-  document.getElementById('heroName').textContent = p.name;
-  document.getElementById('heroSub').textContent = p.address || (tierLabel+' plan · Agent active 24/7');
-  const name = p.contact_name || user.email.split('@')[0];
-  document.getElementById('userName').textContent = name;
-  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-  document.getElementById('statPlan').textContent = tierLabel;
-  document.getElementById('statIncluded').textContent = (p.included_minutes||1000).toLocaleString()+' min';
-  document.getElementById('statSince').textContent = p.onboarded_at ? new Date(p.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
-  document.getElementById('minsLimitLabel').textContent = (p.included_minutes||1000).toLocaleString()+' min';
-  document.getElementById('resBadge').style.display    = (p.tier==='core') ? 'inline-block' : 'none';
-  document.getElementById('ovResSection').style.display = (p.tier==='pro')  ? 'block' : 'none';
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  const setStyle = (id, prop, val) => { const el=document.getElementById(id); if(el) el.style[prop]=val; };
+  set('sidebarTier', tierLabel+' Plan');
+  set('heroName', p.name);
+  set('heroSub', p.address || (tierLabel+' plan · Agent active 24/7'));
+  const name = p.contact_name || (user?.email||'').split('@')[0];
+  set('userName', name);
+  set('userAvatar', name.charAt(0).toUpperCase());
+  set('statPlan', tierLabel);
+  set('statIncluded', (p.included_minutes||1000).toLocaleString()+' min');
+  set('statSince', p.onboarded_at ? new Date(p.onboarded_at).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—');
+  set('minsLimitLabel', (p.included_minutes||1000).toLocaleString()+' min');
+  setStyle('resBadge', 'display', (p.tier==='core') ? 'inline-block' : 'none');
+  setStyle('ovResSection', 'display', (p.tier==='pro') ? 'block' : 'none');
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -691,6 +693,9 @@ async function init() {
   applyPropertyToHeader();
 
   await loadOverview();
+
+  // Handle return from Stripe checkout
+  await handleStripeReturn();
 }
 
 // ── Overview ─────────────────────────────────────────────────────────────────
@@ -1319,6 +1324,52 @@ async function modalNext() {
 async function doProvision() {
   try {
     const {data:{session}} = await sb.auth.getSession();
+
+    // Call edge function to create Stripe Checkout session (TEST MODE ONLY)
+    // Returns { url } — redirect to Stripe, come back to /dashboard/client.html?session_id=xxx
+    const res = await fetch(`${SB_URL}/functions/v1/create-add-property-checkout`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({
+        user_id: user.id,
+        property_draft: {
+          name: modalData.name,
+          addr: modalData.addr,
+          city: modalData.city,
+          state: modalData.state,
+          rooms: modalData.rooms,
+          type: modalData.type,
+        },
+        plan: modalData.plan,
+        addons: modalData.addons,
+        test_mode: true, // ALWAYS true until you explicitly remove this flag
+      })
+    });
+    const d = await res.json();
+
+    if(d.url) {
+      // Save modal state to sessionStorage so we can restore after redirect
+      sessionStorage.setItem('nsa_pending_prop', JSON.stringify(modalData));
+      window.location.href = d.url;
+    } else if(d.error) {
+      // Edge function not deployed yet — fall back to direct provision (demo mode)
+      console.warn('create-add-property-checkout not available, falling back to direct provision:', d.error);
+      await doProvisionDirect(session);
+    } else {
+      showToast('Unexpected response from checkout', 'error');
+      modalStep=3; renderModal();
+    }
+  } catch(e) {
+    // Edge function doesn't exist yet — fall back to direct provision
+    console.warn('Stripe checkout unavailable, using direct provision:', String(e));
+    const {data:{session}} = await sb.auth.getSession();
+    await doProvisionDirect(session);
+  }
+}
+
+// Direct provision (used as fallback when Stripe edge fn not deployed, and for Mountain Inn / internal)
+async function doProvisionDirect(session) {
+  try {
     const payload = {
       property_name: modalData.name,
       address: modalData.addr,
@@ -1327,7 +1378,7 @@ async function doProvision() {
       tier: modalData.plan,
       extra_languages: modalData.addons.join(','),
       contact_email: user.email,
-      contact_name: user.email.split('@')[0],
+      contact_name: (user.email||'').split('@')[0],
     };
     const res = await fetch(`${SB_URL}/functions/v1/provision-client`, {
       method:'POST',
@@ -1336,21 +1387,65 @@ async function doProvision() {
     });
     const d = await res.json();
     if(d.ok) {
-      // Reload properties list
-      const {data:newProps} = await sb.from('properties').select('*').in('id',[...(properties.map(p=>p.id)),d.property_id]);
+      const {data:newProps} = await sb.from('properties').select('*');
       if(newProps) properties = newProps;
-      modalStep=5;
-      renderModal();
+      modalStep=5; renderModal();
     } else {
-      showToast('Provisioning failed: '+(d.error||'Unknown error'),'error');
-      modalStep=3;
-      renderModal();
+      showToast('Provisioning failed: '+(d.error||'Unknown error'), 'error');
+      modalStep=3; renderModal();
     }
   } catch(e) {
-    showToast('Error: '+String(e),'error');
-    modalStep=3;
-    renderModal();
+    showToast('Error: '+String(e), 'error');
+    modalStep=3; renderModal();
   }
+}
+
+// Handle return from Stripe checkout (?session_id=xxx in URL)
+async function handleStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const cancelled = params.get('cancelled');
+
+  if(cancelled) {
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+    showToast('Checkout cancelled — no charge was made.', '');
+    return;
+  }
+
+  if(!sessionId) return;
+
+  // Clean URL immediately
+  window.history.replaceState({}, '', window.location.pathname);
+
+  // Restore modal data from sessionStorage
+  try {
+    const saved = sessionStorage.getItem('nsa_pending_prop');
+    if(saved) { modalData = JSON.parse(saved); sessionStorage.removeItem('nsa_pending_prop'); }
+  } catch(_) {}
+
+  // Open modal at provisioning step
+  document.getElementById('addPropModal').classList.remove('hidden');
+  modalStep=4; renderModal();
+
+  // Poll for the property to appear (webhook will create it)
+  let attempts=0;
+  const poll = setInterval(async () => {
+    attempts++;
+    const {data:ps} = await sb.from('properties').select('*');
+    if(ps && ps.length > properties.length) {
+      clearInterval(poll);
+      properties = ps;
+      activeId = ps.find(p => !properties.find(op=>op.id===p.id))?.id || ps[ps.length-1].id;
+      modalStep=5; renderModal();
+      renderSidebarTop();
+    }
+    if(attempts > 30) { // 60s timeout
+      clearInterval(poll);
+      showToast('Agent is being set up — check back in a minute.', '');
+      closeAddPropModal();
+    }
+  }, 2000);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
