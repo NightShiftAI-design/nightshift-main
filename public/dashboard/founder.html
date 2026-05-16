@@ -125,6 +125,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .tier-badge.core { background: rgba(255,255,255,.08); color: var(--text2); }
 .tier-badge.pro { background: rgba(79,140,255,.15); color: var(--accent); }
 .tier-badge.elite { background: rgba(167,139,250,.15); color: var(--purple); }
+.tier-badge.internal { background: rgba(245,158,11,.12); color: var(--accent3); }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .status-dot.active { background: var(--accent2); }
 .status-dot.pending { background: var(--accent3); }
@@ -433,6 +434,7 @@ const FOUNDER_EMAIL = 'founder@nightshifthotels.com';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const TIER_MRR = { core: 549, pro: 699 };
+const INTERNAL_PROPERTY_IDS = ['fbed1d94-66e8-4d3a-872a-be290e931223']; // Mountain Inn — test property, no billing
 
 // ── Time ─────────────────────────────────────────────────────────────────────
 function updateTime() {
@@ -542,7 +544,7 @@ async function loadProperties() {
   const pending = safeProperties.filter(p => !p.is_active || p.status === 'pending_review');
 
   // KPI
-  const mrr = active.reduce((sum, p) => sum + (TIER_MRR[p.tier] || 0), 0);
+  const mrr = active.reduce((sum, p) => INTERNAL_PROPERTY_IDS.includes(p.id) ? sum : sum + (TIER_MRR[p.tier] || 0), 0);
   document.getElementById('kpiMRR').textContent = '$' + mrr.toLocaleString();
   document.getElementById('kpiMRRDelta').textContent = mrr > 0 ? `$${(mrr * 12).toLocaleString()} annualized` : 'No active clients';
   document.getElementById('kpiClients').textContent = active.length;
@@ -567,14 +569,14 @@ async function loadProperties() {
         <div>
           <div class="prop-name">${escHtml(p.name)}</div>
           <div class="prop-meta">
-            <span class="tier-badge ${p.tier}">${p.tier.toUpperCase()}</span>
+            <span class="tier-badge ${INTERNAL_PROPERTY_IDS.includes(p.id) ? 'internal' : p.tier}">${INTERNAL_PROPERTY_IDS.includes(p.id) ? 'INTERNAL' : p.tier.toUpperCase()}</span>
             <span class="status-dot active"></span>
             <span class="prop-stat">Active</span>
             ${p.contact_email ? `<span class="prop-stat">· ${escHtml(p.contact_email)}</span>` : ''}
           </div>
         </div>
         <div class="prop-right">
-          <div class="prop-mrr">$${(TIER_MRR[p.tier]||0).toLocaleString()}</div>
+          <div class="prop-mrr">$${INTERNAL_PROPERTY_IDS.includes(p.id) ? '0' : (TIER_MRR[p.tier]||0).toLocaleString()}</div>
           <div class="prop-mrr-label">/month</div>
           <div class="prop-actions">
             <a href="https://beta.retellai.com" target="_blank" class="prop-action-btn">Retell ↗</a>
@@ -612,8 +614,8 @@ async function loadProperties() {
 
 // ── Load Call Stats ───────────────────────────────────────────────────────────
 async function loadCallStats() {
-  const monthStart = new Date();
-  monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 
   const { data: calls, count } = await sb
     .from('call_logs')
