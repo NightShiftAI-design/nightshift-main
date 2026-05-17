@@ -1124,6 +1124,21 @@
       .hero-headline { font-size: 24px; letter-spacing: -.015em; }
       .btn-primary, .btn-secondary { padding: 13px 16px; font-size: 13px; }
     }
+    /* OVERNIGHT ACTIVITY LOG */
+    .activity-log { display: flex; flex-direction: column; gap: 0; margin-top: 40px; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .activity-entry { display: grid; grid-template-columns: 80px 1fr; gap: 20px; padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--surface); transition: background .15s; }
+    .activity-entry:last-child { border-bottom: none; }
+    .activity-entry:hover { background: var(--surface2); }
+    .activity-time { font-size: 12px; color: var(--text3); font-family: var(--font-mono, 'DM Sans', monospace); font-variant-numeric: tabular-nums; padding-top: 3px; }
+    .activity-content { display: flex; flex-direction: column; gap: 6px; }
+    .activity-type { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; width: fit-content; }
+    .activity-type.reservation { background: rgba(56,232,160,.1); border: 1px solid rgba(56,232,160,.2); color: rgba(56,232,160,.9); }
+    .activity-type.faq { background: rgba(79,140,255,.1); border: 1px solid rgba(79,140,255,.2); color: rgba(140,185,255,.9); }
+    .activity-type.escalation { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.18); color: rgba(251,191,36,.85); }
+    .activity-detail { font-size: 13px; color: var(--text2); line-height: 1.6; font-weight: 300; }
+    .activity-note { margin-top: 16px; font-size: 11px; color: var(--text3); text-align: center; }
+    @media (max-width: 480px) { .activity-entry { grid-template-columns: 1fr; gap: 8px; } .activity-time { font-size: 11px; } }
+
   </style>
 </head>
 <body>
@@ -1191,29 +1206,28 @@
             Book a demo
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
-          <a href="/packages.html" class="btn-secondary">See packages</a>
-          <a href="/virtual-front-desk-vs-call-center.html" class="btn-secondary">How it compares</a>
+          <a href="/packages.html" class="btn-secondary">View packages</a>
         </div>
         <div class="social-proof" aria-label="Key capabilities">
           <div class="proof-item">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 4.5 7 10.5 4 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Answers in &lt;3 seconds
+            Keep your existing number
           </div>
           <div class="proof-item">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 4.5 7 10.5 4 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Property-specific training
+            No hardware required
           </div>
           <div class="proof-item">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 4.5 7 10.5 4 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            ADA-aware call flows
+            Works alongside existing staff
           </div>
           <div class="proof-item">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 4.5 7 10.5 4 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Safe emergency escalation
+            Setup in under 1 business day
           </div>
           <div class="proof-item">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 4.5 7 10.5 4 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Up in ~10 minutes
+            Built by motel operators
           </div>
         </div>
       </section>
@@ -1539,6 +1553,53 @@
           <strong style="color:var(--text2);">Important:</strong> NightShift does not provide medical or legal advice. In emergencies, callers can be instructed to dial 911, and escalation routes can notify your staff based on your preferred procedures.
         </p>
       </section>
+      <!-- OVERNIGHT ACTIVITY EXAMPLE -->
+      <section class="section container" aria-label="Example overnight activity" id="overnight-example">
+        <div class="reveal">
+          <div class="section-label">In practice</div>
+          <h2 class="section-heading">What a typical overnight<br/>looks like</h2>
+          <p class="section-sub">Anonymized examples from real overnight call handling. No staff on shift, no missed calls.</p>
+        </div>
+        <div class="activity-log reveal" role="list" aria-label="Example overnight activity log">
+          <div class="activity-entry" role="listitem">
+            <div class="activity-time">11:12 PM</div>
+            <div class="activity-content">
+              <div class="activity-type reservation">Reservation captured</div>
+              <div class="activity-detail">Guest called requesting a king room for 2 nights, checked in next Thursday. Arrival date confirmed with full year, rate quoted, intake summary emailed to front desk.</div>
+            </div>
+          </div>
+          <div class="activity-entry" role="listitem">
+            <div class="activity-time">1:38 AM</div>
+            <div class="activity-content">
+              <div class="activity-type faq">FAQ handled</div>
+              <div class="activity-detail">Spanish-speaking caller asked about pet policy and parking. Both questions answered in Spanish from property configuration. Call ended without escalation.</div>
+            </div>
+          </div>
+          <div class="activity-entry" role="listitem">
+            <div class="activity-time">2:54 AM</div>
+            <div class="activity-content">
+              <div class="activity-type escalation">Escalated to staff</div>
+              <div class="activity-detail">Guest reported a maintenance issue in room 114. Flagged as non-emergency, routed to on-call maintenance contact per property escalation rules. Summary logged.</div>
+            </div>
+          </div>
+          <div class="activity-entry" role="listitem">
+            <div class="activity-time">4:07 AM</div>
+            <div class="activity-content">
+              <div class="activity-type reservation">Reservation captured</div>
+              <div class="activity-detail">Late-night caller asked about weekly rates for an extended stay. Weekly rate and deposit policy quoted per property rules. Booking intake collected and sent to front desk.</div>
+            </div>
+          </div>
+          <div class="activity-entry" role="listitem">
+            <div class="activity-time">6:31 AM</div>
+            <div class="activity-content">
+              <div class="activity-type faq">FAQ handled</div>
+              <div class="activity-detail">Early caller asked for check-out time and whether late check-out was available. Both answered per property configuration. No escalation needed.</div>
+            </div>
+          </div>
+        </div>
+        <p class="activity-note">Examples are illustrative. Actual call flows and outcomes depend on your property configuration.</p>
+      </section>
+      <hr class="divider container" />
       <!-- FINAL CTA -->
       <div class="cta-block container">
         <div class="cta-inner reveal">
@@ -1555,7 +1616,7 @@
               Book a demo
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
-            <a href="mailto:founder@nightshifthotels.com" class="btn-secondary">Email us</a>
+            <a href="/packages.html" class="btn-secondary">View packages</a>
           </div>
         </div>
       </div>
@@ -1566,28 +1627,28 @@
       <div class="container">
         <div class="trust-strip-inner">
           <div class="trust-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Built by motel operators</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-item">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <span>SSL Encrypted</span>
+            <span>No hardware installation</span>
           </div>
           <div class="trust-divider"></div>
           <div class="trust-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>No card data collected</span>
-          </div>
-          <div class="trust-divider"></div>
-          <div class="trust-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            <span>Call data retained 12 months</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.2 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
+            <span>Keep your existing number</span>
           </div>
           <div class="trust-divider"></div>
           <div class="trust-item">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            <span>Guest data never sold</span>
+            <span>Works alongside existing staff</span>
           </div>
           <div class="trust-divider"></div>
           <div class="trust-item">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Privacy-first design</span>
+            <span>No PMS replacement needed</span>
           </div>
         </div>
       </div>
