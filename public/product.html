@@ -848,7 +848,7 @@
       height: 1px;
       background: linear-gradient(90deg, transparent, rgba(79,140,255,.7), rgba(56,232,160,.5), transparent);
     }
-    @media (max-width: 640px) { .cta-inner { padding: 48px 24px; } .escalation-grid { grid-template-columns: 1fr !important; } }
+    @media (max-width: 640px) { .cta-inner { padding: 48px 24px; } .escalation-grid { grid-template-columns: 1fr !important; } .screenshot-grid { grid-template-columns: 1fr !important; } }
     .cta-headline {
       font-family: var(--font-display);
       font-size: clamp(26px, 4vw, 42px);
@@ -1379,25 +1379,53 @@
       </div>
     </div>
 
-    <!-- DASHBOARD SCREENSHOT -->
-    <div class="reveal" style="margin: 36px 0 48px; position: relative;">
-      <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 32px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(79,140,255,.15); position: relative;">
-        <div style="background: rgba(13,17,23,.9); padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.08);">
-          <div style="display:flex;gap:5px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></div>
-            <div style="width:10px;height:10px;border-radius:50%;background:#ffbd2e;"></div>
-            <div style="width:10px;height:10px;border-radius:50%;background:#28c840;"></div>
+    <!-- DASHBOARD SCREENSHOTS -->
+    <div class="reveal" style="margin: 36px 0 48px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="screenshot-grid">
+
+        <!-- Overview -->
+        <div>
+          <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 0 1px rgba(79,140,255,.12);">
+            <div style="background:rgba(13,17,23,.9);padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);">
+              <div style="display:flex;gap:4px;">
+                <div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#ffbd2e;"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div>
+              </div>
+              <span style="font-size:11px;color:rgba(240,244,255,.35);margin-left:6px;">Overview</span>
+            </div>
+            <img
+              src="/assets/dashboard-preview.png"
+              alt="NightShift AI dashboard overview showing call volume, reservations, revenue captured, and agent status"
+              style="width:100%;display:block;max-height:420px;object-fit:cover;object-position:top;"
+              loading="lazy"
+            />
           </div>
-          <span style="font-size:12px;color:rgba(240,244,255,.4);margin-left:8px;">nightshifthotels.com/dashboard</span>
+          <p style="font-size:11px;color:rgba(240,244,255,.3);text-align:center;margin-top:10px;">Dashboard overview — calls, reservations, revenue, agent status</p>
         </div>
-        <img
-          src="/assets/dashboard-preview.png"
-          alt="NightShift AI client dashboard showing call volume, reservations captured, revenue tracked, and recent activity log"
-          style="width:100%;display:block;max-height:580px;object-fit:cover;object-position:top;"
-          loading="lazy"
-        />
+
+        <!-- Call log -->
+        <div>
+          <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 0 1px rgba(56,232,160,.1);">
+            <div style="background:rgba(13,17,23,.9);padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);">
+              <div style="display:flex;gap:4px;">
+                <div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#ffbd2e;"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div>
+              </div>
+              <span style="font-size:11px;color:rgba(240,244,255,.35);margin-left:6px;">Call Log</span>
+            </div>
+            <img
+              src="/assets/calllog-preview.png"
+              alt="NightShift AI call log showing reservation confirmed, guest information requests, complaints, and escalations with timestamps and sentiment tags"
+              style="width:100%;display:block;max-height:420px;object-fit:cover;object-position:top;"
+              loading="lazy"
+            />
+          </div>
+          <p style="font-size:11px;color:rgba(240,244,255,.3);text-align:center;margin-top:10px;">Call log — every call with outcome, sentiment, and summary</p>
+        </div>
+
       </div>
-      <p style="font-size:12px;color:rgba(240,244,255,.35);text-align:center;margin-top:12px;">Client dashboard — call log, reservation tracking, escalation history, and agent status</p>
     </div>
 
     <div class="feature-grid">
