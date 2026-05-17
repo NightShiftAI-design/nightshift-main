@@ -848,7 +848,7 @@
       height: 1px;
       background: linear-gradient(90deg, transparent, rgba(79,140,255,.7), rgba(56,232,160,.5), transparent);
     }
-    @media (max-width: 640px) { .cta-inner { padding: 48px 24px; } }
+    @media (max-width: 640px) { .cta-inner { padding: 48px 24px; } .escalation-grid { grid-template-columns: 1fr !important; } }
     .cta-headline {
       font-family: var(--font-display);
       font-size: clamp(26px, 4vw, 42px);
@@ -1001,7 +1001,7 @@
   <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav-inner">
       <a href="/" class="brand" aria-label="NightShift AI Home">
-        <img src="/favicon-32x32.png" alt="" aria-hidden="true" width="28" height="28" style="border-radius:7px;display:block;flex-shrink:0;">
+        <img src="/assets/logo-512.png" alt="NightShift AI" width="32" height="32" style="border-radius:8px;display:block;flex-shrink:0;object-fit:cover;">
         <span class="brand-name">NightShift AI</span>
       </a>
 
@@ -1371,12 +1371,33 @@
       <div>
         <div class="section-label">Visibility</div>
         <h2 class="section-heading">Full operational clarity,<br/>overnight and beyond</h2>
-        <p class="section-sub">Call outcomes, reservation attempts, escalations, and staff messages — all logged and accessible.</p>
+        <p class="section-sub">Call outcomes, reservation attempts, escalations, and staff messages — all logged and accessible from your dashboard.</p>
       </div>
       <div class="section-ctas">
         <a href="/contact.html" class="btn-primary">Book a demo</a>
-        <a href="/packages.html" class="btn-secondary">Packages</a>
+        <a href="/packages.html" class="btn-secondary">View packages</a>
       </div>
+    </div>
+
+    <!-- DASHBOARD SCREENSHOT -->
+    <div class="reveal" style="margin: 36px 0 48px; position: relative;">
+      <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 32px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(79,140,255,.15); position: relative;">
+        <div style="background: rgba(13,17,23,.9); padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.08);">
+          <div style="display:flex;gap:5px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#ffbd2e;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#28c840;"></div>
+          </div>
+          <span style="font-size:12px;color:rgba(240,244,255,.4);margin-left:8px;">nightshifthotels.com/dashboard</span>
+        </div>
+        <img
+          src="/assets/dashboard-preview.png"
+          alt="NightShift AI client dashboard showing call volume, reservations captured, revenue tracked, and recent activity log"
+          style="width:100%;display:block;max-height:580px;object-fit:cover;object-position:top;"
+          loading="lazy"
+        />
+      </div>
+      <p style="font-size:12px;color:rgba(240,244,255,.35);text-align:center;margin-top:12px;">Client dashboard — call log, reservation tracking, escalation history, and agent status</p>
     </div>
 
     <div class="feature-grid">
@@ -1410,6 +1431,67 @@
         <h3 class="feature-title">Keep your phone line</h3>
         <p class="feature-body">Forward your current number — no carrier changes, no new hardware, no staff retraining.</p>
       </div>
+    </div>
+  </section>
+
+  <hr class="divider container" />
+
+  <!-- EMERGENCY ESCALATION -->
+  <section class="section container reveal" aria-label="Emergency and escalation handling" id="escalation">
+    <div class="section-head">
+      <div>
+        <div class="section-label">Safety & reliability</div>
+        <h2 class="section-heading">What happens at<br/>2am in an emergency</h2>
+        <p class="section-sub">NightShift escalates immediately based on your rules — by situation type, time of night, and staff role. Nothing gets stuck, and guests are never left without a path to help.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:40px;" class="escalation-grid">
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,.9)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">Life-threatening emergencies</div>
+        </div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;font-weight:300;">If a caller reports fire, injury, assault, or a medical emergency, NightShift immediately instructs them to hang up and call 911. It does not attempt to handle the situation, ask clarifying questions, or route through staff first. Emergency services are always the first instruction.</p>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,.85)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.73 2.18 2 2 0 012.7.01h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.29 6.29l1.07-1.07a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">Non-emergency escalation</div>
+        </div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;font-weight:300;">Maintenance issues, billing disputes, noise complaints, or situations NightShift cannot resolve are routed to your designated staff contact — by role and time window. The agent says "One moment while I connect you" and transfers with context, not silence.</p>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(140,185,255,.9)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">Staff demand escalation</div>
+        </div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;font-weight:300;">If a guest explicitly asks to speak to a person, NightShift honors it immediately. It doesn't argue, loop, or offer workarounds — it says "Of course" and transfers to your designated front desk contact. Guest frustration never increases because of the AI.</p>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(56,232,160,.08);border:1px solid rgba(56,232,160,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(56,232,160,.85)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">Every escalation is logged</div>
+        </div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;font-weight:300;">Every call that gets escalated — including the reason, time, and summary — is logged and emailed to your designated contact. Your team always knows what happened overnight, even if they were asleep when the call came in.</p>
+      </div>
+
+    </div>
+
+    <div style="margin-top:20px;background:rgba(79,140,255,.05);border:1px solid rgba(79,140,255,.15);border-radius:12px;padding:20px 24px;font-size:13px;color:var(--text2);line-height:1.65;">
+      <strong style="color:var(--text);">Important:</strong> NightShift does not provide medical or legal advice and is not a substitute for emergency services. For any life-threatening situation, callers are always instructed to contact 911 first. Escalation routing is based on the contacts and rules you configure during setup.
     </div>
   </section>
 
@@ -1527,7 +1609,7 @@
     <div class="footer-inner">
       <div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <img src="/favicon-32x32.png" alt="" aria-hidden="true" width="26" height="26" style="border-radius:6px;display:block;flex-shrink:0;">
+          <img src="/assets/logo-512.png" alt="NightShift AI" width="30" height="30" style="border-radius:7px;display:block;flex-shrink:0;object-fit:cover;">
           <span class="footer-brand-name">NightShift AI</span>
         </div>
         <p class="footer-tagline" style="margin-top:8px;">AI-powered virtual front desk for hotels. Every call answered, every night.</p>
