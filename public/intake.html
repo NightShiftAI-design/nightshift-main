@@ -563,19 +563,23 @@
               <div class="field full"><label>Competitor properties to avoid mentioning <span class="opt">(optional)</span></label><input name="competitors" placeholder="e.g., Holiday Inn Express next door" /></div>
               <div class="field full"><label>Anything else we should know <span class="opt">(optional)</span></label><textarea name="special_instructions" style="min-height:110px;" placeholder="Special rules, seasonal changes, VIP guest handling, local events that affect your property..."></textarea></div>
             </div>
-            <div style="margin-top:16px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:16px 18px;">
+            <div style="margin-top:16px;margin-bottom:16px;background:var(--surface);border:1px solid rgba(79,140,255,.2);border-radius:10px;padding:16px 18px;">
               <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;">
-                <input type="checkbox" id="agreeTerms" name="agreed_to_terms" value="yes" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;">
+                <input type="checkbox" id="agreeTerms" name="agreed_to_terms" value="yes" required style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;">
                 <span style="font-size:13px;color:var(--text2);line-height:1.6;">
                   I agree to the NightShift AI
                   <a href="/terms.html" target="_blank" style="color:var(--accent);">Terms of Service</a>,
                   <a href="/privacy.html" target="_blank" style="color:var(--accent);">Privacy Policy</a>,
                   and <a href="/msa.html" target="_blank" style="color:var(--accent);">Master Subscription Agreement</a>.
+                  <strong style="color:var(--text);">I understand this subscription has a 6-month minimum term.</strong>
                   I understand the setup fee is non-refundable once my agent is configured.
                   I acknowledge the overbooking responsibility disclaimer in Section 4.
                 </span>
               </label>
             </div>
+            <!-- Hidden fields populated by JS at submission time for legal audit trail -->
+            <input type="hidden" name="msa_user_agent" id="msaUserAgent">
+            <input type="hidden" name="msa_accepted_at" id="msaAcceptedAt">
             <div class="form-nav">
               <button type="button" class="btn-back" onclick="nextStep(6)">← Back</button>
               <span class="step-indicator">Step 7 of 8</span>
@@ -914,7 +918,7 @@ function goToPayment() {
   });
   var agree = document.getElementById('agreeTerms');
   if (agree && !agree.checked) {
-    valid=false; agree.closest('div').style.outline='1px solid #ff6b6b';
+    valid=false; agree.closest('div').style.outline='2px solid #ff6b6b';
   } else if (agree) { agree.closest('div').style.outline=''; }
   if (!valid) {
     var s=document.getElementById('formStatus');
@@ -922,12 +926,24 @@ function goToPayment() {
     return;
   }
   var s=document.getElementById('formStatus'); if(s) s.className='form-status';
+
+  // Stamp MSA acceptance metadata at exact moment of agreement
+  var msaAt = new Date().toISOString();
+  var uaEl = document.getElementById('msaUserAgent');
+  var atEl = document.getElementById('msaAcceptedAt');
+  if (uaEl) uaEl.value = navigator.userAgent || '';
+  if (atEl) atEl.value = msaAt;
+
   // Collect form data
   var fd=new FormData(document.getElementById('intakeForm'));
   fd.forEach(function(v,k){
     if(formData[k]){formData[k]=Array.isArray(formData[k])?formData[k].concat(v):[formData[k],v];}
     else{formData[k]=v;}
   });
+  // Ensure MSA fields are in formData
+  formData.agreed_to_msa = 'true';
+  formData.msa_accepted_at = msaAt;
+  formData.msa_user_agent = navigator.userAgent || '';
   nextStep(8);
 }
 
