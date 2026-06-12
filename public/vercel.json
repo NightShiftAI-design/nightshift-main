@@ -1,3 +1,82 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "nightshifthotels.com" }],
+      "destination": "https://www.nightshifthotels.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/blog-ai-hotel-front-desk",
+      "destination": "/blog/ai-hotel-front-desk",
+      "permanent": true
+    },
+    {
+      "source": "/blog-ai-hotel-front-desk.html",
+      "destination": "/blog/ai-hotel-front-desk",
+      "permanent": true
+    },
+    {
+      "source": "/blog-reduce-hotel-front-desk-costs",
+      "destination": "/blog/reduce-hotel-front-desk-costs",
+      "permanent": true
+    },
+    {
+      "source": "/blog-reduce-hotel-front-desk-costs.html",
+      "destination": "/blog/reduce-hotel-front-desk-costs",
+      "permanent": true
+    },
+    {
+      "source": "/blog-hotel-overbooking-prevention",
+      "destination": "/blog/hotel-overbooking-prevention",
+      "permanent": true
+    },
+    {
+      "source": "/blog-hotel-overbooking-prevention.html",
+      "destination": "/blog/hotel-overbooking-prevention",
+      "permanent": true
+    },
+    {
+      "source": "/blog/hotel-overbooking-prevention.html",
+      "destination": "/blog/hotel-overbooking-prevention",
+      "permanent": true
+    },
+    {
+      "source": "/terms.html",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/faq.html",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
+      "source": "/privacy.html",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/about.html",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/contact.html",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/packages.html",
+      "destination": "/packages",
+      "permanent": true
+    },
+    {
+      "source": "/product.html",
+      "destination": "/product",
+      "permanent": true
+    }
+  ]
 }

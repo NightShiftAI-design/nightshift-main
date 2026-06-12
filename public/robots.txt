@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /intake
+Disallow: /thanks
+Disallow: /cdn-cgi/
+
+Sitemap: https://www.nightshifthotels.com/sitemap.xml
+Host: https://www.nightshifthotels.com
